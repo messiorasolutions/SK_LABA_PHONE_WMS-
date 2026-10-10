@@ -1,5 +1,9 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "dotenv": "^18.0.7",
+    "mysql2": "^3.24.5"
+  }
 }

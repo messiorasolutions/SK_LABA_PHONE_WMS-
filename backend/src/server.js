@@ -1,4 +1,10 @@
 require('dotenv').config();
-const db = require('./config/db');
+const app = require('./app');
+require('./config/db');
 
-console.log('Server initialized...');
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on: http://localhost:${PORT}`);
+    console.log(`📖 Swagger API Docs:  http://localhost:${PORT}/api-docs`);
+});

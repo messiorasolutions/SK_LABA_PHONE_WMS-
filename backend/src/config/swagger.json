@@ -1,0 +1,875 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "SK LABA PHONE WMS - API Documentation",
+    "version": "1.0.0",
+    "description": "API documentation for frontend developers. Works on localhost and hosted cloud domains."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Auto (Works on Localhost and Hosted URL)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Brands",
+      "description": "Brand APIs"
+    },
+    {
+      "name": "Storage Options",
+      "description": "Storage Option APIs"
+    },
+    {
+      "name": "Specifications",
+      "description": "Technical specifications and accessory option APIs"
+    },
+    {
+      "name": "Phones",
+      "description": "Smartphone inventory and catalog management APIs"
+    }
+  ],
+  "paths": {
+    "/api/brands": {
+      "post": {
+        "tags": ["Brands"],
+        "summary": "Create Brand",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "brand_name": "Apple",
+                "description": "Flagship smartphones and devices",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Brand created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Brand created successfully",
+                  "data": {
+                    "brand_id": 1,
+                    "brand_name": "Apple",
+                    "description": "Flagship smartphones and devices",
+                    "is_active": 1,
+                    "created_at": "2026-10-14T03:31:01.000Z",
+                    "updated_at": "2026-10-14T03:31:01.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Brands"],
+        "summary": "Get All Brands",
+        "responses": {
+          "200": {
+            "description": "List of all brands",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "data": [
+                    {
+                      "brand_id": 1,
+                      "brand_name": "Apple",
+                      "description": "Flagship smartphones and devices",
+                      "is_active": 1,
+                      "created_at": "2026-10-14T03:31:01.000Z",
+                      "updated_at": "2026-10-14T03:31:01.000Z"
+                    },
+                    {
+                      "brand_id": 2,
+                      "brand_name": "Samsung",
+                      "description": "Galaxy smartphones",
+                      "is_active": 1,
+                      "created_at": "2026-10-14T03:40:00.000Z",
+                      "updated_at": "2026-10-14T03:40:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/brands/{id}": {
+      "get": {
+        "tags": ["Brands"],
+        "summary": "Get Brand By ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Brand details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "brand_id": 1,
+                    "brand_name": "Apple",
+                    "description": "Flagship smartphones and devices",
+                    "is_active": 1,
+                    "created_at": "2026-10-14T03:31:01.000Z",
+                    "updated_at": "2026-10-14T03:31:01.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Brands"],
+        "summary": "Update Brand",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "brand_name": "Apple Inc.",
+                "description": "Updated brand description",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Brand updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Brand updated successfully",
+                  "data": {
+                    "brand_id": 1,
+                    "brand_name": "Apple Inc.",
+                    "description": "Updated brand description",
+                    "is_active": 1,
+                    "created_at": "2026-10-14T03:31:01.000Z",
+                    "updated_at": "2026-10-14T04:20:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Brands"],
+        "summary": "Delete Brand",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Brand deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Brand 'Apple Inc.' deleted successfully",
+                  "data": {
+                    "brand_id": 1,
+                    "brand_name": "Apple Inc."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/storage-options": {
+      "post": {
+        "tags": ["Storage Options"],
+        "summary": "Create Storage Option",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "storage_name": "128GB",
+                "capacity_gb": 128
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Storage option created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Storage option created successfully",
+                  "data": {
+                    "storage_id": 1,
+                    "storage_name": "128GB",
+                    "capacity_gb": 128,
+                    "created_at": "2026-10-14T04:15:41.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Storage Options"],
+        "summary": "Get All Storage Options",
+        "responses": {
+          "200": {
+            "description": "List of all storage options",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "data": [
+                    {
+                      "storage_id": 1,
+                      "storage_name": "128GB",
+                      "capacity_gb": 128,
+                      "created_at": "2026-10-14T04:15:41.000Z"
+                    },
+                    {
+                      "storage_id": 2,
+                      "storage_name": "256GB",
+                      "capacity_gb": 256,
+                      "created_at": "2026-10-14T04:15:42.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/storage-options/{id}": {
+      "get": {
+        "tags": ["Storage Options"],
+        "summary": "Get Storage Option By ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Storage option details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "storage_id": 1,
+                    "storage_name": "128GB",
+                    "capacity_gb": 128,
+                    "created_at": "2026-10-14T04:15:41.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Storage Options"],
+        "summary": "Update Storage Option",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "storage_name": "512GB",
+                "capacity_gb": 512
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Storage option updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Storage option updated successfully",
+                  "data": {
+                    "storage_id": 1,
+                    "storage_name": "512GB",
+                    "capacity_gb": 512,
+                    "created_at": "2026-10-14T04:15:41.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Storage Options"],
+        "summary": "Delete Storage Option",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Storage option deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Storage option '128GB' deleted successfully",
+                  "data": {
+                    "storage_id": 1,
+                    "storage_name": "128GB"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/specifications": {
+      "post": {
+        "tags": ["Specifications"],
+        "summary": "Create Specification",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "specification_name": "Super AMOLED Display 120Hz",
+                "specification_type": "TECHNICAL",
+                "description": "6.7 inch Full HD+ Dynamic AMOLED screen",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Specification created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Specification created successfully",
+                  "data": {
+                    "specification_id": 1,
+                    "specification_name": "Super AMOLED Display 120Hz",
+                    "specification_type": "TECHNICAL",
+                    "description": "6.7 inch Full HD+ Dynamic AMOLED screen",
+                    "is_active": 1,
+                    "created_at": "2026-10-14T05:00:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Specifications"],
+        "summary": "Get All Specifications",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Optional filter by type: TECHNICAL or ACCESSORY",
+            "schema": {
+              "type": "string",
+              "enum": ["TECHNICAL", "ACCESSORY"],
+              "example": "TECHNICAL"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of specifications",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "data": [
+                    {
+                      "specification_id": 1,
+                      "specification_name": "Super AMOLED Display 120Hz",
+                      "specification_type": "TECHNICAL",
+                      "description": "6.7 inch Full HD+ screen",
+                      "is_active": 1,
+                      "created_at": "2026-10-14T05:00:00.000Z"
+                    },
+                    {
+                      "specification_id": 2,
+                      "specification_name": "25W Fast Charger Adapter",
+                      "specification_type": "ACCESSORY",
+                      "description": "Original USB-C Power Adapter",
+                      "is_active": 1,
+                      "created_at": "2026-10-14T05:02:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/specifications/{id}": {
+      "get": {
+        "tags": ["Specifications"],
+        "summary": "Get Specification By ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Specification details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "specification_id": 1,
+                    "specification_name": "Super AMOLED Display 120Hz",
+                    "specification_type": "TECHNICAL",
+                    "description": "6.7 inch Full HD+ screen",
+                    "is_active": 1,
+                    "created_at": "2026-10-14T05:00:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Specifications"],
+        "summary": "Update Specification",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "specification_name": "Super AMOLED Display 144Hz",
+                "specification_type": "TECHNICAL",
+                "description": "Upgraded 144Hz high refresh rate screen",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Specification updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Specification updated successfully",
+                  "data": {
+                    "specification_id": 1,
+                    "specification_name": "Super AMOLED Display 144Hz",
+                    "specification_type": "TECHNICAL",
+                    "description": "Upgraded 144Hz high refresh rate screen",
+                    "is_active": 1,
+                    "created_at": "2026-10-14T05:00:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Specifications"],
+        "summary": "Delete Specification",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Specification deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Specification 'Super AMOLED Display 144Hz' deleted successfully",
+                  "data": {
+                    "specification_id": 1,
+                    "specification_name": "Super AMOLED Display 144Hz",
+                    "specification_type": "TECHNICAL"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones": {
+      "post": {
+        "tags": ["Phones"],
+        "summary": "Create Phone",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "name": "iPhone 15 Pro Max",
+                "brand_id": 1,
+                "phone_condition": "NEW",
+                "price": 1199.99,
+                "storage_ids": [1, 2],
+                "colour_options": ["Natural Titanium", "Blue Titanium", "Black Titanium"],
+                "specification_ids": [1],
+                "warranty": "1 Year Apple Warranty",
+                "accessory_ids": [2],
+                "description": "A17 Pro chip, Titanium design, 48MP main camera.",
+                "stock_quantity": 25,
+                "availability": "IN_STOCK",
+                "installment_enabled": true,
+                "installment_plan_ids": [1, 2],
+                "status": "PUBLISHED",
+                "photos": [
+                  "https://images.unsplash.com/photo-1695048133142-1a20484d2569"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Phone created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Phone created successfully",
+                  "data": {
+                    "phone_id": 1,
+                    "name": "iPhone 15 Pro Max",
+                    "brand_id": 1,
+                    "brand_name": "Apple",
+                    "phone_condition": "NEW",
+                    "price": "1199.99",
+                    "storage_ids": [1, 2],
+                    "colour_options": ["Natural Titanium", "Blue Titanium", "Black Titanium"],
+                    "specification_ids": [1],
+                    "warranty": "1 Year Apple Warranty",
+                    "accessory_ids": [2],
+                    "description": "A17 Pro chip, Titanium design, 48MP main camera.",
+                    "stock_quantity": 25,
+                    "availability": "IN_STOCK",
+                    "installment_enabled": 1,
+                    "installment_plan_ids": [1, 2],
+                    "status": "PUBLISHED",
+                    "photos": [
+                      "https://images.unsplash.com/photo-1695048133142-1a20484d2569"
+                    ],
+                    "created_at": "2026-10-14T05:30:00.000Z",
+                    "updated_at": "2026-10-14T05:30:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Phones"],
+        "summary": "Get All Phones",
+        "parameters": [
+          {
+            "name": "brand_id",
+            "in": "query",
+            "required": false,
+            "description": "Filter by Brand ID",
+            "schema": { "type": "integer", "example": 1 }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Filter by status: DRAFT, PUBLISHED, ARCHIVED",
+            "schema": { "type": "string", "example": "PUBLISHED" }
+          },
+          {
+            "name": "phone_condition",
+            "in": "query",
+            "required": false,
+            "description": "Filter by condition: NEW, USED",
+            "schema": { "type": "string", "example": "NEW" }
+          },
+          {
+            "name": "availability",
+            "in": "query",
+            "required": false,
+            "description": "Filter by availability: IN_STOCK, LOW_STOCK, SOLD_OUT, COMING_SOON",
+            "schema": { "type": "string", "example": "IN_STOCK" }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Search keyword in phone name or brand name",
+            "schema": { "type": "string", "example": "iPhone" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of phones",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 1,
+                  "data": [
+                    {
+                      "phone_id": 1,
+                      "name": "iPhone 15 Pro Max",
+                      "brand_id": 1,
+                      "brand_name": "Apple",
+                      "phone_condition": "NEW",
+                      "price": "1199.99",
+                      "storage_ids": [1, 2],
+                      "colour_options": ["Natural Titanium", "Blue Titanium"],
+                      "stock_quantity": 25,
+                      "availability": "IN_STOCK",
+                      "status": "PUBLISHED",
+                      "created_at": "2026-10-14T05:30:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}": {
+      "get": {
+        "tags": ["Phones"],
+        "summary": "Get Phone By ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "example": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "phone_id": 1,
+                    "name": "iPhone 15 Pro Max",
+                    "brand_id": 1,
+                    "brand_name": "Apple",
+                    "phone_condition": "NEW",
+                    "price": "1199.99",
+                    "storage_ids": [1, 2],
+                    "colour_options": ["Natural Titanium", "Blue Titanium"],
+                    "specification_ids": [1],
+                    "warranty": "1 Year Apple Warranty",
+                    "accessory_ids": [2],
+                    "description": "A17 Pro chip, Titanium design.",
+                    "stock_quantity": 25,
+                    "availability": "IN_STOCK",
+                    "installment_enabled": 1,
+                    "status": "PUBLISHED",
+                    "photos": [
+                      "https://images.unsplash.com/photo-1695048133142-1a20484d2569"
+                    ],
+                    "created_at": "2026-10-14T05:30:00.000Z",
+                    "updated_at": "2026-10-14T05:30:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Phones"],
+        "summary": "Update Phone",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "example": 1 }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "price": 1099.99,
+                "stock_quantity": 18,
+                "availability": "IN_STOCK"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Phone updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Phone updated successfully",
+                  "data": {
+                    "phone_id": 1,
+                    "name": "iPhone 15 Pro Max",
+                    "brand_id": 1,
+                    "price": "1099.99",
+                    "stock_quantity": 18,
+                    "availability": "IN_STOCK",
+                    "updated_at": "2026-10-14T05:40:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Phones"],
+        "summary": "Delete Phone",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "example": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Phone 'iPhone 15 Pro Max' deleted successfully",
+                  "data": {
+                    "phone_id": 1,
+                    "name": "iPhone 15 Pro Max"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

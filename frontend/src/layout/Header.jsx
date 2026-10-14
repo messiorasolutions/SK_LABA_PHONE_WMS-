@@ -1,65 +1,54 @@
 import React from 'react';
-import { COLORS } from '../constants/colors';
 import logoImg from '../assets/logo.png';
-import { Bell, Search, Menu, Sparkles } from 'lucide-react';
+import { Menu, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Header({ toggleSidebar }) {
+  const { isDark, toggleTheme } = useTheme();
+
   return (
-    <header
-      style={{
-        backgroundColor: COLORS.surface,
-        borderColor: COLORS.border,
-      }}
-      className="h-16 border-b px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs"
-    >
-      <div className="flex items-center gap-3">
+    <header className="h-12 border-b px-3 sm:px-5 flex items-center justify-between sticky top-0 z-30 shadow-xs bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 transition-colors duration-150">
+      <div className="flex items-center gap-2 sm:gap-3">
         <button
           onClick={toggleSidebar}
-          style={{ color: COLORS.muted }}
-          className="p-1.5 rounded-lg hover:bg-slate-100 lg:hidden cursor-pointer"
+          className="p-1 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden cursor-pointer"
+          title="Toggle Navigation"
         >
-          <Menu className="w-5 h-5" />
+          <Menu className="w-4 h-4" />
         </button>
 
-        <div className="relative hidden sm:block w-72 md:w-80">
-          <Search style={{ color: COLORS.placeholder }} className="w-3.5 h-3.5 absolute left-3 top-3" />
-          <input
-            type="text"
-            placeholder="Search phones, brands, specs..."
-            style={{
-              backgroundColor: COLORS.background,
-              borderColor: COLORS.border,
-              color: COLORS.foreground,
-            }}
-            className="w-full pl-9 pr-3 py-2 border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:bg-white transition-all"
-          />
+        <div className="flex items-center gap-2">
+          <h1 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-none uppercase">
+            Phone Management Portal
+          </h1>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Notification bell */}
+      <div className="flex items-center gap-2">
+        {/* Dark / Light Mode Toggle Button */}
         <button
-          style={{ color: COLORS.muted }}
-          className="relative p-2 rounded-xl hover:text-[#1D4ED8] hover:bg-slate-100 cursor-pointer transition-colors"
+          onClick={toggleTheme}
+          className="p-1.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors text-slate-600 dark:text-slate-300"
+          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          aria-label="Toggle Dark Mode"
         >
-          <Bell className="w-4 h-4" />
-          <span
-            style={{ backgroundColor: COLORS.secondary }}
-            className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full ring-2 ring-white"
-          />
+          {isDark ? (
+            <Sun className="w-3.5 h-3.5 text-amber-400" />
+          ) : (
+            <Moon className="w-3.5 h-3.5 text-slate-700" />
+          )}
         </button>
 
-        <div style={{ backgroundColor: COLORS.border }} className="h-5 w-px mx-0.5" />
-
         {/* Logo Badge */}
-        <div className="flex items-center gap-2">
-          <img
-            src={logoImg}
-            alt="SK LABA Logo"
-            className="w-8 h-8 rounded-lg object-contain bg-black border border-slate-200 shadow-sm"
-          />
-        </div>
+        <img
+          src={logoImg}
+          alt="SK LABA Logo"
+          className="w-7 h-7 object-contain bg-black border border-slate-300 dark:border-slate-700 shadow-xs"
+        />
       </div>
     </header>
   );
 }
+
+
+

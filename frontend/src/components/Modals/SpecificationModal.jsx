@@ -49,30 +49,24 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-      <div
-        style={{ backgroundColor: COLORS.surface, borderColor: COLORS.border }}
-        className="rounded-2xl shadow-xl border max-w-md w-full overflow-hidden"
-      >
-        <div
-          style={{ backgroundColor: COLORS.background, borderColor: COLORS.border }}
-          className="flex items-center justify-between px-5 py-3.5 border-b"
-        >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+      <div className="shadow-xl border max-w-md w-full overflow-hidden bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
           <div className="flex items-center gap-2.5">
             <div
               style={{ backgroundColor: COLORS.primaryLight, color: COLORS.primary }}
-              className="w-8 h-8 rounded-lg flex items-center justify-center font-bold"
+              className="w-8 h-8 flex items-center justify-center font-bold border border-red-200 dark:border-red-900 dark:bg-red-950/40"
             >
               <Cpu className="w-4 h-4" />
             </div>
             <div>
-              <h3 className={TYPOGRAPHY.heading}>
+              <h3 className={`${TYPOGRAPHY.heading} text-slate-900 dark:text-slate-100`}>
                 {initial ? 'Edit Specification' : 'Create Specification'}
               </h3>
-              <p className={TYPOGRAPHY.caption}>Technical or accessory specification</p>
+              <p className={`${TYPOGRAPHY.caption} text-slate-500 dark:text-slate-400`}>Technical or accessory specification</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer">
+          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -84,7 +78,7 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
               borderColor: COLORS.secondaryBorder,
               color: COLORS.danger,
             }}
-            className="m-5 mb-0 p-3 rounded-xl border flex items-center gap-2 text-xs"
+            className="m-5 mb-0 p-3 border flex items-center gap-2 text-xs"
           >
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{submitError}</span>
@@ -93,7 +87,7 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
+            <label className={`${TYPOGRAPHY.label} text-slate-700 dark:text-slate-300 block mb-1.5`}>
               Specification Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -102,18 +96,18 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
               onChange={(e) => setSpecName(e.target.value)}
               placeholder="e.g. Super AMOLED Display 120Hz, 25W Fast Charger"
               required
-              className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-slate-50 focus:bg-white transition-all"
+              className="w-full px-3.5 py-2 text-xs border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-[#DC2626] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 transition-all"
             />
           </div>
 
           <div>
-            <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
+            <label className={`${TYPOGRAPHY.label} text-slate-700 dark:text-slate-300 block mb-1.5`}>
               Type <span className="text-red-500">*</span>
             </label>
             <select
               value={specType}
               onChange={(e) => setSpecType(e.target.value)}
-              className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-white transition-all"
+              className="w-full px-3.5 py-2 text-xs border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-[#DC2626] bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-all"
             >
               <option value="TECHNICAL">TECHNICAL (Screen, CPU, Camera)</option>
               <option value="ACCESSORY">ACCESSORY (Charger, Cable, Case)</option>
@@ -121,7 +115,7 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
           </div>
 
           <div>
-            <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
+            <label className={`${TYPOGRAPHY.label} text-slate-700 dark:text-slate-300 block mb-1.5`}>
               Description
             </label>
             <textarea
@@ -129,7 +123,7 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Detailed specs or features..."
               rows={3}
-              className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-slate-50 focus:bg-white transition-all resize-none"
+              className="w-full px-3.5 py-2 text-xs border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-[#DC2626] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 transition-all resize-none"
             />
           </div>
 
@@ -139,22 +133,22 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
               role="switch"
               aria-checked={isActive}
               onClick={() => setIsActive(!isActive)}
-              className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors cursor-pointer ${
-                isActive ? 'bg-[#1D4ED8]' : 'bg-slate-300'
+              className={`relative inline-flex h-5 w-10 items-center transition-colors cursor-pointer ${
+                isActive ? 'bg-[#DC2626]' : 'bg-slate-300 dark:bg-slate-700'
               }`}
             >
               <span
-                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                className={`inline-block h-3.5 w-3.5 transform bg-white transition-transform ${
                   isActive ? 'translate-x-5' : 'translate-x-1'
                 }`}
               />
             </button>
-            <span className={TYPOGRAPHY.subheading}>
-              Status: <strong className={isActive ? 'text-emerald-600' : 'text-slate-500'}>{isActive ? 'Active' : 'Inactive'}</strong>
+            <span className={`${TYPOGRAPHY.subheading} text-slate-600 dark:text-slate-400`}>
+              Status: <strong className={isActive ? 'text-emerald-500' : 'text-slate-400'}>{isActive ? 'Active' : 'Inactive'}</strong>
             </span>
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
+          <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button variant="outline" size="sm" type="button" onClick={onClose}>
               Cancel
             </Button>
@@ -165,5 +159,6 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
         </form>
       </div>
     </div>
+
   );
 }

@@ -92,30 +92,24 @@ export default function PhoneModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-      <div
-        style={{ backgroundColor: COLORS.surface, borderColor: COLORS.border }}
-        className="rounded-2xl shadow-xl border max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-      >
-        <div
-          style={{ backgroundColor: COLORS.background, borderColor: COLORS.border }}
-          className="flex items-center justify-between px-5 py-3.5 border-b sticky top-0 bg-white z-10"
-        >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+      <div className="shadow-xl border max-w-2xl w-full max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
           <div className="flex items-center gap-2.5">
             <div
               style={{ backgroundColor: COLORS.primaryLight, color: COLORS.primary }}
-              className="w-8 h-8 rounded-lg flex items-center justify-center font-bold"
+              className="w-8 h-8 flex items-center justify-center font-bold border border-red-200 dark:border-red-900 dark:bg-red-950/40"
             >
               <Smartphone className="w-4 h-4" />
             </div>
             <div>
-              <h3 className={TYPOGRAPHY.heading}>
+              <h3 className={`${TYPOGRAPHY.heading} text-slate-900 dark:text-slate-100`}>
                 {initial ? 'Edit Phone Inventory' : 'Add New Smartphone'}
               </h3>
-              <p className={TYPOGRAPHY.caption}>Inventory & catalogue details</p>
+              <p className={`${TYPOGRAPHY.caption} text-slate-500 dark:text-slate-400`}>Inventory & catalogue details</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer">
+          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -127,12 +121,13 @@ export default function PhoneModal({
               borderColor: COLORS.secondaryBorder,
               color: COLORS.danger,
             }}
-            className="m-5 mb-0 p-3 rounded-xl border flex items-center gap-2 text-xs"
+            className="m-5 mb-0 p-3 border flex items-center gap-2 text-xs"
           >
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{submitError}</span>
           </div>
         )}
+
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -289,24 +284,26 @@ export default function PhoneModal({
                 role="switch"
                 aria-checked={installmentEnabled}
                 onClick={() => setInstallmentEnabled(!installmentEnabled)}
-                className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors cursor-pointer ${
-                  installmentEnabled ? 'bg-[#1D4ED8]' : 'bg-slate-300'
+                className={`relative inline-flex h-5 w-10 items-center transition-colors cursor-pointer ${
+                  installmentEnabled ? 'bg-[#DC2626]' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
               >
                 <span
-                  className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                  className={`inline-block h-3.5 w-3.5 transform bg-white transition-transform ${
                     installmentEnabled ? 'translate-x-5' : 'translate-x-1'
                   }`}
                 />
               </button>
-              <span className={TYPOGRAPHY.subheading}>
+              <span className={`${TYPOGRAPHY.subheading} text-slate-600 dark:text-slate-400`}>
                 Installment Enabled:{' '}
-                <strong>{installmentEnabled ? 'Yes (Koko / MintPay / Bank)' : 'No'}</strong>
+                <strong className={installmentEnabled ? 'text-emerald-500' : 'text-slate-500'}>
+                  {installmentEnabled ? 'Yes (Koko / MintPay / Bank)' : 'No'}
+                </strong>
               </span>
             </div>
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
+          <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button variant="outline" size="sm" type="button" onClick={onClose}>
               Cancel
             </Button>
@@ -314,6 +311,7 @@ export default function PhoneModal({
               {initial ? 'Save Changes' : 'Create Phone'}
             </Button>
           </div>
+
         </form>
       </div>
     </div>

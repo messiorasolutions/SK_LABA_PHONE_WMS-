@@ -22,27 +22,24 @@ export default function Button({
         };
       case 'outline':
         return {
-          backgroundColor: COLORS.transparent,
-          color: COLORS.foreground,
-          borderColor: COLORS.border,
-          hoverBg: COLORS.background,
+          backgroundColor: 'transparent',
+          color: 'currentColor',
+          borderColor: 'currentColor',
         };
       case 'danger':
         return {
           backgroundColor: COLORS.secondaryLight,
           color: COLORS.secondary,
           borderColor: COLORS.secondaryBorder,
-          hoverBg: '#FEE2E2',
         };
       case 'ghost':
         return {
-          backgroundColor: COLORS.transparent,
+          backgroundColor: 'transparent',
           color: COLORS.muted,
-          hoverBg: COLORS.primaryLight,
         };
       case 'gradient':
         return {
-          background: 'linear-gradient(to right, #1D4ED8, #DC2626)',
+          background: 'linear-gradient(to right, #DC2626, #991B1B)',
           color: COLORS.white,
           borderColor: 'transparent',
         };
@@ -51,18 +48,20 @@ export default function Button({
         return {
           backgroundColor: COLORS.primary,
           color: COLORS.white,
-          hoverBg: COLORS.primaryDark,
+          borderColor: '#B91C1C',
         };
     }
   };
 
+
   const styleConfig = getStyles();
 
   const sizeClasses = {
-    sm: 'px-2.5 py-1.5 text-xs rounded-lg',
-    md: 'px-4 py-2 text-xs font-semibold rounded-xl',
-    lg: 'px-5 py-2.5 text-sm font-bold rounded-xl',
+    sm: 'px-2.5 py-1.5 text-xs',
+    md: 'px-4 py-2 text-xs font-semibold',
+    lg: 'px-5 py-2.5 text-sm font-bold',
   };
+
 
   return (
     <button

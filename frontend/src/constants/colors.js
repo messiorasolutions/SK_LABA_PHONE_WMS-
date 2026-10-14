@@ -1,15 +1,16 @@
 export const COLORS = {
-  // Primary Blue Theme (Korean Royal / Deep Blue from Logo)
-  primary: '#1D4ED8',          // Vibrant Royal Blue
-  primaryDark: '#1E3A8A',      // Dark Navy Blue
-  primaryLight: '#EFF6FF',     // Soft Blue Tint
-  primaryBorder: '#BFDBFE',    // Blue Border
+  // Primary Red Theme (Korean Taegeuk Red from SK LABA Logo)
+  primary: '#DC2626',          // Vibrant Brand Logo Red
+  primaryDark: '#B91C1C',      // Deep Crimson Red
+  primaryLight: '#FEF2F2',     // Soft Red Tint
+  primaryBorder: '#FECACA',    // Red Border
 
-  // Secondary Red Theme (Korean Taegeuk Red from Logo)
-  secondary: '#DC2626',        // Vibrant Brand Red
-  secondaryDark: '#991B1B',    // Dark Crimson Red
+  // Secondary Red / Accent Theme
+  secondary: '#B91C1C',        // Dark Crimson Red
+  secondaryDark: '#991B1B',    // Deep Dark Red
   secondaryLight: '#FEF2F2',   // Soft Red Tint
   secondaryBorder: '#FCA5A5',  // Red Border
+
 
   // Accent & Action Colors
   accent: '#2563EB',           // Electric Blue

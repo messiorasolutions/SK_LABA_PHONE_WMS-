@@ -44,7 +44,7 @@ export default function Badge({ children, variant = 'blue', icon: Icon, classNam
         color: style.color,
         borderColor: style.borderColor,
       }}
-      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${className}`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold border ${className}`}
     >
       {Icon && <Icon className="w-3 h-3" />}
       {children}

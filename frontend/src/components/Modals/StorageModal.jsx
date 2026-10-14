@@ -41,30 +41,24 @@ export default function StorageModal({ isOpen, onClose, onSubmit, initial = null
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-      <div
-        style={{ backgroundColor: COLORS.surface, borderColor: COLORS.border }}
-        className="rounded-2xl shadow-xl border max-w-md w-full overflow-hidden"
-      >
-        <div
-          style={{ backgroundColor: COLORS.background, borderColor: COLORS.border }}
-          className="flex items-center justify-between px-5 py-3.5 border-b"
-        >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+      <div className="shadow-xl border max-w-md w-full overflow-hidden bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
           <div className="flex items-center gap-2.5">
             <div
               style={{ backgroundColor: COLORS.primaryLight, color: COLORS.primary }}
-              className="w-8 h-8 rounded-lg flex items-center justify-center font-bold"
+              className="w-8 h-8 flex items-center justify-center font-bold border border-red-200 dark:border-red-900 dark:bg-red-950/40"
             >
               <HardDrive className="w-4 h-4" />
             </div>
             <div>
-              <h3 className={TYPOGRAPHY.heading}>
+              <h3 className={`${TYPOGRAPHY.heading} text-slate-900 dark:text-slate-100`}>
                 {initial ? 'Edit Storage Option' : 'Create Storage Option'}
               </h3>
-              <p className={TYPOGRAPHY.caption}>Configure GB capacity</p>
+              <p className={`${TYPOGRAPHY.caption} text-slate-500 dark:text-slate-400`}>Configure GB capacity</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer">
+          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -76,7 +70,7 @@ export default function StorageModal({ isOpen, onClose, onSubmit, initial = null
               borderColor: COLORS.secondaryBorder,
               color: COLORS.danger,
             }}
-            className="m-5 mb-0 p-3 rounded-xl border flex items-center gap-2 text-xs"
+            className="m-5 mb-0 p-3 border flex items-center gap-2 text-xs"
           >
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{submitError}</span>
@@ -85,7 +79,7 @@ export default function StorageModal({ isOpen, onClose, onSubmit, initial = null
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
+            <label className={`${TYPOGRAPHY.label} text-slate-700 dark:text-slate-300 block mb-1.5`}>
               Storage Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -94,12 +88,12 @@ export default function StorageModal({ isOpen, onClose, onSubmit, initial = null
               onChange={(e) => setStorageName(e.target.value)}
               placeholder="e.g. 128GB, 256GB, 512GB, 1TB"
               required
-              className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-slate-50 focus:bg-white transition-all"
+              className="w-full px-3.5 py-2 text-xs border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-[#DC2626] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 transition-all"
             />
           </div>
 
           <div>
-            <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
+            <label className={`${TYPOGRAPHY.label} text-slate-700 dark:text-slate-300 block mb-1.5`}>
               Capacity in GB <span className="text-red-500">*</span>
             </label>
             <input
@@ -109,11 +103,11 @@ export default function StorageModal({ isOpen, onClose, onSubmit, initial = null
               onChange={(e) => setCapacityGb(e.target.value)}
               placeholder="e.g. 128"
               required
-              className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-slate-50 focus:bg-white transition-all"
+              className="w-full px-3.5 py-2 text-xs border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-[#DC2626] bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 transition-all"
             />
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
+          <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button variant="outline" size="sm" type="button" onClick={onClose}>
               Cancel
             </Button>
@@ -124,5 +118,6 @@ export default function StorageModal({ isOpen, onClose, onSubmit, initial = null
         </form>
       </div>
     </div>
+
   );
 }

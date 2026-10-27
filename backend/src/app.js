@@ -19,6 +19,52 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// Database Diagnostic Check Endpoint
+app.get('/api/test-db', async (req, res) => {
+    try {
+        const pool = require('./config/db');
+        const [rows] = await pool.query('SELECT 1 as test');
+        res.json({
+            success: true,
+            status: 'Database connected successfully',
+            db_host: process.env.DB_HOST || 'MISSING',
+            db_port: process.env.DB_PORT || 'MISSING',
+            result: rows
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            status: 'Database connection failed',
+            db_host: process.env.DB_HOST || 'MISSING',
+            db_port: process.env.DB_PORT || 'MISSING',
+            error_message: err.message,
+            error_code: err.code
+        });
+    }
+});
+
+// Outbound IP Diagnostic Endpoint - shows the real public IP of this server
+app.get('/api/my-ip', (req, res) => {
+    const https = require('https');
+    https.get('https://api.ipify.org?format=json', (response) => {
+        let data = '';
+        response.on('data', chunk => { data += chunk; });
+        response.on('end', () => {
+            try {
+                const json = JSON.parse(data);
+                res.json({
+                    server_outbound_ip: json.ip,
+                    message: 'Add this IP to your Aiven MySQL IP Allow List'
+                });
+            } catch (e) {
+                res.json({ raw: data });
+            }
+        });
+    }).on('error', (err) => {
+        res.status(500).json({ error: err.message });
+    });
+});
+
 // Swagger UI Documentation
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./config/swagger.json');

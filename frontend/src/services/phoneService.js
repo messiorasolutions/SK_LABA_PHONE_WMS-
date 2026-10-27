@@ -1,24 +1,8 @@
-import axios from 'axios';
-
-const BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://api.sklabaphone.com';
-
-const REQUEST_TIMEOUT_MS = 15000;
+import axiosInstance from './axiosInstance';
 
 // Create Phone
 const createPhone = async (phoneData) => {
-  const config = {
-    method: 'post',
-    url: `${BASE_URL}/api/phones`,
-    timeout: REQUEST_TIMEOUT_MS,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: phoneData,
-  };
-
-  return axios.request(config).then((response) => {
-    return response;
-  });
+  return axiosInstance.post('/api/phones', phoneData);
 };
 
 // Fetch All Phones (filters: { brand_id, status, phone_condition, availability, search })
@@ -27,59 +11,22 @@ const getPhones = async (filters = {}) => {
     Object.entries(filters).filter(([, v]) => v !== '' && v !== null && v !== undefined)
   );
 
-  const config = {
-    method: 'get',
-    url: `${BASE_URL}/api/phones`,
-    timeout: REQUEST_TIMEOUT_MS,
-    params: cleanParams,
-  };
-
-  return axios.request(config).then((response) => {
-    return response;
-  });
+  return axiosInstance.get('/api/phones', { params: cleanParams });
 };
 
 // Find Phone by ID
 const getPhoneById = async (phoneId) => {
-  const config = {
-    method: 'get',
-    url: `${BASE_URL}/api/phones/${phoneId}`,
-    timeout: REQUEST_TIMEOUT_MS,
-  };
-
-  return axios.request(config).then((response) => {
-    return response;
-  });
+  return axiosInstance.get(`/api/phones/${phoneId}`);
 };
 
 // Update Phone
 const updatePhone = async (phoneId, phoneData) => {
-  const config = {
-    method: 'put',
-    url: `${BASE_URL}/api/phones/${phoneId}`,
-    timeout: REQUEST_TIMEOUT_MS,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: phoneData,
-  };
-
-  return axios.request(config).then((response) => {
-    return response;
-  });
+  return axiosInstance.put(`/api/phones/${phoneId}`, phoneData);
 };
 
 // Delete Phone
 const deletePhone = async (phoneId) => {
-  const config = {
-    method: 'delete',
-    url: `${BASE_URL}/api/phones/${phoneId}`,
-    timeout: REQUEST_TIMEOUT_MS,
-  };
-
-  return axios.request(config).then((response) => {
-    return response;
-  });
+  return axiosInstance.delete(`/api/phones/${phoneId}`);
 };
 
 export {

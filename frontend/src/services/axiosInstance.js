@@ -1,13 +1,18 @@
 // ============================================================
 // AXIOS INSTANCE
 // Base URL is always read from .env (VITE_API_BASE_URL)
-// Never hardcode the base URL anywhere else
+// Default fallback: http://localhost:5000
+// Never hardcode the base URL anywhere else!
 // ============================================================
 
 import axios from 'axios'
 
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -26,15 +31,14 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// Response interceptor — global error handling
+// Response interceptor — preserve error while setting error.message if API returns one
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message =
-      error.response?.data?.message ||
-      error.message ||
-      'Something went wrong'
-    return Promise.reject({ ...error, message })
+    if (error.response?.data?.message) {
+      error.message = error.response.data.message
+    }
+    return Promise.reject(error)
   }
 )
 

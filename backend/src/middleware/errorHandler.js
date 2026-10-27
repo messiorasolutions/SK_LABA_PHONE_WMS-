@@ -48,7 +48,8 @@ function errorHandler(err, req, res, next) { // eslint-disable-line no-unused-va
     // Default internal server error
     return res.status(500).json({
         success: false,
-        message: 'Internal server error occurred.'
+        message: err.message || 'Internal server error occurred.',
+        code: err.code || undefined
     });
 }
 

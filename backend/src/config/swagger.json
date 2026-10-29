@@ -2449,7 +2449,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of inquiries",
+            "description": "Paginated list of reservations",
             "content": {
               "application/json": {
                 "example": {

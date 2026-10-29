@@ -35,6 +35,26 @@ class StorageOptionRepository {
     }
 
     /**
+     * Find storage options by multiple IDs
+     * @param {Array<number|string>} ids
+     * @returns {Promise<Array>}
+     */
+    async findByIds(ids) {
+        if (!Array.isArray(ids) || ids.length === 0) return [];
+        const cleanIds = ids.map(id => Number(id)).filter(id => !isNaN(id) && id > 0);
+        if (cleanIds.length === 0) return [];
+        const placeholders = cleanIds.map(() => '?').join(',');
+        const query = `
+            SELECT storage_id, storage_name, capacity_gb, created_at
+            FROM storage_options
+            WHERE storage_id IN (${placeholders})
+            ORDER BY capacity_gb ASC
+        `;
+        const [rows] = await pool.execute(query, cleanIds);
+        return rows;
+    }
+
+    /**
      * Find storage option by name
      * @param {string} storage_name
      * @returns {Promise<Object|null>}

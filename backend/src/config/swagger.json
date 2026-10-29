@@ -31,6 +31,10 @@
     {
       "name": "Instalment Plans",
       "description": "Instalment plans management (MG-11, ST-02, C-03)"
+    },
+    {
+      "name": "Offers",
+      "description": "Promotional offers and discounts management (MG-03, C-01, C-02, C-03, C-12)"
     }
   ],
   "paths": {
@@ -1664,6 +1668,434 @@
                       }
                     ]
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/offers": {
+      "get": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Get All Offers",
+        "description": "Retrieve all promotional offers with optional filters (?stage=active|upcoming|ended|draft, ?search=...) for Managers and Staff (MG-03, AL-04).",
+        "parameters": [
+          {
+            "name": "stage",
+            "in": "query",
+            "required": false,
+            "description": "Filter by lifecycle stage: active, upcoming, ended, draft, all",
+            "schema": {
+              "type": "string",
+              "example": "active"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Search keyword in offer title or description",
+            "schema": {
+              "type": "string",
+              "example": "Avurudu"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of offers",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 1,
+                  "data": [
+                    {
+                      "offer_id": 1,
+                      "title": "Avurudu Mega Savings",
+                      "description": "Special promotional price on iPhone 15 Pro Max",
+                      "banner_image": "https://images.unsplash.com/photo-offer-banner.jpg",
+                      "phone_ids": [
+                        2
+                      ],
+                      "regular_price": 1199.99,
+                      "offer_price": 1049.99,
+                      "discount_amount": 150,
+                      "discount_percentage": 12.5,
+                      "stage": "ACTIVE",
+                      "is_active": true,
+                      "seconds_remaining": 1500000,
+                      "phones": [
+                        {
+                          "phone_id": 2,
+                          "name": "iPhone 15 Pro Max",
+                          "brand_name": "Apple Inc.",
+                          "price": 1199.99
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Create Promotional Offer",
+        "description": "Create and schedule an offer (Manager function MG-03).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "title": "Avurudu Mega Savings",
+                "description": "Special promotional price on iPhone 15 Pro Max",
+                "banner_image": "https://images.unsplash.com/photo-offer-banner.jpg",
+                "phone_ids": [
+                  2
+                ],
+                "regular_price": 1199.99,
+                "offer_price": 1049.99,
+                "start_date_time": "2026-10-25T00:00:00",
+                "end_date_time": "2026-11-15T23:59:59",
+                "status": "PUBLISHED"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Offer created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Offer created successfully",
+                  "data": {
+                    "offer_id": 1,
+                    "title": "Avurudu Mega Savings",
+                    "regular_price": 1199.99,
+                    "offer_price": 1049.99,
+                    "discount_amount": 150,
+                    "stage": "ACTIVE"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/offers/active": {
+      "get": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Get All Active Offers (Storefront)",
+        "description": "Retrieve only currently running active offers for Home page (C-01) and Offers page (C-12).",
+        "responses": {
+          "200": {
+            "description": "Active offers list",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 1,
+                  "data": [
+                    {
+                      "offer_id": 1,
+                      "title": "Avurudu Mega Savings",
+                      "banner_image": "https://images.unsplash.com/photo-offer-banner.jpg",
+                      "regular_price": 1199.99,
+                      "offer_price": 1049.99,
+                      "discount_amount": 150,
+                      "seconds_remaining": 1500000,
+                      "phones": [
+                        {
+                          "phone_id": 2,
+                          "name": "iPhone 15 Pro Max",
+                          "brand_name": "Apple Inc."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/offers/{id}": {
+      "get": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Get Offer By ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "offer_id": 1,
+                    "title": "Avurudu Mega Savings",
+                    "regular_price": 1199.99,
+                    "offer_price": 1049.99,
+                    "stage": "ACTIVE"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Update Offer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "title": "Avurudu Mega Savings (Limited Stock)",
+                "offer_price": 1029.99
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Offer updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Offer updated successfully",
+                  "data": {
+                    "offer_id": 1,
+                    "title": "Avurudu Mega Savings (Limited Stock)",
+                    "regular_price": 1199.99,
+                    "offer_price": 1029.99,
+                    "discount_amount": 170
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Delete Offer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Offer 'Avurudu Mega Savings' deleted successfully",
+                  "data": {
+                    "offer_id": 1,
+                    "title": "Avurudu Mega Savings"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/offer": {
+      "get": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Get Phone Active Offer (Storefront Badge)",
+        "description": "Check if a specific phone model has an active running offer (C-02, C-03).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone active offer check",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "phone_id": 2,
+                    "phone_name": "iPhone 15 Pro Max",
+                    "regular_price": 1199.99,
+                    "has_active_offer": true,
+                    "offer": {
+                      "offer_id": 1,
+                      "title": "Avurudu Mega Savings",
+                      "offer_price": 1029.99,
+                      "savings": 170,
+                      "discount_percentage": 14.2,
+                      "seconds_remaining": 1500000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/compare": {
+      "get": {
+        "tags": [
+          "Customer Phones (C-05)"
+        ],
+        "summary": "Compare 2 or 3 phones side-by-side (SRS C-05)",
+        "description": "Returns side-by-side comparison for 2 or 3 phones including photo, price, offer price, savings, warranty, stock status, colors, storages, specs, accessories, and monthly installment calculations. Saved in customer browser.",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2,3"
+            },
+            "description": "Comma-separated IDs of 2 or 3 phones to compare (e.g. 2,3 or 2,3,4)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Side-by-side comparison matrix and enriched phones",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Successfully retrieved side-by-side comparison for 2 phones.",
+                  "data": {
+                    "count": 2,
+                    "phones": [],
+                    "comparison_matrix": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid selection (less than 2 or more than 3 phones)"
+          },
+          "404": {
+            "description": "One or more selected phones not found"
+          }
+        }
+      }
+    },
+    "/api/phones/favorites": {
+      "get": {
+        "tags": [
+          "Customer Favorites (C-06)"
+        ],
+        "summary": "Retrieve live phone details for saved favorites (SRS C-06)",
+        "description": "Returns live phone card details, active offers, pricing, warranty, and availability labels for IDs stored in the customer browser. Also returns unavailable_ids for deleted/archived phones.",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2,3,4"
+            },
+            "description": "Comma-separated phone IDs saved in customer browser localStorage (e.g. 2,3,4)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live phone cards and unavailable IDs list",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "data": [
+                    {
+                      "phone_id": 2,
+                      "name": "iPhone 15 Pro Max",
+                      "brand_name": "Apple Inc.",
+                      "main_photo": "https://images.unsplash.com/...",
+                      "phone_condition": "NEW",
+                      "regular_price": 1199.99,
+                      "effective_price": 1029.99,
+                      "availability": "LOW_STOCK",
+                      "availability_label": "Only 25 left",
+                      "current_stock": 25,
+                      "active_offer": {
+                        "has_active_offer": true,
+                        "offer_title": "Avurudu Mega Savings",
+                        "offer_price": 1029.99,
+                        "discount_percentage": 14.2,
+                        "savings": 170
+                      },
+                      "is_available": true
+                    }
+                  ],
+                  "unavailable_ids": [
+                    99
+                  ]
                 }
               }
             }

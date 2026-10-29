@@ -33,6 +33,26 @@ class SpecificationRepository {
     }
 
     /**
+     * Find specifications by multiple IDs
+     * @param {Array<number|string>} ids
+     * @returns {Promise<Array>}
+     */
+    async findByIds(ids) {
+        if (!Array.isArray(ids) || ids.length === 0) return [];
+        const cleanIds = ids.map(id => Number(id)).filter(id => !isNaN(id) && id > 0);
+        if (cleanIds.length === 0) return [];
+        const placeholders = cleanIds.map(() => '?').join(',');
+        const query = `
+            SELECT specification_id, specification_name, specification_type, description, is_active, created_at
+            FROM specifications
+            WHERE specification_id IN (${placeholders})
+            ORDER BY specification_type ASC, specification_name ASC
+        `;
+        const [rows] = await pool.execute(query, cleanIds);
+        return rows;
+    }
+
+    /**
      * Find a specification by name and type
      * @param {string} specification_name
      * @param {string} specification_type

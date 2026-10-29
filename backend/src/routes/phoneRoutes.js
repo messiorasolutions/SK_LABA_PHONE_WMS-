@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const phoneController = require('../controllers/phoneController');
 const installmentPlanController = require('../controllers/installmentPlanController');
+const offerController = require('../controllers/offerController');
 const {
     validateCreatePhone,
     validateUpdatePhone
@@ -27,8 +28,17 @@ router.patch('/:id/restore', (req, res, next) => phoneController.restorePhone(re
 router.post('/:id/restore', (req, res, next) => phoneController.restorePhone(req, res, next));
 router.put('/:id/restore', (req, res, next) => phoneController.restorePhone(req, res, next));
 
+// Phone Comparison Route (SRS C-05 - Customer/Visitor side-by-side comparison)
+router.get('/compare', (req, res, next) => phoneController.comparePhones(req, res, next));
+
+// Phone Favorites Route (SRS C-06 - Customer/Visitor saved items)
+router.get('/favorites', (req, res, next) => phoneController.getFavorites(req, res, next));
+
 // Phone Installments Calculation (C-03)
 router.get('/:id/installments', (req, res, next) => installmentPlanController.getPhoneInstallments(req, res, next));
+
+// Phone Offer Check (C-02 & C-03)
+router.get('/:id/offer', (req, res, next) => offerController.getPhoneOffer(req, res, next));
 
 // Standard Phone routes
 router.post('/', validateCreatePhone, (req, res, next) => phoneController.createPhone(req, res, next));

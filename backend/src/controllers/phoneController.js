@@ -261,6 +261,47 @@ class PhoneController {
             next(error);
         }
     }
+
+    /**
+     * GET /api/phones/compare?ids=1,2,3
+     * Compare 2 or 3 phones side-by-side (SRS C-05)
+     */
+    async comparePhones(req, res, next) {
+        try {
+            const rawIds = req.query.ids || req.query.phone_ids;
+
+            const comparison = await phoneService.comparePhones(rawIds);
+
+            return res.status(200).json({
+                success: true,
+                message: `Successfully retrieved side-by-side comparison for ${comparison.count} phones.`,
+                data: comparison
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * GET /api/phones/favorites?ids=1,2,3
+     * Retrieve live phone card data for saved favorite IDs (SRS C-06)
+     */
+    async getFavorites(req, res, next) {
+        try {
+            const rawIds = req.query.ids || req.query.phone_ids;
+
+            const favorites = await phoneService.getFavorites(rawIds);
+
+            return res.status(200).json({
+                success: true,
+                count: favorites.count,
+                data: favorites.data,
+                unavailable_ids: favorites.unavailable_ids
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new PhoneController();

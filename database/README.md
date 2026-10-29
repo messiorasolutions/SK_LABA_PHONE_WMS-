@@ -83,6 +83,40 @@ CREATE TABLE phones (
 ) ENGINE=InnoDB;
 
 
+CREATE TABLE offers (
+    offer_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    description TEXT NULL,
+    banner_image VARCHAR(500) NULL,
+    phone_ids JSON NOT NULL,
+    regular_price DECIMAL(12,2) NOT NULL,
+    offer_price DECIMAL(12,2) NOT NULL,
+    start_date_time DATETIME NOT NULL,
+    end_date_time DATETIME NOT NULL,
+    status ENUM('DRAFT', 'PUBLISHED') NOT NULL DEFAULT 'DRAFT',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_offers_status (status),
+    INDEX idx_offers_dates (start_date_time, end_date_time)
+) ENGINE=InnoDB;
+
+
+CREATE TABLE offers (
+    offer_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    description TEXT NULL,
+    banner_image VARCHAR(500) NULL,
+    phone_ids JSON NOT NULL,
+    regular_price DECIMAL(12,2) NOT NULL,
+    offer_price DECIMAL(12,2) NOT NULL,
+    start_date_time DATETIME NOT NULL,
+    end_date_time DATETIME NOT NULL,
+    status ENUM('DRAFT', 'PUBLISHED') NOT NULL DEFAULT 'DRAFT',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_offers_status (status),
+    INDEX idx_offers_dates (start_date_time, end_date_time)
+) ENGINE=InnoDB;
 CREATE TABLE dashboard_users (
     user_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     display_name VARCHAR(150) NOT NULL,

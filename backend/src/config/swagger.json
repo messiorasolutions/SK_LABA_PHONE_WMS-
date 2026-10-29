@@ -31,6 +31,12 @@
     {
       "name": "Instalment Plans",
       "description": "Instalment plans management (MG-11, ST-02, C-03)"
+    },
+    {
+      "name": "Offers",
+      "description": "Promotional offers and discounts management (MG-03, C-01, C-02, C-03, C-12)"
+    },
+    {
       "name": "Users",
       "description": "User & Role Management APIs (ADMIN only)"
     },
@@ -840,7 +846,6 @@
                         "Blue Titanium"
                       ],
                       "low_stock_level": 25,
-                      "stock_quantity": 25,
                       "availability": "IN_STOCK",
                       "status": "PUBLISHED",
                       "created_at": "2026-10-14T05:30:00.000Z"
@@ -1169,53 +1174,6 @@
             "schema": {
               "type": "string",
               "example": "low"
-    "/api/users": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "List Users (ADMIN only)",
-        "description": "Retrieve paginated users with optional search and role/status filters",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "default": 10
-            }
-          },
-          {
-            "name": "search",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "role",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ADMIN",
-                "STAFF"
-              ]
-            }
-          },
-          {
-            "name": "is_active",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
@@ -1255,60 +1213,6 @@
         ],
         "summary": "Add Stock Quantity",
         "description": "Add quantity to a phone. Automatically updates availability to IN_STOCK or LOW_STOCK.",
-            "description": "Paginated user list retrieved"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Create Staff/Admin Account (ADMIN only)",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "example": {
-                "display_name": "Warehouse Associate",
-                "email": "associate@sklabaphone.com",
-                "password": "SecurePassword123!",
-                "role": "STAFF",
-                "is_active": true
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "User created successfully"
-          },
-          "400": {
-            "description": "Validation error"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "409": {
-            "description": "Email conflict"
-          }
-        }
-      }
-    },
-    "/api/users/{id}": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Get User Details (ADMIN only)",
         "parameters": [
           {
             "name": "id",
@@ -1363,24 +1267,6 @@
         ],
         "summary": "Deduct Stock Quantity",
         "description": "Deduct quantity from a phone. Validates that current stock is sufficient. Auto-marks SOLD_OUT when stock reaches 0.",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User details"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Update User Profile/Role (ADMIN only)",
         "parameters": [
           {
             "name": "id",
@@ -1389,7 +1275,6 @@
             "schema": {
               "type": "integer",
               "example": 2
-              "type": "integer"
             }
           }
         ],
@@ -1401,8 +1286,6 @@
                 "quantity": 5,
                 "reason": "SALE",
                 "notes": "Order #8839"
-                "display_name": "Updated Name",
-                "role": "ADMIN"
               }
             }
           }
@@ -1438,23 +1321,6 @@
         ],
         "summary": "Mark Phone as Sold Out",
         "description": "Instantly mark a phone as SOLD_OUT with optional stock reset.",
-            "description": "User updated successfully"
-          },
-          "400": {
-            "description": "Validation error / cannot demote last admin"
-          },
-          "409": {
-            "description": "Email conflict"
-          }
-        }
-      }
-    },
-    "/api/users/{id}/status": {
-      "patch": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Activate or Deactivate User Account (ADMIN only)",
         "parameters": [
           {
             "name": "id",
@@ -1463,7 +1329,6 @@
             "schema": {
               "type": "integer",
               "example": 2
-              "type": "integer"
             }
           }
         ],
@@ -1473,11 +1338,6 @@
             "application/json": {
               "example": {
                 "reset_quantity": true
-          "required": true,
-          "content": {
-            "application/json": {
-              "example": {
-                "is_active": false
               }
             }
           }
@@ -1564,21 +1424,6 @@
         ],
         "summary": "Create Instalment Plan",
         "description": "Create a new installment financing plan (Manager function MG-11).",
-            "description": "User status updated successfully"
-          },
-          "400": {
-            "description": "Validation error / cannot deactivate self or last admin"
-          }
-        }
-      }
-    },
-    "/api/inquiries": {
-      "post": {
-        "tags": [
-          "Inquiries"
-        ],
-        "summary": "Submit Customer Inquiry (Public)",
-        "description": "Public rate-limited endpoint for customer inquiries from the website. Does not require authentication.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1590,10 +1435,6 @@
                 "additional_fee": 15,
                 "terms": "Valid for Commercial Bank credit cardholders.",
                 "is_active": true
-                "name": "John Doe",
-                "phone_number": "+94771234567",
-                "message": "Is the Apple iPhone 15 Pro 128GB currently in stock?",
-                "phone_id": 1
               }
             }
           }
@@ -1601,7 +1442,6 @@
         "responses": {
           "201": {
             "description": "Instalment plan created successfully",
-            "description": "Inquiry submitted successfully",
             "content": {
               "application/json": {
                 "example": {
@@ -1722,6 +1562,782 @@
             "schema": {
               "type": "integer",
               "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instalment plan deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Instalment plan 'Koko 3 Months 0% Interest' deleted successfully",
+                  "data": {
+                    "installment_plan_id": 1,
+                    "plan_name": "Koko 3 Months 0% Interest"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/installment-plans/{id}/toggle-status": {
+      "patch": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Toggle Plan Active Status",
+        "description": "Toggle plan between Active and Inactive (MG-11).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan status toggled",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Instalment plan status changed to Active",
+                  "data": {
+                    "installment_plan_id": 1,
+                    "plan_name": "Koko 3 Months 0% Interest",
+                    "is_active": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/installments": {
+      "get": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Calculate Phone Monthly Instalments",
+        "description": "Calculates the monthly payment breakdown for a phone based on active installment plans (Customer Requirement C-03).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone monthly installments calculation",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "phone_id": 2,
+                    "phone_name": "iPhone 15 Pro Max",
+                    "phone_price": 1199.99,
+                    "installment_enabled": true,
+                    "plans_count": 2,
+                    "plans": [
+                      {
+                        "installment_plan_id": 1,
+                        "plan_name": "Koko 3 Months 0% Interest",
+                        "number_of_months": 3,
+                        "interest_rate": 0,
+                        "interest_amount": 0,
+                        "additional_fee": 0,
+                        "total_payable": 1199.99,
+                        "monthly_payment": 400
+                      },
+                      {
+                        "installment_plan_id": 2,
+                        "plan_name": "Commercial Bank 12 Months",
+                        "number_of_months": 12,
+                        "interest_rate": 5,
+                        "interest_amount": 60,
+                        "additional_fee": 15,
+                        "total_payable": 1274.99,
+                        "monthly_payment": 106.25
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/offers": {
+      "get": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Get All Offers",
+        "description": "Retrieve all promotional offers with optional filters (?stage=active|upcoming|ended|draft, ?search=...) for Managers and Staff (MG-03, AL-04).",
+        "parameters": [
+          {
+            "name": "stage",
+            "in": "query",
+            "required": false,
+            "description": "Filter by lifecycle stage: active, upcoming, ended, draft, all",
+            "schema": {
+              "type": "string",
+              "example": "active"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Search keyword in offer title or description",
+            "schema": {
+              "type": "string",
+              "example": "Avurudu"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of offers",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 1,
+                  "data": [
+                    {
+                      "offer_id": 1,
+                      "title": "Avurudu Mega Savings",
+                      "description": "Special promotional price on iPhone 15 Pro Max",
+                      "banner_image": "https://images.unsplash.com/photo-offer-banner.jpg",
+                      "phone_ids": [
+                        2
+                      ],
+                      "regular_price": 1199.99,
+                      "offer_price": 1049.99,
+                      "discount_amount": 150,
+                      "discount_percentage": 12.5,
+                      "stage": "ACTIVE",
+                      "is_active": true,
+                      "seconds_remaining": 1500000,
+                      "phones": [
+                        {
+                          "phone_id": 2,
+                          "name": "iPhone 15 Pro Max",
+                          "brand_name": "Apple Inc.",
+                          "price": 1199.99
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Create Promotional Offer",
+        "description": "Create and schedule an offer (Manager function MG-03).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "title": "Avurudu Mega Savings",
+                "description": "Special promotional price on iPhone 15 Pro Max",
+                "banner_image": "https://images.unsplash.com/photo-offer-banner.jpg",
+                "phone_ids": [
+                  2
+                ],
+                "regular_price": 1199.99,
+                "offer_price": 1049.99,
+                "start_date_time": "2026-10-25T00:00:00",
+                "end_date_time": "2026-11-15T23:59:59",
+                "status": "PUBLISHED"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Offer created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Offer created successfully",
+                  "data": {
+                    "offer_id": 1,
+                    "title": "Avurudu Mega Savings",
+                    "regular_price": 1199.99,
+                    "offer_price": 1049.99,
+                    "discount_amount": 150,
+                    "stage": "ACTIVE"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/offers/active": {
+      "get": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Get All Active Offers (Storefront)",
+        "description": "Retrieve only currently running active offers for Home page (C-01) and Offers page (C-12).",
+        "responses": {
+          "200": {
+            "description": "Active offers list",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 1,
+                  "data": [
+                    {
+                      "offer_id": 1,
+                      "title": "Avurudu Mega Savings",
+                      "banner_image": "https://images.unsplash.com/photo-offer-banner.jpg",
+                      "regular_price": 1199.99,
+                      "offer_price": 1049.99,
+                      "discount_amount": 150,
+                      "seconds_remaining": 1500000,
+                      "phones": [
+                        {
+                          "phone_id": 2,
+                          "name": "iPhone 15 Pro Max",
+                          "brand_name": "Apple Inc."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/offers/{id}": {
+      "get": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Get Offer By ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "offer_id": 1,
+                    "title": "Avurudu Mega Savings",
+                    "regular_price": 1199.99,
+                    "offer_price": 1049.99,
+                    "stage": "ACTIVE"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Update Offer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "title": "Avurudu Mega Savings (Limited Stock)",
+                "offer_price": 1029.99
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Offer updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Offer updated successfully",
+                  "data": {
+                    "offer_id": 1,
+                    "title": "Avurudu Mega Savings (Limited Stock)",
+                    "regular_price": 1199.99,
+                    "offer_price": 1029.99,
+                    "discount_amount": 170
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Delete Offer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Offer 'Avurudu Mega Savings' deleted successfully",
+                  "data": {
+                    "offer_id": 1,
+                    "title": "Avurudu Mega Savings"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/offer": {
+      "get": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Get Phone Active Offer (Storefront Badge)",
+        "description": "Check if a specific phone model has an active running offer (C-02, C-03).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone active offer check",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "phone_id": 2,
+                    "phone_name": "iPhone 15 Pro Max",
+                    "regular_price": 1199.99,
+                    "has_active_offer": true,
+                    "offer": {
+                      "offer_id": 1,
+                      "title": "Avurudu Mega Savings",
+                      "offer_price": 1029.99,
+                      "savings": 170,
+                      "discount_percentage": 14.2,
+                      "seconds_remaining": 1500000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/compare": {
+      "get": {
+        "tags": [
+          "Customer Phones (C-05)"
+        ],
+        "summary": "Compare 2 or 3 phones side-by-side (SRS C-05)",
+        "description": "Returns side-by-side comparison for 2 or 3 phones including photo, price, offer price, savings, warranty, stock status, colors, storages, specs, accessories, and monthly installment calculations. Saved in customer browser.",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2,3"
+            },
+            "description": "Comma-separated IDs of 2 or 3 phones to compare (e.g. 2,3 or 2,3,4)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Side-by-side comparison matrix and enriched phones",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Successfully retrieved side-by-side comparison for 2 phones.",
+                  "data": {
+                    "count": 2,
+                    "phones": [],
+                    "comparison_matrix": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid selection (less than 2 or more than 3 phones)"
+          },
+          "404": {
+            "description": "One or more selected phones not found"
+          }
+        }
+      }
+    },
+    "/api/phones/favorites": {
+      "get": {
+        "tags": [
+          "Customer Favorites (C-06)"
+        ],
+        "summary": "Retrieve live phone details for saved favorites (SRS C-06)",
+        "description": "Returns live phone card details, active offers, pricing, warranty, and availability labels for IDs stored in the customer browser. Also returns unavailable_ids for deleted/archived phones.",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2,3,4"
+            },
+            "description": "Comma-separated phone IDs saved in customer browser localStorage (e.g. 2,3,4)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live phone cards and unavailable IDs list",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "data": [
+                    {
+                      "phone_id": 2,
+                      "name": "iPhone 15 Pro Max",
+                      "brand_name": "Apple Inc.",
+                      "main_photo": "https://images.unsplash.com/...",
+                      "phone_condition": "NEW",
+                      "regular_price": 1199.99,
+                      "effective_price": 1029.99,
+                      "availability": "LOW_STOCK",
+                      "availability_label": "Only 25 left",
+                      "current_stock": 25,
+                      "active_offer": {
+                        "has_active_offer": true,
+                        "offer_title": "Avurudu Mega Savings",
+                        "offer_price": 1029.99,
+                        "discount_percentage": 14.2,
+                        "savings": 170
+                      },
+                      "is_available": true
+                    }
+                  ],
+                  "unavailable_ids": [
+                    99
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List Users (ADMIN only)",
+        "description": "Retrieve paginated users with optional search and role/status filters",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ADMIN",
+                "STAFF"
+              ]
+            }
+          },
+          {
+            "name": "is_active",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated user list retrieved"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create Staff/Admin Account (ADMIN only)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "display_name": "Warehouse Associate",
+                "email": "associate@sklabaphone.com",
+                "password": "SecurePassword123!",
+                "role": "STAFF",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Email conflict"
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User Details (ADMIN only)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update User Profile/Role (ADMIN only)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "display_name": "Updated Name",
+                "role": "ADMIN"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully"
+          },
+          "400": {
+            "description": "Validation error / cannot demote last admin"
+          },
+          "409": {
+            "description": "Email conflict"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/status": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Activate or Deactivate User Account (ADMIN only)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "is_active": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User status updated successfully"
+          },
+          "400": {
+            "description": "Validation error / cannot deactivate self or last admin"
+          }
+        }
+      }
+    },
+    "/api/inquiries": {
+      "post": {
+        "tags": [
+          "Inquiries"
+        ],
+        "summary": "Submit Customer Inquiry (Public)",
+        "description": "Public rate-limited endpoint for customer inquiries from the website. Does not require authentication.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "name": "John Doe",
+                "phone_number": "+94771234567",
+                "message": "Is the Apple iPhone 15 Pro 128GB currently in stock?",
+                "phone_id": 1
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Inquiry submitted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
                   "message": "Inquiry submitted successfully. Our team will contact you soon.",
                   "data": {
                     "inquiry_id": 1,
@@ -1813,31 +2429,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Instalment plan deleted successfully",
             "description": "Paginated list of inquiries",
             "content": {
               "application/json": {
                 "example": {
                   "success": true,
-                  "message": "Instalment plan 'Koko 3 Months 0% Interest' deleted successfully",
-                  "data": {
-                    "installment_plan_id": 1,
-                    "plan_name": "Koko 3 Months 0% Interest"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/installment-plans/{id}/toggle-status": {
-      "patch": {
-        "tags": [
-          "Instalment Plans"
-        ],
-        "summary": "Toggle Plan Active Status",
-        "description": "Toggle plan between Active and Inactive (MG-11).",
                   "data": [
                     {
                       "inquiry_id": 1,
@@ -1890,39 +2486,12 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "example": 1
               "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Plan status toggled",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": true,
-                  "message": "Instalment plan status changed to Active",
-                  "data": {
-                    "installment_plan_id": 1,
-                    "plan_name": "Koko 3 Months 0% Interest",
-                    "is_active": true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/phones/{id}/installments": {
-      "get": {
-        "tags": [
-          "Instalment Plans"
-        ],
-        "summary": "Calculate Phone Monthly Instalments",
-        "description": "Calculates the monthly payment breakdown for a phone based on active installment plans (Customer Requirement C-03).",
             "description": "Inquiry details retrieved successfully"
           },
           "401": {
@@ -1947,51 +2516,6 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "example": 2
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Phone monthly installments calculation",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": true,
-                  "data": {
-                    "phone_id": 2,
-                    "phone_name": "iPhone 15 Pro Max",
-                    "phone_price": 1199.99,
-                    "installment_enabled": true,
-                    "plans_count": 2,
-                    "plans": [
-                      {
-                        "installment_plan_id": 1,
-                        "plan_name": "Koko 3 Months 0% Interest",
-                        "number_of_months": 3,
-                        "interest_rate": 0,
-                        "interest_amount": 0,
-                        "additional_fee": 0,
-                        "total_payable": 1199.99,
-                        "monthly_payment": 400
-                      },
-                      {
-                        "installment_plan_id": 2,
-                        "plan_name": "Commercial Bank 12 Months",
-                        "number_of_months": 12,
-                        "interest_rate": 5,
-                        "interest_amount": 60,
-                        "additional_fee": 15,
-                        "total_payable": 1274.99,
-                        "monthly_payment": 106.25
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
               "type": "integer"
             }
           }

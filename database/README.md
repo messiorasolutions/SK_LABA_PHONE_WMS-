@@ -79,3 +79,72 @@ CREATE TABLE phones (
     INDEX idx_phones_status (status),
     INDEX idx_phones_price (price)
 ) ENGINE=InnoDB;
+
+
+CREATE TABLE dashboard_users (
+    user_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    display_name VARCHAR(150) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('ADMIN', 'STAFF') NOT NULL DEFAULT 'STAFF',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    last_login_at TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_dashboard_users_role (role),
+    INDEX idx_dashboard_users_is_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE sessions (
+    session_id VARCHAR(128) COLLATE utf8mb4_bin NOT NULL,
+    expires INT(11) UNSIGNED NOT NULL,
+    data MEDIUMTEXT COLLATE utf8mb4_bin,
+    PRIMARY KEY (session_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+## Database Migrations
+
+SQL migration files are maintained in `database/migrations/`.
+To run all pending migrations against the configured MySQL database:
+
+```bash
+cd backend
+npm run migrate
+```
+
+
+CREATE TABLE password_reset_tokens (
+    reset_token_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    token_hash VARCHAR(64) NOT NULL UNIQUE,
+    expires_at TIMESTAMP NOT NULL,
+    is_consumed BOOLEAN NOT NULL DEFAULT FALSE,
+    consumed_at TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_password_resets_user FOREIGN KEY (user_id) REFERENCES dashboard_users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    INDEX idx_password_resets_user (user_id),
+    INDEX idx_password_resets_token (token_hash),
+    INDEX idx_password_resets_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inquiries (
+    inquiry_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    customer_name VARCHAR(150) NOT NULL,
+    phone_number VARCHAR(30) NOT NULL,
+    message TEXT NOT NULL,
+    phone_id BIGINT UNSIGNED NULL,
+    status ENUM('New', 'In Progress', 'Contacted', 'Closed') NOT NULL DEFAULT 'New',
+    assigned_to_user_id BIGINT UNSIGNED NULL,
+    updated_by_user_id BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_inquiries_phone FOREIGN KEY (phone_id) REFERENCES phones(phone_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inquiries_assigned_user FOREIGN KEY (assigned_to_user_id) REFERENCES dashboard_users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inquiries_updated_user FOREIGN KEY (updated_by_user_id) REFERENCES dashboard_users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    INDEX idx_inquiries_status (status),
+    INDEX idx_inquiries_phone_id (phone_id),
+    INDEX idx_inquiries_assigned_to (assigned_to_user_id),
+    INDEX idx_inquiries_created_at (created_at),
+    INDEX idx_inquiries_customer_name (customer_name),
+    INDEX idx_inquiries_phone_number (phone_number)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

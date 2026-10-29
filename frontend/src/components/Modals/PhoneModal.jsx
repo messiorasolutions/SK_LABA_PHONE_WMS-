@@ -18,7 +18,7 @@ export default function PhoneModal({
   const [brandId, setBrandId] = useState('');
   const [phoneCondition, setPhoneCondition] = useState('NEW');
   const [price, setPrice] = useState('');
-  const [stockQuantity, setStockQuantity] = useState('');
+  const [lowStockLevel, setLowStockLevel] = useState('');
   const [availability, setAvailability] = useState('IN_STOCK');
   const [status, setStatus] = useState('DRAFT');
   const [warranty, setWarranty] = useState('');
@@ -33,7 +33,7 @@ export default function PhoneModal({
       setBrandId(initial.brand_id || '');
       setPhoneCondition(initial.phone_condition || 'NEW');
       setPrice(initial.price || '');
-      setStockQuantity(initial.stock_quantity ?? '');
+      setLowStockLevel(initial.low_stock_level ?? initial.stock_quantity ?? '');
       setAvailability(initial.availability || 'IN_STOCK');
       setStatus(initial.status || 'DRAFT');
       setWarranty(initial.warranty || '');
@@ -49,7 +49,7 @@ export default function PhoneModal({
       setBrandId(brands[0]?.brand_id || '');
       setPhoneCondition('NEW');
       setPrice('');
-      setStockQuantity('');
+      setLowStockLevel('');
       setAvailability('IN_STOCK');
       setStatus('PUBLISHED');
       setWarranty('');
@@ -74,7 +74,8 @@ export default function PhoneModal({
       brand_id: Number(brandId),
       phone_condition: phoneCondition,
       price: Number(price),
-      stock_quantity: Number(stockQuantity) || 0,
+      low_stock_level: Number(lowStockLevel) || 0,
+      stock_quantity: Number(lowStockLevel) || 0,
       availability,
       status,
       warranty: warranty.trim(),
@@ -196,14 +197,14 @@ export default function PhoneModal({
 
             <div>
               <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
-                Stock Quantity
+                Low Stock Level
               </label>
               <input
                 type="number"
                 min="0"
-                value={stockQuantity}
-                onChange={(e) => setStockQuantity(e.target.value)}
-                placeholder="25"
+                value={lowStockLevel}
+                onChange={(e) => setLowStockLevel(e.target.value)}
+                placeholder="5"
                 className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-slate-50 focus:bg-white"
               />
             </div>

@@ -27,12 +27,18 @@
     {
       "name": "Phones",
       "description": "Smartphone inventory and catalog management APIs"
+    },
+    {
+      "name": "Instalment Plans",
+      "description": "Instalment plans management (MG-11, ST-02, C-03)"
     }
   ],
   "paths": {
     "/api/brands": {
       "post": {
-        "tags": ["Brands"],
+        "tags": [
+          "Brands"
+        ],
         "summary": "Create Brand",
         "requestBody": {
           "required": true,
@@ -69,7 +75,9 @@
         }
       },
       "get": {
-        "tags": ["Brands"],
+        "tags": [
+          "Brands"
+        ],
         "summary": "Get All Brands",
         "responses": {
           "200": {
@@ -106,7 +114,9 @@
     },
     "/api/brands/{id}": {
       "get": {
-        "tags": ["Brands"],
+        "tags": [
+          "Brands"
+        ],
         "summary": "Get Brand By ID",
         "parameters": [
           {
@@ -141,7 +151,9 @@
         }
       },
       "put": {
-        "tags": ["Brands"],
+        "tags": [
+          "Brands"
+        ],
         "summary": "Update Brand",
         "parameters": [
           {
@@ -189,7 +201,9 @@
         }
       },
       "delete": {
-        "tags": ["Brands"],
+        "tags": [
+          "Brands"
+        ],
         "summary": "Delete Brand",
         "parameters": [
           {
@@ -223,7 +237,9 @@
     },
     "/api/storage-options": {
       "post": {
-        "tags": ["Storage Options"],
+        "tags": [
+          "Storage Options"
+        ],
         "summary": "Create Storage Option",
         "requestBody": {
           "required": true,
@@ -257,7 +273,9 @@
         }
       },
       "get": {
-        "tags": ["Storage Options"],
+        "tags": [
+          "Storage Options"
+        ],
         "summary": "Get All Storage Options",
         "responses": {
           "200": {
@@ -290,7 +308,9 @@
     },
     "/api/storage-options/{id}": {
       "get": {
-        "tags": ["Storage Options"],
+        "tags": [
+          "Storage Options"
+        ],
         "summary": "Get Storage Option By ID",
         "parameters": [
           {
@@ -323,7 +343,9 @@
         }
       },
       "put": {
-        "tags": ["Storage Options"],
+        "tags": [
+          "Storage Options"
+        ],
         "summary": "Update Storage Option",
         "parameters": [
           {
@@ -368,7 +390,9 @@
         }
       },
       "delete": {
-        "tags": ["Storage Options"],
+        "tags": [
+          "Storage Options"
+        ],
         "summary": "Delete Storage Option",
         "parameters": [
           {
@@ -402,7 +426,9 @@
     },
     "/api/specifications": {
       "post": {
-        "tags": ["Specifications"],
+        "tags": [
+          "Specifications"
+        ],
         "summary": "Create Specification",
         "requestBody": {
           "required": true,
@@ -440,7 +466,9 @@
         }
       },
       "get": {
-        "tags": ["Specifications"],
+        "tags": [
+          "Specifications"
+        ],
         "summary": "Get All Specifications",
         "parameters": [
           {
@@ -450,7 +478,10 @@
             "description": "Optional filter by type: TECHNICAL or ACCESSORY",
             "schema": {
               "type": "string",
-              "enum": ["TECHNICAL", "ACCESSORY"],
+              "enum": [
+                "TECHNICAL",
+                "ACCESSORY"
+              ],
               "example": "TECHNICAL"
             }
           }
@@ -490,7 +521,9 @@
     },
     "/api/specifications/{id}": {
       "get": {
-        "tags": ["Specifications"],
+        "tags": [
+          "Specifications"
+        ],
         "summary": "Get Specification By ID",
         "parameters": [
           {
@@ -525,7 +558,9 @@
         }
       },
       "put": {
-        "tags": ["Specifications"],
+        "tags": [
+          "Specifications"
+        ],
         "summary": "Update Specification",
         "parameters": [
           {
@@ -574,7 +609,9 @@
         }
       },
       "delete": {
-        "tags": ["Specifications"],
+        "tags": [
+          "Specifications"
+        ],
         "summary": "Delete Specification",
         "parameters": [
           {
@@ -609,7 +646,9 @@
     },
     "/api/phones": {
       "post": {
-        "tags": ["Phones"],
+        "tags": [
+          "Phones"
+        ],
         "summary": "Create Phone",
         "requestBody": {
           "required": true,
@@ -620,16 +659,30 @@
                 "brand_id": 1,
                 "phone_condition": "NEW",
                 "price": 1199.99,
-                "storage_ids": [1, 2],
-                "colour_options": ["Natural Titanium", "Blue Titanium", "Black Titanium"],
-                "specification_ids": [1],
+                "storage_ids": [
+                  1,
+                  2
+                ],
+                "colour_options": [
+                  "Natural Titanium",
+                  "Blue Titanium",
+                  "Black Titanium"
+                ],
+                "specification_ids": [
+                  1
+                ],
                 "warranty": "1 Year Apple Warranty",
-                "accessory_ids": [2],
+                "accessory_ids": [
+                  2
+                ],
                 "description": "A17 Pro chip, Titanium design, 48MP main camera.",
-                "stock_quantity": 25,
+                "low_stock_level": 25,
                 "availability": "IN_STOCK",
                 "installment_enabled": true,
-                "installment_plan_ids": [1, 2],
+                "installment_plan_ids": [
+                  1,
+                  2
+                ],
                 "status": "PUBLISHED",
                 "photos": [
                   "https://images.unsplash.com/photo-1695048133142-1a20484d2569"
@@ -653,16 +706,30 @@
                     "brand_name": "Apple",
                     "phone_condition": "NEW",
                     "price": "1199.99",
-                    "storage_ids": [1, 2],
-                    "colour_options": ["Natural Titanium", "Blue Titanium", "Black Titanium"],
-                    "specification_ids": [1],
+                    "storage_ids": [
+                      1,
+                      2
+                    ],
+                    "colour_options": [
+                      "Natural Titanium",
+                      "Blue Titanium",
+                      "Black Titanium"
+                    ],
+                    "specification_ids": [
+                      1
+                    ],
                     "warranty": "1 Year Apple Warranty",
-                    "accessory_ids": [2],
+                    "accessory_ids": [
+                      2
+                    ],
                     "description": "A17 Pro chip, Titanium design, 48MP main camera.",
-                    "stock_quantity": 25,
+                    "low_stock_level": 25,
                     "availability": "IN_STOCK",
                     "installment_enabled": 1,
-                    "installment_plan_ids": [1, 2],
+                    "installment_plan_ids": [
+                      1,
+                      2
+                    ],
                     "status": "PUBLISHED",
                     "photos": [
                       "https://images.unsplash.com/photo-1695048133142-1a20484d2569"
@@ -677,7 +744,9 @@
         }
       },
       "get": {
-        "tags": ["Phones"],
+        "tags": [
+          "Phones"
+        ],
         "summary": "Get All Phones",
         "parameters": [
           {
@@ -685,35 +754,59 @@
             "in": "query",
             "required": false,
             "description": "Filter by Brand ID",
-            "schema": { "type": "integer", "example": 1 }
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
           },
           {
             "name": "status",
             "in": "query",
             "required": false,
             "description": "Filter by status: DRAFT, PUBLISHED, ARCHIVED",
-            "schema": { "type": "string", "example": "PUBLISHED" }
+            "schema": {
+              "type": "string",
+              "example": "PUBLISHED"
+            }
           },
           {
             "name": "phone_condition",
             "in": "query",
             "required": false,
             "description": "Filter by condition: NEW, USED",
-            "schema": { "type": "string", "example": "NEW" }
+            "schema": {
+              "type": "string",
+              "example": "NEW"
+            }
           },
           {
             "name": "availability",
             "in": "query",
             "required": false,
             "description": "Filter by availability: IN_STOCK, LOW_STOCK, SOLD_OUT, COMING_SOON",
-            "schema": { "type": "string", "example": "IN_STOCK" }
+            "schema": {
+              "type": "string",
+              "example": "IN_STOCK"
+            }
           },
           {
             "name": "search",
             "in": "query",
             "required": false,
             "description": "Search keyword in phone name or brand name",
-            "schema": { "type": "string", "example": "iPhone" }
+            "schema": {
+              "type": "string",
+              "example": "iPhone"
+            }
+          },
+          {
+            "name": "archived",
+            "in": "query",
+            "description": "Filter by archived status: yes / true / 1 for archived only; no / false for normal only; all for both",
+            "schema": {
+              "type": "string",
+              "example": "yes"
+            }
           }
         ],
         "responses": {
@@ -732,9 +825,15 @@
                       "brand_name": "Apple",
                       "phone_condition": "NEW",
                       "price": "1199.99",
-                      "storage_ids": [1, 2],
-                      "colour_options": ["Natural Titanium", "Blue Titanium"],
-                      "stock_quantity": 25,
+                      "storage_ids": [
+                        1,
+                        2
+                      ],
+                      "colour_options": [
+                        "Natural Titanium",
+                        "Blue Titanium"
+                      ],
+                      "low_stock_level": 25,
                       "availability": "IN_STOCK",
                       "status": "PUBLISHED",
                       "created_at": "2026-10-14T05:30:00.000Z"
@@ -749,14 +848,19 @@
     },
     "/api/phones/{id}": {
       "get": {
-        "tags": ["Phones"],
+        "tags": [
+          "Phones"
+        ],
         "summary": "Get Phone By ID",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer", "example": 1 }
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
           }
         ],
         "responses": {
@@ -773,13 +877,23 @@
                     "brand_name": "Apple",
                     "phone_condition": "NEW",
                     "price": "1199.99",
-                    "storage_ids": [1, 2],
-                    "colour_options": ["Natural Titanium", "Blue Titanium"],
-                    "specification_ids": [1],
+                    "storage_ids": [
+                      1,
+                      2
+                    ],
+                    "colour_options": [
+                      "Natural Titanium",
+                      "Blue Titanium"
+                    ],
+                    "specification_ids": [
+                      1
+                    ],
                     "warranty": "1 Year Apple Warranty",
-                    "accessory_ids": [2],
+                    "accessory_ids": [
+                      2
+                    ],
                     "description": "A17 Pro chip, Titanium design.",
-                    "stock_quantity": 25,
+                    "low_stock_level": 25,
                     "availability": "IN_STOCK",
                     "installment_enabled": 1,
                     "status": "PUBLISHED",
@@ -796,14 +910,19 @@
         }
       },
       "put": {
-        "tags": ["Phones"],
+        "tags": [
+          "Phones"
+        ],
         "summary": "Update Phone",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer", "example": 1 }
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
           }
         ],
         "requestBody": {
@@ -812,7 +931,7 @@
             "application/json": {
               "example": {
                 "price": 1099.99,
-                "stock_quantity": 18,
+                "low_stock_level": 18,
                 "availability": "IN_STOCK"
               }
             }
@@ -831,7 +950,7 @@
                     "name": "iPhone 15 Pro Max",
                     "brand_id": 1,
                     "price": "1099.99",
-                    "stock_quantity": 18,
+                    "low_stock_level": 18,
                     "availability": "IN_STOCK",
                     "updated_at": "2026-10-14T05:40:00.000Z"
                   }
@@ -842,14 +961,19 @@
         }
       },
       "delete": {
-        "tags": ["Phones"],
+        "tags": [
+          "Phones"
+        ],
         "summary": "Delete Phone",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer", "example": 1 }
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
           }
         ],
         "responses": {
@@ -863,6 +987,682 @@
                   "data": {
                     "phone_id": 1,
                     "name": "iPhone 15 Pro Max"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/archived": {
+      "get": {
+        "tags": [
+          "Phones"
+        ],
+        "summary": "Get All Archived Phones",
+        "description": "Retrieve all phones currently moved to the archive list",
+        "responses": {
+          "200": {
+            "description": "Archived phones list",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 1,
+                  "data": [
+                    {
+                      "phone_id": 2,
+                      "name": "iPhone 15 Pro Max",
+                      "brand_id": 1,
+                      "price": "1199.99",
+                      "low_stock_level": 25,
+                      "status": "ARCHIVED",
+                      "is_archived": true
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/archive": {
+      "patch": {
+        "tags": [
+          "Phones"
+        ],
+        "summary": "Archive Phone",
+        "description": "Move a phone to archive (is_archived=true, status=ARCHIVED). It will no longer show in the normal list.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone archived successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Phone 'iPhone 15 Pro Max' has been archived successfully",
+                  "data": {
+                    "phone_id": 2,
+                    "name": "iPhone 15 Pro Max",
+                    "status": "ARCHIVED",
+                    "is_archived": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/restore": {
+      "patch": {
+        "tags": [
+          "Phones"
+        ],
+        "summary": "Restore Phone",
+        "description": "Restore an archived phone back to active status (is_archived=false, status=DRAFT or PUBLISHED). It becomes visible in normal list.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "example": {
+                "status": "PUBLISHED"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Phone restored successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Phone 'iPhone 15 Pro Max' has been restored successfully",
+                  "data": {
+                    "phone_id": 2,
+                    "name": "iPhone 15 Pro Max",
+                    "status": "PUBLISHED",
+                    "is_archived": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/stock": {
+      "get": {
+        "tags": [
+          "Stock Management"
+        ],
+        "summary": "Get Stock Overview for All Phones",
+        "description": "Retrieve all phones with their current stock, low stock threshold, and availability status. Supports search and filters.",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Search by phone name or brand name",
+            "schema": {
+              "type": "string",
+              "example": "iPhone"
+            }
+          },
+          {
+            "name": "brand_id",
+            "in": "query",
+            "required": false,
+            "description": "Filter by brand ID",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "availability",
+            "in": "query",
+            "required": false,
+            "description": "Filter by availability: IN_STOCK, LOW_STOCK, SOLD_OUT, COMING_SOON",
+            "schema": {
+              "type": "string",
+              "example": "IN_STOCK"
+            }
+          },
+          {
+            "name": "stock_status",
+            "in": "query",
+            "required": false,
+            "description": "Filter by stock status: low (at/below low stock level), out (sold out/zero), in_stock",
+            "schema": {
+              "type": "string",
+              "example": "low"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stock list retrieved successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 1,
+                  "data": [
+                    {
+                      "phone_id": 2,
+                      "name": "iPhone 15 Pro Max",
+                      "brand_id": 1,
+                      "brand_name": "Apple Inc.",
+                      "phone_condition": "NEW",
+                      "price": "1199.99",
+                      "current_stock": 25,
+                      "low_stock_level": 25,
+                      "availability": "LOW_STOCK",
+                      "status": "PUBLISHED"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/stock/add": {
+      "post": {
+        "tags": [
+          "Stock Management"
+        ],
+        "summary": "Add Stock Quantity",
+        "description": "Add quantity to a phone. Automatically updates availability to IN_STOCK or LOW_STOCK.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "quantity": 15,
+                "reason": "RESTOCK",
+                "notes": "Batch #104 delivery"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stock added successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Added 15 units to 'iPhone 15 Pro Max'. Current stock is now 30.",
+                  "data": {
+                    "phone_id": 2,
+                    "name": "iPhone 15 Pro Max",
+                    "previous_stock": 15,
+                    "added_quantity": 15,
+                    "current_stock": 30,
+                    "low_stock_level": 25,
+                    "availability": "IN_STOCK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/stock/remove": {
+      "post": {
+        "tags": [
+          "Stock Management"
+        ],
+        "summary": "Deduct Stock Quantity",
+        "description": "Deduct quantity from a phone. Validates that current stock is sufficient. Auto-marks SOLD_OUT when stock reaches 0.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "quantity": 5,
+                "reason": "SALE",
+                "notes": "Order #8839"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stock deducted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Deducted 5 units from 'iPhone 15 Pro Max'. Current stock is now 25.",
+                  "data": {
+                    "phone_id": 2,
+                    "name": "iPhone 15 Pro Max",
+                    "previous_stock": 30,
+                    "removed_quantity": 5,
+                    "current_stock": 25,
+                    "low_stock_level": 25,
+                    "availability": "LOW_STOCK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/stock/sold-out": {
+      "patch": {
+        "tags": [
+          "Stock Management"
+        ],
+        "summary": "Mark Phone as Sold Out",
+        "description": "Instantly mark a phone as SOLD_OUT with optional stock reset.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "example": {
+                "reset_quantity": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Phone marked as SOLD_OUT",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Phone 'iPhone 15 Pro Max' marked as SOLD_OUT.",
+                  "data": {
+                    "phone_id": 2,
+                    "name": "iPhone 15 Pro Max",
+                    "current_stock": 0,
+                    "low_stock_level": 25,
+                    "availability": "SOLD_OUT"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/installment-plans": {
+      "get": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Get All Instalment Plans",
+        "description": "Retrieve all installment plans. Pass ?is_active=true to get active plans for staff dropdowns.",
+        "parameters": [
+          {
+            "name": "is_active",
+            "in": "query",
+            "required": false,
+            "description": "Filter by active status (true/false)",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Search keyword in plan name or terms",
+            "schema": {
+              "type": "string",
+              "example": "Commercial Bank"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of installment plans",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "data": [
+                    {
+                      "installment_plan_id": 1,
+                      "plan_name": "Koko 3 Months 0% Interest",
+                      "number_of_months": 3,
+                      "interest_rate": 0,
+                      "additional_fee": 0,
+                      "terms": "Pay in 3 equal monthly installments with debit card.",
+                      "is_active": true
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Create Instalment Plan",
+        "description": "Create a new installment financing plan (Manager function MG-11).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "plan_name": "Commercial Bank 12 Months",
+                "number_of_months": 12,
+                "interest_rate": 5,
+                "additional_fee": 15,
+                "terms": "Valid for Commercial Bank credit cardholders.",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Instalment plan created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Instalment plan created successfully",
+                  "data": {
+                    "installment_plan_id": 2,
+                    "plan_name": "Commercial Bank 12 Months",
+                    "number_of_months": 12,
+                    "interest_rate": 5,
+                    "additional_fee": 15,
+                    "is_active": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/installment-plans/{id}": {
+      "get": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Get Instalment Plan By ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instalment plan details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "installment_plan_id": 1,
+                    "plan_name": "Koko 3 Months 0% Interest",
+                    "number_of_months": 3,
+                    "interest_rate": 0,
+                    "additional_fee": 0,
+                    "is_active": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Update Instalment Plan",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "plan_name": "Koko 3 Months 0% Interest (All Cards)",
+                "interest_rate": 0,
+                "additional_fee": 0
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Instalment plan updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Instalment plan updated successfully",
+                  "data": {
+                    "installment_plan_id": 1,
+                    "plan_name": "Koko 3 Months 0% Interest (All Cards)",
+                    "number_of_months": 3,
+                    "interest_rate": 0,
+                    "additional_fee": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Delete Instalment Plan",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instalment plan deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Instalment plan 'Koko 3 Months 0% Interest' deleted successfully",
+                  "data": {
+                    "installment_plan_id": 1,
+                    "plan_name": "Koko 3 Months 0% Interest"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/installment-plans/{id}/toggle-status": {
+      "patch": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Toggle Plan Active Status",
+        "description": "Toggle plan between Active and Inactive (MG-11).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan status toggled",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Instalment plan status changed to Active",
+                  "data": {
+                    "installment_plan_id": 1,
+                    "plan_name": "Koko 3 Months 0% Interest",
+                    "is_active": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/installments": {
+      "get": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Calculate Phone Monthly Instalments",
+        "description": "Calculates the monthly payment breakdown for a phone based on active installment plans (Customer Requirement C-03).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone monthly installments calculation",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "phone_id": 2,
+                    "phone_name": "iPhone 15 Pro Max",
+                    "phone_price": 1199.99,
+                    "installment_enabled": true,
+                    "plans_count": 2,
+                    "plans": [
+                      {
+                        "installment_plan_id": 1,
+                        "plan_name": "Koko 3 Months 0% Interest",
+                        "number_of_months": 3,
+                        "interest_rate": 0,
+                        "interest_amount": 0,
+                        "additional_fee": 0,
+                        "total_payable": 1199.99,
+                        "monthly_payment": 400
+                      },
+                      {
+                        "installment_plan_id": 2,
+                        "plan_name": "Commercial Bank 12 Months",
+                        "number_of_months": 12,
+                        "interest_rate": 5,
+                        "interest_amount": 60,
+                        "additional_fee": 15,
+                        "total_payable": 1274.99,
+                        "monthly_payment": 106.25
+                      }
+                    ]
                   }
                 }
               }

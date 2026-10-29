@@ -20,14 +20,143 @@ class PhoneController {
 
     /**
      * GET /api/phones
-     * Retrieve all phones (with optional filters)
+     * Retrieve phones (defaults to non-archived; supports archived=yes / status=ARCHIVED / include_archived=true)
      */
     async getAllPhones(req, res, next) {
         try {
-            const { brand_id, status, phone_condition, availability, search } = req.query;
+            const {
+                brand_id,
+                status,
+                phone_condition,
+                availability,
+                search,
+                archived,
+                is_archived,
+                include_archived
+            } = req.query;
+
             const phones = await phoneService.getAllPhones({
                 brand_id,
                 status,
+                phone_condition,
+                availability,
+                search,
+                archived,
+                is_archived,
+                include_archived
+            });
+
+            return res.status(200).json({
+                success: true,
+                count: phones.length,
+                data: phones
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * GET /api/phones/stock
+     * Retrieve all phones for stock management screen
+     */
+    async getStockList(req, res, next) {
+        try {
+            const {
+                search,
+                brand_id,
+                phone_condition,
+                availability,
+                stock_status,
+                archived,
+                is_archived,
+                include_archived
+            } = req.query;
+
+            const phones = await phoneService.getStockList({
+                search,
+                brand_id,
+                phone_condition,
+                availability,
+                stock_status,
+                archived,
+                is_archived,
+                include_archived
+            });
+
+            return res.status(200).json({
+                success: true,
+                count: phones.length,
+                data: phones
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * POST /api/phones/:id/stock/add
+     * Add stock quantity
+     */
+    async addStock(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await phoneService.addStock(id, req.body || {});
+            return res.status(200).json({
+                success: true,
+                message: `Added ${result.added_quantity} units to '${result.name}'. Current stock is now ${result.current_stock}.`,
+                data: result
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * POST /api/phones/:id/stock/remove
+     * Deduct stock quantity
+     */
+    async removeStock(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await phoneService.removeStock(id, req.body || {});
+            return res.status(200).json({
+                success: true,
+                message: `Deducted ${result.removed_quantity} units from '${result.name}'. Current stock is now ${result.current_stock}.`,
+                data: result
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * PATCH /api/phones/:id/stock/sold-out
+     * Mark phone as SOLD_OUT
+     */
+    async markSoldOut(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await phoneService.markSoldOut(id, req.body || {});
+            return res.status(200).json({
+                success: true,
+                message: `Phone '${result.name}' marked as SOLD_OUT.`,
+                data: result
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * GET /api/phones/archived
+     * Retrieve all archived phones
+     */
+    async getArchivedPhones(req, res, next) {
+        try {
+            const { brand_id, phone_condition, availability, search } = req.query;
+            const phones = await phoneService.getArchivedPhones({
+                brand_id,
                 phone_condition,
                 availability,
                 search
@@ -53,6 +182,43 @@ class PhoneController {
             const phone = await phoneService.getPhoneById(id);
             return res.status(200).json({
                 success: true,
+                data: phone
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * PATCH /api/phones/:id/archive
+     * Archive a phone
+     */
+    async archivePhone(req, res, next) {
+        try {
+            const { id } = req.params;
+            const phone = await phoneService.archivePhone(id);
+            return res.status(200).json({
+                success: true,
+                message: `Phone '${phone.name}' has been archived successfully`,
+                data: phone
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * PATCH /api/phones/:id/restore
+     * Restore an archived phone
+     */
+    async restorePhone(req, res, next) {
+        try {
+            const { id } = req.params;
+            const restoreStatus = req.body?.status || 'DRAFT';
+            const phone = await phoneService.restorePhone(id, restoreStatus);
+            return res.status(200).json({
+                success: true,
+                message: `Phone '${phone.name}' has been restored successfully`,
                 data: phone
             });
         } catch (error) {

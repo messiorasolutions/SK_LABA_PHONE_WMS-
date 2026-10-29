@@ -23,11 +23,14 @@ function validateCreatePhone(req, res, next) {
         warranty,
         accessory_ids,
         description,
+        low_stock_level,
+        current_stock,
         stock_quantity,
         availability,
         installment_enabled,
         installment_plan_ids,
         status,
+        is_archived,
         photos
     } = req.body;
 
@@ -94,10 +97,24 @@ function validateCreatePhone(req, res, next) {
         return next(new AppError('description must be a string.', 400));
     }
 
-    // stock_quantity
-    if (stock_quantity !== undefined && stock_quantity !== null) {
-        if (isNaN(stock_quantity) || Number(stock_quantity) < 0 || !Number.isInteger(Number(stock_quantity))) {
-            return next(new AppError('stock_quantity must be a non-negative integer.', 400));
+    // low_stock_level
+    const lowStockValue = low_stock_level !== undefined ? low_stock_level : stock_quantity;
+    if (lowStockValue !== undefined && lowStockValue !== null) {
+        if (isNaN(lowStockValue) || Number(lowStockValue) < 0 || !Number.isInteger(Number(lowStockValue))) {
+            return next(new AppError('low_stock_level must be a non-negative integer.', 400));
+        }
+    }
+
+    if (current_stock !== undefined && current_stock !== null) {
+        if (isNaN(current_stock) || Number(current_stock) < 0 || !Number.isInteger(Number(current_stock))) {
+            return next(new AppError('current_stock must be a non-negative integer.', 400));
+        }
+    }
+
+    // current_stock
+    if (current_stock !== undefined && current_stock !== null) {
+        if (isNaN(current_stock) || Number(current_stock) < 0 || !Number.isInteger(Number(current_stock))) {
+            return next(new AppError('current_stock must be a non-negative integer.', 400));
         }
     }
 
@@ -121,6 +138,13 @@ function validateCreatePhone(req, res, next) {
         const cleanStatus = String(status).trim().toUpperCase();
         if (!VALID_STATUS.includes(cleanStatus)) {
             return next(new AppError(`Invalid status '${status}'. Allowed values: ${VALID_STATUS.join(', ')}.`, 400));
+        }
+    }
+
+    // is_archived
+    if (is_archived !== undefined && is_archived !== null) {
+        if (typeof is_archived !== 'boolean' && is_archived !== 0 && is_archived !== 1 && is_archived !== 'true' && is_archived !== 'false' && is_archived !== 'yes' && is_archived !== 'no') {
+            return next(new AppError('is_archived must be a boolean or yes/no.', 400));
         }
     }
 
@@ -151,11 +175,14 @@ function validateUpdatePhone(req, res, next) {
         warranty,
         accessory_ids,
         description,
+        low_stock_level,
+        current_stock,
         stock_quantity,
         availability,
         installment_enabled,
         installment_plan_ids,
         status,
+        is_archived,
         photos
     } = req.body;
 
@@ -220,9 +247,16 @@ function validateUpdatePhone(req, res, next) {
         return next(new AppError('description must be a string.', 400));
     }
 
-    if (stock_quantity !== undefined && stock_quantity !== null) {
-        if (isNaN(stock_quantity) || Number(stock_quantity) < 0 || !Number.isInteger(Number(stock_quantity))) {
-            return next(new AppError('stock_quantity must be a non-negative integer.', 400));
+    const lowStockValue = low_stock_level !== undefined ? low_stock_level : stock_quantity;
+    if (lowStockValue !== undefined && lowStockValue !== null) {
+        if (isNaN(lowStockValue) || Number(lowStockValue) < 0 || !Number.isInteger(Number(lowStockValue))) {
+            return next(new AppError('low_stock_level must be a non-negative integer.', 400));
+        }
+    }
+
+    if (current_stock !== undefined && current_stock !== null) {
+        if (isNaN(current_stock) || Number(current_stock) < 0 || !Number.isInteger(Number(current_stock))) {
+            return next(new AppError('current_stock must be a non-negative integer.', 400));
         }
     }
 
@@ -243,6 +277,12 @@ function validateUpdatePhone(req, res, next) {
         const cleanStatus = String(status).trim().toUpperCase();
         if (!VALID_STATUS.includes(cleanStatus)) {
             return next(new AppError(`Invalid status '${status}'. Allowed values: ${VALID_STATUS.join(', ')}.`, 400));
+        }
+    }
+
+    if (is_archived !== undefined && is_archived !== null) {
+        if (typeof is_archived !== 'boolean' && is_archived !== 0 && is_archived !== 1 && is_archived !== 'true' && is_archived !== 'false' && is_archived !== 'yes' && is_archived !== 'no') {
+            return next(new AppError('is_archived must be a boolean or yes/no.', 400));
         }
     }
 

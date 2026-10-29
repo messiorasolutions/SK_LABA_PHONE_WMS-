@@ -4,6 +4,7 @@ const brandRoutes = require('./routes/brandRoutes');
 const storageOptionRoutes = require('./routes/storageOptionRoutes');
 const specificationRoutes = require('./routes/specificationRoutes');
 const phoneRoutes = require('./routes/phoneRoutes');
+const installmentPlanRoutes = require('./routes/installmentPlanRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const AppError = require('./utils/customError');
 
@@ -90,6 +91,7 @@ app.use('/api/brands', brandRoutes);
 app.use('/api/storage-options', storageOptionRoutes);
 app.use('/api/specifications', specificationRoutes);
 app.use('/api/phones', phoneRoutes);
+app.use('/api/installment-plans', installmentPlanRoutes);
 
 // 404 Handler for undefined routes
 app.use((req, res, next) => {

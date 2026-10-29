@@ -1,5 +1,9 @@
 const phoneRepository = require('../repositories/phoneRepository');
 const brandRepository = require('../repositories/brandRepository');
+const storageOptionRepository = require('../repositories/storageOptionRepository');
+const specificationRepository = require('../repositories/specificationRepository');
+const offerRepository = require('../repositories/offerRepository');
+const installmentPlanService = require('./installmentPlanService');
 const AppError = require('../utils/customError');
 
 class PhoneService {
@@ -307,6 +311,373 @@ class PhoneService {
         return {
             phone_id: Number(id),
             name: existing.name
+        };
+    }
+
+    /**
+     * Compare 2 or 3 phones side-by-side (SRS C-05)
+     * @param {Array<number|string>|string} rawIds
+     * @returns {Promise<Object>}
+     */
+    async comparePhones(rawIds) {
+        let parsedIds = [];
+
+        if (Array.isArray(rawIds)) {
+            parsedIds = rawIds.map(id => Number(id));
+        } else if (typeof rawIds === 'string') {
+            parsedIds = rawIds.split(',').map(s => Number(s.trim()));
+        } else if (typeof rawIds === 'number') {
+            parsedIds = [rawIds];
+        }
+
+        const uniqueIds = Array.from(new Set(parsedIds.filter(id => !isNaN(id) && id > 0)));
+
+        if (uniqueIds.length < 2) {
+            throw new AppError('Phone comparison requires at least 2 distinct phones (select 2 or 3 phones).', 400);
+        }
+
+        if (uniqueIds.length > 3) {
+            throw new AppError('Phone comparison allows a maximum of 3 phones at a time.', 400);
+        }
+
+        // Fetch phones
+        const rawPhones = [];
+        for (const phoneId of uniqueIds) {
+            const phone = await phoneRepository.findById(phoneId);
+            if (!phone) {
+                throw new AppError(`Phone with ID ${phoneId} was not found.`, 404);
+            }
+            if (phone.is_archived || phone.status === 'ARCHIVED') {
+                throw new AppError(`Phone '${phone.name}' (ID ${phoneId}) is archived and cannot be compared.`, 400);
+            }
+            rawPhones.push(phone);
+        }
+
+        // Enrich each phone with details, offers, storages, specs, accessories, installments
+        const enrichedPhones = await Promise.all(rawPhones.map(async (phone) => {
+            const storageIds = Array.isArray(phone.storage_ids) ? phone.storage_ids : [];
+            const specIds = Array.isArray(phone.specification_ids) ? phone.specification_ids : [];
+            const accessoryIds = Array.isArray(phone.accessory_ids) ? phone.accessory_ids : [];
+
+            // Resolve storage options
+            const storages = await storageOptionRepository.findByIds(storageIds);
+            const storageNames = storages.map(s => s.storage_name);
+
+            // Resolve specifications
+            const specs = await specificationRepository.findByIds(specIds);
+            const specItems = specs.map(s => ({
+                specification_id: s.specification_id,
+                name: s.specification_name,
+                type: s.specification_type,
+                description: s.description
+            }));
+
+            // Resolve accessories
+            const accessories = await specificationRepository.findByIds(accessoryIds);
+            const accessoryNames = accessories.map(a => a.specification_name);
+
+            // Resolve active offer
+            let activeOffer = {
+                has_active_offer: false,
+                offer_price: null,
+                discount_percentage: 0,
+                discount_amount: 0
+            };
+            try {
+                const offer = await offerRepository.findActiveOfferByPhoneId(phone.phone_id);
+                if (offer) {
+                    activeOffer = {
+                        has_active_offer: true,
+                        offer_id: offer.offer_id,
+                        title: offer.title,
+                        regular_price: Number(offer.regular_price),
+                        offer_price: Number(offer.offer_price),
+                        discount_percentage: offer.discount_percentage,
+                        discount_amount: offer.discount_amount,
+                        end_date_time: offer.end_date_time,
+                        seconds_remaining: offer.seconds_remaining
+                    };
+                }
+            } catch (err) { // eslint-disable-line no-unused-vars
+                // keep default if lookup error
+            }
+
+            // Resolve installment
+            let installment = {
+                installment_enabled: Boolean(phone.installment_enabled),
+                starting_monthly_payment: null,
+                plans_count: 0
+            };
+            if (phone.installment_enabled) {
+                try {
+                    const instResult = await installmentPlanService.calculatePhoneInstallments(phone.phone_id);
+                    if (instResult.plans && instResult.plans.length > 0) {
+                        const monthlyPayments = instResult.plans.map(p => Number(p.monthly_payment));
+                        installment.starting_monthly_payment = Math.min(...monthlyPayments);
+                        installment.plans_count = instResult.plans.length;
+                    }
+                } catch (err) { // eslint-disable-line no-unused-vars
+                    // keep default
+                }
+            }
+
+            // Availability display label
+            let availabilityLabel = phone.availability;
+            if (phone.availability === 'SOLD_OUT') {
+                availabilityLabel = 'Sold Out';
+            } else if (phone.availability === 'LOW_STOCK') {
+                availabilityLabel = `Only ${phone.current_stock} left`;
+            } else if (phone.availability === 'IN_STOCK') {
+                availabilityLabel = 'In Stock';
+            } else if (phone.availability === 'COMING_SOON') {
+                availabilityLabel = 'Coming Soon';
+            }
+
+            const mainPhoto = (Array.isArray(phone.photos) && phone.photos.length > 0)
+                ? phone.photos[0]
+                : null;
+
+            const regularPrice = Number(phone.price);
+            const effectivePrice = activeOffer.has_active_offer ? activeOffer.offer_price : regularPrice;
+
+            return {
+                phone_id: phone.phone_id,
+                name: phone.name,
+                brand_id: phone.brand_id,
+                brand_name: phone.brand_name || null,
+                main_photo: mainPhoto,
+                photos: Array.isArray(phone.photos) ? phone.photos : [],
+                phone_condition: phone.phone_condition,
+                regular_price: regularPrice,
+                effective_price: effectivePrice,
+                availability: phone.availability,
+                availability_label: availabilityLabel,
+                current_stock: phone.current_stock,
+                warranty: phone.warranty || 'No warranty specified',
+                colour_options: Array.isArray(phone.colour_options) ? phone.colour_options : [],
+                storage_options: storages.map(s => ({ storage_id: s.storage_id, storage_name: s.storage_name, capacity_gb: s.capacity_gb })),
+                storage_names: storageNames,
+                specifications: specItems,
+                accessory_names: accessoryNames,
+                active_offer: activeOffer,
+                installment: installment,
+                description: phone.description || null
+            };
+        }));
+
+        // Generate comparison matrix for frontend side-by-side rendering
+        const comparisonMatrix = [
+            {
+                key: 'name',
+                label: 'Phone Model',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.name]))
+            },
+            {
+                key: 'brand_name',
+                label: 'Brand',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.brand_name || 'N/A']))
+            },
+            {
+                key: 'main_photo',
+                label: 'Photo',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.main_photo]))
+            },
+            {
+                key: 'regular_price',
+                label: 'Regular Price',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.regular_price]))
+            },
+            {
+                key: 'offer_price',
+                label: 'Offer Price',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.active_offer.has_active_offer ? p.active_offer.offer_price : null]))
+            },
+            {
+                key: 'savings',
+                label: 'Savings / Discount',
+                values: Object.fromEntries(enrichedPhones.map(p => [
+                    p.phone_id,
+                    p.active_offer.has_active_offer ? `${p.active_offer.discount_percentage}% off (Save $${p.active_offer.discount_amount})` : 'None'
+                ]))
+            },
+            {
+                key: 'phone_condition',
+                label: 'Condition',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.phone_condition]))
+            },
+            {
+                key: 'availability_label',
+                label: 'Availability',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.availability_label]))
+            },
+            {
+                key: 'current_stock',
+                label: 'Current Stock',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.current_stock]))
+            },
+            {
+                key: 'colour_options',
+                label: 'Colours',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.colour_options]))
+            },
+            {
+                key: 'storage_names',
+                label: 'Storage Options',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.storage_names.length > 0 ? p.storage_names : ['Standard']]))
+            },
+            {
+                key: 'warranty',
+                label: 'Warranty',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.warranty]))
+            },
+            {
+                key: 'accessory_names',
+                label: 'Included Accessories',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.accessory_names.length > 0 ? p.accessory_names : ['None specified']]))
+            },
+            {
+                key: 'installment',
+                label: 'Monthly Instalment',
+                values: Object.fromEntries(enrichedPhones.map(p => [
+                    p.phone_id,
+                    p.installment.installment_enabled && p.installment.starting_monthly_payment
+                        ? `From $${p.installment.starting_monthly_payment}/mo (${p.installment.plans_count} plans)`
+                        : 'Not available'
+                ]))
+            },
+            {
+                key: 'specifications',
+                label: 'Key Specifications',
+                values: Object.fromEntries(enrichedPhones.map(p => [
+                    p.phone_id,
+                    p.specifications.map(s => `${s.name}: ${s.description || ''}`).join('; ') || 'Standard specifications'
+                ]))
+            }
+        ];
+
+        return {
+            count: enrichedPhones.length,
+            phones: enrichedPhones,
+            comparison_matrix: comparisonMatrix
+        };
+    }
+
+    /**
+     * Retrieve live phone details for customer favorites (SRS C-06)
+     * @param {Array<number|string>|string} rawIds
+     * @returns {Promise<Object>}
+     */
+    async getFavorites(rawIds) {
+        if (!rawIds) {
+            return {
+                count: 0,
+                data: [],
+                unavailable_ids: []
+            };
+        }
+
+        let parsedIds = [];
+        if (Array.isArray(rawIds)) {
+            parsedIds = rawIds.map(id => Number(id));
+        } else if (typeof rawIds === 'string') {
+            parsedIds = rawIds.split(',').map(s => Number(s.trim()));
+        } else if (typeof rawIds === 'number') {
+            parsedIds = [rawIds];
+        }
+
+        const uniqueIds = Array.from(new Set(parsedIds.filter(id => !isNaN(id) && id > 0)));
+
+        if (uniqueIds.length === 0) {
+            return {
+                count: 0,
+                data: [],
+                unavailable_ids: []
+            };
+        }
+
+        const validPhones = [];
+        const unavailableIds = [];
+
+        for (const phoneId of uniqueIds) {
+            const phone = await phoneRepository.findById(phoneId);
+
+            // If phone doesn't exist, is archived, or status is ARCHIVED -> mark unavailable
+            if (!phone || phone.is_archived || phone.status === 'ARCHIVED') {
+                unavailableIds.push(phoneId);
+                continue;
+            }
+
+            // Check active offer
+            let activeOffer = {
+                has_active_offer: false,
+                offer_price: null,
+                discount_percentage: 0,
+                savings: 0
+            };
+
+            try {
+                const offer = await offerRepository.findActiveOfferByPhoneId(phone.phone_id);
+                if (offer) {
+                    activeOffer = {
+                        has_active_offer: true,
+                        offer_id: offer.offer_id,
+                        offer_title: offer.title,
+                        regular_price: Number(offer.regular_price),
+                        offer_price: Number(offer.offer_price),
+                        discount_percentage: offer.discount_percentage,
+                        savings: offer.discount_amount,
+                        end_date_time: offer.end_date_time,
+                        seconds_remaining: offer.seconds_remaining
+                    };
+                }
+            } catch (err) { // eslint-disable-line no-unused-vars
+                // Keep default
+            }
+
+            // Availability display label
+            let availabilityLabel = phone.availability;
+            if (phone.availability === 'SOLD_OUT') {
+                availabilityLabel = 'Sold Out';
+            } else if (phone.availability === 'LOW_STOCK') {
+                availabilityLabel = `Only ${phone.current_stock} left`;
+            } else if (phone.availability === 'IN_STOCK') {
+                availabilityLabel = 'In Stock';
+            } else if (phone.availability === 'COMING_SOON') {
+                availabilityLabel = 'Coming Soon';
+            }
+
+            const mainPhoto = (Array.isArray(phone.photos) && phone.photos.length > 0)
+                ? phone.photos[0]
+                : null;
+
+            const regularPrice = Number(phone.price);
+            const effectivePrice = activeOffer.has_active_offer ? activeOffer.offer_price : regularPrice;
+
+            validPhones.push({
+                phone_id: phone.phone_id,
+                name: phone.name,
+                brand_id: phone.brand_id,
+                brand_name: phone.brand_name || null,
+                main_photo: mainPhoto,
+                photos: Array.isArray(phone.photos) ? phone.photos : [],
+                phone_condition: phone.phone_condition,
+                regular_price: regularPrice,
+                effective_price: effectivePrice,
+                availability: phone.availability,
+                availability_label: availabilityLabel,
+                current_stock: phone.current_stock,
+                warranty: phone.warranty || 'No warranty specified',
+                colour_options: Array.isArray(phone.colour_options) ? phone.colour_options : [],
+                active_offer: activeOffer,
+                installment_enabled: Boolean(phone.installment_enabled),
+                is_available: true
+            });
+        }
+
+        return {
+            count: validPhones.length,
+            data: validPhones,
+            unavailable_ids: unavailableIds
         };
     }
 }

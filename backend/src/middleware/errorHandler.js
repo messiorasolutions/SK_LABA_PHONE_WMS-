@@ -45,11 +45,10 @@ function errorHandler(err, req, res, next) { // eslint-disable-line no-unused-va
     // Log genuinely unexpected errors
     console.error('Unhandled Error:', err);
 
-    // Default internal server error
+    // Default internal server error - safe generic message to prevent leaking internal database / system errors
     return res.status(500).json({
         success: false,
-        message: err.message || 'Internal server error occurred.',
-        code: err.code || undefined
+        message: 'Internal server error occurred.'
     });
 }
 

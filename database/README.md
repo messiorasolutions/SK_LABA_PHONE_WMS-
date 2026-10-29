@@ -175,3 +175,34 @@ CREATE TABLE reservations (
     INDEX idx_reservations_assigned_to (assigned_to_user_id),
     INDEX idx_reservations_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE sell_requests (
+    request_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    customer_name VARCHAR(150) NOT NULL,
+    phone_number VARCHAR(30) NOT NULL,
+    brand_and_model VARCHAR(200) NOT NULL,
+    brand VARCHAR(100) NULL,
+    model VARCHAR(100) NULL,
+    storage_capacity VARCHAR(50) NOT NULL,
+    phone_condition VARCHAR(50) NOT NULL,
+    battery_health VARCHAR(30) NOT NULL,
+    description TEXT NULL,
+    photos JSON NULL,
+    desired_phone_id BIGINT UNSIGNED NULL,
+    status ENUM('New', 'Quote Given', 'Accepted', 'Declined', 'Closed') NOT NULL DEFAULT 'New',
+    assigned_to_user_id BIGINT UNSIGNED NULL,
+    updated_by_user_id BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_sell_requests_desired_phone FOREIGN KEY (desired_phone_id) REFERENCES phones(phone_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_sell_requests_assigned_user FOREIGN KEY (assigned_to_user_id) REFERENCES dashboard_users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_sell_requests_updated_user FOREIGN KEY (updated_by_user_id) REFERENCES dashboard_users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT chk_sell_requests_photos_json CHECK (photos IS NULL OR JSON_VALID(photos)),
+    INDEX idx_sell_requests_status (status),
+    INDEX idx_sell_requests_desired_phone (desired_phone_id),
+    INDEX idx_sell_requests_assigned_to (assigned_to_user_id),
+    INDEX idx_sell_requests_customer_name (customer_name),
+    INDEX idx_sell_requests_phone_number (phone_number),
+    INDEX idx_sell_requests_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

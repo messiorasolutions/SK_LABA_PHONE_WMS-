@@ -76,10 +76,26 @@ const reservationRateLimiter = rateLimit({
     skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
 });
 
+/**
+ * Rate limiter middleware for public sell-your-phone submissions to prevent spam and abuse (C-14).
+ */
+const sellRequestRateLimiter = rateLimit({
+    windowMs: Number(process.env.SELL_REQUEST_RATE_LIMIT_WINDOW_MS) || (15 * 60 * 1000), // 15 minutes
+    limit: Number(process.env.SELL_REQUEST_RATE_LIMIT_MAX) || 10, // 10 attempts per window
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many sell phone requests from this IP. Please try again after 15 minutes.'
+    },
+    skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
+});
+
 module.exports = {
     loginRateLimiter,
     forgotPasswordRateLimiter,
     resetPasswordRateLimiter,
     inquiryRateLimiter,
-    reservationRateLimiter
+    reservationRateLimiter,
+    sellRequestRateLimiter
 };

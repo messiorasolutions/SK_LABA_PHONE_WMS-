@@ -11,6 +11,7 @@ const phoneRoutes = require('./routes/phoneRoutes');
 const installmentPlanRoutes = require('./routes/installmentPlanRoutes');
 const offerRoutes = require('./routes/offerRoutes');
 const inquiryRoutes = require('./routes/inquiryRoutes');
+const reservationRoutes = require('./routes/reservationRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const AppError = require('./utils/customError');
 
@@ -130,6 +131,7 @@ app.use('/api/phones', phoneRoutes);
 app.use('/api/installment-plans', installmentPlanRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/inquiries', inquiryRoutes);
+app.use('/api/reservations', reservationRoutes);
 
 // 7. 404 Handler for undefined routes
 app.use((req, res, next) => {

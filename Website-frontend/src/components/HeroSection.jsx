@@ -9,7 +9,7 @@ export default function HeroSection() {
   const dispatch = useDispatch();
 
   return (
-    <section className="relative overflow-hidden bg-theme-bg min-h-[580px] lg:min-h-[680px] flex items-center pt-24 sm:pt-28 pb-12 sm:pb-16">
+    <section className="relative overflow-hidden bg-theme-bg min-h-[600px] lg:min-h-[700px] flex items-center pt-28 sm:pt-32 pb-12 sm:pb-16">
       {/* Background Hero Image with Phones, Glowing Ring & Atmosphere */}
       <div className="absolute inset-0 z-0">
         <img

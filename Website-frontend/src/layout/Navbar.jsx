@@ -20,18 +20,21 @@ export default function Navbar() {
   return (
     <header className="absolute top-0 left-0 right-0 z-50 w-full bg-transparent transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 sm:h-24">
+        <div className="flex items-center justify-between h-24 sm:h-28">
           
-          {/* Left: SK LABA Brand Logo (Enlarged) */}
+          {/* Left: SK LABA Brand Logo (Enlarged & Highlighted) */}
           <a
             href="#"
             onClick={(e) => handleTabClick('Home', e)}
-            className="flex items-center gap-3 shrink-0 group py-2"
+            className="relative flex items-center shrink-0 group py-2"
           >
+            {/* Luminous Glow Behind Logo */}
+            <div className="absolute -inset-3 bg-gradient-to-r from-blue-600/30 via-red-600/20 to-sky-500/20 rounded-full blur-xl opacity-80 group-hover:opacity-100 transition-opacity" />
+
             <img
               src={logoImg}
               alt={STORE_INFO.name}
-              className="h-14 sm:h-16 md:h-18 w-auto object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-md"
+              className="relative z-10 h-16 sm:h-20 md:h-22 w-auto object-contain transition-transform duration-200 group-hover:scale-105 filter drop-shadow-[0_0_16px_rgba(255,255,255,0.25)] drop-shadow-[0_0_30px_rgba(37,99,235,0.35)]"
             />
           </a>
 

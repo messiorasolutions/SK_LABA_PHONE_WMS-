@@ -18,19 +18,27 @@ class PhoneService {
         const cleanName = data.name.trim();
         const cleanCondition = data.phone_condition.trim().toUpperCase();
         const numericPrice = Number(data.price);
-        const stockQty = data.stock_quantity !== undefined ? Number(data.stock_quantity) : 0;
+        const lowStockLevel = data.low_stock_level !== undefined
+            ? Number(data.low_stock_level)
+            : (data.stock_quantity !== undefined ? Number(data.stock_quantity) : 5);
+        const currentStock = data.current_stock !== undefined ? Number(data.current_stock) : 0;
 
         // Auto-assign availability if not explicitly passed
         let availability = data.availability ? data.availability.trim().toUpperCase() : null;
         if (!availability) {
-            if (stockQty === 0) {
+            if (currentStock === 0) {
                 availability = 'SOLD_OUT';
-            } else if (stockQty <= 5) {
+            } else if (currentStock <= lowStockLevel) {
                 availability = 'LOW_STOCK';
             } else {
                 availability = 'IN_STOCK';
             }
         }
+
+        const status = data.status ? data.status.trim().toUpperCase() : 'DRAFT';
+        const isArchived = data.is_archived !== undefined
+            ? Boolean(data.is_archived === true || data.is_archived === 1 || data.is_archived === 'true' || data.is_archived === 'yes')
+            : (status === 'ARCHIVED');
 
         const phoneRecord = {
             name: cleanName,
@@ -43,11 +51,13 @@ class PhoneService {
             warranty: data.warranty ? data.warranty.trim() : null,
             accessory_ids: Array.isArray(data.accessory_ids) ? data.accessory_ids : null,
             description: data.description ? data.description.trim() : null,
-            stock_quantity: stockQty,
+            low_stock_level: lowStockLevel,
+            current_stock: currentStock,
             availability,
             installment_enabled: Boolean(data.installment_enabled),
             installment_plan_ids: Array.isArray(data.installment_plan_ids) ? data.installment_plan_ids : null,
-            status: data.status ? data.status.trim().toUpperCase() : 'DRAFT',
+            status,
+            is_archived: isArchived ? 1 : 0,
             photos: Array.isArray(data.photos) ? data.photos : null
         };
 
@@ -56,12 +66,130 @@ class PhoneService {
     }
 
     /**
-     * Retrieve all phones (with optional filters)
+     * Retrieve phones (with optional filters)
      * @param {Object} filters
      * @returns {Promise<Array>}
      */
     async getAllPhones(filters = {}) {
         return await phoneRepository.findAll(filters);
+    }
+
+    /**
+     * Retrieve all phones for stock management screen
+     * @param {Object} filters
+     * @returns {Promise<Array>}
+     */
+    async getStockList(filters = {}) {
+        return await phoneRepository.findAllStock(filters);
+    }
+
+    /**
+     * Add stock quantity to a phone
+     * @param {number|string} id
+     * @param {Object} data
+     * @returns {Promise<Object>}
+     */
+    async addStock(id, data = {}) {
+        const phone = await phoneRepository.findById(id);
+        if (!phone) {
+            throw new AppError(`Phone with ID ${id} not found.`, 404);
+        }
+
+        const quantity = data.quantity;
+        if (quantity === undefined || quantity === null || isNaN(quantity) || Number(quantity) <= 0 || !Number.isInteger(Number(quantity))) {
+            throw new AppError('Quantity must be a positive integer greater than 0.', 400);
+        }
+
+        const addedQty = Number(quantity);
+        const prevStock = Number(phone.current_stock || 0);
+        const newStock = prevStock + addedQty;
+
+        // Auto-assign availability
+        let newAvailability = 'IN_STOCK';
+        if (newStock <= phone.low_stock_level) {
+            newAvailability = 'LOW_STOCK';
+        }
+
+        const updated = await phoneRepository.addStock(id, addedQty, newAvailability);
+        return {
+            ...updated,
+            previous_stock: prevStock,
+            added_quantity: addedQty,
+            current_stock: newStock,
+            reason: data.reason || 'RESTOCK',
+            notes: data.notes || null
+        };
+    }
+
+    /**
+     * Deduct stock quantity from a phone
+     * @param {number|string} id
+     * @param {Object} data
+     * @returns {Promise<Object>}
+     */
+    async removeStock(id, data = {}) {
+        const phone = await phoneRepository.findById(id);
+        if (!phone) {
+            throw new AppError(`Phone with ID ${id} not found.`, 404);
+        }
+
+        const quantity = data.quantity;
+        if (quantity === undefined || quantity === null || isNaN(quantity) || Number(quantity) <= 0 || !Number.isInteger(Number(quantity))) {
+            throw new AppError('Quantity must be a positive integer greater than 0.', 400);
+        }
+
+        const removedQty = Number(quantity);
+        const prevStock = Number(phone.current_stock || 0);
+
+        if (prevStock < removedQty) {
+            throw new AppError(`Cannot deduct ${removedQty} units. Current stock is only ${prevStock}.`, 400);
+        }
+
+        const newStock = prevStock - removedQty;
+
+        // Auto-assign availability: SOLD_OUT if 0, LOW_STOCK if <= threshold, else IN_STOCK
+        let newAvailability = 'IN_STOCK';
+        if (newStock === 0) {
+            newAvailability = 'SOLD_OUT';
+        } else if (newStock <= phone.low_stock_level) {
+            newAvailability = 'LOW_STOCK';
+        }
+
+        const updated = await phoneRepository.removeStock(id, removedQty, newAvailability);
+        return {
+            ...updated,
+            previous_stock: prevStock,
+            removed_quantity: removedQty,
+            current_stock: newStock,
+            reason: data.reason || 'SALE',
+            notes: data.notes || null
+        };
+    }
+
+    /**
+     * Mark a phone as SOLD_OUT
+     * @param {number|string} id
+     * @param {Object} [data]
+     * @returns {Promise<Object>}
+     */
+    async markSoldOut(id, data = {}) {
+        const phone = await phoneRepository.findById(id);
+        if (!phone) {
+            throw new AppError(`Phone with ID ${id} not found.`, 404);
+        }
+
+        const resetQuantity = data.reset_quantity === true || data.reset_quantity === 'true';
+        const updated = await phoneRepository.markSoldOut(id, resetQuantity);
+        return updated;
+    }
+
+    /**
+     * Retrieve all archived phones
+     * @param {Object} filters
+     * @returns {Promise<Array>}
+     */
+    async getArchivedPhones(filters = {}) {
+        return await phoneRepository.findAll({ ...filters, archived: true });
     }
 
     /**
@@ -75,6 +203,35 @@ class PhoneService {
             throw new AppError(`Phone with ID ${id} not found.`, 404);
         }
         return phone;
+    }
+
+    /**
+     * Archive a phone by ID
+     * @param {number|string} id
+     * @returns {Promise<Object>}
+     */
+    async archivePhone(id) {
+        const existing = await phoneRepository.findById(id);
+        if (!existing) {
+            throw new AppError(`Phone with ID ${id} not found.`, 404);
+        }
+
+        return await phoneRepository.archive(id);
+    }
+
+    /**
+     * Restore an archived phone by ID
+     * @param {number|string} id
+     * @param {string} [restoreStatus='DRAFT']
+     * @returns {Promise<Object>}
+     */
+    async restorePhone(id, restoreStatus = 'DRAFT') {
+        const existing = await phoneRepository.findById(id);
+        if (!existing) {
+            throw new AppError(`Phone with ID ${id} not found.`, 404);
+        }
+
+        return await phoneRepository.restore(id, restoreStatus);
     }
 
     /**
@@ -96,6 +253,16 @@ class PhoneService {
             }
         }
 
+        const nextStatus = data.status !== undefined ? data.status.trim().toUpperCase() : existing.status;
+        let nextIsArchived;
+        if (data.is_archived !== undefined) {
+            nextIsArchived = Boolean(data.is_archived === true || data.is_archived === 1 || data.is_archived === 'true' || data.is_archived === 'yes') ? 1 : 0;
+        } else if (data.status !== undefined) {
+            nextIsArchived = nextStatus === 'ARCHIVED' ? 1 : 0;
+        } else {
+            nextIsArchived = existing.is_archived ? 1 : 0;
+        }
+
         const merged = {
             name: data.name !== undefined ? data.name.trim() : existing.name,
             brand_id: data.brand_id !== undefined ? Number(data.brand_id) : existing.brand_id,
@@ -107,11 +274,17 @@ class PhoneService {
             warranty: data.warranty !== undefined ? (data.warranty ? data.warranty.trim() : null) : existing.warranty,
             accessory_ids: data.accessory_ids !== undefined ? data.accessory_ids : existing.accessory_ids,
             description: data.description !== undefined ? (data.description ? data.description.trim() : null) : existing.description,
-            stock_quantity: data.stock_quantity !== undefined ? Number(data.stock_quantity) : existing.stock_quantity,
+            low_stock_level: data.low_stock_level !== undefined
+                ? Number(data.low_stock_level)
+                : (data.stock_quantity !== undefined ? Number(data.stock_quantity) : (existing.low_stock_level ?? existing.stock_quantity ?? 5)),
+            current_stock: data.current_stock !== undefined
+                ? Number(data.current_stock)
+                : existing.current_stock,
             availability: data.availability !== undefined ? data.availability.trim().toUpperCase() : existing.availability,
             installment_enabled: data.installment_enabled !== undefined ? Boolean(data.installment_enabled) : Boolean(existing.installment_enabled),
             installment_plan_ids: data.installment_plan_ids !== undefined ? data.installment_plan_ids : existing.installment_plan_ids,
-            status: data.status !== undefined ? data.status.trim().toUpperCase() : existing.status,
+            status: nextStatus,
+            is_archived: nextIsArchived,
             photos: data.photos !== undefined ? data.photos : existing.photos
         };
 

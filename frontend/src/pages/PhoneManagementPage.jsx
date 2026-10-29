@@ -318,7 +318,7 @@ export default function PhoneManagementPage() {
                       <th className="px-3 py-2 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">Brand</th>
                       <th className="px-3 py-2 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">Condition</th>
                       <th className="px-3 py-2 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">Price</th>
-                      <th className="px-3 py-2 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">Stock</th>
+                      <th className="px-3 py-2 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">Low Stock Level</th>
                       <th className="px-3 py-2 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">Status</th>
                       <th className="px-3 py-2 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">Availability</th>
                       <th className="px-3 py-2 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px] text-right">Actions</th>
@@ -336,7 +336,7 @@ export default function PhoneManagementPage() {
                           </Badge>
                         </td>
                         <td className="px-3 py-1.5 font-bold text-slate-900 dark:text-slate-100">{formatPrice(phone.price)}</td>
-                        <td className="px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-300">{phone.stock_quantity ?? 0}</td>
+                        <td className="px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-300">{phone.low_stock_level ?? phone.stock_quantity ?? 0}</td>
                         <td className="px-3 py-1.5">
                           <Badge variant={phone.status === 'PUBLISHED' ? 'success' : 'amber'}>
                             {phone.status}

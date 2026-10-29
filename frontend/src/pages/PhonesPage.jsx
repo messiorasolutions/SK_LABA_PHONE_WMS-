@@ -36,6 +36,7 @@ const EMPTY_FORM = {
   brand_id: '',
   phone_condition: 'NEW',
   price: '',
+  low_stock_level: '',
   stock_quantity: '',
   availability: 'IN_STOCK',
   status: 'DRAFT',
@@ -66,7 +67,8 @@ function PhoneModal({ open, onClose, onSubmit, initial, loading, brands }) {
         brand_id: initial.brand_id || '',
         phone_condition: initial.phone_condition || 'NEW',
         price: initial.price || '',
-        stock_quantity: initial.stock_quantity || '',
+        low_stock_level: initial.low_stock_level ?? initial.stock_quantity ?? '',
+        stock_quantity: initial.low_stock_level ?? initial.stock_quantity ?? '',
         availability: initial.availability || 'IN_STOCK',
         status: initial.status || 'DRAFT',
         warranty: initial.warranty || '',
@@ -90,7 +92,8 @@ function PhoneModal({ open, onClose, onSubmit, initial, loading, brands }) {
       ...form,
       brand_id: Number(form.brand_id),
       price: Number(form.price),
-      stock_quantity: Number(form.stock_quantity),
+      low_stock_level: Number(form.low_stock_level),
+      stock_quantity: Number(form.low_stock_level),
       colour_options: form.colour_options
         ? form.colour_options.split(',').map((c) => c.trim()).filter(Boolean)
         : [],
@@ -185,7 +188,7 @@ function PhoneModal({ open, onClose, onSubmit, initial, loading, brands }) {
             {field('Price (USD)', 'price', 'number', '0.00', true)}
 
             {/* Stock */}
-            {field('Stock Quantity', 'stock_quantity', 'number', '0')}
+            {field('Low Stock Level', 'low_stock_level', 'number', '5')}
 
             {/* Status */}
             {selectField('Status', 'status', PHONE_STATUS_OPTIONS)}
@@ -392,7 +395,7 @@ export default function PhonesPage() {
                       </span>
                     </td>
                     <td className={`${SPACING.tableCell} ${TYPOGRAPHY.tableCellBold} whitespace-nowrap`}>{formatPrice(phone.price)}</td>
-                    <td className={`${SPACING.tableCell} ${TYPOGRAPHY.tableCell}`}>{phone.stock_quantity ?? '—'}</td>
+                    <td className={`${SPACING.tableCell} ${TYPOGRAPHY.tableCell}`}>{phone.low_stock_level ?? phone.stock_quantity ?? '—'}</td>
                     <td className={SPACING.tableCell}>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${PHONE_STATUS_COLORS[phone.status] || 'bg-gray-100 text-gray-600'}`}>
                         {phone.status}

@@ -17,6 +17,7 @@
     "express-mysql-session": "^3.0.3",
     "express-rate-limit": "^8.7.1",
     "express-session": "^1.19.0",
+    "formidable": "^3.5.4",
     "mysql2": "^3.24.5",
     "nodemailer": "^10.2.1",
     "swagger-ui-express": "^5.0.1"

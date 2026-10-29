@@ -3,3 +3,9 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Uploaded media files
+backend/src/uploads/*
+!backend/src/uploads/.gitkeep
+backend/src/uploads/*/*
+!backend/src/uploads/*/.gitkeep

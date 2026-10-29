@@ -12,6 +12,7 @@ const installmentPlanRoutes = require('./routes/installmentPlanRoutes');
 const offerRoutes = require('./routes/offerRoutes');
 const inquiryRoutes = require('./routes/inquiryRoutes');
 const reservationRoutes = require('./routes/reservationRoutes');
+const sellRequestRoutes = require('./routes/sellRequestRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const AppError = require('./utils/customError');
 
@@ -55,7 +56,6 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// 5. Swagger UI Documentation
 // Database Diagnostic Check Endpoint
 app.get('/api/test-db', async (req, res) => {
     try {
@@ -102,7 +102,7 @@ app.get('/api/my-ip', (req, res) => {
     });
 });
 
-// Swagger UI Documentation
+// 5. Swagger UI Documentation
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./config/swagger.json');
 
@@ -132,6 +132,8 @@ app.use('/api/installment-plans', installmentPlanRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/reservations', reservationRoutes);
+app.use('/api/sell-requests', sellRequestRoutes);
+app.use('/api/sell-phone-requests', sellRequestRoutes);
 
 // 7. 404 Handler for undefined routes
 app.use((req, res, next) => {

@@ -49,6 +49,10 @@
       "description": "Instalment plans management (MG-11, ST-02, C-03)"
       "name": "Reservations",
       "description": "Customer reservation submission and dashboard reservation management APIs (C-09, C-03, ST-07)"
+    },
+    {
+      "name": "Sell Your Phone",
+      "description": "Customer Sell-Your-Phone submission (C-14) and dashboard request management APIs (ST-08)"
     }
   ],
   "paths": {
@@ -2871,6 +2875,436 @@
           },
           "404": {
             "description": "Reservation or staff member not found"
+          }
+        }
+      }
+    },
+    "/api/sell-requests": {
+      "post": {
+        "tags": [
+          "Sell Your Phone"
+        ],
+        "summary": "Submit Customer Sell-Your-Phone Request (Public, C-14)",
+        "description": "Public rate-limited endpoint for customer sell-your-phone submissions. Supports multipart/form-data with up to 5 photos (validates magic bytes, max 5MB/photo) or JSON payload.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "customer_name",
+                  "phone_number",
+                  "brand_and_model",
+                  "storage_capacity",
+                  "phone_condition",
+                  "battery_health"
+                ],
+                "properties": {
+                  "customer_name": {
+                    "type": "string",
+                    "example": "Nimal Fernando"
+                  },
+                  "phone_number": {
+                    "type": "string",
+                    "example": "+94771234567"
+                  },
+                  "brand_and_model": {
+                    "type": "string",
+                    "example": "Apple iPhone 12 Pro"
+                  },
+                  "brand": {
+                    "type": "string",
+                    "example": "Apple"
+                  },
+                  "model": {
+                    "type": "string",
+                    "example": "iPhone 12 Pro"
+                  },
+                  "storage_capacity": {
+                    "type": "string",
+                    "example": "128GB"
+                  },
+                  "phone_condition": {
+                    "type": "string",
+                    "example": "Good"
+                  },
+                  "battery_health": {
+                    "type": "string",
+                    "example": "86%"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Minor scratches, fully working with box"
+                  },
+                  "desired_phone_id": {
+                    "type": "integer",
+                    "example": 101
+                  },
+                  "photos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "description": "Up to 5 phone photos (JPG, PNG, WEBP, max 5MB each)"
+                  }
+                }
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "customer_name",
+                  "phone_number",
+                  "brand_and_model",
+                  "storage_capacity",
+                  "phone_condition",
+                  "battery_health"
+                ],
+                "properties": {
+                  "customer_name": {
+                    "type": "string",
+                    "example": "Nimal Fernando"
+                  },
+                  "phone_number": {
+                    "type": "string",
+                    "example": "+94771234567"
+                  },
+                  "brand_and_model": {
+                    "type": "string",
+                    "example": "Apple iPhone 12 Pro"
+                  },
+                  "brand": {
+                    "type": "string",
+                    "example": "Apple"
+                  },
+                  "model": {
+                    "type": "string",
+                    "example": "iPhone 12 Pro"
+                  },
+                  "storage_capacity": {
+                    "type": "string",
+                    "example": "128GB"
+                  },
+                  "phone_condition": {
+                    "type": "string",
+                    "example": "Good"
+                  },
+                  "battery_health": {
+                    "type": "string",
+                    "example": "86%"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Minor scratches, fully working with box"
+                  },
+                  "desired_phone_id": {
+                    "type": "integer",
+                    "example": 101
+                  },
+                  "photos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "/uploads/sell-requests/photo1.jpg",
+                      "/uploads/sell-requests/photo2.jpg"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sell request submitted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Your sell request has been received. Our team will review the details and contact you with a valuation quote.",
+                  "data": {
+                    "request_id": 1,
+                    "customer_name": "Nimal Fernando",
+                    "phone_number": "+94771234567",
+                    "brand_and_model": "Apple iPhone 12 Pro",
+                    "brand": "Apple",
+                    "model": "iPhone 12 Pro",
+                    "storage_capacity": "128GB",
+                    "phone_condition": "Good",
+                    "battery_health": "86%",
+                    "description": "Minor scratches, fully working with box",
+                    "photos": [
+                      "/uploads/sell-requests/sell_1730000000_abc123.jpg"
+                    ],
+                    "desired_phone_id": 101,
+                    "status": "New",
+                    "created_at": "2026-10-29T10:00:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error or invalid photo upload"
+          },
+          "404": {
+            "description": "Desired phone not found"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Sell Your Phone"
+        ],
+        "summary": "List Sell Requests (Admin & Staff, ST-08)",
+        "description": "Retrieve a paginated list of sell-your-phone requests with search and filters.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search by customer name, phone number, or brand/model"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "New",
+                "Quote Given",
+                "Accepted",
+                "Declined",
+                "Closed"
+              ]
+            }
+          },
+          {
+            "name": "assigned_to_user_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "desired_phone_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to_date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of sell requests with pagination"
+          },
+          "400": {
+            "description": "Invalid query parameters"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/sell-requests/{id}": {
+      "get": {
+        "tags": [
+          "Sell Your Phone"
+        ],
+        "summary": "Get Sell Request Details (Admin & Staff, ST-08)",
+        "description": "Retrieve complete details of an individual sell-your-phone request by ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete sell request details"
+          },
+          "400": {
+            "description": "Invalid ID parameter"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Sell request not found"
+          }
+        }
+      }
+    },
+    "/api/sell-requests/{id}/status": {
+      "patch": {
+        "tags": [
+          "Sell Your Phone"
+        ],
+        "summary": "Update Sell Request Status (Admin & Staff, ST-08)",
+        "description": "Update sell request status. Allowed SRS statuses: New, Quote Given, Accepted, Declined, Closed. CSRF token required.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "New",
+                      "Quote Given",
+                      "Accepted",
+                      "Declined",
+                      "Closed"
+                    ],
+                    "example": "Quote Given"
+                  },
+                  "assigned_to_user_id": {
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status updated successfully"
+          },
+          "400": {
+            "description": "Invalid status or inactive staff member"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden / Missing CSRF token"
+          },
+          "404": {
+            "description": "Sell request or staff member not found"
+          }
+        }
+      }
+    },
+    "/api/sell-requests/{id}/assign": {
+      "patch": {
+        "tags": [
+          "Sell Your Phone"
+        ],
+        "summary": "Assign Sell Request to Staff (Admin & Staff)",
+        "description": "Assign or reassign a sell request to a staff member. CSRF token required.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "assigned_to_user_id"
+                ],
+                "properties": {
+                  "assigned_to_user_id": {
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assigned successfully"
+          },
+          "400": {
+            "description": "Invalid user ID or inactive staff member"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden / Missing CSRF token"
+          },
+          "404": {
+            "description": "Sell request or staff member not found"
           }
         }
       }

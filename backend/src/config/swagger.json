@@ -35,6 +35,12 @@
     {
       "name": "Offers",
       "description": "Promotional offers and discounts management (MG-03, C-01, C-02, C-03, C-12)"
+      "name": "Users",
+      "description": "User & Role Management APIs (ADMIN only)"
+    },
+    {
+      "name": "Inquiries",
+      "description": "Public customer inquiry submission and dashboard inquiry management APIs"
     }
   ],
   "paths": {
@@ -838,6 +844,7 @@
                         "Blue Titanium"
                       ],
                       "low_stock_level": 25,
+                      "stock_quantity": 25,
                       "availability": "IN_STOCK",
                       "status": "PUBLISHED",
                       "created_at": "2026-10-14T05:30:00.000Z"
@@ -1166,6 +1173,53 @@
             "schema": {
               "type": "string",
               "example": "low"
+    "/api/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List Users (ADMIN only)",
+        "description": "Retrieve paginated users with optional search and role/status filters",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ADMIN",
+                "STAFF"
+              ]
+            }
+          },
+          {
+            "name": "is_active",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -1205,6 +1259,60 @@
         ],
         "summary": "Add Stock Quantity",
         "description": "Add quantity to a phone. Automatically updates availability to IN_STOCK or LOW_STOCK.",
+            "description": "Paginated user list retrieved"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create Staff/Admin Account (ADMIN only)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "display_name": "Warehouse Associate",
+                "email": "associate@sklabaphone.com",
+                "password": "SecurePassword123!",
+                "role": "STAFF",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Email conflict"
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User Details (ADMIN only)",
         "parameters": [
           {
             "name": "id",
@@ -1259,6 +1367,24 @@
         ],
         "summary": "Deduct Stock Quantity",
         "description": "Deduct quantity from a phone. Validates that current stock is sufficient. Auto-marks SOLD_OUT when stock reaches 0.",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update User Profile/Role (ADMIN only)",
         "parameters": [
           {
             "name": "id",
@@ -1267,6 +1393,7 @@
             "schema": {
               "type": "integer",
               "example": 2
+              "type": "integer"
             }
           }
         ],
@@ -1278,6 +1405,8 @@
                 "quantity": 5,
                 "reason": "SALE",
                 "notes": "Order #8839"
+                "display_name": "Updated Name",
+                "role": "ADMIN"
               }
             }
           }
@@ -1313,6 +1442,23 @@
         ],
         "summary": "Mark Phone as Sold Out",
         "description": "Instantly mark a phone as SOLD_OUT with optional stock reset.",
+            "description": "User updated successfully"
+          },
+          "400": {
+            "description": "Validation error / cannot demote last admin"
+          },
+          "409": {
+            "description": "Email conflict"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/status": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Activate or Deactivate User Account (ADMIN only)",
         "parameters": [
           {
             "name": "id",
@@ -1321,6 +1467,7 @@
             "schema": {
               "type": "integer",
               "example": 2
+              "type": "integer"
             }
           }
         ],
@@ -1330,6 +1477,11 @@
             "application/json": {
               "example": {
                 "reset_quantity": true
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "is_active": false
               }
             }
           }
@@ -1416,6 +1568,21 @@
         ],
         "summary": "Create Instalment Plan",
         "description": "Create a new installment financing plan (Manager function MG-11).",
+            "description": "User status updated successfully"
+          },
+          "400": {
+            "description": "Validation error / cannot deactivate self or last admin"
+          }
+        }
+      }
+    },
+    "/api/inquiries": {
+      "post": {
+        "tags": [
+          "Inquiries"
+        ],
+        "summary": "Submit Customer Inquiry (Public)",
+        "description": "Public rate-limited endpoint for customer inquiries from the website. Does not require authentication.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1427,6 +1594,10 @@
                 "additional_fee": 15,
                 "terms": "Valid for Commercial Bank credit cardholders.",
                 "is_active": true
+                "name": "John Doe",
+                "phone_number": "+94771234567",
+                "message": "Is the Apple iPhone 15 Pro 128GB currently in stock?",
+                "phone_id": 1
               }
             }
           }
@@ -1434,6 +1605,7 @@
         "responses": {
           "201": {
             "description": "Instalment plan created successfully",
+            "description": "Inquiry submitted successfully",
             "content": {
               "application/json": {
                 "example": {
@@ -1554,12 +1726,99 @@
             "schema": {
               "type": "integer",
               "example": 1
+                  "message": "Inquiry submitted successfully. Our team will contact you soon.",
+                  "data": {
+                    "inquiry_id": 1,
+                    "customer_name": "John Doe",
+                    "name": "John Doe",
+                    "phone_number": "+94771234567",
+                    "message": "Is the Apple iPhone 15 Pro 128GB currently in stock?",
+                    "phone_id": 1,
+                    "status": "New",
+                    "selected_phone": {
+                      "phone_id": 1,
+                      "name": "iPhone 15 Pro",
+                      "price": 345000,
+                      "brand_name": "Apple",
+                      "availability": "IN_STOCK",
+                      "status": "PUBLISHED"
+                    },
+                    "created_at": "2026-10-29T06:00:00.000Z",
+                    "updated_at": "2026-10-29T06:00:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (missing or malformed fields)"
+          },
+          "404": {
+            "description": "Referenced phone does not exist"
+          },
+          "429": {
+            "description": "Too many inquiry submissions from this IP"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Inquiries"
+        ],
+        "summary": "List Inquiries (Admin & Staff)",
+        "description": "Protected endpoint for dashboard users to view paginated inquiries with searching and filtering.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by customer name or phone number",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status: New, In Progress, Contacted, Closed",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "New",
+                "In Progress",
+                "Contacted",
+                "Closed"
+              ]
+            }
+          },
+          {
+            "name": "assigned_to_user_id",
+            "in": "query",
+            "description": "Filter by assigned staff user ID",
+            "schema": {
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
             "description": "Instalment plan deleted successfully",
+            "description": "Paginated list of inquiries",
             "content": {
               "application/json": {
                 "example": {
@@ -1583,6 +1842,52 @@
         ],
         "summary": "Toggle Plan Active Status",
         "description": "Toggle plan between Active and Inactive (MG-11).",
+                  "data": [
+                    {
+                      "inquiry_id": 1,
+                      "customer_name": "John Doe",
+                      "phone_number": "+94771234567",
+                      "message": "Is the Apple iPhone 15 Pro 128GB currently in stock?",
+                      "phone_id": 1,
+                      "status": "New",
+                      "assigned_to_user_id": null,
+                      "updated_by_user_id": null,
+                      "selected_phone": {
+                        "phone_id": 1,
+                        "name": "iPhone 15 Pro",
+                        "price": 345000,
+                        "brand_name": "Apple"
+                      },
+                      "created_at": "2026-10-29T06:00:00.000Z",
+                      "updated_at": "2026-10-29T06:00:00.000Z"
+                    }
+                  ],
+                  "pagination": {
+                    "total": 1,
+                    "page": 1,
+                    "limit": 10,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: Session login required"
+          },
+          "403": {
+            "description": "Forbidden: Requires ADMIN or STAFF role"
+          }
+        }
+      }
+    },
+    "/api/inquiries/{id}": {
+      "get": {
+        "tags": [
+          "Inquiries"
+        ],
+        "summary": "Get Inquiry Details (Admin & Staff)",
+        "description": "Retrieve complete details of an individual inquiry by ID.",
         "parameters": [
           {
             "name": "id",
@@ -1591,6 +1896,7 @@
             "schema": {
               "type": "integer",
               "example": 1
+              "type": "integer"
             }
           }
         ],
@@ -1621,6 +1927,24 @@
         ],
         "summary": "Calculate Phone Monthly Instalments",
         "description": "Calculates the monthly payment breakdown for a phone based on active installment plans (Customer Requirement C-03).",
+            "description": "Inquiry details retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Inquiry not found"
+          }
+        }
+      }
+    },
+    "/api/inquiries/{id}/status": {
+      "patch": {
+        "tags": [
+          "Inquiries"
+        ],
+        "summary": "Update Inquiry Status (Admin & Staff)",
+        "description": "Update inquiry status and staff attribution. Logged-in staff identity is automatically recorded.",
         "parameters": [
           {
             "name": "id",
@@ -1671,6 +1995,37 @@
                 }
               }
             }
+          }
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "status": "In Progress",
+                "assigned_to_user_id": 2
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inquiry status updated successfully"
+          },
+          "400": {
+            "description": "Invalid status value or inactive assigned staff"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden / Missing CSRF token"
+          },
+          "404": {
+            "description": "Inquiry or assigned staff not found"
           }
         }
       }

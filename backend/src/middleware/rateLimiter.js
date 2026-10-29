@@ -61,9 +61,25 @@ const inquiryRateLimiter = rateLimit({
     skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
 });
 
+/**
+ * Rate limiter middleware for public customer reservation submissions to prevent spam and abuse.
+ */
+const reservationRateLimiter = rateLimit({
+    windowMs: Number(process.env.RESERVATION_RATE_LIMIT_WINDOW_MS) || (15 * 60 * 1000), // 15 minutes
+    limit: Number(process.env.RESERVATION_RATE_LIMIT_MAX) || 10, // 10 attempts per window
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many reservation submissions from this IP. Please try again after 15 minutes.'
+    },
+    skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
+});
+
 module.exports = {
     loginRateLimiter,
     forgotPasswordRateLimiter,
     resetPasswordRateLimiter,
-    inquiryRateLimiter
+    inquiryRateLimiter,
+    reservationRateLimiter
 };

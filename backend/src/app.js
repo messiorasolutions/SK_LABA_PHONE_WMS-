@@ -9,6 +9,7 @@ const storageOptionRoutes = require('./routes/storageOptionRoutes');
 const specificationRoutes = require('./routes/specificationRoutes');
 const phoneRoutes = require('./routes/phoneRoutes');
 const inquiryRoutes = require('./routes/inquiryRoutes');
+const reservationRoutes = require('./routes/reservationRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const AppError = require('./utils/customError');
 
@@ -126,6 +127,7 @@ app.use('/api/storage-options', storageOptionRoutes);
 app.use('/api/specifications', specificationRoutes);
 app.use('/api/phones', phoneRoutes);
 app.use('/api/inquiries', inquiryRoutes);
+app.use('/api/reservations', reservationRoutes);
 
 // 7. 404 Handler for undefined routes
 app.use((req, res, next) => {

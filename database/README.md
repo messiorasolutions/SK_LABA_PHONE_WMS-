@@ -148,3 +148,30 @@ CREATE TABLE inquiries (
     INDEX idx_inquiries_customer_name (customer_name),
     INDEX idx_inquiries_phone_number (phone_number)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE reservations (
+    reservation_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    customer_name VARCHAR(150) NOT NULL,
+    phone_number VARCHAR(30) NOT NULL,
+    email VARCHAR(255) NULL,
+    phone_id BIGINT UNSIGNED NOT NULL,
+    selected_options JSON NULL,
+    preferred_collection_date DATE NOT NULL,
+    customer_note TEXT NULL,
+    status ENUM('Pending', 'Confirmed', 'Ready for Collection', 'Collected', 'Cancelled', 'Expired') NOT NULL DEFAULT 'Pending',
+    assigned_to_user_id BIGINT UNSIGNED NULL,
+    updated_by_user_id BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_reservations_phone FOREIGN KEY (phone_id) REFERENCES phones(phone_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_reservations_assigned_user FOREIGN KEY (assigned_to_user_id) REFERENCES dashboard_users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_reservations_updated_user FOREIGN KEY (updated_by_user_id) REFERENCES dashboard_users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT chk_reservations_options_json CHECK (selected_options IS NULL OR JSON_VALID(selected_options)),
+    INDEX idx_reservations_status (status),
+    INDEX idx_reservations_phone_id (phone_id),
+    INDEX idx_reservations_collection_date (preferred_collection_date),
+    INDEX idx_reservations_customer_name (customer_name),
+    INDEX idx_reservations_phone_number (phone_number),
+    INDEX idx_reservations_assigned_to (assigned_to_user_id),
+    INDEX idx_reservations_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

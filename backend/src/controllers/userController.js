@@ -11,7 +11,17 @@ class UserController {
      */
     async listUsers(req, res, next) {
         try {
-            const { page, limit, search, role, is_active } = req.query;
+            const { page, limit, search, role } = req.query;
+            let is_active = req.query.is_active !== undefined ? req.query.is_active : req.query.status;
+
+            if (is_active !== undefined && is_active !== null && is_active !== '') {
+                const lower = String(is_active).trim().toLowerCase();
+                if (['true', '1', 'active'].includes(lower)) {
+                    is_active = true;
+                } else if (['false', '0', 'inactive'].includes(lower)) {
+                    is_active = false;
+                }
+            }
 
             const result = await this.userService.listUsers({
                 page,

@@ -45,6 +45,8 @@
       "description": "Public customer inquiry submission and dashboard inquiry management APIs"
     },
     {
+      "name": "Instalment Plans",
+      "description": "Instalment plans management (MG-11, ST-02, C-03)"
       "name": "Reservations",
       "description": "Customer reservation submission and dashboard reservation management APIs (C-09, C-03, ST-07)"
     }
@@ -2701,6 +2703,40 @@
         ],
         "responses": {
           "200": {
+            "description": "Paginated list of inquiries",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "inquiry_id": 1,
+                      "customer_name": "John Doe",
+                      "phone_number": "+94771234567",
+                      "message": "Is the Apple iPhone 15 Pro 128GB currently in stock?",
+                      "phone_id": 1,
+                      "status": "New",
+                      "assigned_to_user_id": null,
+                      "updated_by_user_id": null,
+                      "selected_phone": {
+                        "phone_id": 1,
+                        "name": "iPhone 15 Pro",
+                        "price": 345000,
+                        "brand_name": "Apple"
+                      },
+                      "created_at": "2026-10-29T06:00:00.000Z",
+                      "updated_at": "2026-10-29T06:00:00.000Z"
+                    }
+                  ],
+                  "pagination": {
+                    "total": 1,
+                    "page": 1,
+                    "limit": 10,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
             "description": "Paginated list of reservations"
           },
           "401": {
@@ -2731,6 +2767,7 @@
         ],
         "responses": {
           "200": {
+            "description": "Inquiry details retrieved successfully"
             "description": "Reservation details retrieved successfully"
           },
           "401": {

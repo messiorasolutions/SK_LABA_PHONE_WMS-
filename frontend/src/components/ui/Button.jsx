@@ -53,15 +53,13 @@ export default function Button({
     }
   };
 
-
   const styleConfig = getStyles();
 
   const sizeClasses = {
-    sm: 'px-2.5 py-1.5 text-xs',
-    md: 'px-4 py-2 text-xs font-semibold',
-    lg: 'px-5 py-2.5 text-sm font-bold',
+    sm: 'px-2.5 py-1.5 text-xs rounded-lg',
+    md: 'px-4 py-2 text-xs font-semibold rounded-xl',
+    lg: 'px-5 py-2.5 text-sm font-bold rounded-xl',
   };
-
 
   return (
     <button

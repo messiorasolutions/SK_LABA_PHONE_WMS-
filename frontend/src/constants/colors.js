@@ -1,19 +1,18 @@
 export const COLORS = {
-  // Primary Red Theme (Korean Taegeuk Red from SK LABA Logo)
-  primary: '#DC2626',          // Vibrant Brand Logo Red
-  primaryDark: '#B91C1C',      // Deep Crimson Red
-  primaryLight: '#FEF2F2',     // Soft Red Tint
-  primaryBorder: '#FECACA',    // Red Border
+  // Primary Blue Theme (Matching Target SaaS Mockup #2563EB)
+  primary: '#2563EB',          // Royal Blue
+  primaryDark: '#1D4ED8',      // Deep Royal Blue
+  primaryLight: '#EFF6FF',     // Soft Blue Tint
+  primaryBorder: '#BFDBFE',    // Light Blue Border
 
-  // Secondary Red / Accent Theme
-  secondary: '#B91C1C',        // Dark Crimson Red
-  secondaryDark: '#991B1B',    // Deep Dark Red
-  secondaryLight: '#FEF2F2',   // Soft Red Tint
-  secondaryBorder: '#FCA5A5',  // Red Border
-
+  // Secondary / Subtle Neutral Theme
+  secondary: '#475569',        // Slate 600
+  secondaryDark: '#1E293B',    // Slate 800
+  secondaryLight: '#F8FAFC',   // Slate 50
+  secondaryBorder: '#E2E8F0',  // Slate 200
 
   // Accent & Action Colors
-  accent: '#2563EB',           // Electric Blue
+  accent: '#2563EB',           // Royal Blue Accent
   background: '#F8FAFC',       // Clean Page Background
   surface: '#FFFFFF',          // Card/Modal White Surface
   border: '#E2E8F0',           // Neutral Divider Border
@@ -23,12 +22,12 @@ export const COLORS = {
   muted: '#64748B',            // Muted Body/Secondary Text
   placeholder: '#94A3B8',      // Input Placeholder
 
-  // Status Indicators
+  // Status Indicators (Subtle & Professional)
   success: '#059669',          // Green Active Badge
   successLight: '#ECFDF5',
   warning: '#D97706',          // Amber Warning Badge
   warningLight: '#FFFBEB',
-  danger: '#DC2626',           // Red Error Badge
+  danger: '#EF4444',           // Soft Red Delete/Error
   dangerLight: '#FEF2F2',
 
   // Layout Themes

@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { COLORS } from '../../constants/colors';
-import { TYPOGRAPHY } from '../../constants/typography';
-import Button from '../ui/Button';
-import { X, Smartphone, AlertCircle } from 'lucide-react';
+import {
+  X,
+  Smartphone,
+  Shield,
+  Tag,
+  Layers,
+  FileText,
+  Plus,
+  ChevronDown,
+  AlertCircle,
+} from 'lucide-react';
 
 export default function PhoneModal({
   isOpen,
@@ -20,11 +27,12 @@ export default function PhoneModal({
   const [price, setPrice] = useState('');
   const [lowStockLevel, setLowStockLevel] = useState('');
   const [availability, setAvailability] = useState('IN_STOCK');
-  const [status, setStatus] = useState('DRAFT');
+  const [status, setStatus] = useState('PUBLISHED');
   const [warranty, setWarranty] = useState('');
   const [description, setDescription] = useState('');
   const [colourOptions, setColourOptions] = useState('');
   const [installmentEnabled, setInstallmentEnabled] = useState(false);
+  const [showMoreDetails, setShowMoreDetails] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
@@ -35,7 +43,7 @@ export default function PhoneModal({
       setPrice(initial.price || '');
       setLowStockLevel(initial.low_stock_level ?? initial.stock_quantity ?? '');
       setAvailability(initial.availability || 'IN_STOCK');
-      setStatus(initial.status || 'DRAFT');
+      setStatus(initial.status || 'PUBLISHED');
       setWarranty(initial.warranty || '');
       setDescription(initial.description || '');
       setColourOptions(
@@ -44,6 +52,7 @@ export default function PhoneModal({
           : initial.colour_options || ''
       );
       setInstallmentEnabled(Boolean(initial.installment_enabled));
+      setShowMoreDetails(Boolean(initial.warranty || initial.colour_options));
     } else {
       setName('');
       setBrandId(brands[0]?.brand_id || '');
@@ -56,6 +65,7 @@ export default function PhoneModal({
       setDescription('');
       setColourOptions('');
       setInstallmentEnabled(false);
+      setShowMoreDetails(false);
     }
     setSubmitError('');
   }, [initial, isOpen, brands]);
@@ -65,7 +75,7 @@ export default function PhoneModal({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim() || !brandId || !price) {
-      setSubmitError('Phone Name, Brand, and Price are required.');
+      setSubmitError('Phone Model, Brand, and Price are required.');
       return;
     }
 
@@ -93,228 +103,274 @@ export default function PhoneModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-      <div className="shadow-xl border max-w-2xl w-full max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
-          <div className="flex items-center gap-2.5">
-            <div
-              style={{ backgroundColor: COLORS.primaryLight, color: COLORS.primary }}
-              className="w-8 h-8 flex items-center justify-center font-bold border border-red-200 dark:border-red-900 dark:bg-red-950/40"
-            >
+    <>
+      {/* Semi-transparent Backdrop */}
+      <div
+        className="fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-[1px] transition-opacity"
+        onClick={onClose}
+      />
+
+      {/* Slide-over Right Panel (Opens smoothly from right side) */}
+      <div className="fixed top-0 right-0 bottom-0 z-50 w-full sm:w-[410px] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col transform transition-transform duration-200 ease-out animate-in slide-in-from-right">
+        {/* Panel Header (Fixed at top) */}
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#2563EB] flex items-center justify-center shrink-0">
               <Smartphone className="w-4 h-4" />
             </div>
             <div>
-              <h3 className={`${TYPOGRAPHY.heading} text-slate-900 dark:text-slate-100`}>
-                {initial ? 'Edit Phone Inventory' : 'Add New Smartphone'}
-              </h3>
-              <p className={`${TYPOGRAPHY.caption} text-slate-500 dark:text-slate-400`}>Inventory & catalogue details</p>
+              <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
+                {initial ? 'Edit Phone' : 'Create Phone'}
+              </h2>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                {initial ? 'Update phone specifications' : 'Add a new phone to your inventory'}
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+          <button
+            onClick={onClose}
+            type="button"
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
 
+        {/* Error Notification */}
         {submitError && (
-          <div
-            style={{
-              backgroundColor: COLORS.dangerLight,
-              borderColor: COLORS.secondaryBorder,
-              color: COLORS.danger,
-            }}
-            className="m-5 mb-0 p-3 border flex items-center gap-2 text-xs"
-          >
+          <div className="mx-5 mt-3 p-2.5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 rounded-lg flex items-center gap-2 text-xs shrink-0">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{submitError}</span>
           </div>
         )}
 
-
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="sm:col-span-2">
-              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
-                Phone Name <span className="text-red-500">*</span>
+        {/* Form Container with pinned footer */}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+          {/* Scrollable Form Body (Compact layout so fields fit normally) */}
+          <div className="flex-1 overflow-y-auto px-5 py-3.5 space-y-3 [scrollbar-width:thin] scrollbar-thin">
+            {/* 1. Phone Model * */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Phone Model <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. iPhone 15 Pro Max, Galaxy S24 Ultra"
-                required
-                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-slate-50 focus:bg-white"
-              />
+              <div className="relative flex items-center">
+                <Smartphone className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Select or enter model"
+                  required
+                  className="w-full pl-8 pr-8 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] transition-colors"
+                />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
+              </div>
             </div>
 
+            {/* 2. Brand * */}
             <div>
-              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Brand <span className="text-red-500">*</span>
               </label>
-              <select
-                value={brandId}
-                onChange={(e) => setBrandId(e.target.value)}
-                required
-                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-white"
-              >
-                <option value="">Select Brand...</option>
-                {brands.map((b) => (
-                  <option key={b.brand_id} value={b.brand_id}>
-                    {b.brand_name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative flex items-center">
+                <Shield className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
+                <select
+                  value={brandId}
+                  onChange={(e) => setBrandId(e.target.value)}
+                  required
+                  className="w-full pl-8 pr-8 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] cursor-pointer transition-colors"
+                >
+                  <option value="" disabled>Select brand</option>
+                  {brands.map((b) => (
+                    <option key={b.brand_id} value={b.brand_id}>
+                      {b.brand_name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
+              </div>
             </div>
 
+            {/* 3. Condition * */}
             <div>
-              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Condition <span className="text-red-500">*</span>
               </label>
-              <select
-                value={phoneCondition}
-                onChange={(e) => setPhoneCondition(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-white"
-              >
-                <option value="NEW">NEW (Brand New Sealed)</option>
-                <option value="USED">USED (Pre-Owned / Korea Import)</option>
-              </select>
+              <div className="relative flex items-center">
+                <Tag className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
+                <select
+                  value={phoneCondition}
+                  onChange={(e) => setPhoneCondition(e.target.value)}
+                  required
+                  className="w-full pl-8 pr-8 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] cursor-pointer transition-colors"
+                >
+                  <option value="NEW">New (Brand New Sealed)</option>
+                  <option value="USED">Used (Pre-Owned / Korea Import)</option>
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
+              </div>
             </div>
 
+            {/* 4. Price * */}
             <div>
-              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
-                Price (USD) <span className="text-red-500">*</span>
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Price <span className="text-red-500">*</span>
               </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="1099.99"
-                required
-                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-slate-50 focus:bg-white"
-              />
+              <div className="relative flex items-center">
+                <span className="text-xs text-slate-400 font-semibold absolute left-3 pointer-events-none">
+                  $
+                </span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="0.00"
+                  required
+                  className="w-full pl-7 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] transition-colors"
+                />
+              </div>
             </div>
 
+            {/* 5. Low Stock Level */}
             <div>
-              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Low Stock Level
               </label>
-              <input
-                type="number"
-                min="0"
-                value={lowStockLevel}
-                onChange={(e) => setLowStockLevel(e.target.value)}
-                placeholder="5"
-                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-slate-50 focus:bg-white"
-              />
+              <div className="relative flex items-center">
+                <Layers className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
+                <input
+                  type="number"
+                  min="0"
+                  value={lowStockLevel}
+                  onChange={(e) => setLowStockLevel(e.target.value)}
+                  placeholder="0"
+                  className="w-full pl-8 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] transition-colors"
+                />
+              </div>
             </div>
 
+            {/* 6. Status */}
             <div>
-              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Status
               </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-white"
-              >
-                <option value="PUBLISHED">PUBLISHED (Active on storefront)</option>
-                <option value="DRAFT">DRAFT (Hidden / Warehouse only)</option>
-                <option value="ARCHIVED">ARCHIVED (Discontinued)</option>
-              </select>
+              <div className="relative flex items-center">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 absolute left-3 pointer-events-none" />
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="w-full pl-8 pr-8 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-200 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] cursor-pointer transition-colors"
+                >
+                  <option value="PUBLISHED">Published</option>
+                  <option value="DRAFT">Draft</option>
+                  <option value="ARCHIVED">Archived</option>
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
+              </div>
             </div>
 
+            {/* 7. Description (Optional) */}
             <div>
-              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
-                Availability
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Description (Optional)
               </label>
-              <select
-                value={availability}
-                onChange={(e) => setAvailability(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-white"
-              >
-                <option value="IN_STOCK">IN STOCK</option>
-                <option value="LOW_STOCK">LOW STOCK</option>
-                <option value="SOLD_OUT">SOLD OUT</option>
-                <option value="COMING_SOON">COMING SOON</option>
-              </select>
+              <div className="relative">
+                <FileText className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Enter additional details..."
+                  rows={2}
+                  className="w-full pl-8 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] resize-none transition-colors min-h-[64px]"
+                />
+              </div>
             </div>
 
-            <div className="sm:col-span-2">
-              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
-                Warranty
-              </label>
-              <input
-                type="text"
-                value={warranty}
-                onChange={(e) => setWarranty(e.target.value)}
-                placeholder="e.g. 1 Year Official Apple / SK Laba Korea Warranty"
-                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-slate-50 focus:bg-white"
-              />
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
-                Colour Options (comma separated)
-              </label>
-              <input
-                type="text"
-                value={colourOptions}
-                onChange={(e) => setColourOptions(e.target.value)}
-                placeholder="Natural Titanium, Blue Titanium, Black Titanium"
-                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-slate-50 focus:bg-white"
-              />
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className={`${TYPOGRAPHY.label} block mb-1.5`}>
-                Description & Specs Highlights
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="A17 Pro chip, Titanium design, 48MP main camera..."
-                rows={3}
-                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] bg-slate-50 focus:bg-white resize-none"
-              />
-            </div>
-
-            <div className="sm:col-span-2 flex items-center gap-3">
+            {/* Toggle for Advanced Details (Warranty, Colors, Installments) */}
+            <div className="pt-0.5">
               <button
                 type="button"
-                role="switch"
-                aria-checked={installmentEnabled}
-                onClick={() => setInstallmentEnabled(!installmentEnabled)}
-                className={`relative inline-flex h-5 w-10 items-center transition-colors cursor-pointer ${
-                  installmentEnabled ? 'bg-[#DC2626]' : 'bg-slate-300 dark:bg-slate-700'
-                }`}
+                onClick={() => setShowMoreDetails(!showMoreDetails)}
+                className="text-[11px] font-medium text-[#2563EB] hover:underline flex items-center gap-1 cursor-pointer"
               >
-                <span
-                  className={`inline-block h-3.5 w-3.5 transform bg-white transition-transform ${
-                    installmentEnabled ? 'translate-x-5' : 'translate-x-1'
-                  }`}
-                />
+                <span>{showMoreDetails ? '▲ Hide Extra Fields' : '+ Add Warranty, Colors & Installments'}</span>
               </button>
-              <span className={`${TYPOGRAPHY.subheading} text-slate-600 dark:text-slate-400`}>
-                Installment Enabled:{' '}
-                <strong className={installmentEnabled ? 'text-emerald-500' : 'text-slate-500'}>
-                  {installmentEnabled ? 'Yes (Koko / MintPay / Bank)' : 'No'}
-                </strong>
-              </span>
             </div>
+
+            {showMoreDetails && (
+              <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800 animate-fadeIn">
+                {/* Warranty */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Warranty
+                  </label>
+                  <input
+                    type="text"
+                    value={warranty}
+                    onChange={(e) => setWarranty(e.target.value)}
+                    placeholder="e.g. 1 Year Official SK Laba Warranty"
+                    className="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB]"
+                  />
+                </div>
+
+                {/* Colour Options */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Colour Options (comma separated)
+                  </label>
+                  <input
+                    type="text"
+                    value={colourOptions}
+                    onChange={(e) => setColourOptions(e.target.value)}
+                    placeholder="Natural Titanium, Blue Titanium, Black Titanium"
+                    className="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB]"
+                  />
+                </div>
+
+                {/* Installment Toggle */}
+                <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                  <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                    Enable Installment Plans (Koko / MintPay)
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={installmentEnabled}
+                    onChange={(e) => setInstallmentEnabled(e.target.checked)}
+                    className="w-4 h-4 rounded text-[#2563EB] focus:ring-blue-500 cursor-pointer"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <Button variant="outline" size="sm" type="button" onClick={onClose}>
+          {/* Panel Footer (Pinned at Bottom - Always Visible) */}
+          <div className="p-4 px-5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-1/2 py-2.5 px-4 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-center cursor-pointer"
+            >
               Cancel
-            </Button>
-            <Button variant="gradient" size="sm" type="submit" loading={loading}>
-              {initial ? 'Save Changes' : 'Create Phone'}
-            </Button>
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-1/2 py-2.5 px-4 text-xs font-semibold text-white bg-[#2563EB] hover:bg-blue-700 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              {loading ? (
+                <span>Saving...</span>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4" />
+                  <span>{initial ? 'Save Changes' : 'Create Phone'}</span>
+                </>
+              )}
+            </button>
           </div>
-
         </form>
       </div>
-    </div>
+    </>
   );
 }

@@ -28,6 +28,14 @@ export const API_ENDPOINTS = {
     status: (id) => `/api/inquiries/${id}/status`,
   },
 
+  // Reservations Management (SRS C-09, C-03, ST-07)
+  reservations: {
+    base: '/api/reservations',
+    byId: (id) => `/api/reservations/${id}`,
+    status: (id) => `/api/reservations/${id}/status`,
+    assign: (id) => `/api/reservations/${id}/assign`,
+  },
+
   // WMS Inventory & Catalog
   brands: {
     base: '/api/brands',

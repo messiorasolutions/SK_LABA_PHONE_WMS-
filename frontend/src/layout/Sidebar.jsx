@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import logoImg from '../assets/logo.png';
 import {
   MessageSquare,
+  CalendarClock,
   Shield,
   LogOut,
 } from 'lucide-react';
@@ -21,6 +22,7 @@ export default function Sidebar({ isOpen, onClose }) {
   };
 
   const isUsersActive = location.pathname.startsWith('/users');
+  const isReservationsActive = location.pathname.startsWith('/reservations');
   const isInquiriesActive = location.pathname.startsWith('/inquiries');
 
   const displayName = user?.display_name || user?.name || 'Admin';
@@ -72,7 +74,7 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* Scrollable Navigation Links */}
         <div className="flex-1 py-4 px-3 overflow-y-auto">
           <nav className="space-y-1.5 text-xs">
-            {/* 1. User & Role Management */}
+            {/* 1. User & Role Management (ADMIN only) */}
             {isAdmin && (
               <NavLink
                 to="/users"
@@ -99,7 +101,32 @@ export default function Sidebar({ isOpen, onClose }) {
               </NavLink>
             )}
 
-            {/* 2. Customer Inquiries */}
+            {/* 2. Customer Reservations (SRS ST-07) */}
+            <NavLink
+              to="/reservations"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
+                  isReservationsActive
+                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
+                }`
+              }
+            >
+              {isReservationsActive && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+              )}
+              <CalendarClock
+                className={`w-4 h-4 shrink-0 transition-colors ${
+                  isReservationsActive
+                    ? 'text-[#2563eb] dark:text-blue-400'
+                    : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                }`}
+              />
+              <span className="truncate">Customer Reservations</span>
+            </NavLink>
+
+            {/* 3. Customer Inquiries */}
             <NavLink
               to="/inquiries"
               onClick={onClose}
@@ -147,9 +174,7 @@ export default function Sidebar({ isOpen, onClose }) {
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 mt-1">
-                  <span
-                    className="inline-block text-[9px] font-mono font-bold tracking-wider uppercase px-2 py-0.5 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 rounded-full border border-blue-200/60 dark:border-blue-900/60 leading-tight"
-                  >
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     {userRole}
                   </span>
                 </div>
@@ -158,10 +183,10 @@ export default function Sidebar({ isOpen, onClose }) {
 
             <button
               onClick={handleLogout}
-              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-full transition-colors cursor-pointer shrink-0"
+              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-xl transition-colors cursor-pointer shrink-0"
               title="Sign Out"
             >
-              <LogOut className="w-3.5 h-3.5" />
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>

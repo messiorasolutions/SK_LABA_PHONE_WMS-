@@ -45,8 +45,6 @@
       "description": "Public customer inquiry submission and dashboard inquiry management APIs"
     },
     {
-      "name": "Instalment Plans",
-      "description": "Instalment plans management (MG-11, ST-02, C-03)"
       "name": "Reservations",
       "description": "Customer reservation submission and dashboard reservation management APIs (C-09, C-03, ST-07)"
     }
@@ -2435,7 +2433,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of inquiries",
+            "description": "Paginated list of reservations",
             "content": {
               "application/json": {
                 "example": {
@@ -2737,7 +2735,6 @@
                 }
               }
             }
-            "description": "Paginated list of reservations"
           },
           "401": {
             "description": "Unauthorized: Session login required"
@@ -2767,7 +2764,6 @@
         ],
         "responses": {
           "200": {
-            "description": "Inquiry details retrieved successfully"
             "description": "Reservation details retrieved successfully"
           },
           "401": {

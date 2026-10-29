@@ -29,14 +29,16 @@
       "description": "Smartphone inventory and catalog management APIs"
     },
     {
-      "name": "Instalment Plans",
-      "description": "Instalment plans management (MG-11, ST-02, C-03)"
       "name": "Users",
       "description": "User & Role Management APIs (ADMIN only)"
     },
     {
       "name": "Inquiries",
       "description": "Public customer inquiry submission and dashboard inquiry management APIs"
+    },
+    {
+      "name": "Instalment Plans",
+      "description": "Instalment plans management (MG-11, ST-02, C-03)"
     }
   ],
   "paths": {
@@ -840,7 +842,6 @@
                         "Blue Titanium"
                       ],
                       "low_stock_level": 25,
-                      "stock_quantity": 25,
                       "availability": "IN_STOCK",
                       "status": "PUBLISHED",
                       "created_at": "2026-10-14T05:30:00.000Z"
@@ -1169,53 +1170,6 @@
             "schema": {
               "type": "string",
               "example": "low"
-    "/api/users": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "List Users (ADMIN only)",
-        "description": "Retrieve paginated users with optional search and role/status filters",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "default": 10
-            }
-          },
-          {
-            "name": "search",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "role",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ADMIN",
-                "STAFF"
-              ]
-            }
-          },
-          {
-            "name": "is_active",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
@@ -1255,60 +1209,6 @@
         ],
         "summary": "Add Stock Quantity",
         "description": "Add quantity to a phone. Automatically updates availability to IN_STOCK or LOW_STOCK.",
-            "description": "Paginated user list retrieved"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Create Staff/Admin Account (ADMIN only)",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "example": {
-                "display_name": "Warehouse Associate",
-                "email": "associate@sklabaphone.com",
-                "password": "SecurePassword123!",
-                "role": "STAFF",
-                "is_active": true
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "User created successfully"
-          },
-          "400": {
-            "description": "Validation error"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "409": {
-            "description": "Email conflict"
-          }
-        }
-      }
-    },
-    "/api/users/{id}": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Get User Details (ADMIN only)",
         "parameters": [
           {
             "name": "id",
@@ -1363,24 +1263,6 @@
         ],
         "summary": "Deduct Stock Quantity",
         "description": "Deduct quantity from a phone. Validates that current stock is sufficient. Auto-marks SOLD_OUT when stock reaches 0.",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User details"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Update User Profile/Role (ADMIN only)",
         "parameters": [
           {
             "name": "id",
@@ -1389,7 +1271,6 @@
             "schema": {
               "type": "integer",
               "example": 2
-              "type": "integer"
             }
           }
         ],
@@ -1401,8 +1282,6 @@
                 "quantity": 5,
                 "reason": "SALE",
                 "notes": "Order #8839"
-                "display_name": "Updated Name",
-                "role": "ADMIN"
               }
             }
           }
@@ -1438,23 +1317,6 @@
         ],
         "summary": "Mark Phone as Sold Out",
         "description": "Instantly mark a phone as SOLD_OUT with optional stock reset.",
-            "description": "User updated successfully"
-          },
-          "400": {
-            "description": "Validation error / cannot demote last admin"
-          },
-          "409": {
-            "description": "Email conflict"
-          }
-        }
-      }
-    },
-    "/api/users/{id}/status": {
-      "patch": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Activate or Deactivate User Account (ADMIN only)",
         "parameters": [
           {
             "name": "id",
@@ -1463,7 +1325,6 @@
             "schema": {
               "type": "integer",
               "example": 2
-              "type": "integer"
             }
           }
         ],
@@ -1473,11 +1334,6 @@
             "application/json": {
               "example": {
                 "reset_quantity": true
-          "required": true,
-          "content": {
-            "application/json": {
-              "example": {
-                "is_active": false
               }
             }
           }
@@ -1564,21 +1420,6 @@
         ],
         "summary": "Create Instalment Plan",
         "description": "Create a new installment financing plan (Manager function MG-11).",
-            "description": "User status updated successfully"
-          },
-          "400": {
-            "description": "Validation error / cannot deactivate self or last admin"
-          }
-        }
-      }
-    },
-    "/api/inquiries": {
-      "post": {
-        "tags": [
-          "Inquiries"
-        ],
-        "summary": "Submit Customer Inquiry (Public)",
-        "description": "Public rate-limited endpoint for customer inquiries from the website. Does not require authentication.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1590,10 +1431,6 @@
                 "additional_fee": 15,
                 "terms": "Valid for Commercial Bank credit cardholders.",
                 "is_active": true
-                "name": "John Doe",
-                "phone_number": "+94771234567",
-                "message": "Is the Apple iPhone 15 Pro 128GB currently in stock?",
-                "phone_id": 1
               }
             }
           }
@@ -1601,7 +1438,6 @@
         "responses": {
           "201": {
             "description": "Instalment plan created successfully",
-            "description": "Inquiry submitted successfully",
             "content": {
               "application/json": {
                 "example": {
@@ -1722,6 +1558,354 @@
             "schema": {
               "type": "integer",
               "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instalment plan deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Instalment plan 'Koko 3 Months 0% Interest' deleted successfully",
+                  "data": {
+                    "installment_plan_id": 1,
+                    "plan_name": "Koko 3 Months 0% Interest"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/installment-plans/{id}/toggle-status": {
+      "patch": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Toggle Plan Active Status",
+        "description": "Toggle plan between Active and Inactive (MG-11).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan status toggled",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Instalment plan status changed to Active",
+                  "data": {
+                    "installment_plan_id": 1,
+                    "plan_name": "Koko 3 Months 0% Interest",
+                    "is_active": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/installments": {
+      "get": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Calculate Phone Monthly Instalments",
+        "description": "Calculates the monthly payment breakdown for a phone based on active installment plans (Customer Requirement C-03).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone monthly installments calculation",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "phone_id": 2,
+                    "phone_name": "iPhone 15 Pro Max",
+                    "phone_price": 1199.99,
+                    "installment_enabled": true,
+                    "plans_count": 2,
+                    "plans": [
+                      {
+                        "installment_plan_id": 1,
+                        "plan_name": "Koko 3 Months 0% Interest",
+                        "number_of_months": 3,
+                        "interest_rate": 0,
+                        "interest_amount": 0,
+                        "additional_fee": 0,
+                        "total_payable": 1199.99,
+                        "monthly_payment": 400
+                      },
+                      {
+                        "installment_plan_id": 2,
+                        "plan_name": "Commercial Bank 12 Months",
+                        "number_of_months": 12,
+                        "interest_rate": 5,
+                        "interest_amount": 60,
+                        "additional_fee": 15,
+                        "total_payable": 1274.99,
+                        "monthly_payment": 106.25
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List Users (ADMIN only)",
+        "description": "Retrieve paginated users with optional search and role/status filters",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ADMIN",
+                "STAFF"
+              ]
+            }
+          },
+          {
+            "name": "is_active",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated user list retrieved"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create Staff/Admin Account (ADMIN only)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "display_name": "Warehouse Associate",
+                "email": "associate@sklabaphone.com",
+                "password": "SecurePassword123!",
+                "role": "STAFF",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Email conflict"
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User Details (ADMIN only)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update User Profile/Role (ADMIN only)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "display_name": "Updated Name",
+                "role": "ADMIN"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully"
+          },
+          "400": {
+            "description": "Validation error / cannot demote last admin"
+          },
+          "409": {
+            "description": "Email conflict"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/status": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Activate or Deactivate User Account (ADMIN only)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "is_active": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User status updated successfully"
+          },
+          "400": {
+            "description": "Validation error / cannot deactivate self or last admin"
+          }
+        }
+      }
+    },
+    "/api/inquiries": {
+      "post": {
+        "tags": [
+          "Inquiries"
+        ],
+        "summary": "Submit Customer Inquiry (Public)",
+        "description": "Public rate-limited endpoint for customer inquiries from the website. Does not require authentication.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "name": "John Doe",
+                "phone_number": "+94771234567",
+                "message": "Is the Apple iPhone 15 Pro 128GB currently in stock?",
+                "phone_id": 1
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Inquiry submitted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
                   "message": "Inquiry submitted successfully. Our team will contact you soon.",
                   "data": {
                     "inquiry_id": 1,
@@ -1813,31 +1997,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Instalment plan deleted successfully",
             "description": "Paginated list of inquiries",
             "content": {
               "application/json": {
                 "example": {
                   "success": true,
-                  "message": "Instalment plan 'Koko 3 Months 0% Interest' deleted successfully",
-                  "data": {
-                    "installment_plan_id": 1,
-                    "plan_name": "Koko 3 Months 0% Interest"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/installment-plans/{id}/toggle-status": {
-      "patch": {
-        "tags": [
-          "Instalment Plans"
-        ],
-        "summary": "Toggle Plan Active Status",
-        "description": "Toggle plan between Active and Inactive (MG-11).",
                   "data": [
                     {
                       "inquiry_id": 1,
@@ -1890,39 +2054,12 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "example": 1
               "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Plan status toggled",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": true,
-                  "message": "Instalment plan status changed to Active",
-                  "data": {
-                    "installment_plan_id": 1,
-                    "plan_name": "Koko 3 Months 0% Interest",
-                    "is_active": true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/phones/{id}/installments": {
-      "get": {
-        "tags": [
-          "Instalment Plans"
-        ],
-        "summary": "Calculate Phone Monthly Instalments",
-        "description": "Calculates the monthly payment breakdown for a phone based on active installment plans (Customer Requirement C-03).",
             "description": "Inquiry details retrieved successfully"
           },
           "401": {
@@ -1947,51 +2084,6 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "example": 2
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Phone monthly installments calculation",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": true,
-                  "data": {
-                    "phone_id": 2,
-                    "phone_name": "iPhone 15 Pro Max",
-                    "phone_price": 1199.99,
-                    "installment_enabled": true,
-                    "plans_count": 2,
-                    "plans": [
-                      {
-                        "installment_plan_id": 1,
-                        "plan_name": "Koko 3 Months 0% Interest",
-                        "number_of_months": 3,
-                        "interest_rate": 0,
-                        "interest_amount": 0,
-                        "additional_fee": 0,
-                        "total_payable": 1199.99,
-                        "monthly_payment": 400
-                      },
-                      {
-                        "installment_plan_id": 2,
-                        "plan_name": "Commercial Bank 12 Months",
-                        "number_of_months": 12,
-                        "interest_rate": 5,
-                        "interest_amount": 60,
-                        "additional_fee": 15,
-                        "total_payable": 1274.99,
-                        "monthly_payment": 106.25
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
               "type": "integer"
             }
           }

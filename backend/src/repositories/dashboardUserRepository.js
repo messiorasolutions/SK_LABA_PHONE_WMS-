@@ -182,9 +182,15 @@ class DashboardUserRepository {
             params.push(role);
         }
 
-        if (is_active !== undefined && is_active !== null) {
+        if (is_active !== undefined && is_active !== null && is_active !== '') {
+            const isActiveBool =
+                is_active === true ||
+                is_active === 1 ||
+                is_active === '1' ||
+                String(is_active).trim().toLowerCase() === 'true' ||
+                String(is_active).trim().toLowerCase() === 'active';
             conditions.push('is_active = ?');
-            params.push(Boolean(is_active) ? 1 : 0);
+            params.push(isActiveBool ? 1 : 0);
         }
 
         const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';

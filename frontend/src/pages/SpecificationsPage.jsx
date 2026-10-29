@@ -269,8 +269,25 @@ export default function SpecificationsPage() {
                     </td>
                     <td className={`${SPACING.tableCell} ${TYPOGRAPHY.tableCell} max-w-xs truncate`}>{s.description || <span className="text-gray-400">—</span>}</td>
                     <td className={SPACING.tableCell}>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s.is_active === 1 || s.is_active === true ? COLORS.success.badge : COLORS.danger.badge}`}>
-                        {s.is_active === 1 || s.is_active === true ? 'Active' : 'Inactive'}
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          s.is_active === 1 || s.is_active === true ? COLORS.success.badge : COLORS.danger.badge
+                        }`}
+                        style={{ borderRadius: '9999px' }}
+                      >
+                        <span
+                          className={`inline-block rounded-full shrink-0 ${
+                            s.is_active === 1 || s.is_active === true ? 'bg-emerald-500' : 'bg-rose-500'
+                          }`}
+                          style={{
+                            borderRadius: '50%',
+                            width: '6px',
+                            height: '6px',
+                            minWidth: '6px',
+                            minHeight: '6px',
+                          }}
+                        />
+                        <span>{s.is_active === 1 || s.is_active === true ? 'Active' : 'Inactive'}</span>
                       </span>
                     </td>
                     <td className={SPACING.tableCell}>

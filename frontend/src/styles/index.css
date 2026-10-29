@@ -2,12 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-*,
-*::before,
-*::after {
-  border-radius: 0 !important;
-}
-
 /* Dark Mode Theme Support */
 .dark {
   color-scheme: dark;
@@ -25,8 +19,8 @@
 .dark textarea:focus,
 .dark select:focus {
   background-color: #0f172a !important;
-  border-color: #dc2626 !important;
-  outline-color: #dc2626 !important;
+  border-color: #3b82f6 !important;
+  outline-color: #3b82f6 !important;
 }
 
 .dark input::placeholder,
@@ -34,4 +28,12 @@
   color: #64748b !important;
 }
 
-
+/* Remove default browser number input spinners (▲/▼ spin buttons) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}

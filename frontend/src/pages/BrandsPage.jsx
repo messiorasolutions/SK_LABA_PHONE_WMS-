@@ -315,13 +315,26 @@ export default function BrandsPage() {
                     </td>
                     <td className={SPACING.tableCell}>
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full ${TYPOGRAPHY.badgeText} ${
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full ${TYPOGRAPHY.badgeText} ${
                           brand.is_active === 1 || brand.is_active === true
                             ? COLORS.success.badge
                             : COLORS.danger.badge
                         }`}
+                        style={{ borderRadius: '9999px' }}
                       >
-                        {BRAND_STATUS_LABELS[brand.is_active] ?? 'Unknown'}
+                        <span
+                          className={`inline-block rounded-full shrink-0 ${
+                            brand.is_active === 1 || brand.is_active === true ? 'bg-emerald-500' : 'bg-rose-500'
+                          }`}
+                          style={{
+                            borderRadius: '50%',
+                            width: '6px',
+                            height: '6px',
+                            minWidth: '6px',
+                            minHeight: '6px',
+                          }}
+                        />
+                        <span>{BRAND_STATUS_LABELS[brand.is_active] ?? 'Unknown'}</span>
                       </span>
                     </td>
                     <td className={`${SPACING.tableCell} ${TYPOGRAPHY.tableCell}`}>

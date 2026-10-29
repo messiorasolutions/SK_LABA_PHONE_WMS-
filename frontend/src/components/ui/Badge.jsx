@@ -1,53 +1,69 @@
 import React from 'react';
-import { COLORS } from '../../constants/colors';
 
-export default function Badge({ children, variant = 'blue', icon: Icon, className = '' }) {
-  const getBadgeStyle = () => {
+/**
+ * Modern Clean Status Indicator (Frameless / No Box Background)
+ * Replaces boxy AI-style colored rectangles with clean, minimalist dot indicators.
+ */
+export default function Badge({
+  children,
+  variant = 'neutral',
+  icon: Icon,
+  dot = true,
+  className = '',
+}) {
+  const getDotColor = () => {
     switch (variant) {
-      case 'red':
-        return {
-          backgroundColor: COLORS.secondaryLight,
-          color: COLORS.secondary,
-          borderColor: COLORS.secondaryBorder,
-        };
-      case 'green':
       case 'success':
-        return {
-          backgroundColor: COLORS.successLight,
-          color: COLORS.success,
-          borderColor: '#A7F3D0',
-        };
+      case 'green':
+        return 'bg-emerald-500';
       case 'amber':
       case 'warning':
-        return {
-          backgroundColor: COLORS.warningLight,
-          color: COLORS.warning,
-          borderColor: '#FDE68A',
-        };
+        return 'bg-amber-500';
+      case 'red':
+      case 'danger':
+        return 'bg-rose-500';
       case 'blue':
-      case 'primary':
+      case 'info':
+        return 'bg-blue-500';
+      case 'neutral':
+      case 'slate':
+      case 'gray':
       default:
-        return {
-          backgroundColor: COLORS.primaryLight,
-          color: COLORS.primary,
-          borderColor: COLORS.primaryBorder,
-        };
+        return 'bg-slate-400';
     }
   };
 
-  const style = getBadgeStyle();
+  const getTextColor = () => {
+    switch (variant) {
+      case 'success':
+      case 'green':
+        return 'text-slate-800 dark:text-slate-200';
+      case 'amber':
+      case 'warning':
+        return 'text-slate-700 dark:text-slate-300';
+      case 'red':
+      case 'danger':
+        return 'text-slate-700 dark:text-slate-300';
+      default:
+        return 'text-slate-600 dark:text-slate-400';
+    }
+  };
+
+  const formattedText =
+    typeof children === 'string'
+      ? children.charAt(0).toUpperCase() + children.slice(1).toLowerCase()
+      : children;
 
   return (
     <span
-      style={{
-        backgroundColor: style.backgroundColor,
-        color: style.color,
-        borderColor: style.borderColor,
-      }}
-      className={`inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold border ${className}`}
+      className={`inline-flex items-center gap-1.5 text-xs font-medium ${getTextColor()} ${className}`}
     >
-      {Icon && <Icon className="w-3 h-3" />}
-      {children}
+      {Icon ? (
+        <Icon className="w-3.5 h-3.5 shrink-0 opacity-70" />
+      ) : dot ? (
+        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${getDotColor()}`} />
+      ) : null}
+      <span>{formattedText}</span>
     </span>
   );
 }

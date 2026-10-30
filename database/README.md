@@ -242,3 +242,34 @@ CREATE TABLE sell_requests (
     INDEX idx_sell_requests_phone_number (phone_number),
     INDEX idx_sell_requests_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Migration: 006_create_back_in_stock_requests.sql
+-- Description: Creates back_in_stock_requests table for Customer Back-in-Stock Notifications and Dashboard Request Management.
+
+CREATE TABLE IF NOT EXISTS back_in_stock_requests (
+    request_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    phone_id BIGINT UNSIGNED NOT NULL,
+    customer_name VARCHAR(150) NOT NULL,
+    phone_number VARCHAR(30) NOT NULL,
+    email VARCHAR(255) NULL,
+    status ENUM('Pending', 'Contacted') NOT NULL DEFAULT 'Pending',
+    notes TEXT NULL,
+    assigned_to_user_id BIGINT UNSIGNED NULL,
+    updated_by_user_id BIGINT UNSIGNED NULL,
+    contacted_at TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_bisr_phone FOREIGN KEY (phone_id) 
+        REFERENCES phones(phone_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_bisr_assigned_user FOREIGN KEY (assigned_to_user_id) 
+        REFERENCES dashboard_users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_bisr_updated_user FOREIGN KEY (updated_by_user_id) 
+        REFERENCES dashboard_users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    INDEX idx_bisr_phone_id (phone_id),
+    INDEX idx_bisr_status (status),
+    INDEX idx_bisr_phone_status (phone_id, status),
+    INDEX idx_bisr_created_at (created_at),
+    INDEX idx_bisr_phone_number (phone_number),
+    INDEX idx_bisr_customer_name (customer_name),
+    INDEX idx_bisr_assigned_to (assigned_to_user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

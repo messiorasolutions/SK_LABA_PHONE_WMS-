@@ -91,11 +91,27 @@ const sellRequestRateLimiter = rateLimit({
     skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
 });
 
+/**
+ * Rate limiter middleware for public back-in-stock notification requests.
+ */
+const backInStockRateLimiter = rateLimit({
+    windowMs: Number(process.env.BACK_IN_STOCK_RATE_LIMIT_WINDOW_MS) || (15 * 60 * 1000), // 15 minutes
+    limit: Number(process.env.BACK_IN_STOCK_RATE_LIMIT_MAX) || 10, // 10 attempts per window
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many back-in-stock notification requests from this IP. Please try again after 15 minutes.'
+    },
+    skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
+});
+
 module.exports = {
     loginRateLimiter,
     forgotPasswordRateLimiter,
     resetPasswordRateLimiter,
     inquiryRateLimiter,
     reservationRateLimiter,
-    sellRequestRateLimiter
+    sellRequestRateLimiter,
+    backInStockRateLimiter
 };

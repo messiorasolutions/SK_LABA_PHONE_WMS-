@@ -14,6 +14,8 @@ const inquiryRoutes = require('./routes/inquiryRoutes');
 const reservationRoutes = require('./routes/reservationRoutes');
 const sellRequestRoutes = require('./routes/sellRequestRoutes');
 const backInStockRequestRoutes = require('./routes/backInStockRequestRoutes');
+const customerReviewRoutes = require('./routes/customerReviewRoutes');
+const adminReviewRoutes = require('./routes/adminReviewRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const AppError = require('./utils/customError');
 
@@ -136,6 +138,8 @@ app.use('/api/reservations', reservationRoutes);
 app.use('/api/sell-requests', sellRequestRoutes);
 app.use('/api/sell-phone-requests', sellRequestRoutes);
 app.use('/api/back-in-stock-requests', backInStockRequestRoutes);
+app.use('/api/reviews', customerReviewRoutes);
+app.use('/api/admin/reviews', adminReviewRoutes);
 
 // 7. 404 Handler for undefined routes
 app.use((req, res, next) => {

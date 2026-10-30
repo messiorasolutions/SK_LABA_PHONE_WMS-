@@ -106,6 +106,21 @@ const backInStockRateLimiter = rateLimit({
     skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
 });
 
+/**
+ * Rate limiter middleware for public customer review submissions to prevent spam and abuse.
+ */
+const customerReviewRateLimiter = rateLimit({
+    windowMs: Number(process.env.REVIEW_RATE_LIMIT_WINDOW_MS) || (15 * 60 * 1000), // 15 minutes
+    limit: Number(process.env.REVIEW_RATE_LIMIT_MAX) || 5, // 5 reviews per 15 minutes per IP
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many reviews submitted from this IP. Please try again after 15 minutes.'
+    },
+    skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
+});
+
 module.exports = {
     loginRateLimiter,
     forgotPasswordRateLimiter,
@@ -113,5 +128,6 @@ module.exports = {
     inquiryRateLimiter,
     reservationRateLimiter,
     sellRequestRateLimiter,
-    backInStockRateLimiter
+    backInStockRateLimiter,
+    customerReviewRateLimiter
 };

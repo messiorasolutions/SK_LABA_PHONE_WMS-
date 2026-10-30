@@ -273,3 +273,27 @@ CREATE TABLE IF NOT EXISTS back_in_stock_requests (
     INDEX idx_bisr_customer_name (customer_name),
     INDEX idx_bisr_assigned_to (assigned_to_user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- Migration: 007_create_customer_reviews.sql
+-- Description: Creates customer_reviews table for Customer Reviews Management and moderation.
+
+CREATE TABLE IF NOT EXISTS customer_reviews (
+    review_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    customer_name VARCHAR(150) NOT NULL,
+    rating TINYINT UNSIGNED NOT NULL,
+    comment TEXT NOT NULL,
+    status ENUM('Pending', 'Approved', 'Rejected') NOT NULL DEFAULT 'Pending',
+    moderated_by_user_id BIGINT UNSIGNED NULL,
+    moderated_at TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_cr_rating CHECK (rating >= 1 AND rating <= 5),
+    CONSTRAINT fk_cr_moderated_user FOREIGN KEY (moderated_by_user_id) 
+        REFERENCES dashboard_users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    INDEX idx_cr_status (status),
+    INDEX idx_cr_created_at (created_at),
+    INDEX idx_cr_status_created_at (status, created_at),
+    INDEX idx_cr_customer_name (customer_name),
+    INDEX idx_cr_moderated_by (moderated_by_user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

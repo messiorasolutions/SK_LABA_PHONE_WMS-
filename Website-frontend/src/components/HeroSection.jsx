@@ -3,10 +3,28 @@ import { ShoppingCart, ArrowRight } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import mainBannerImg from '../assets/images/main.png';
 import { HERO_CONTENT } from '../constants/siteConfig';
-import { addToCart } from '../actions/heroActions';
+import { setActiveTab } from '../actions/heroActions';
 
 export default function HeroSection() {
   const dispatch = useDispatch();
+
+  const handleShopSmartphones = () => {
+    dispatch(setActiveTab('Smartphones'));
+    const el = document.getElementById('smartphones');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.location.hash = '#smartphones';
+    }
+  };
+
+  const handleExploreDeals = () => {
+    dispatch(setActiveTab('Smartphones'));
+    const el = document.getElementById('smartphones');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <section className="relative overflow-hidden bg-theme-bg min-h-[600px] lg:min-h-[700px] flex items-center pt-28 sm:pt-32 pb-12 sm:pb-16">
@@ -25,7 +43,6 @@ export default function HeroSection() {
       {/* Hero Content Container */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="max-w-xl">
-          
           {/* Eyebrow / Tagline */}
           <div className="inline-block mb-3.5">
             <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-theme-textSecondary">
@@ -51,7 +68,7 @@ export default function HeroSection() {
             {/* Primary Action Button */}
             <button
               type="button"
-              onClick={() => dispatch(addToCart())}
+              onClick={handleShopSmartphones}
               className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-theme-accent hover:bg-theme-accentHover text-white font-semibold text-sm md:text-base shadow-lg shadow-blue-600/35 transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
             >
               <ShoppingCart className="w-4 h-4" />
@@ -62,12 +79,12 @@ export default function HeroSection() {
             {/* Secondary Action Button */}
             <button
               type="button"
+              onClick={handleExploreDeals}
               className="inline-flex items-center justify-center px-6 py-3.5 rounded-full bg-theme-input/70 hover:bg-theme-hover border border-theme-borderMedium hover:border-theme-borderLight text-white font-semibold text-sm md:text-base backdrop-blur-sm transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
             >
               {HERO_CONTENT.secondaryBtnText}
             </button>
           </div>
-
         </div>
       </div>
     </section>

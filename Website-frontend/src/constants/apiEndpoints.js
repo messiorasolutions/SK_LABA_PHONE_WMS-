@@ -19,5 +19,22 @@ export const API_ENDPOINTS = {
   phones: {
     base: '/api/phones',
     byId: (id) => `/api/phones/${id}`,
+    compare: '/api/phones/compare',
+    favorites: '/api/phones/favorites',
+    installments: (id) => `/api/phones/${id}/installments`,
+    offer: (id) => `/api/phones/${id}/offer`,
+  },
+  inquiries: {
+    base: '/api/inquiries',
+  },
+  reservations: {
+    base: '/api/reservations',
+  },
+  offers: {
+    base: '/api/offers',
+    active: '/api/offers/active',
+    byId: (id) => `/api/offers/${id}`,
   },
 };
+
+export default API_ENDPOINTS;

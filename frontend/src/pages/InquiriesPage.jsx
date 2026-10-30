@@ -204,17 +204,12 @@ export default function InquiriesPage() {
 
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
-      {/* Page Title & Action Bar */}
+      {/* Page Title & Action Bar (Clean & Professional) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3.5 border-b border-slate-200/80 dark:border-slate-800">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-2.5">
-            <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            <span>Customer Inquiries & Leads</span>
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Manage incoming customer questions, assign staff, and track inquiry resolutions.
-          </p>
-        </div>
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-2.5">
+          <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <span>Customer Inquiries & Leads</span>
+        </h1>
 
         <button
           onClick={fetchInquiries}

@@ -75,8 +75,8 @@ class ReservationRepository {
                 phone_condition: row.phone_condition || null,
                 photos: this._parseJson(row.phone_photos)
             } : null,
-            created_at: row.created_at,
-            updated_at: row.updated_at
+            created_at: row.created_at ? (row.created_at instanceof Date ? row.created_at.toISOString() : (String(row.created_at).includes('T') ? (String(row.created_at).endsWith('Z') ? String(row.created_at) : String(row.created_at) + 'Z') : new Date(row.created_at).toISOString())) : null,
+            updated_at: row.updated_at ? (row.updated_at instanceof Date ? row.updated_at.toISOString() : (String(row.updated_at).includes('T') ? (String(row.updated_at).endsWith('Z') ? String(row.updated_at) : String(row.updated_at) + 'Z') : new Date(row.updated_at).toISOString())) : null
         };
 
         return formatted;

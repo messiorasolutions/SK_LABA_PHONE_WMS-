@@ -59,6 +59,10 @@
     {
       "name": "Back in Stock Requests",
       "description": "Customer Back-in-Stock notification submissions and dashboard request management APIs"
+    },
+    {
+      "name": "Customer Reviews",
+      "description": "Customer review submission, public approved reviews, and administrative moderation APIs"
     }
   ],
   "paths": {
@@ -3730,6 +3734,396 @@
           },
           "404": {
             "description": "Request or user not found"
+          }
+        }
+      }
+    },
+    "/api/reviews": {
+      "post": {
+        "tags": [
+          "Customer Reviews"
+        ],
+        "summary": "Submit customer review",
+        "description": "Public endpoint allowing customers to submit reviews about their experience with SK LABA PHONE. Rate-limited by IP. Automatically saved with status Pending for administrative moderation.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "customer_name",
+                  "rating",
+                  "comment"
+                ],
+                "properties": {
+                  "customer_name": {
+                    "type": "string",
+                    "example": "Kasun Perera",
+                    "description": "Customer full name (2-150 chars)"
+                  },
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5,
+                    "example": 5,
+                    "description": "Whole-number star rating from 1 to 5"
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Excellent phone condition and super fast delivery. Highly recommended!",
+                    "description": "Review comment / text (3-2000 chars)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review submitted successfully and awaiting moderation",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Thank you for sharing your experience! Your review has been submitted successfully and will appear on our website after approval.",
+                  "data": {
+                    "review_id": 15,
+                    "customer_name": "Kasun Perera",
+                    "rating": 5,
+                    "comment": "Excellent phone condition and super fast delivery. Highly recommended!",
+                    "status": "Pending",
+                    "created_at": "2026-10-30T07:10:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error: missing required fields or invalid rating (must be integer 1-5)"
+          },
+          "429": {
+            "description": "Rate limit exceeded: too many submissions from this IP"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Customer Reviews"
+        ],
+        "summary": "List approved customer reviews for public website",
+        "description": "Public read-only endpoint returning strictly Approved reviews. Pending and Rejected reviews are always hidden.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default 1)",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (default 20, max 50)",
+            "schema": {
+              "type": "integer",
+              "example": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of approved customer reviews",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "data": [
+                    {
+                      "review_id": 2,
+                      "customer_name": "Nuwan Perera",
+                      "rating": 5,
+                      "comment": "Genuine brand new iPhone with complete warranty. Great service!",
+                      "created_at": "2026-10-28T14:30:00.000Z"
+                    },
+                    {
+                      "review_id": 1,
+                      "customer_name": "Dilshan Silva",
+                      "rating": 4,
+                      "comment": "Good customer service and fair pricing.",
+                      "created_at": "2026-10-25T10:30:00.000Z"
+                    }
+                  ],
+                  "pagination": {
+                    "total": 2,
+                    "page": 1,
+                    "limit": 20,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid pagination query parameters"
+          }
+        }
+      }
+    },
+    "/api/admin/reviews": {
+      "get": {
+        "tags": [
+          "Customer Reviews"
+        ],
+        "summary": "List customer reviews for dashboard moderation",
+        "description": "Protected ADMIN endpoint to list, search, and filter customer reviews across Pending, Approved, and Rejected statuses with pagination.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "example": 20
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status: Pending, Approved, Rejected, or ALL (default ALL)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Pending",
+                "Approved",
+                "Rejected",
+                "ALL"
+              ],
+              "example": "Pending"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search customer name or comment keyword",
+            "schema": {
+              "type": "string",
+              "example": "Kasun"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "created_at",
+                "rating",
+                "review_id",
+                "status"
+              ],
+              "example": "created_at"
+            }
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "example": "DESC"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of reviews with moderator details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "review_id": 15,
+                      "customer_name": "Kasun Perera",
+                      "rating": 5,
+                      "comment": "Great phone and fast delivery.",
+                      "status": "Pending",
+                      "moderated_by_user_id": null,
+                      "moderated_at": null,
+                      "moderator": null,
+                      "created_at": "2026-10-30T07:10:00.000Z",
+                      "updated_at": "2026-10-30T07:10:00.000Z"
+                    }
+                  ],
+                  "pagination": {
+                    "total": 1,
+                    "page": 1,
+                    "limit": 20,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden: Insufficient permissions (ADMIN only)"
+          }
+        }
+      }
+    },
+    "/api/admin/reviews/{id}": {
+      "get": {
+        "tags": [
+          "Customer Reviews"
+        ],
+        "summary": "Get review details by ID",
+        "description": "Protected ADMIN endpoint to retrieve full details of an individual review with moderation metadata.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 15
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review details retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden (ADMIN only)"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        }
+      }
+    },
+    "/api/admin/reviews/{id}/status": {
+      "patch": {
+        "tags": [
+          "Customer Reviews"
+        ],
+        "summary": "Moderate customer review (Approve or Reject)",
+        "description": "Protected ADMIN endpoint to approve or reject a customer review. Requires CSRF token. Derives moderator attribution from session.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 15
+            }
+          },
+          {
+            "name": "x-csrf-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "CSRF token"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Approved",
+                      "Rejected"
+                    ],
+                    "example": "Approved"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Review status updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Review successfully approved.",
+                  "data": {
+                    "review_id": 15,
+                    "customer_name": "Kasun Perera",
+                    "rating": 5,
+                    "comment": "Great phone and fast delivery.",
+                    "status": "Approved",
+                    "moderated_by_user_id": 1,
+                    "moderated_at": "2026-10-30T07:25:00.000Z",
+                    "moderator": {
+                      "user_id": 1,
+                      "display_name": "Admin User",
+                      "email": "admin@sklabaphone.com"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid status value (must be Approved or Rejected)"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden: Insufficient permissions or missing CSRF token"
+          },
+          "404": {
+            "description": "Review not found"
           }
         }
       }

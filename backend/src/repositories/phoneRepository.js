@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { calculatePhoneAvailability } = require('../utils/phoneAvailability');
 
 class PhoneRepository {
     /**
@@ -31,6 +32,11 @@ class PhoneRepository {
         formatted.stock = formatted.current_stock;
         formatted.stock_quantity = formatted.current_stock;
         formatted.is_archived = Boolean(formatted.is_archived || formatted.status === 'ARCHIVED');
+        formatted.availability = calculatePhoneAvailability(
+            formatted.current_stock,
+            formatted.low_stock_level,
+            formatted.availability
+        );
         return formatted;
     }
 
@@ -147,8 +153,19 @@ class PhoneRepository {
             values.push(filters.phone_condition);
         }
         if (filters.availability) {
-            query += ` AND p.availability = ?`;
-            values.push(filters.availability);
+            const cleanAvail = String(filters.availability).trim().toUpperCase();
+            if (cleanAvail === 'SOLD_OUT') {
+                query += ` AND ((p.current_stock <= 0 AND (p.availability IS NULL OR p.availability != 'COMING_SOON')) OR p.availability = 'SOLD_OUT')`;
+            } else if (cleanAvail === 'LOW_STOCK') {
+                query += ` AND ((p.current_stock > 0 AND p.current_stock <= COALESCE(p.low_stock_level, 5)) OR p.availability = 'LOW_STOCK')`;
+            } else if (cleanAvail === 'IN_STOCK') {
+                query += ` AND (p.current_stock > COALESCE(p.low_stock_level, 5) AND (p.availability IS NULL OR p.availability != 'COMING_SOON'))`;
+            } else if (cleanAvail === 'COMING_SOON') {
+                query += ` AND p.availability = 'COMING_SOON' AND p.current_stock <= 0`;
+            } else {
+                query += ` AND p.availability = ?`;
+                values.push(cleanAvail);
+            }
         }
         if (filters.search) {
             query += ` AND (p.name LIKE ? OR b.brand_name LIKE ?)`;
@@ -208,8 +225,19 @@ class PhoneRepository {
             values.push(filters.phone_condition);
         }
         if (filters.availability) {
-            query += ` AND p.availability = ?`;
-            values.push(filters.availability);
+            const cleanAvail = String(filters.availability).trim().toUpperCase();
+            if (cleanAvail === 'SOLD_OUT') {
+                query += ` AND ((p.current_stock <= 0 AND (p.availability IS NULL OR p.availability != 'COMING_SOON')) OR p.availability = 'SOLD_OUT')`;
+            } else if (cleanAvail === 'LOW_STOCK') {
+                query += ` AND ((p.current_stock > 0 AND p.current_stock <= COALESCE(p.low_stock_level, 5)) OR p.availability = 'LOW_STOCK')`;
+            } else if (cleanAvail === 'IN_STOCK') {
+                query += ` AND (p.current_stock > COALESCE(p.low_stock_level, 5) AND (p.availability IS NULL OR p.availability != 'COMING_SOON'))`;
+            } else if (cleanAvail === 'COMING_SOON') {
+                query += ` AND p.availability = 'COMING_SOON' AND p.current_stock <= 0`;
+            } else {
+                query += ` AND p.availability = ?`;
+                values.push(cleanAvail);
+            }
         }
         if (filters.search) {
             query += ` AND (p.name LIKE ? OR b.brand_name LIKE ?)`;
@@ -225,7 +253,7 @@ class PhoneRepository {
             } else if (statusLower === 'out' || statusLower === 'sold_out' || statusLower === 'out_of_stock') {
                 query += ` AND (p.current_stock = 0 OR p.availability = 'SOLD_OUT')`;
             } else if (statusLower === 'in_stock') {
-                query += ` AND p.current_stock > 0 AND p.availability = 'IN_STOCK'`;
+                query += ` AND p.current_stock > COALESCE(p.low_stock_level, 5) AND (p.availability IS NULL OR p.availability != 'COMING_SOON')`;
             }
         }
 
@@ -277,10 +305,9 @@ class PhoneRepository {
      * @param {boolean} [resetQuantity=false]
      * @returns {Promise<Object>}
      */
-    async markSoldOut(phone_id, resetQuantity = false) {
-        const query = resetQuantity
-            ? `UPDATE phones SET availability = 'SOLD_OUT', current_stock = 0 WHERE phone_id = ?`
-            : `UPDATE phones SET availability = 'SOLD_OUT' WHERE phone_id = ?`;
+    async markSoldOut(phone_id, resetQuantity = true) {
+        // Enforce consistent availability & stock: a sold out phone has 0 stock
+        const query = `UPDATE phones SET availability = 'SOLD_OUT', current_stock = 0 WHERE phone_id = ?`;
         await pool.execute(query, [phone_id]);
         return this.findById(phone_id);
     }

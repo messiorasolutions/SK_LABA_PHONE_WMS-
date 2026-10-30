@@ -47,12 +47,18 @@
     {
       "name": "Instalment Plans",
       "description": "Instalment plans management (MG-11, ST-02, C-03)"
+    },
+    {
       "name": "Reservations",
       "description": "Customer reservation submission and dashboard reservation management APIs (C-09, C-03, ST-07)"
     },
     {
       "name": "Sell Your Phone",
       "description": "Customer Sell-Your-Phone submission (C-14) and dashboard request management APIs (ST-08)"
+    },
+    {
+      "name": "Back in Stock Requests",
+      "description": "Customer Back-in-Stock notification submissions and dashboard request management APIs"
     }
   ],
   "paths": {
@@ -2707,7 +2713,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of inquiries",
+            "description": "Paginated list of reservations",
             "content": {
               "application/json": {
                 "example": {
@@ -2741,7 +2747,6 @@
                 }
               }
             }
-            "description": "Paginated list of reservations"
           },
           "401": {
             "description": "Unauthorized: Session login required"
@@ -2771,7 +2776,6 @@
         ],
         "responses": {
           "200": {
-            "description": "Inquiry details retrieved successfully"
             "description": "Reservation details retrieved successfully"
           },
           "401": {
@@ -3305,6 +3309,427 @@
           },
           "404": {
             "description": "Sell request or staff member not found"
+          }
+        }
+      }
+    },
+    "/api/back-in-stock-requests": {
+      "post": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "Submit customer back-in-stock notification request",
+        "description": "Public endpoint allowing customers to request notification when a currently sold out phone is back in stock. Rate limited by IP. No login required.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "phone_id",
+                  "customer_name",
+                  "phone_number"
+                ],
+                "properties": {
+                  "phone_id": {
+                    "type": "integer",
+                    "example": 101,
+                    "description": "ID of the sold-out phone"
+                  },
+                  "customer_name": {
+                    "type": "string",
+                    "example": "Kasun Perera",
+                    "description": "Customer full name (2-150 chars)"
+                  },
+                  "phone_number": {
+                    "type": "string",
+                    "example": "+94771234567",
+                    "description": "Phone or WhatsApp contact number (7-15 digits)"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "kasun@example.com",
+                    "description": "Optional email address"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "example": "Looking for 256GB Black",
+                    "description": "Optional customer notes"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Back-in-stock notification request received successfully"
+          },
+          "400": {
+            "description": "Validation Error: Missing required fields, invalid format, or phone is currently in stock or archived"
+          },
+          "404": {
+            "description": "Referenced phone not found"
+          },
+          "429": {
+            "description": "Too many requests from this IP. Rate limit exceeded."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "List back-in-stock requests",
+        "description": "Protected dashboard endpoint to list requests with pagination, searching, and filtering. Supports ?grouped=true for grouped view.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Pending",
+                "Contacted"
+              ]
+            }
+          },
+          {
+            "name": "phone_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "assigned_to_user_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "grouped",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of back-in-stock requests"
+          },
+          "401": {
+            "description": "Unauthorized: Session login required"
+          },
+          "403": {
+            "description": "Forbidden: Requires ADMIN or STAFF role"
+          }
+        }
+      }
+    },
+    "/api/back-in-stock-requests/grouped": {
+      "get": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "List back-in-stock requests grouped by phone",
+        "description": "Protected dashboard endpoint to list phones with waiting customer counts and request statistics.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of phones with waiting counts"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/back-in-stock-requests/phones/{phoneId}": {
+      "get": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "Retrieve waiting customers for a specific phone",
+        "description": "Protected dashboard endpoint to retrieve waiting customer contact details for a selected phone.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "phoneId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone details with waiting customer contact list"
+          },
+          "400": {
+            "description": "Invalid phone ID"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Phone not found"
+          }
+        }
+      }
+    },
+    "/api/back-in-stock-requests/{id}": {
+      "get": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "Retrieve complete request details by ID",
+        "description": "Protected dashboard endpoint to view individual request information including customer contact details and phone details.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request details retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid request ID"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Request not found"
+          }
+        }
+      }
+    },
+    "/api/back-in-stock-requests/{id}/status": {
+      "patch": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "Mark an individual request as Contacted",
+        "description": "Protected dashboard endpoint to update request status to Contacted. Derives staff attribution from session. Requires CSRF protection.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Contacted"
+                    ],
+                    "default": "Contacted"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "example": "Contacted customer on WhatsApp"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request marked as Contacted successfully"
+          },
+          "400": {
+            "description": "Invalid status value or ID parameter"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden or Invalid CSRF token"
+          },
+          "404": {
+            "description": "Request not found"
+          }
+        }
+      }
+    },
+    "/api/back-in-stock-requests/{id}/assign": {
+      "patch": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "Assign request to a staff member",
+        "description": "Protected dashboard endpoint to assign a back-in-stock request to an active staff member. Requires CSRF protection.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "assigned_to_user_id"
+                ],
+                "properties": {
+                  "assigned_to_user_id": {
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request assigned successfully"
+          },
+          "400": {
+            "description": "Invalid user ID or user is inactive"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden or Invalid CSRF token"
+          },
+          "404": {
+            "description": "Request or user not found"
           }
         }
       }

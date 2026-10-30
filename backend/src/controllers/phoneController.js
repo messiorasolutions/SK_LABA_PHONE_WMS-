@@ -102,9 +102,13 @@ class PhoneController {
         try {
             const { id } = req.params;
             const result = await phoneService.addStock(id, req.body || {});
+            let message = `Added ${result.added_quantity} units to '${result.name}'. Current stock is now ${result.current_stock}.`;
+            if (result.stock_restoration_alert) {
+                message += ` (${result.stock_restoration_alert.message})`;
+            }
             return res.status(200).json({
                 success: true,
-                message: `Added ${result.added_quantity} units to '${result.name}'. Current stock is now ${result.current_stock}.`,
+                message,
                 data: result
             });
         } catch (error) {

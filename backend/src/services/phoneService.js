@@ -3,10 +3,29 @@ const brandRepository = require('../repositories/brandRepository');
 const storageOptionRepository = require('../repositories/storageOptionRepository');
 const specificationRepository = require('../repositories/specificationRepository');
 const offerRepository = require('../repositories/offerRepository');
+const defaultBackInStockRequestRepository = require('../repositories/backInStockRequestRepository');
+const { calculatePhoneAvailability } = require('../utils/phoneAvailability');
 const installmentPlanService = require('./installmentPlanService');
 const AppError = require('../utils/customError');
 
 class PhoneService {
+    constructor({
+        phoneRepo = phoneRepository,
+        brandRepo = brandRepository,
+        storageRepo = storageOptionRepository,
+        specRepo = specificationRepository,
+        offerRepo = offerRepository,
+        installmentService = installmentPlanService,
+        backInStockRequestRepo = defaultBackInStockRequestRepository
+    } = {}) {
+        this.phoneRepository = phoneRepo;
+        this.brandRepository = brandRepo;
+        this.storageOptionRepository = storageRepo;
+        this.specificationRepository = specRepo;
+        this.offerRepository = offerRepo;
+        this.installmentPlanService = installmentService;
+        this.backInStockRequestRepository = backInStockRequestRepo;
+    }
     /**
      * Create a new phone record
      * @param {Object} data
@@ -14,7 +33,7 @@ class PhoneService {
      */
     async createPhone(data) {
         // Validate brand existence
-        const brand = await brandRepository.findById(data.brand_id);
+        const brand = await (this.brandRepository || brandRepository).findById(data.brand_id);
         if (!brand) {
             throw new AppError(`Brand with ID ${data.brand_id} not found.`, 404);
         }
@@ -27,17 +46,12 @@ class PhoneService {
             : (data.stock_quantity !== undefined ? Number(data.stock_quantity) : 5);
         const currentStock = data.current_stock !== undefined ? Number(data.current_stock) : 0;
 
-        // Auto-assign availability if not explicitly passed
-        let availability = data.availability ? data.availability.trim().toUpperCase() : null;
-        if (!availability) {
-            if (currentStock === 0) {
-                availability = 'SOLD_OUT';
-            } else if (currentStock <= lowStockLevel) {
-                availability = 'LOW_STOCK';
-            } else {
-                availability = 'IN_STOCK';
-            }
-        }
+        // Calculate availability according to unified business rules (preserving COMING_SOON when stock <= 0)
+        const availability = calculatePhoneAvailability(
+            currentStock,
+            lowStockLevel,
+            data.availability
+        );
 
         const status = data.status ? data.status.trim().toUpperCase() : 'DRAFT';
         const isArchived = data.is_archived !== undefined
@@ -65,7 +79,7 @@ class PhoneService {
             photos: Array.isArray(data.photos) ? data.photos : null
         };
 
-        const newPhone = await phoneRepository.create(phoneRecord);
+        const newPhone = await (this.phoneRepository || phoneRepository).create(phoneRecord);
         return newPhone;
     }
 
@@ -75,7 +89,7 @@ class PhoneService {
      * @returns {Promise<Array>}
      */
     async getAllPhones(filters = {}) {
-        return await phoneRepository.findAll(filters);
+        return await (this.phoneRepository || phoneRepository).findAll(filters);
     }
 
     /**
@@ -84,7 +98,7 @@ class PhoneService {
      * @returns {Promise<Array>}
      */
     async getStockList(filters = {}) {
-        return await phoneRepository.findAllStock(filters);
+        return await (this.phoneRepository || phoneRepository).findAllStock(filters);
     }
 
     /**
@@ -94,7 +108,8 @@ class PhoneService {
      * @returns {Promise<Object>}
      */
     async addStock(id, data = {}) {
-        const phone = await phoneRepository.findById(id);
+        const phoneRepo = this.phoneRepository || phoneRepository;
+        const phone = await phoneRepo.findById(id);
         if (!phone) {
             throw new AppError(`Phone with ID ${id} not found.`, 404);
         }
@@ -108,20 +123,47 @@ class PhoneService {
         const prevStock = Number(phone.current_stock || 0);
         const newStock = prevStock + addedQty;
 
-        // Auto-assign availability
-        let newAvailability = 'IN_STOCK';
-        if (newStock <= phone.low_stock_level) {
-            newAvailability = 'LOW_STOCK';
+        // Auto-assign availability according to unified business rules
+        const lowStockLevel = Number(phone.low_stock_level ?? 5);
+        const newAvailability = calculatePhoneAvailability(newStock, lowStockLevel, phone.availability);
+
+        const updated = await (this.phoneRepository || phoneRepository).addStock(id, addedQty, newAvailability);
+
+        // Detect genuine transition from SOLD_OUT to a purchasable state.
+        // newStock must be strictly > 0 for both IN_STOCK and LOW_STOCK so that a corrupt
+        // availability value of 'IN_STOCK' at zero stock never triggers a false alert.
+        const isRestoredFromSoldOut = (phone.availability === 'SOLD_OUT' || prevStock === 0) &&
+            ((newStock > 0 && newAvailability === 'IN_STOCK') || (newStock > 0 && newAvailability === 'LOW_STOCK'));
+
+        let waitingCustomersCount = 0;
+        let stockRestorationAlert = null;
+
+        const backInStockRepo = this.backInStockRequestRepository || defaultBackInStockRequestRepository;
+        if (isRestoredFromSoldOut && backInStockRepo && typeof backInStockRepo.countWaitingByPhoneId === 'function') {
+            try {
+                waitingCustomersCount = await backInStockRepo.countWaitingByPhoneId(id);
+                if (waitingCustomersCount > 0) {
+                    stockRestorationAlert = {
+                        phone_id: updated.phone_id,
+                        phone_name: updated.name,
+                        waiting_customers_count: waitingCustomersCount,
+                        message: `${waitingCustomersCount} customer${waitingCustomersCount === 1 ? ' is' : 's are'} waiting`
+                    };
+                }
+            } catch (err) { // eslint-disable-line no-unused-vars
+                // Preserve existing stock update behavior
+            }
         }
 
-        const updated = await phoneRepository.addStock(id, addedQty, newAvailability);
         return {
             ...updated,
             previous_stock: prevStock,
             added_quantity: addedQty,
             current_stock: newStock,
             reason: data.reason || 'RESTOCK',
-            notes: data.notes || null
+            notes: data.notes || null,
+            waiting_customers_count: waitingCustomersCount,
+            stock_restoration_alert: stockRestorationAlert
         };
     }
 
@@ -132,7 +174,8 @@ class PhoneService {
      * @returns {Promise<Object>}
      */
     async removeStock(id, data = {}) {
-        const phone = await phoneRepository.findById(id);
+        const phoneRepo = this.phoneRepository || phoneRepository;
+        const phone = await phoneRepo.findById(id);
         if (!phone) {
             throw new AppError(`Phone with ID ${id} not found.`, 404);
         }
@@ -151,15 +194,11 @@ class PhoneService {
 
         const newStock = prevStock - removedQty;
 
-        // Auto-assign availability: SOLD_OUT if 0, LOW_STOCK if <= threshold, else IN_STOCK
-        let newAvailability = 'IN_STOCK';
-        if (newStock === 0) {
-            newAvailability = 'SOLD_OUT';
-        } else if (newStock <= phone.low_stock_level) {
-            newAvailability = 'LOW_STOCK';
-        }
+        // Auto-assign availability according to unified business rules
+        const lowStockLevel = Number(phone.low_stock_level ?? 5);
+        const newAvailability = calculatePhoneAvailability(newStock, lowStockLevel, phone.availability);
 
-        const updated = await phoneRepository.removeStock(id, removedQty, newAvailability);
+        const updated = await (this.phoneRepository || phoneRepository).removeStock(id, removedQty, newAvailability);
         return {
             ...updated,
             previous_stock: prevStock,
@@ -177,13 +216,16 @@ class PhoneService {
      * @returns {Promise<Object>}
      */
     async markSoldOut(id, data = {}) {
-        const phone = await phoneRepository.findById(id);
+        const phoneRepo = this.phoneRepository || phoneRepository;
+        const phone = await phoneRepo.findById(id);
         if (!phone) {
             throw new AppError(`Phone with ID ${id} not found.`, 404);
         }
 
-        const resetQuantity = data.reset_quantity === true || data.reset_quantity === 'true';
-        const updated = await phoneRepository.markSoldOut(id, resetQuantity);
+        const resetQuantity = data.reset_quantity !== undefined
+            ? (data.reset_quantity === true || data.reset_quantity === 'true')
+            : true;
+        const updated = await (this.phoneRepository || phoneRepository).markSoldOut(id, resetQuantity);
         return updated;
     }
 
@@ -193,7 +235,7 @@ class PhoneService {
      * @returns {Promise<Array>}
      */
     async getArchivedPhones(filters = {}) {
-        return await phoneRepository.findAll({ ...filters, archived: true });
+        return await (this.phoneRepository || phoneRepository).findAll({ ...filters, archived: true });
     }
 
     /**
@@ -202,7 +244,8 @@ class PhoneService {
      * @returns {Promise<Object>}
      */
     async getPhoneById(id) {
-        const phone = await phoneRepository.findById(id);
+        const phoneRepo = this.phoneRepository || phoneRepository;
+        const phone = await phoneRepo.findById(id);
         if (!phone) {
             throw new AppError(`Phone with ID ${id} not found.`, 404);
         }
@@ -215,12 +258,12 @@ class PhoneService {
      * @returns {Promise<Object>}
      */
     async archivePhone(id) {
-        const existing = await phoneRepository.findById(id);
+        const existing = await (this.phoneRepository || phoneRepository).findById(id);
         if (!existing) {
             throw new AppError(`Phone with ID ${id} not found.`, 404);
         }
 
-        return await phoneRepository.archive(id);
+        return await (this.phoneRepository || phoneRepository).archive(id);
     }
 
     /**
@@ -230,12 +273,12 @@ class PhoneService {
      * @returns {Promise<Object>}
      */
     async restorePhone(id, restoreStatus = 'DRAFT') {
-        const existing = await phoneRepository.findById(id);
+        const existing = await (this.phoneRepository || phoneRepository).findById(id);
         if (!existing) {
             throw new AppError(`Phone with ID ${id} not found.`, 404);
         }
 
-        return await phoneRepository.restore(id, restoreStatus);
+        return await (this.phoneRepository || phoneRepository).restore(id, restoreStatus);
     }
 
     /**
@@ -245,13 +288,13 @@ class PhoneService {
      * @returns {Promise<Object>}
      */
     async updatePhone(id, data) {
-        const existing = await phoneRepository.findById(id);
+        const existing = await (this.phoneRepository || phoneRepository).findById(id);
         if (!existing) {
             throw new AppError(`Phone with ID ${id} not found.`, 404);
         }
 
         if (data.brand_id !== undefined) {
-            const brand = await brandRepository.findById(data.brand_id);
+            const brand = await (this.brandRepository || brandRepository).findById(data.brand_id);
             if (!brand) {
                 throw new AppError(`Brand with ID ${data.brand_id} not found.`, 404);
             }
@@ -267,6 +310,22 @@ class PhoneService {
             nextIsArchived = existing.is_archived ? 1 : 0;
         }
 
+        const nextLowStockLevel = data.low_stock_level !== undefined
+            ? Number(data.low_stock_level)
+            : (data.stock_quantity !== undefined ? Number(data.stock_quantity) : (existing.low_stock_level ?? existing.stock_quantity ?? 5));
+        const nextCurrentStock = data.current_stock !== undefined
+            ? Number(data.current_stock)
+            : Number(existing.current_stock ?? 0);
+        const explicitAvailability = data.availability !== undefined
+            ? data.availability.trim().toUpperCase()
+            : existing.availability;
+
+        const nextAvailability = calculatePhoneAvailability(
+            nextCurrentStock,
+            nextLowStockLevel,
+            explicitAvailability
+        );
+
         const merged = {
             name: data.name !== undefined ? data.name.trim() : existing.name,
             brand_id: data.brand_id !== undefined ? Number(data.brand_id) : existing.brand_id,
@@ -278,13 +337,9 @@ class PhoneService {
             warranty: data.warranty !== undefined ? (data.warranty ? data.warranty.trim() : null) : existing.warranty,
             accessory_ids: data.accessory_ids !== undefined ? data.accessory_ids : existing.accessory_ids,
             description: data.description !== undefined ? (data.description ? data.description.trim() : null) : existing.description,
-            low_stock_level: data.low_stock_level !== undefined
-                ? Number(data.low_stock_level)
-                : (data.stock_quantity !== undefined ? Number(data.stock_quantity) : (existing.low_stock_level ?? existing.stock_quantity ?? 5)),
-            current_stock: data.current_stock !== undefined
-                ? Number(data.current_stock)
-                : existing.current_stock,
-            availability: data.availability !== undefined ? data.availability.trim().toUpperCase() : existing.availability,
+            low_stock_level: nextLowStockLevel,
+            current_stock: nextCurrentStock,
+            availability: nextAvailability,
             installment_enabled: data.installment_enabled !== undefined ? Boolean(data.installment_enabled) : Boolean(existing.installment_enabled),
             installment_plan_ids: data.installment_plan_ids !== undefined ? data.installment_plan_ids : existing.installment_plan_ids,
             status: nextStatus,
@@ -292,8 +347,43 @@ class PhoneService {
             photos: data.photos !== undefined ? data.photos : existing.photos
         };
 
-        const updatedPhone = await phoneRepository.update(id, merged);
-        return updatedPhone;
+        const updatedPhone = await (this.phoneRepository || phoneRepository).update(id, merged);
+
+        // Detect genuine transition from SOLD_OUT to a purchasable state.
+        // newStock must be strictly > 0 for both IN_STOCK and LOW_STOCK so that a staff member
+        // who sets availability = 'IN_STOCK' while leaving current_stock at 0 never fires a
+        // false waiting-customer alert.
+        const prevStock = Number(existing.current_stock || 0);
+        const newStock = Number(merged.current_stock || 0);
+        const isRestoredFromSoldOut = (existing.availability === 'SOLD_OUT' || prevStock === 0) &&
+            ((newStock > 0 && merged.availability === 'IN_STOCK') || (newStock > 0 && merged.availability === 'LOW_STOCK')) &&
+            !(existing.availability === merged.availability && prevStock === newStock);
+
+        let waitingCustomersCount = 0;
+        let stockRestorationAlert = null;
+
+        const backInStockRepo = this.backInStockRequestRepository || defaultBackInStockRequestRepository;
+        if (isRestoredFromSoldOut && backInStockRepo && typeof backInStockRepo.countWaitingByPhoneId === 'function') {
+            try {
+                waitingCustomersCount = await backInStockRepo.countWaitingByPhoneId(id);
+                if (waitingCustomersCount > 0) {
+                    stockRestorationAlert = {
+                        phone_id: updatedPhone.phone_id,
+                        phone_name: updatedPhone.name,
+                        waiting_customers_count: waitingCustomersCount,
+                        message: `${waitingCustomersCount} customer${waitingCustomersCount === 1 ? ' is' : 's are'} waiting`
+                    };
+                }
+            } catch (err) { // eslint-disable-line no-unused-vars
+                // Preserve existing update phone behavior
+            }
+        }
+
+        return {
+            ...updatedPhone,
+            waiting_customers_count: waitingCustomersCount,
+            stock_restoration_alert: stockRestorationAlert
+        };
     }
 
     /**
@@ -302,12 +392,12 @@ class PhoneService {
      * @returns {Promise<Object>}
      */
     async deletePhone(id) {
-        const existing = await phoneRepository.findById(id);
+        const existing = await (this.phoneRepository || phoneRepository).findById(id);
         if (!existing) {
             throw new AppError(`Phone with ID ${id} not found.`, 404);
         }
 
-        await phoneRepository.delete(id);
+        await (this.phoneRepository || phoneRepository).delete(id);
         return {
             phone_id: Number(id),
             name: existing.name
@@ -343,7 +433,7 @@ class PhoneService {
         // Fetch phones
         const rawPhones = [];
         for (const phoneId of uniqueIds) {
-            const phone = await phoneRepository.findById(phoneId);
+            const phone = await (this.phoneRepository || phoneRepository).findById(phoneId);
             if (!phone) {
                 throw new AppError(`Phone with ID ${phoneId} was not found.`, 404);
             }
@@ -599,7 +689,7 @@ class PhoneService {
         const unavailableIds = [];
 
         for (const phoneId of uniqueIds) {
-            const phone = await phoneRepository.findById(phoneId);
+            const phone = await (this.phoneRepository || phoneRepository).findById(phoneId);
 
             // If phone doesn't exist, is archived, or status is ARCHIVED -> mark unavailable
             if (!phone || phone.is_archived || phone.status === 'ARCHIVED') {
@@ -683,3 +773,6 @@ class PhoneService {
 }
 
 module.exports = new PhoneService();
+module.exports.PhoneService = PhoneService;
+
+module.exports.calculatePhoneAvailability = calculatePhoneAvailability;

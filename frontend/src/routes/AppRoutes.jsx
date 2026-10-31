@@ -7,6 +7,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layout/MainLayout';
 import InquiriesPage from '../pages/InquiriesPage';
+import ReservationsPage from '../pages/ReservationsPage';
 import UsersPage from '../pages/UsersPage';
 import LoginPage from '../pages/auth/LoginPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
@@ -16,7 +17,7 @@ import { useAuth } from '../context/AuthContext';
 
 function DefaultRedirect() {
   const { isAdmin } = useAuth();
-  return <Navigate to={isAdmin ? '/users' : '/inquiries'} replace />;
+  return <Navigate to={isAdmin ? '/users' : '/reservations'} replace />;
 }
 
 export default function AppRoutes() {
@@ -62,6 +63,19 @@ export default function AppRoutes() {
         }
       />
 
+      {/* Reservation Management (SRS ST-07) */}
+      <Route
+        path="/reservations"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ReservationsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Customer Inquiries */}
       <Route
         path="/inquiries"
         element={
@@ -73,7 +87,7 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Default / Fallback Routes: Redirect to Users for Admin or Inquiries for Staff */}
+      {/* Default / Fallback Routes */}
       <Route
         path="/"
         element={

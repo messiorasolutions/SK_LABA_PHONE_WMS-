@@ -1,11 +1,15 @@
 import React from 'react';
-import { Phone, MessageCircle, MapPin, Clock, Mail, ShieldCheck } from 'lucide-react';
+import { Phone, MessageCircle, MapPin, Clock, Mail, ShieldCheck, MessageSquare } from 'lucide-react';
 import { STORE_INFO } from '../constants/siteConfig';
 
 export default function Footer() {
   const handleWhatsApp = () => {
     const clean = (STORE_INFO.whatsapp || '').replace(/\D/g, '');
     window.open(`https://wa.me/${clean}?text=Hello%20SK%20LABA%20PHONE!`, '_blank');
+  };
+
+  const handleOpenGeneralInquiry = () => {
+    window.dispatchEvent(new CustomEvent('sk_laba_open_inquiry_modal', { detail: { phone: null } }));
   };
 
   return (
@@ -23,14 +27,23 @@ export default function Footer() {
             <p className="text-xs text-theme-textMuted max-w-sm leading-relaxed">
               Leading provider of authentic flagship smartphones, verified pre-owned devices, and mobile accessories direct from South Korea to your doorstep.
             </p>
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex flex-wrap items-center gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={handleWhatsApp}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 text-xs font-semibold transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 text-xs font-semibold transition-colors cursor-pointer"
               >
                 <MessageCircle className="w-3.5 h-3.5" />
                 <span>WhatsApp Shop</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleOpenGeneralInquiry}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-sky-400 text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>Send Inquiry</span>
               </button>
 
               <a
@@ -109,4 +122,3 @@ export default function Footer() {
     </footer>
   );
 }
-

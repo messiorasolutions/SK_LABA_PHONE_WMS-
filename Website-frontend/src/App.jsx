@@ -7,6 +7,7 @@ import SmartphonesPage from './pages/SmartphonesPage';
 import FavoritesModal from './components/Modals/FavoritesModal';
 import PhoneDetailModal from './components/Modals/PhoneDetailModal';
 import ReservationModal from './components/Modals/ReservationModal';
+import InquiryModal from './components/Modals/InquiryModal';
 import { setActiveTab } from './actions/heroActions';
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
   const [favoritesModalOpen, setFavoritesModalOpen] = useState(false);
   const [selectedPhoneForDetail, setSelectedPhoneForDetail] = useState(null);
   const [selectedPhoneForReserve, setSelectedPhoneForReserve] = useState(null);
+  const [inquiryModalData, setInquiryModalData] = useState(null); // { phone: phoneObj | null } when open
 
   // Sync route / hash on initial mount and browser back/forward
   useEffect(() => {
@@ -37,10 +39,16 @@ export default function App() {
     const handleOpenFav = () => setFavoritesModalOpen(true);
     window.addEventListener('sk_laba_open_favorites_modal', handleOpenFav);
 
+    const handleOpenInquiry = (e) => {
+      setInquiryModalData({ phone: e.detail?.phone || null });
+    };
+    window.addEventListener('sk_laba_open_inquiry_modal', handleOpenInquiry);
+
     return () => {
       window.removeEventListener('hashchange', syncRoute);
       window.removeEventListener('popstate', syncRoute);
       window.removeEventListener('sk_laba_open_favorites_modal', handleOpenFav);
+      window.removeEventListener('sk_laba_open_inquiry_modal', handleOpenInquiry);
     };
   }, [dispatch]);
 
@@ -95,6 +103,10 @@ export default function App() {
             setSelectedPhoneForReserve(p);
             setSelectedPhoneForDetail(null);
           }}
+          onOpenInquiry={(p) => {
+            setInquiryModalData({ phone: p });
+            setSelectedPhoneForDetail(null);
+          }}
         />
       )}
 
@@ -103,6 +115,14 @@ export default function App() {
         <ReservationModal
           phone={selectedPhoneForReserve}
           onClose={() => setSelectedPhoneForReserve(null)}
+        />
+      )}
+
+      {/* Global Customer Inquiry Modal (PDF 1 / C-08) */}
+      {inquiryModalData && (
+        <InquiryModal
+          phone={inquiryModalData.phone}
+          onClose={() => setInquiryModalData(null)}
         />
       )}
     </div>

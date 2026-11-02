@@ -67,11 +67,6 @@ export default function HeroSection() {
                 Customer Reviews ↓
               </span>
             </button>
-          {/* Eyebrow / Tagline */}
-          <div className="inline-block mb-3.5">
-            <span className="text-[11px] sm:text-xs font-normal uppercase tracking-[0.22em] text-slate-300">
-              {HERO_CONTENT.eyebrow}
-            </span>
           </div>
 
           {/* Main Title: "Find Your Next Smartphone" - Clean white, non-bold, official */}

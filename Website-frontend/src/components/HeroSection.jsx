@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, ArrowRight, Star } from 'lucide-react';
+import { ShoppingCart, ArrowRight } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import mainBannerImg from '../assets/images/main.png';
 import { HERO_CONTENT } from '../constants/siteConfig';
@@ -43,30 +43,11 @@ export default function HeroSection() {
       {/* Hero Content Container */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="max-w-xl">
-          {/* Rating Proof Badge */}
-          <div className="flex items-center gap-3 mb-3.5 flex-wrap">
-            <div className="inline-block">
-              <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-theme-textSecondary">
-                {HERO_CONTENT.eyebrow}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                const el = document.getElementById('reviews');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md cursor-pointer transition-all group"
-              title="Read Customer Reviews"
-            >
-              <div className="flex items-center text-amber-400">
-                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              </div>
-              <span className="text-[11px] font-bold text-white">4.9/5</span>
-              <span className="text-[11px] text-slate-400 group-hover:text-amber-300 transition-colors">
-                Customer Reviews ↓
-              </span>
-            </button>
+          {/* Eyebrow / Tagline */}
+          <div className="mb-3.5">
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-theme-textSecondary">
+              {HERO_CONTENT.eyebrow}
+            </span>
           </div>
 
           {/* Main Title: "Find Your Next Smartphone" - Clean white, non-bold, official */}
@@ -81,18 +62,20 @@ export default function HeroSection() {
             <button
               type="button"
               onClick={handleShopSmartphones}
-              className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-theme-accent hover:bg-theme-accentHover text-white font-semibold text-sm md:text-base shadow-lg shadow-blue-600/35 transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
+              className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
             >
-              <ShoppingCart className="w-4 h-4" />
-              <span>{HERO_CONTENT.primaryBtnText}</span>
-              <ArrowRight className="w-4 h-4 ml-0.5" />
+              <span className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-black group-hover:bg-neutral-950 text-white font-normal text-sm md:text-base transition-colors duration-200">
+                <ShoppingCart className="w-4 h-4" />
+                <span>{HERO_CONTENT.primaryBtnText}</span>
+                <ArrowRight className="w-4 h-4 ml-0.5 group-hover:translate-x-0.5 transition-transform" />
+              </span>
             </button>
 
             {/* Secondary Action Button */}
             <button
               type="button"
               onClick={handleExploreDeals}
-              className="inline-flex items-center justify-center px-6 py-3.5 rounded-full bg-theme-input/70 hover:bg-theme-hover border border-theme-borderMedium hover:border-theme-borderLight text-white font-semibold text-sm md:text-base backdrop-blur-sm transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
+              className="inline-flex items-center justify-center px-6 py-3.5 rounded-full bg-black/60 hover:bg-black border border-white/15 hover:border-white/30 text-white font-normal text-sm md:text-base backdrop-blur-sm transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
             >
               {HERO_CONTENT.secondaryBtnText}
             </button>

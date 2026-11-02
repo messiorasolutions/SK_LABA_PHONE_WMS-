@@ -1,12 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { ArrowRight, Tag, Star, Quote, MessageSquareHeart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Tag, Star, MessageSquareHeart } from 'lucide-react';
 import HeroSection from '../components/HeroSection';
 import TrustBadges from '../components/TrustBadges';
 import { getActiveOffers } from '../services/offerService';
 import { reviewService } from '../services/reviewService';
 import { setActiveTab } from '../actions/heroActions';
 import upgradeVideo from '../assets/images/upgrade_vedio.mp4';
+
+function ReviewComment({ comment }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const isLong = comment && comment.length > 80;
+
+  if (!isLong) {
+    return <span>&ldquo;{comment}&rdquo;</span>;
+  }
+
+  return (
+    <span>
+      &ldquo;{isExpanded ? comment : `${comment.slice(0, 80)}...`}&rdquo;
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsExpanded(!isExpanded);
+        }}
+        className="text-slate-400 hover:text-white ml-2 text-xs font-normal not-italic underline cursor-pointer transition-colors inline-block"
+      >
+        {isExpanded ? 'See less' : 'See more..'}
+      </button>
+    </span>
+  );
+}
 
 export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenReview }) {
   const dispatch = useDispatch();
@@ -197,7 +222,7 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
             <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex justify-end">
               <div className="w-fit ml-auto md:w-auto max-w-[78%] sm:max-w-md lg:max-w-lg text-left space-y-2.5 sm:space-y-4 pt-6 sm:pt-8 md:pt-0 pointer-events-auto bg-black/50 md:bg-transparent backdrop-blur-xs md:backdrop-blur-none p-3.5 sm:p-4 md:p-0 rounded-2xl md:rounded-none">
                 
-                <h2 className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] sm:whitespace-nowrap">
+                <h2 className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-normal text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] sm:whitespace-nowrap">
                   Trade in. Upgrade.
                 </h2>
 
@@ -209,10 +234,10 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
                   <button
                     type="button"
                     onClick={handleOpenSell}
-                    className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3.5 rounded-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs sm:text-sm font-semibold shadow-xl shadow-blue-600/40 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 hover:border-white/40 text-white text-xs sm:text-sm font-normal backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
                   >
                     <span>Get your estimate</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                   </button>
                 </div>
 
@@ -223,26 +248,28 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       </section>
 
       {activeOffers.length > 0 && (
-        <section className="py-16 bg-[#040812] border-b border-theme-border/50">
+        <section className="py-16 bg-black border-b border-white/10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-red-400 mb-1 block">
+                <span className="text-xs font-normal uppercase tracking-wider text-theme-textSecondary mb-1 block">
                   Limited Time Deals
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                <h2 className="text-2xl sm:text-3xl font-normal text-white tracking-tight flex items-center gap-2">
                   <span>Current Special Offers</span>
-                  <Tag className="w-5 h-5 text-red-500" />
+                  <Tag className="w-5 h-5 text-theme-textSecondary" />
                 </h2>
               </div>
 
               <button
                 type="button"
                 onClick={handleGoToSmartphones}
-                className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-theme-input hover:bg-theme-hover border border-theme-border text-white text-xs font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                className="hidden sm:inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
               >
-                <span>View in Smartphones Page</span>
-                <ArrowRight className="w-4 h-4 text-theme-accent" />
+                <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                  <span>View in Smartphones Page</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </span>
               </button>
             </div>
 
@@ -250,44 +277,44 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
               {activeOffers.map((offer) => (
                 <div
                   key={offer.offer_id}
-                  className="bg-theme-surface border border-theme-border hover:border-red-500/40 rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-colors shadow-xl"
+                  className="bg-black border border-white/15 hover:border-white/30 rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 shadow-xl shadow-black/80"
                 >
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-3">
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-600/20 text-red-400 border border-red-500/30">
-                        {offer.discount_percentage ? `${offer.discount_percentage}% OFF` : 'SPECIAL DEAL'}
-                      </span>
-                      <span className="text-xs text-theme-textMuted">
-                        Active Promotion
-                      </span>
-                    </div>
-
-                    <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
-                      {offer.title}
-                    </h3>
-                    <p className="text-xs text-theme-textSecondary leading-relaxed mb-4">
-                      {offer.description}
-                    </p>
-
-                    <div className="flex items-baseline gap-3 mb-4">
-                      <span className="text-2xl font-black text-white">
-                        ${Number(offer.offer_price).toLocaleString()}
-                      </span>
-                      {offer.regular_price && (
-                        <span className="text-sm text-theme-textMuted line-through">
-                          ${Number(offer.regular_price).toLocaleString()}
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <span className="px-3 py-1 rounded-full text-xs font-normal bg-black text-slate-300 border border-white/15">
+                          {offer.discount_percentage ? `${offer.discount_percentage}% OFF` : 'SPECIAL DEAL'}
                         </span>
-                      )}
+                        <span className="text-xs text-theme-textMuted">
+                          Active Promotion
+                        </span>
+                      </div>
+
+                      <h3 className="text-lg sm:text-xl font-normal text-white mb-2">
+                        {offer.title}
+                      </h3>
+                      <p className="text-xs text-theme-textSecondary leading-relaxed mb-4 font-normal">
+                        {offer.description}
+                      </p>
+
+                      <div className="flex items-baseline gap-3 mb-4">
+                        <span className="text-2xl font-normal text-white">
+                          ${Number(offer.offer_price).toLocaleString()}
+                        </span>
+                        {offer.regular_price && (
+                          <span className="text-sm text-theme-textMuted line-through font-normal">
+                            ${Number(offer.regular_price).toLocaleString()}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
                   <button
                     type="button"
                     onClick={handleGoToSmartphones}
-                    className="w-full py-2.5 px-4 rounded-xl bg-theme-input hover:bg-theme-hover border border-theme-border text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                    className="w-full py-2.5 px-4 rounded-full bg-black hover:bg-neutral-900 border border-white/20 hover:border-white/40 text-white text-xs font-normal flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-black/60 group cursor-pointer"
                   >
                     <span>Discover Smartphones Catalog</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-sky-400" />
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:translate-x-0.5 transition-transform" />
                   </button>
                 </div>
               ))}
@@ -297,14 +324,14 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       )}
 
       {/* Customer Reviews Section */}
-      <section id="reviews" className="py-16 bg-[#030712] border-b border-theme-border/50 scroll-mt-24">
+      <section id="reviews" className="pt-16 pb-24 sm:pb-32 bg-black border-b border-white/10 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 sm:mb-14">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+              <h2 className="text-2xl sm:text-3xl font-normal text-white tracking-tight flex items-center gap-2.5">
                 <span>Verified Customer Reviews</span>
               </h2>
-              <p className="text-xs sm:text-sm text-theme-textSecondary mt-1">
+              <p className="text-xs sm:text-sm text-theme-textSecondary mt-2.5 leading-relaxed">
                 Real feedback from clients who purchased certified smartphones and traded devices with us.
               </p>
             </div>
@@ -312,122 +339,76 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
             <button
               type="button"
               onClick={handleOpenReviewModal}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer self-start sm:self-auto shrink-0"
+              className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer self-start sm:self-auto shrink-0"
             >
-              <MessageSquareHeart className="w-4 h-4" />
-              <span>Write a Review</span>
+              <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                <MessageSquareHeart className="w-4 h-4" />
+                <span>Write a Review</span>
+              </span>
             </button>
           </div>
 
           {reviewsLoading ? (
-            <div className="flex gap-5 overflow-hidden">
-              {[1, 2, 3].map((n) => (
-                <div
-                  key={n}
-                  className="min-w-[280px] sm:min-w-[340px] md:min-w-[380px] bg-theme-surface border border-theme-border rounded-3xl p-6 h-48 animate-pulse flex flex-col justify-between shrink-0"
-                >
-                  <div className="space-y-3">
-                    <div className="h-4 bg-white/10 rounded w-24" />
-                    <div className="h-3 bg-white/5 rounded w-full" />
-                    <div className="h-3 bg-white/5 rounded w-3/4" />
+            <div className="bg-black border border-white/10 rounded-2xl overflow-hidden shadow-xl shadow-black/80">
+              <div className="divide-y divide-white/10">
+                {[1, 2, 3].map((n) => (
+                  <div key={n} className="p-4 sm:p-5 flex items-center justify-between gap-4 animate-pulse">
+                    <div className="flex items-center gap-3 w-1/4">
+                      <div className="w-8 h-8 rounded-full bg-white/10 shrink-0" />
+                      <div className="h-3.5 bg-white/10 rounded w-24" />
+                    </div>
+                    <div className="h-3.5 bg-white/10 rounded w-20" />
+                    <div className="h-3.5 bg-white/5 rounded w-1/2" />
+                    <div className="h-3.5 bg-white/10 rounded w-16" />
                   </div>
-                  <div className="h-4 bg-white/10 rounded w-32" />
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           ) : reviews.length > 0 ? (
-            <>
-              <div
-                ref={reviewsCarouselRef}
-              onScroll={handleCarouselScroll}
-              className="flex items-stretch gap-5 sm:gap-6 overflow-x-auto scroll-smooth pb-2 pt-1 px-1 snap-x snap-mandatory [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-            >
-              {reviews.map((r) => (
-                <div
-                  key={r.review_id}
-                  className="min-w-[280px] sm:min-w-[340px] md:min-w-[380px] max-w-[380px] shrink-0 snap-start bg-theme-surface border border-theme-border hover:border-amber-500/40 rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all hover:-translate-y-1 shadow-lg hover:shadow-xl relative overflow-hidden group select-none"
-                >
-                  <Quote className="absolute right-4 bottom-4 w-16 h-16 text-white/[0.03] pointer-events-none group-hover:text-amber-500/[0.06] transition-colors" />
-
-                  <div className="space-y-3 relative z-10">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`w-4 h-4 ${
-                              star <= r.rating
-                                ? 'text-amber-400 fill-amber-400'
-                                : 'text-slate-600'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-[11px] text-theme-textMuted font-medium">
-                        {r.created_at ? new Date(r.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                      </span>
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal italic">
-                      &ldquo;{r.comment}&rdquo;
-                    </p>
-                  </div>
-
-                  <div className="pt-4 mt-4 border-t border-theme-border/60 flex items-center gap-2.5 relative z-10">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center uppercase shadow-sm">
-                      {(r.customer_name || 'C').charAt(0)}
-                    </div>
-                    <div className="text-xs font-bold text-white leading-tight">
-                      {r.customer_name}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Scroll navigation underneath the cards */}
-            {reviews.length > 1 && (
-              <div className="flex items-center justify-center gap-3 pt-6">
-                <button
-                  type="button"
-                  onClick={() => handleReviewsScroll('left')}
-                  className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 active:scale-95 text-white border border-white/10 transition-all cursor-pointer shadow-md hover:border-white/20"
-                  title="Scroll Left"
-                  aria-label="Scroll Left"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-
-                {/* Carousel Indicator Dots */}
-                <div className="flex items-center gap-2 px-2">
-                  {reviews.map((_, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => scrollToIndex(idx)}
-                      className={`transition-all duration-300 rounded-full cursor-pointer ${
-                        activeIndex === idx
-                          ? 'w-6 h-2 bg-gradient-to-r from-blue-500 to-indigo-500 shadow-sm shadow-blue-500/50'
-                          : 'w-2 h-2 bg-white/20 hover:bg-white/40'
-                      }`}
-                      title={`Go to review ${idx + 1}`}
-                      aria-label={`Go to review ${idx + 1}`}
-                    />
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleReviewsScroll('right')}
-                  className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 active:scale-95 text-white border border-white/10 transition-all cursor-pointer shadow-md hover:border-white/20"
-                  title="Scroll Right"
-                  aria-label="Scroll Right"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
+            <div className="bg-black border border-white/10 rounded-2xl overflow-hidden shadow-xl shadow-black/80">
+              <div className="max-h-[240px] sm:max-h-[250px] overflow-y-auto overflow-x-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-black [&::-webkit-scrollbar-thumb]:bg-white/20 hover:[&::-webkit-scrollbar-thumb]:bg-white/30 [&::-webkit-scrollbar-thumb]:rounded-full">
+                <table className="w-full text-left text-xs sm:text-sm text-slate-300">
+                  <tbody className="divide-y divide-white/10 font-normal">
+                    {reviews.map((r) => (
+                      <tr key={r.review_id} className="hover:bg-neutral-950 transition-colors">
+                        <td className="py-3.5 sm:py-4 px-4 sm:px-6 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full border border-white/20 bg-neutral-900 flex items-center justify-center text-white text-xs font-normal shrink-0">
+                              {(r.customer_name || 'C').charAt(0)}
+                            </div>
+                            <span className="text-white font-normal">{r.customer_name}</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 sm:py-4 px-4 sm:px-6 whitespace-nowrap">
+                          <div className="flex items-center gap-0.5 transform -skew-x-12">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`w-3 h-3 ${
+                                  star <= r.rating ? 'text-amber-600/90 fill-amber-600/90' : 'text-neutral-800 fill-neutral-900'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </td>
+                        <td className="py-3.5 sm:py-4 px-4 sm:px-6 min-w-[260px] max-w-xl text-slate-300 font-normal italic leading-relaxed">
+                          <ReviewComment comment={r.comment} />
+                        </td>
+                        <td className="py-3.5 sm:py-4 px-4 sm:px-6 whitespace-nowrap text-right text-[11px] text-theme-textMuted font-normal">
+                          {r.created_at
+                            ? new Date(r.created_at).toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })
+                            : ''}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            )}
-            </>
+            </div>
           ) : (
             <div className="text-center py-12 px-4 rounded-3xl border border-dashed border-theme-border/80 bg-theme-surface/50 max-w-xl mx-auto space-y-4">
 
@@ -440,9 +421,11 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
               <button
                 type="button"
                 onClick={handleOpenReviewModal}
-                className="px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md transition-all cursor-pointer"
+                className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
               >
-                Share Your Experience
+                <span className="inline-flex items-center px-5 py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                  Share Your Experience
+                </span>
               </button>
             </div>
           )}

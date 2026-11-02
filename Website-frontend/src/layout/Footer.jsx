@@ -22,24 +22,26 @@ export default function Footer({ onOpenSell }) {
   };
 
   return (
-    <footer className="w-full bg-[#03060E] border-t border-theme-border text-theme-textSecondary pt-12 pb-8">
+    <footer className="w-full bg-black border-t border-white/10 text-theme-textSecondary pt-12 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-theme-border/60">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-white/10">
           <div className="md:col-span-2 space-y-3">
-            <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <h3 className="text-xl font-normal text-white tracking-tight flex items-center gap-2">
               <span>{STORE_INFO.name}</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-600/20 text-sky-400 border border-blue-500/30">
-                {STORE_INFO.tagline}
+              <span className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-700/70 via-blue-800/70 to-blue-950/70 shadow-sm">
+                <span className="text-[10px] font-normal px-2 py-[1px] rounded-full bg-black text-slate-300 leading-tight">
+                  {STORE_INFO.tagline}
+                </span>
               </span>
             </h3>
-            <p className="text-xs text-theme-textMuted max-w-sm leading-relaxed">
+            <p className="text-xs text-theme-textMuted max-w-sm leading-relaxed font-normal">
               Leading provider of authentic flagship smartphones, verified pre-owned devices, and mobile accessories direct from South Korea to your doorstep.
             </p>
             <div className="flex flex-wrap items-center gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={handleWhatsApp}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-theme-border text-white text-xs font-semibold transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-900 border border-white/15 hover:border-white/30 text-white text-xs font-normal transition-all cursor-pointer shadow-sm"
               >
                 <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
                 <span>WhatsApp Shop</span>
@@ -48,27 +50,27 @@ export default function Footer({ onOpenSell }) {
               <button
                 type="button"
                 onClick={handleOpenGeneralInquiry}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-sky-400 text-xs font-semibold transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-900 border border-white/15 hover:border-white/30 text-white text-xs font-normal transition-all cursor-pointer shadow-sm"
               >
-                <MessageSquare className="w-3.5 h-3.5" />
+                <MessageSquare className="w-3.5 h-3.5 text-slate-300" />
                 <span>Send Inquiry</span>
               </button>
 
               <a
                 href={`tel:${STORE_INFO.phone}`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-theme-input hover:bg-theme-hover border border-theme-border text-white text-xs font-semibold transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-900 border border-white/15 hover:border-white/30 text-white text-xs font-normal transition-all shadow-sm"
               >
-                <Phone className="w-3.5 h-3.5 text-sky-400" />
+                <Phone className="w-3.5 h-3.5 text-slate-300" />
                 <span>Call {STORE_INFO.phone}</span>
               </a>
             </div>
           </div>
 
           <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">
+            <h4 className="text-xs font-normal text-white uppercase tracking-wider mb-3">
               Shop Categories
             </h4>
-            <ul className="space-y-2 text-xs">
+            <ul className="space-y-2 text-xs font-normal">
               <li>
                 <a href="#smartphones" className="hover:text-white transition-colors">
                   Flagship Smartphones
@@ -83,7 +85,7 @@ export default function Footer({ onOpenSell }) {
                 <button
                   type="button"
                   onClick={handleOpenSell}
-                  className="hover:text-emerald-400 transition-colors text-left"
+                  className="hover:text-emerald-400 transition-colors text-left cursor-pointer"
                 >
                   Sell Your Old Phone
                 </button>
@@ -102,23 +104,23 @@ export default function Footer({ onOpenSell }) {
           </div>
 
           <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">
+            <h4 className="text-xs font-normal text-white uppercase tracking-wider mb-3">
               Shop Information
             </h4>
-            <div className="space-y-2 text-xs">
+            <div className="space-y-2 text-xs font-normal">
               <div className="flex items-start gap-2 text-theme-textMuted">
-                <MapPin className="w-3.5 h-3.5 text-theme-accent shrink-0 mt-0.5" />
+                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
                 <span>{STORE_INFO.address}</span>
               </div>
               <div className="flex items-center gap-2 text-theme-textMuted">
-                <Clock className="w-3.5 h-3.5 text-theme-accent shrink-0" />
+                <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 <span>{STORE_INFO.openingHours}</span>
               </div>
               <div className="flex items-center gap-2 text-theme-textMuted">
-                <Mail className="w-3.5 h-3.5 text-theme-accent shrink-0" />
+                <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 <span>{STORE_INFO.email}</span>
               </div>
-              <div className="flex items-center gap-2 text-emerald-400 font-semibold pt-1">
+              <div className="flex items-center gap-2 text-emerald-400 font-normal pt-1">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Verified South Korea Warehouse</span>
               </div>
@@ -126,13 +128,13 @@ export default function Footer({ onOpenSell }) {
           </div>
         </div>
 
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-theme-textMuted">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-theme-textMuted font-normal">
           <div>
             &copy; {new Date().getFullYear()} {STORE_INFO.name}. All rights reserved.
           </div>
           <div className="flex items-center gap-4">
             <span className="text-[11px] text-theme-textMuted">Direct South Korea Import</span>
-            <span className="w-1 h-1 rounded-full bg-theme-border" />
+            <span className="w-1 h-1 rounded-full bg-white/20" />
             <span className="text-[11px] text-emerald-400">100% Genuine Devices</span>
           </div>
         </div>

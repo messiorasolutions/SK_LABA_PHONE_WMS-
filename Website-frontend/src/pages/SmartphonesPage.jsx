@@ -338,7 +338,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
             {/* Favourites Button */}
             <button
               type="button"
-              onClick={() => setFavoritesModalOpen((prev) => !prev)}
+              onClick={() => setFavoritesModalOpen(true)}
               className="px-3.5 py-2 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white text-xs font-medium flex items-center gap-2 transition-colors cursor-pointer"
             >
               <Heart className={`w-3.5 h-3.5 ${favoriteIds.length > 0 ? 'text-red-500 fill-current' : ''}`} />

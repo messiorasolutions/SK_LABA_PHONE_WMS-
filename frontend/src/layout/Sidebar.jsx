@@ -5,6 +5,10 @@ import {
   MessageSquare,
   CalendarClock,
   Shield,
+  Smartphone,
+  Package,
+  CreditCard,
+  Tag,
   LogOut,
   ArrowLeftRight,
   Star,
@@ -24,6 +28,18 @@ export default function Sidebar({ isOpen, onClose }) {
   };
 
   const isUsersActive = location.pathname.startsWith('/users');
+  const isPhoneManagementActive =
+    location.pathname.startsWith('/phone-management') || location.pathname.startsWith('/phones');
+  const isStockActive =
+    location.pathname.startsWith('/stock-management') ||
+    location.pathname.startsWith('/stock') ||
+    location.pathname.startsWith('/storage-management');
+  const isOffersActive =
+    location.pathname.startsWith('/offers') ||
+    location.pathname.startsWith('/offer-management');
+  const isInstallmentsActive =
+    location.pathname.startsWith('/installment-plans') ||
+    location.pathname.startsWith('/installments');
   const isReservationsActive = location.pathname.startsWith('/reservations');
   const isInquiriesActive = location.pathname.startsWith('/inquiries');
   const isSellRequestsActive = location.pathname.startsWith('/sell-requests');
@@ -128,6 +144,107 @@ export default function Sidebar({ isOpen, onClose }) {
               </NavLink>
             )}
 
+            {/* 2. Phone Management (ST-01, ST-02, ST-03, MG-01) */}
+            <NavLink
+              to="/phone-management"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
+                  isPhoneManagementActive
+                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
+                }`
+              }
+            >
+              {isPhoneManagementActive && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+              )}
+              <Smartphone
+                className={`w-4 h-4 shrink-0 transition-colors ${
+                  isPhoneManagementActive
+                    ? 'text-[#2563eb] dark:text-blue-400'
+                    : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                }`}
+              />
+              <span className="truncate">Phone Management</span>
+            </NavLink>
+
+            {/* 3. Stock Management (SRS ST-05) */}
+            <NavLink
+              to="/stock-management"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
+                  isStockActive
+                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
+                }`
+              }
+            >
+              {isStockActive && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+              )}
+              <Package
+                className={`w-4 h-4 shrink-0 transition-colors ${
+                  isStockActive
+                    ? 'text-[#2563eb] dark:text-blue-400'
+                    : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                }`}
+              />
+              <span className="truncate">Stock Management</span>
+            </NavLink>
+
+            {/* 4. Offers Management (SRS MG-03) */}
+            <NavLink
+              to="/offers"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
+                  isOffersActive
+                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
+                }`
+              }
+            >
+              {isOffersActive && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+              )}
+              <Tag
+                className={`w-4 h-4 shrink-0 transition-colors ${
+                  isOffersActive
+                    ? 'text-[#2563eb] dark:text-blue-400'
+                    : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                }`}
+              />
+              <span className="truncate">Offers Management</span>
+            </NavLink>
+
+            {/* 5. Installment Plans Management (SRS MG-11) */}
+            <NavLink
+              to="/installment-plans"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
+                  isInstallmentsActive
+                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
+                }`
+              }
+            >
+              {isInstallmentsActive && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+              )}
+              <CreditCard
+                className={`w-4 h-4 shrink-0 transition-colors ${
+                  isInstallmentsActive
+                    ? 'text-[#2563eb] dark:text-blue-400'
+                    : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                }`}
+              />
+              <span className="truncate">Installment Plans</span>
+            </NavLink>
+
+            {/* 6. Customer Reservations (SRS ST-07) */}
             <NavLink
               to="/reservations"
               onClick={onClose}
@@ -152,6 +269,7 @@ export default function Sidebar({ isOpen, onClose }) {
               <span className="truncate">Customer Reservations</span>
             </NavLink>
 
+            {/* 7. Customer Inquiries (SRS ST-06) */}
             <NavLink
               to="/inquiries"
               onClick={onClose}

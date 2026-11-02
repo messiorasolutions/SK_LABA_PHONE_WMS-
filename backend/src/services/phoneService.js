@@ -88,8 +88,30 @@ class PhoneService {
      * @param {Object} filters
      * @returns {Promise<Array>}
      */
+    /**
+     * Enrich phone with resolved storage options
+     * @param {Object} phone
+     * @returns {Promise<Object>}
+     */
+    async enrichPhone(phone) {
+        if (!phone) return null;
+        const storageRepo = this.storageOptionRepository || storageOptionRepository;
+        const storageIds = Array.isArray(phone.storage_ids) ? phone.storage_ids : [];
+        const storages = await storageRepo.findByIds(storageIds);
+        return {
+            ...phone,
+            storage_options: storages.map(s => ({
+                storage_id: s.storage_id,
+                storage_name: s.storage_name,
+                capacity_gb: s.capacity_gb,
+            })),
+            storage_names: storages.map(s => s.storage_name),
+        };
+    }
+
     async getAllPhones(filters = {}) {
-        return await (this.phoneRepository || phoneRepository).findAll(filters);
+        const rawPhones = await (this.phoneRepository || phoneRepository).findAll(filters);
+        return await Promise.all(rawPhones.map(p => this.enrichPhone(p)));
     }
 
     /**
@@ -98,7 +120,8 @@ class PhoneService {
      * @returns {Promise<Array>}
      */
     async getStockList(filters = {}) {
-        return await (this.phoneRepository || phoneRepository).findAllStock(filters);
+        const rawStock = await (this.phoneRepository || phoneRepository).findAllStock(filters);
+        return await Promise.all(rawStock.map(p => this.enrichPhone(p)));
     }
 
     /**
@@ -121,17 +144,64 @@ class PhoneService {
 
         const addedQty = Number(quantity);
         const prevStock = Number(phone.current_stock || 0);
-        const newStock = prevStock + addedQty;
+
+        let updatedColours = null;
+        let newStock = prevStock + addedQty;
+
+        if (phone.colour_options) {
+            let cols = phone.colour_options;
+            if (typeof cols === 'string') {
+                try { cols = JSON.parse(cols); } catch { cols = []; }
+            }
+            if (Array.isArray(cols) && cols.length > 0) {
+                const targetColor = data.color_name || (cols.length === 1 ? (cols[0].color_name || cols[0].name) : null);
+                const targetStorage = data.storage_name ? String(data.storage_name).trim() : null;
+
+                cols = cols.map((c, i) => {
+                    const colObj = typeof c === 'string'
+                        ? { name: c, color_name: c, color_code: '#4B5563', photos: [], quantity: 0, storage_quantities: {} }
+                        : { ...c };
+                    if (colObj.quantity === undefined || colObj.quantity === null) {
+                        colObj.quantity = (i === 0 ? prevStock : 0);
+                    } else {
+                        colObj.quantity = Number(colObj.quantity) || 0;
+                    }
+                    if (!colObj.storage_quantities || typeof colObj.storage_quantities !== 'object') {
+                        colObj.storage_quantities = {};
+                    }
+                    return colObj;
+                });
+
+                let targetCol = cols.find(c =>
+                    targetColor && ((c.name && c.name.toLowerCase() === targetColor.toLowerCase()) ||
+                    (c.color_name && c.color_name.toLowerCase() === targetColor.toLowerCase()))
+                ) || cols[0];
+
+                if (targetCol) {
+                    if (targetStorage) {
+                        targetCol.storage_quantities[targetStorage] = (Number(targetCol.storage_quantities[targetStorage]) || 0) + addedQty;
+                        targetCol.quantity = Object.values(targetCol.storage_quantities).reduce((a, b) => a + Number(b), 0);
+                    } else {
+                        targetCol.quantity = (Number(targetCol.quantity) || 0) + addedQty;
+                    }
+                }
+
+                updatedColours = cols;
+                newStock = cols.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0);
+            }
+        }
 
         // Auto-assign availability according to unified business rules
         const lowStockLevel = Number(phone.low_stock_level ?? 5);
         const newAvailability = calculatePhoneAvailability(newStock, lowStockLevel, phone.availability);
 
-        const updated = await (this.phoneRepository || phoneRepository).addStock(id, addedQty, newAvailability);
+        let updatedPhone;
+        if (updatedColours && typeof (this.phoneRepository || phoneRepository).updateStockWithColours === 'function') {
+            updatedPhone = await (this.phoneRepository || phoneRepository).updateStockWithColours(id, newStock, newAvailability, updatedColours);
+        } else {
+            updatedPhone = await (this.phoneRepository || phoneRepository).addStock(id, addedQty, newAvailability);
+        }
 
-        // Detect genuine transition from SOLD_OUT to a purchasable state.
-        // newStock must be strictly > 0 for both IN_STOCK and LOW_STOCK so that a corrupt
-        // availability value of 'IN_STOCK' at zero stock never triggers a false alert.
         const isRestoredFromSoldOut = (phone.availability === 'SOLD_OUT' || prevStock === 0) &&
             ((newStock > 0 && newAvailability === 'IN_STOCK') || (newStock > 0 && newAvailability === 'LOW_STOCK'));
 
@@ -144,19 +214,19 @@ class PhoneService {
                 waitingCustomersCount = await backInStockRepo.countWaitingByPhoneId(id);
                 if (waitingCustomersCount > 0) {
                     stockRestorationAlert = {
-                        phone_id: updated.phone_id,
-                        phone_name: updated.name,
+                        phone_id: updatedPhone.phone_id,
+                        phone_name: updatedPhone.name,
                         waiting_customers_count: waitingCustomersCount,
                         message: `${waitingCustomersCount} customer${waitingCustomersCount === 1 ? ' is' : 's are'} waiting`
                     };
                 }
-            } catch (err) { // eslint-disable-line no-unused-vars
+            } catch (err) {
                 // Preserve existing stock update behavior
             }
         }
 
         return {
-            ...updated,
+            ...updatedPhone,
             previous_stock: prevStock,
             added_quantity: addedQty,
             current_stock: newStock,
@@ -192,15 +262,73 @@ class PhoneService {
             throw new AppError(`Cannot deduct ${removedQty} units. Current stock is only ${prevStock}.`, 400);
         }
 
-        const newStock = prevStock - removedQty;
+        let updatedColours = null;
+        let newStock = prevStock - removedQty;
 
-        // Auto-assign availability according to unified business rules
+        if (phone.colour_options) {
+            let cols = phone.colour_options;
+            if (typeof cols === 'string') {
+                try { cols = JSON.parse(cols); } catch { cols = []; }
+            }
+            if (Array.isArray(cols) && cols.length > 0) {
+                const targetColor = data.color_name || (cols.length === 1 ? (cols[0].color_name || cols[0].name) : null);
+                const targetStorage = data.storage_name ? String(data.storage_name).trim() : null;
+
+                cols = cols.map((c, i) => {
+                    const colObj = typeof c === 'string'
+                        ? { name: c, color_name: c, color_code: '#4B5563', photos: [], quantity: 0, storage_quantities: {} }
+                        : { ...c };
+                    if (colObj.quantity === undefined || colObj.quantity === null) {
+                        colObj.quantity = (i === 0 ? prevStock : 0);
+                    } else {
+                        colObj.quantity = Number(colObj.quantity) || 0;
+                    }
+                    if (!colObj.storage_quantities || typeof colObj.storage_quantities !== 'object') {
+                        colObj.storage_quantities = {};
+                    }
+                    return colObj;
+                });
+
+                let targetCol = cols.find(c =>
+                    targetColor && ((c.name && c.name.toLowerCase() === targetColor.toLowerCase()) ||
+                    (c.color_name && c.color_name.toLowerCase() === targetColor.toLowerCase()))
+                ) || cols[0];
+
+                if (targetCol) {
+                    if (targetStorage) {
+                        const currentStorageStock = Number(targetCol.storage_quantities[targetStorage]) !== undefined && !isNaN(Number(targetCol.storage_quantities[targetStorage]))
+                            ? Number(targetCol.storage_quantities[targetStorage])
+                            : (targetCol.quantity || 0);
+
+                        if (currentStorageStock < removedQty) {
+                            throw new AppError(`Cannot deduct ${removedQty} units from '${targetCol.name} (${targetStorage})'. Available is only ${currentStorageStock}.`, 400);
+                        }
+                        targetCol.storage_quantities[targetStorage] = Math.max(0, currentStorageStock - removedQty);
+                        targetCol.quantity = Object.values(targetCol.storage_quantities).reduce((a, b) => a + Number(b), 0);
+                    } else {
+                        if (targetCol.quantity < removedQty) {
+                            throw new AppError(`Cannot deduct ${removedQty} units from color '${targetCol.name}'. Available is only ${targetCol.quantity}.`, 400);
+                        }
+                        targetCol.quantity = Math.max(0, (Number(targetCol.quantity) || 0) - removedQty);
+                    }
+                }
+
+                updatedColours = cols;
+                newStock = cols.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0);
+            }
+        }
+
         const lowStockLevel = Number(phone.low_stock_level ?? 5);
         const newAvailability = calculatePhoneAvailability(newStock, lowStockLevel, phone.availability);
 
-        const updated = await (this.phoneRepository || phoneRepository).removeStock(id, removedQty, newAvailability);
+        let updatedPhone;
+        if (updatedColours && typeof (this.phoneRepository || phoneRepository).updateStockWithColours === 'function') {
+            updatedPhone = await (this.phoneRepository || phoneRepository).updateStockWithColours(id, newStock, newAvailability, updatedColours);
+        } else {
+            updatedPhone = await (this.phoneRepository || phoneRepository).removeStock(id, removedQty, newAvailability);
+        }
         return {
-            ...updated,
+            ...updatedPhone,
             previous_stock: prevStock,
             removed_quantity: removedQty,
             current_stock: newStock,
@@ -211,9 +339,6 @@ class PhoneService {
 
     /**
      * Mark a phone as SOLD_OUT
-     * @param {number|string} id
-     * @param {Object} [data]
-     * @returns {Promise<Object>}
      */
     async markSoldOut(id, data = {}) {
         const phoneRepo = this.phoneRepository || phoneRepository;
@@ -249,7 +374,7 @@ class PhoneService {
         if (!phone) {
             throw new AppError(`Phone with ID ${id} not found.`, 404);
         }
-        return phone;
+        return await this.enrichPhone(phone);
     }
 
     /**

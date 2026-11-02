@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, AlertCircle } from 'lucide-react';
+import { X, Trash2, AlertCircle, Heart } from 'lucide-react';
 import { useFavoritesAndCompare } from '../../hooks/useFavoritesAndCompare';
 import phoneService from '../../services/phoneService';
 
@@ -13,6 +13,24 @@ export default function FavoritesModal({
   const [loading, setLoading] = useState(true);
   const [unavailableCount, setUnavailableCount] = useState(0);
 
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  // Lock body scroll while drawer is open
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+
   useEffect(() => {
     if (favoriteIds.length === 0) {
       setFavoritesList([]);
@@ -21,20 +39,60 @@ export default function FavoritesModal({
     }
 
     setLoading(true);
+    let isCancelled = false;
+
     phoneService
       .getFavorites(favoriteIds)
       .then((res) => {
-        if (res.data?.success && res.data?.data) {
-          setFavoritesList(res.data.data.items || []);
-          if (res.data.unavailable_ids?.length) {
-            setUnavailableCount(res.data.unavailable_ids.length);
-          }
+        if (isCancelled) return;
+        const raw = res.data?.data;
+        const items = Array.isArray(raw) ? raw : (Array.isArray(raw?.items) ? raw.items : []);
+        if (items.length > 0) {
+          setFavoritesList(items);
+          setLoading(false);
+        } else {
+          // Fallback to matching with getPhones
+          phoneService
+            .getPhones()
+            .then((allRes) => {
+              if (isCancelled) return;
+              const all = allRes.data?.data || allRes.data || [];
+              const matched = all.filter((p) => favoriteIds.includes(Number(p.phone_id || p.id)));
+              setFavoritesList(matched);
+            })
+            .catch(() => {
+              if (!isCancelled) setFavoritesList([]);
+            })
+            .finally(() => {
+              if (!isCancelled) setLoading(false);
+            });
+        }
+        if (res.data?.unavailable_ids?.length) {
+          setUnavailableCount(res.data.unavailable_ids.length);
         }
       })
       .catch((err) => {
-        console.error('Failed to load favorites', err);
-      })
-      .finally(() => setLoading(false));
+        if (isCancelled) return;
+        console.error('Failed to load favorites via getFavorites, falling back to getPhones', err);
+        phoneService
+          .getPhones()
+          .then((allRes) => {
+            if (isCancelled) return;
+            const all = allRes.data?.data || allRes.data || [];
+            const matched = all.filter((p) => favoriteIds.includes(Number(p.phone_id || p.id)));
+            setFavoritesList(matched);
+          })
+          .catch(() => {
+            if (!isCancelled) setFavoritesList([]);
+          })
+          .finally(() => {
+            if (!isCancelled) setLoading(false);
+          });
+      });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [favoriteIds]);
 
   return (
@@ -99,11 +157,12 @@ export default function FavoritesModal({
               )}
 
               {favoritesList.map((item) => {
-                const id = item.phone_id;
-                const regPrice = Number(item.regular_price || 0);
-                const effPrice = Number(item.effective_price || item.regular_price || 0);
-                const hasOffer = Boolean(item.active_offer?.has_active_offer);
+                const id = item.phone_id || item.id;
+                const regPrice = Number(item.regular_price || item.price || 0);
+                const effPrice = Number(item.effective_price || item.offer_price || item.price || 0);
+                const hasOffer = Boolean(item.active_offer?.has_active_offer || (item.regular_price && item.effective_price && item.effective_price < item.regular_price));
                 const isSoldOut = item.availability === 'SOLD_OUT';
+                const photo = item.main_photo || (Array.isArray(item.photos) && item.photos.length > 0 ? item.photos[0] : null) || item.image_url || '';
 
                 return (
                   <div
@@ -119,9 +178,9 @@ export default function FavoritesModal({
                       }}
                     >
                       <div className="w-14 h-14 bg-[#080D1A] rounded p-1 flex items-center justify-center shrink-0 border border-theme-border">
-                        {item.main_photo ? (
+                        {photo ? (
                           <img
-                            src={item.main_photo}
+                            src={photo}
                             alt={item.name}
                             className="max-h-full max-w-full object-contain"
                           />

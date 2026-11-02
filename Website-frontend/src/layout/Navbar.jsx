@@ -5,13 +5,25 @@ import logoImg from '../assets/images/logo.png';
 import { setActiveTab, setSearchQuery } from '../actions/heroActions';
 import { NAV_LINKS, STORE_INFO } from '../constants/siteConfig';
 import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
+import { useCart } from '../hooks/useCart';
 
-export default function Navbar({ onOpenFavorites, onOpenSell }) {
+export default function Navbar({ onOpenFavorites, onOpenCart }) {
   const dispatch = useDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const { favoriteIds } = useFavoritesAndCompare();
+  const { totalCount: cartTotalCount } = useCart();
 
-  const { activeTab, searchQuery, cartCount } = useSelector((state) => state.hero);
+  const { activeTab, searchQuery } = useSelector((state) => state.hero);
+
+  // Sync hash change on mount
+  // Track scroll position for sticky styling
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const handleHash = () => {
@@ -157,13 +169,13 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
             <button
               type="button"
               onClick={handleOpenFavorites}
-              className="relative p-2 rounded-full text-theme-textSecondary hover:text-red-400 hover:bg-white/5 transition-colors cursor-pointer"
+              className="relative p-2 rounded-full text-theme-textSecondary hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
               title="Saved Favourites (C-06)"
               aria-label="Favourites"
             >
-              <Heart className={`w-5 h-5 ${favoriteIds.length > 0 ? 'text-red-500 fill-current' : ''}`} />
+              <Heart className="w-5 h-5" />
               {favoriteIds.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center shadow-md animate-scale">
+                <span className="absolute -top-1 -right-1 bg-white/20 border border-white/30 text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center shadow-md animate-scale">
                   {favoriteIds.length}
                 </span>
               )}
@@ -180,13 +192,14 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
 
             <button
               type="button"
+              onClick={() => onOpenCart ? onOpenCart() : window.dispatchEvent(new CustomEvent('sk_laba_open_cart_modal'))}
               className="relative p-2 rounded-full text-theme-textSecondary hover:text-theme-textPrimary hover:bg-white/5 transition-colors cursor-pointer"
               title="Shopping Cart"
               aria-label="Shopping Cart"
             >
               <ShoppingCart className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 bg-theme-accent text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center shadow-md">
-                {cartCount}
+                {cartTotalCount}
               </span>
             </button>
 

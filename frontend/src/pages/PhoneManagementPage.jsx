@@ -11,6 +11,7 @@ import SpecificationModal from '../components/Modals/SpecificationModal';
 import PhoneModal from '../components/Modals/PhoneModal';
 import ConfirmDeleteModal from '../components/Modals/ConfirmDeleteModal';
 import DetailModal from '../components/Modals/DetailModal';
+import PhoneCompareModal from '../components/Modals/PhoneCompareModal';
 
 import {
   Smartphone,
@@ -23,9 +24,13 @@ import {
   Edit2,
   Trash2,
   Eye,
+  Scale,
+  Archive,
+  RotateCcw,
   CheckCircle2,
   AlertCircle,
   ChevronDown,
+  X,
 } from 'lucide-react';
 
 function PhoneThumbnail({ src, alt }) {
@@ -59,11 +64,31 @@ function PhoneThumbnail({ src, alt }) {
 }
 
 function BrandDisplay({ brandName }) {
+  const name = typeof brandName === 'string'
+    ? brandName
+    : (typeof brandName === 'object' && brandName ? (brandName.brand_name || brandName.name || '—') : '—');
   return (
     <span className="font-medium text-slate-700 dark:text-slate-300">
-      {brandName || '—'}
+      {name}
     </span>
   );
+}
+
+function getPhoneSubtitle(phone) {
+  const screen = typeof phone.screen_size === 'string' ? phone.screen_size : '6.7\"';
+  let storage = '';
+  if (Array.isArray(phone.storage_names) && phone.storage_names.length > 0) {
+    storage = phone.storage_names.map(s => typeof s === 'string' ? s : s?.name || '').filter(Boolean).join(', ');
+  } else if (Array.isArray(phone.storage_options) && phone.storage_options.length > 0) {
+    storage = phone.storage_options.map(s => s?.storage_name || (s?.capacity_gb ? `${s.capacity_gb}GB` : '')).filter(Boolean).join(', ');
+  } else if (typeof phone.storage_capacity === 'string') {
+    storage = phone.storage_capacity;
+  } else if (Array.isArray(phone.colour_options) && phone.colour_options.length > 0) {
+    const c0 = phone.colour_options[0];
+    if (typeof c0 === 'string') storage = c0;
+    else if (typeof c0 === 'object' && c0) storage = c0.color_name || c0.name || '';
+  }
+  return `${screen} · ${storage || '256GB'}`;
 }
 
 export default function PhoneManagementPage() {
@@ -88,6 +113,43 @@ export default function PhoneManagementPage() {
   const currentToast =
     phonesHook.toast || brandsHook.toast || storageHook.toast || specsHook.toast;
 
+  // Phone comparison state (SRS C-05)
+  const [selectedCompareIds, setSelectedCompareIds] = useState([]);
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+
+  const handleToggleCompare = (phoneId) => {
+    setSelectedCompareIds((prev) => {
+      if (prev.includes(phoneId)) {
+        return prev.filter((id) => id !== phoneId);
+      }
+      if (prev.length >= 3) {
+        phonesHook.showToast('You can compare a maximum of 3 smartphones at a time.', 'error');
+        return prev;
+      }
+      return [...prev, phoneId];
+    });
+  };
+
+  const handleRemoveCompare = (phoneId) => {
+    setSelectedCompareIds((prev) => prev.filter((id) => id !== phoneId));
+  };
+
+  const handleAddCompare = (phoneId) => {
+    setSelectedCompareIds((prev) => {
+      if (prev.includes(phoneId)) return prev;
+      if (prev.length >= 3) {
+        phonesHook.showToast('You can compare a maximum of 3 smartphones at a time.', 'error');
+        return prev;
+      }
+      return [...prev, phoneId];
+    });
+  };
+
+  const handleClearCompare = () => {
+    setSelectedCompareIds([]);
+  };
+
+  // Global detail modal state
   const [detailModal, setDetailModal] = useState({ isOpen: false, title: '', data: null });
   const openDetail = (title, data) => setDetailModal({ isOpen: true, title, data });
   const closeDetail = () => setDetailModal({ isOpen: false, title: '', data: null });
@@ -321,6 +383,22 @@ export default function PhoneManagementPage() {
               </div>
             </div>
 
+            {/* Compare Smartphones Button (SRS C-05) */}
+            <button
+              type="button"
+              onClick={() => setIsCompareModalOpen(true)}
+              className={`inline-flex items-center gap-1.5 px-3 py-2 border rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                selectedCompareIds.length > 0
+                  ? 'bg-blue-50 dark:bg-blue-950/60 text-[#2563EB] border-blue-200 dark:border-blue-800'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+              }`}
+              title="Compare smartphones side-by-side (SRS C-05)"
+            >
+              <Scale className="w-3.5 h-3.5" />
+              <span>Compare {selectedCompareIds.length > 0 ? `(${selectedCompareIds.length}/3)` : ''}</span>
+            </button>
+
+            {/* Quick Refresh */}
             <button
               onClick={() => phonesHook.handleRefresh()}
               className="p-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 rounded-lg transition-colors cursor-pointer"
@@ -347,7 +425,7 @@ export default function PhoneManagementPage() {
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40">
-                      <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px] w-12">#</th>
+                      <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px] w-36">ID</th>
                       <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Phone Model</th>
                       <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Brand</th>
                       <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Condition</th>
@@ -361,7 +439,7 @@ export default function PhoneManagementPage() {
                     {phonesHook.phones.map((phone, idx) => (
                       <tr key={phone.phone_id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
                         <td className="px-4 py-3 font-mono text-slate-400 dark:text-slate-500 text-xs">
-                          {phone.phone_id || idx + 1}
+                          SKLABA_Phone_{phone.phone_id || idx + 1}
                         </td>
 
                         <td className="px-4 py-3">
@@ -372,7 +450,7 @@ export default function PhoneManagementPage() {
                                 {phone.name}
                               </div>
                               <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
-                                {phone.screen_size || '6.7"'} · {phone.storage_capacity || phone.colour_options?.[0] || '256GB'}
+                                {getPhoneSubtitle(phone)}
                               </div>
                             </div>
                           </div>
@@ -407,25 +485,58 @@ export default function PhoneManagementPage() {
                         </td>
 
                         <td className="px-4 py-3">
-                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
-                            <span
-                              className={`inline-block rounded-full shrink-0 ${
-                                phone.status === 'PUBLISHED' ? 'bg-emerald-500' : 'bg-slate-400'
-                              }`}
-                              style={{
-                                borderRadius: '50%',
-                                width: '6px',
-                                height: '6px',
-                              }}
-                            />
-                            <span>{phone.status ? (phone.status.charAt(0) + phone.status.slice(1).toLowerCase()) : 'Published'}</span>
-                          </span>
+                          {phone.is_archived === 1 || phone.status === 'ARCHIVED' ? (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+                              <span
+                                className="inline-block rounded-full shrink-0 bg-amber-500"
+                                style={{
+                                  borderRadius: '50%',
+                                  width: '6px',
+                                  height: '6px',
+                                }}
+                              />
+                              <span>Archived</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                              <span
+                                className={`inline-block rounded-full shrink-0 ${
+                                  phone.status === 'PUBLISHED' ? 'bg-emerald-500' : 'bg-slate-400'
+                                }`}
+                                style={{
+                                  borderRadius: '50%',
+                                  width: '6px',
+                                  height: '6px',
+                                }}
+                              />
+                              <span>{phone.status ? (phone.status.charAt(0) + phone.status.slice(1).toLowerCase()) : 'Draft'}</span>
+                            </span>
+                          )}
                         </td>
 
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
+                            {/* Compare (SRS C-05) */}
                             <button
-                              onClick={() => openDetail(`Phone #${phone.phone_id}: ${phone.name}`, phone)}
+                              type="button"
+                              onClick={() => handleToggleCompare(phone.phone_id)}
+                              className={`p-1.5 border rounded-lg transition-colors cursor-pointer ${
+                                selectedCompareIds.includes(phone.phone_id)
+                                  ? 'bg-[#2563EB] text-white border-[#2563EB]'
+                                  : 'border-slate-100 dark:border-slate-800 text-slate-400 hover:text-[#2563EB] hover:bg-blue-50 dark:hover:bg-slate-800'
+                              }`}
+                              title={
+                                selectedCompareIds.includes(phone.phone_id)
+                                  ? 'Remove from comparison'
+                                  : 'Add to side-by-side comparison (SRS C-05)'
+                              }
+                            >
+                              <Scale className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* View */}
+                            <button
+                              onClick={() => openDetail(`SKLABA_Phone_${phone.phone_id}: ${phone.name}`, phone)}
                               className="p-1.5 border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                               title="View details"
                             >
@@ -440,6 +551,26 @@ export default function PhoneManagementPage() {
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
 
+                            {/* Archive / Restore (SRS MG-01) */}
+                            {phone.is_archived === 1 || phone.status === 'ARCHIVED' ? (
+                              <button
+                                onClick={() => phonesHook.setRestoringPhone(phone)}
+                                className="p-1.5 border border-amber-200 dark:border-amber-900/60 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors cursor-pointer"
+                                title="Restore to Draft (SRS MG-01)"
+                              >
+                                <RotateCcw className="w-3.5 h-3.5" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => phonesHook.setArchivingPhone(phone)}
+                                className="p-1.5 border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition-colors cursor-pointer"
+                                title="Archive phone (SRS MG-01)"
+                              >
+                                <Archive className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+
+                            {/* Delete */}
                             <button
                               onClick={() => phonesHook.setDeletingPhone(phone)}
                               className="p-1.5 border border-red-100 dark:border-red-950/60 text-red-500 bg-red-50 dark:bg-red-950/40 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors cursor-pointer"
@@ -497,7 +628,7 @@ export default function PhoneManagementPage() {
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40">
-                      <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">#</th>
+                      <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px] w-36">ID</th>
                       <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Brand Name</th>
                       <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Description</th>
                       <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Status</th>
@@ -508,7 +639,7 @@ export default function PhoneManagementPage() {
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {brandsHook.filteredBrands.map((brand) => (
                       <tr key={brand.brand_id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
-                        <td className="px-4 py-3 font-mono text-slate-400 dark:text-slate-500">{brand.brand_id}</td>
+                        <td className="px-4 py-3 font-mono text-slate-400 dark:text-slate-500">SKLABA_Brand_{brand.brand_id}</td>
                         <td className="px-4 py-3 font-semibold text-slate-800 dark:text-slate-100">{brand.brand_name}</td>
                         <td className="px-4 py-3 text-slate-500 dark:text-slate-400 max-w-xs truncate">{brand.description || '—'}</td>
                         <td className="px-4 py-3">
@@ -539,7 +670,7 @@ export default function PhoneManagementPage() {
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
-                              onClick={() => openDetail(`Brand #${brand.brand_id}: ${brand.brand_name}`, brand)}
+                              onClick={() => openDetail(`SKLABA_Brand_${brand.brand_id}: ${brand.brand_name}`, brand)}
                               className="p-1.5 border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-colors"
                               title="View details"
                             >
@@ -609,7 +740,7 @@ export default function PhoneManagementPage() {
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40">
-                      <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">#</th>
+                      <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px] w-36">ID</th>
                       <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Option Name</th>
                       <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Capacity</th>
                       <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Created At</th>
@@ -619,7 +750,7 @@ export default function PhoneManagementPage() {
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {storageHook.filteredStorage.map((s) => (
                       <tr key={s.storage_id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
-                        <td className="px-4 py-3 font-mono text-slate-400 dark:text-slate-500">{s.storage_id}</td>
+                        <td className="px-4 py-3 font-mono text-slate-400 dark:text-slate-500">SKLABA_Storage_{s.storage_id}</td>
                         <td className="px-4 py-3 font-semibold text-slate-800 dark:text-slate-100">{s.storage_name}</td>
                         <td className="px-4 py-3">
                           <span className="font-semibold text-xs text-[#2563EB] bg-blue-50 px-2 py-0.5 rounded-md">
@@ -630,7 +761,7 @@ export default function PhoneManagementPage() {
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
-                              onClick={() => openDetail(`Storage #${s.storage_id}: ${s.storage_name}`, s)}
+                              onClick={() => openDetail(`SKLABA_Storage_${s.storage_id}: ${s.storage_name}`, s)}
                               className="p-1.5 border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-colors"
                               title="View details"
                             >
@@ -716,7 +847,7 @@ export default function PhoneManagementPage() {
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40">
-                      <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">#</th>
+                      <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px] w-36">ID</th>
                       <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Spec Name</th>
                       <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Category Type</th>
                       <th className="px-4 py-3 font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Description</th>
@@ -727,7 +858,7 @@ export default function PhoneManagementPage() {
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {specsHook.filteredSpecs.map((spec) => (
                       <tr key={spec.specification_id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
-                        <td className="px-4 py-3 font-mono text-slate-400 dark:text-slate-500">{spec.specification_id}</td>
+                        <td className="px-4 py-3 font-mono text-slate-400 dark:text-slate-500">SKLABA_Spec_{spec.specification_id}</td>
                         <td className="px-4 py-3 font-semibold text-slate-800 dark:text-slate-100">{spec.specification_name}</td>
                         <td className="px-4 py-3">
                           <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
@@ -762,7 +893,7 @@ export default function PhoneManagementPage() {
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
-                              onClick={() => openDetail(`Spec #${spec.specification_id}: ${spec.specification_name}`, spec)}
+                              onClick={() => openDetail(`SKLABA_Spec_${spec.specification_id}: ${spec.specification_name}`, spec)}
                               className="p-1.5 border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-colors"
                               title="View details"
                             >
@@ -821,6 +952,33 @@ export default function PhoneManagementPage() {
         loading={phonesHook.submitting}
       />
 
+      {/* Archive Smartphone Modal (SRS MG-01) */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(phonesHook.archivingPhone)}
+        onClose={() => phonesHook.setArchivingPhone(null)}
+        onConfirm={() => phonesHook.handleArchivePhone(phonesHook.archivingPhone)}
+        title="Archive Smartphone"
+        subtitle="Hide from customer website"
+        message={`Archive "${phonesHook.archivingPhone?.name}"? It will be hidden from the website catalogue (SRS MG-01). You can restore it to Draft at any time.`}
+        confirmText="Archive Phone"
+        variant="warning"
+        loading={phonesHook.submitting}
+      />
+
+      {/* Restore Smartphone Modal (SRS MG-01) */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(phonesHook.restoringPhone)}
+        onClose={() => phonesHook.setRestoringPhone(null)}
+        onConfirm={() => phonesHook.handleRestorePhone(phonesHook.restoringPhone, 'DRAFT')}
+        title="Restore Smartphone"
+        subtitle="Restore to catalogue"
+        message={`Restore "${phonesHook.restoringPhone?.name}" to Draft status? It will become editable and can be published again (SRS MG-01).`}
+        confirmText="Restore to Draft"
+        variant="primary"
+        loading={phonesHook.submitting}
+      />
+
+      {/* ── MODALS: BRANDS ───────────────────────────────────────── */}
       <BrandModal
         isOpen={brandsHook.isAddOpen || Boolean(brandsHook.editingBrand)}
         onClose={() => {
@@ -899,6 +1057,69 @@ export default function PhoneManagementPage() {
         title={detailModal.title}
         data={detailModal.data}
       />
+
+      {/* ── PHONE COMPARISON MODAL (SRS C-05) ─────────────────────── */}
+      <PhoneCompareModal
+        isOpen={isCompareModalOpen}
+        onClose={() => setIsCompareModalOpen(false)}
+        phoneIds={selectedCompareIds}
+        onRemovePhone={handleRemoveCompare}
+        onAddPhone={handleAddCompare}
+        onClearAll={handleClearCompare}
+        allPhones={phonesHook.phones}
+      />
+
+      {/* ── FLOATING COMPARISON DOCK ───────────────────────────────── */}
+      {selectedCompareIds.length > 0 && !isCompareModalOpen && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl rounded-2xl px-5 py-3 flex items-center gap-4 animate-in slide-in-from-bottom-4">
+          <div className="flex items-center gap-2">
+            <Scale className="w-4 h-4 text-[#2563EB]" />
+            <span className="text-xs font-bold text-slate-900 dark:text-white">
+              Compare ({selectedCompareIds.length}/3)
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {selectedCompareIds.map((id) => {
+              const p = phonesHook.phones.find((item) => item.phone_id === id);
+              return (
+                <div
+                  key={id}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs text-slate-700 dark:text-slate-300"
+                >
+                  <span className="max-w-[110px] truncate font-medium">{p?.name || `Phone #${id}`}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCompare(id)}
+                    className="text-slate-400 hover:text-red-500 cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-700 pl-4">
+            <button
+              type="button"
+              onClick={() => setIsCompareModalOpen(true)}
+              disabled={selectedCompareIds.length < 2}
+              className="px-3.5 py-1.5 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-40 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors cursor-pointer"
+            >
+              Compare Now
+            </button>
+
+            <button
+              type="button"
+              onClick={handleClearCompare}
+              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer px-2 py-1"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -69,7 +69,7 @@ export const fetchPhones = (filters = {}) => {
 export const addPhone = (phoneData) => {
   return async (dispatch) => {
     if (!phoneData?.name || !phoneData?.brand_id || !phoneData?.price) {
-      const message = 'Phone name, brand and price are required.';
+      const message = 'Name, brand, and price are required.';
       dispatch({ type: PHONE_ADD_FAILURE, payload: message });
       return { success: false, error: message };
     }
@@ -78,13 +78,14 @@ export const addPhone = (phoneData) => {
 
     try {
       const response = await PhoneService.createPhone(phoneData);
+      const created = response.data?.data || response.data;
       dispatch({
         type: PHONE_ADD_SUCCESS,
-        payload: response.data?.data || phoneData,
+        payload: created,
       });
 
       dispatch(fetchPhones());
-      return { success: true, data: response.data };
+      return { success: true, data: created };
     } catch (err) {
       const message = logAndExtractError('Add phone', err);
       dispatch({ type: PHONE_ADD_FAILURE, payload: message });
@@ -105,13 +106,14 @@ export const updatePhone = (phoneId, phoneData) => {
 
     try {
       const response = await PhoneService.updatePhone(phoneId, phoneData);
+      const updated = response.data?.data || response.data;
       dispatch({
         type: PHONE_UPDATE_SUCCESS,
-        payload: response.data?.data || phoneData,
+        payload: updated,
       });
 
       dispatch(fetchPhones());
-      return { success: true, data: response.data };
+      return { success: true, data: updated };
     } catch (err) {
       const message = logAndExtractError('Update phone', err);
       dispatch({ type: PHONE_UPDATE_FAILURE, payload: message });
@@ -142,6 +144,42 @@ export const deletePhone = (phoneId) => {
     } catch (err) {
       const message = logAndExtractError('Delete phone', err);
       dispatch({ type: PHONE_DELETE_FAILURE, payload: message });
+      return { success: false, error: message };
+    }
+  };
+};
+
+export const archivePhone = (phoneId) => {
+  return async (dispatch) => {
+    if (!phoneId) {
+      return { success: false, error: 'Phone ID is required.' };
+    }
+
+    try {
+      const response = await PhoneService.archivePhone(phoneId);
+      const data = response.data?.data || response.data;
+      dispatch(fetchPhones());
+      return { success: true, data };
+    } catch (err) {
+      const message = logAndExtractError('Archive phone', err);
+      return { success: false, error: message };
+    }
+  };
+};
+
+export const restorePhone = (phoneId, restoreStatus = 'DRAFT') => {
+  return async (dispatch) => {
+    if (!phoneId) {
+      return { success: false, error: 'Phone ID is required.' };
+    }
+
+    try {
+      const response = await PhoneService.restorePhone(phoneId, restoreStatus);
+      const data = response.data?.data || response.data;
+      dispatch(fetchPhones());
+      return { success: true, data };
+    } catch (err) {
+      const message = logAndExtractError('Restore phone', err);
       return { success: false, error: message };
     }
   };

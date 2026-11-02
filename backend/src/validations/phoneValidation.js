@@ -62,8 +62,8 @@ function validateCreatePhone(req, res, next) {
     }
 
     // JSON array fields validation
-    if (storage_ids !== undefined && storage_ids !== null && !Array.isArray(storage_ids)) {
-        return next(new AppError('storage_ids must be an array of storage IDs.', 400));
+    if (!Array.isArray(storage_ids) || storage_ids.length === 0) {
+        return next(new AppError('At least one storage option is mandatory (storage_ids).', 400));
     }
 
     if (colour_options !== undefined && colour_options !== null && !Array.isArray(colour_options)) {

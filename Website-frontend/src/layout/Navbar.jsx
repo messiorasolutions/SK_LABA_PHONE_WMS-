@@ -32,6 +32,12 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
 
       if (hash === '#smartphones' || pathname === '/smartphones') {
         dispatch(setActiveTab('Smartphones'));
+      } else if (hash === '#reviews') {
+        dispatch(setActiveTab('Home'));
+        setTimeout(() => {
+          const el = document.getElementById('reviews');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       } else if (hash === '' || hash === '#' || hash === '#home' || pathname === '/') {
         dispatch(setActiveTab('Home'));
       }
@@ -54,6 +60,15 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
     if (tabName === 'Smartphones') {
       window.location.hash = '#smartphones';
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (tabName === 'Reviews') {
+      dispatch(setActiveTab('Home'));
+      window.location.hash = '#reviews';
+      setTimeout(() => {
+        const el = document.getElementById('reviews');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 50);
     } else if (tabName === 'Home') {
       window.location.hash = '';
       window.scrollTo({ top: 0, behavior: 'smooth' });

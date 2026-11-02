@@ -11,6 +11,7 @@ import {
   Tag,
   LogOut,
   ArrowLeftRight,
+  Star,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -42,6 +43,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const isReservationsActive = location.pathname.startsWith('/reservations');
   const isInquiriesActive = location.pathname.startsWith('/inquiries');
   const isSellRequestsActive = location.pathname.startsWith('/sell-requests');
+  const isReviewsActive = location.pathname.startsWith('/reviews');
 
   const displayName = user?.display_name || user?.name || 'Admin';
   const userInitial = displayName.charAt(0).toUpperCase();
@@ -113,6 +115,32 @@ export default function Sidebar({ isOpen, onClose }) {
                   }`}
                 />
                 <span className="truncate">User & Role Management</span>
+              </NavLink>
+            )}
+
+            {isAdmin && (
+              <NavLink
+                to="/reviews"
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
+                    isReviewsActive
+                      ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
+                  }`
+                }
+              >
+                {isReviewsActive && (
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+                )}
+                <Star
+                  className={`w-4 h-4 shrink-0 transition-colors ${
+                    isReviewsActive
+                      ? 'text-[#2563eb] dark:text-blue-400'
+                      : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                  }`}
+                />
+                <span className="truncate">Customer Reviews</span>
               </NavLink>
             )}
 

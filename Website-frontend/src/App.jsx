@@ -10,6 +10,7 @@ import ReservationModal from './components/Modals/ReservationModal';
 import InquiryModal from './components/Modals/InquiryModal';
 import CartModal from './components/Modals/CartModal';
 import SellPhoneModal from './components/Modals/SellPhoneModal';
+import ReviewModal from './components/Modals/ReviewModal';
 import { setActiveTab } from './actions/heroActions';
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
   const [selectedPhoneForReserve, setSelectedPhoneForReserve] = useState(null);
   const [inquiryModalData, setInquiryModalData] = useState(null);
   const [sellModalData, setSellModalData] = useState(null);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   useEffect(() => {
     const syncRoute = () => {
@@ -30,7 +32,7 @@ export default function App() {
 
       if (hash === '#smartphones' || pathname === '/smartphones') {
         dispatch(setActiveTab('Smartphones'));
-      } else if (hash === '' || hash === '#' || hash === '#home' || pathname === '/') {
+      } else if (hash === '' || hash === '#' || hash === '#home' || hash === '#reviews' || pathname === '/') {
         dispatch(setActiveTab('Home'));
       }
     };
@@ -59,6 +61,9 @@ export default function App() {
     };
     window.addEventListener('sk_laba_open_sell_modal', handleOpenSell);
 
+    const handleOpenReview = () => setReviewModalOpen(true);
+    window.addEventListener('sk_laba_open_review_modal', handleOpenReview);
+
     return () => {
       window.removeEventListener('hashchange', syncRoute);
       window.removeEventListener('popstate', syncRoute);
@@ -66,6 +71,7 @@ export default function App() {
       window.removeEventListener('sk_laba_open_cart_modal', handleOpenCart);
       window.removeEventListener('sk_laba_open_inquiry_modal', handleOpenInquiry);
       window.removeEventListener('sk_laba_open_sell_modal', handleOpenSell);
+      window.removeEventListener('sk_laba_open_review_modal', handleOpenReview);
     };
   }, [dispatch]);
 
@@ -92,7 +98,7 @@ export default function App() {
         {isSmartphonesPage ? (
           <SmartphonesPage onNavigateToHome={handleNavigateToHome} />
         ) : (
-          <HomePage onNavigateToSmartphones={handleNavigateToSmartphones} onOpenSell={() => setSellModalData({})} />
+          <HomePage onNavigateToSmartphones={handleNavigateToSmartphones} onOpenSell={() => setSellModalData({})} onOpenReview={() => setReviewModalOpen(true)} />
         )}
       </main>
 
@@ -162,6 +168,15 @@ export default function App() {
         <SellPhoneModal
           desiredPhone={sellModalData.desiredPhone}
           onClose={() => setSellModalData(null)}
+        />
+      )}
+
+      {reviewModalOpen && (
+        <ReviewModal
+          onClose={() => setReviewModalOpen(false)}
+          onSuccess={() => {
+            window.dispatchEvent(new CustomEvent('sk_laba_review_submitted'));
+          }}
         />
       )}
     </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, ArrowRight } from 'lucide-react';
+import { ShoppingCart, ArrowRight, Star } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import mainBannerImg from '../assets/images/main.png';
 import { HERO_CONTENT } from '../constants/siteConfig';
@@ -43,6 +43,30 @@ export default function HeroSection() {
       {/* Hero Content Container */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="max-w-xl">
+          {/* Rating Proof Badge */}
+          <div className="flex items-center gap-3 mb-3.5 flex-wrap">
+            <div className="inline-block">
+              <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-theme-textSecondary">
+                {HERO_CONTENT.eyebrow}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById('reviews');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md cursor-pointer transition-all group"
+              title="Read Customer Reviews"
+            >
+              <div className="flex items-center text-amber-400">
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              </div>
+              <span className="text-[11px] font-bold text-white">4.9/5</span>
+              <span className="text-[11px] text-slate-400 group-hover:text-amber-300 transition-colors">
+                Customer Reviews ↓
+              </span>
+            </button>
           {/* Eyebrow / Tagline */}
           <div className="inline-block mb-3.5">
             <span className="text-[11px] sm:text-xs font-normal uppercase tracking-[0.22em] text-slate-300">

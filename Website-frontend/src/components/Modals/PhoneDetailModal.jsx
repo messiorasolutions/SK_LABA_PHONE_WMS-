@@ -629,9 +629,20 @@ export default function PhoneDetailModal({
                   {isVariantSoldOut ? (
                     <button
                       type="button"
-                      onClick={() => onOpenNotifyBackInStock && onOpenNotifyBackInStock({ ...phone, color_name: selectedColor, storage_name: selectedStorage })}
+                      onClick={() =>
+                        onOpenNotifyBackInStock &&
+                        onOpenNotifyBackInStock({
+                          ...phone,
+                          color_name: selectedColor,
+                          storage_name: selectedStorage,
+                        })
+                      }
                       className="w-full py-2.5 px-3 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white font-medium text-xs transition-all cursor-pointer text-center truncate"
-                      title={`Notify Me When ${selectedColor} (${selectedStorage}) is Back in Stock`}
+                      title={
+                        isSoldOut
+                          ? 'This device is sold out. Click to get notified when back in stock.'
+                          : `Notify me when ${selectedColor} (${selectedStorage}) is back in stock`
+                      }
                     >
                       Notify When Available
                     </button>

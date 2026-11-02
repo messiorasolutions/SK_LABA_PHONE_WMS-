@@ -12,6 +12,7 @@ import {
   LogOut,
   ArrowLeftRight,
   Star,
+  BellRing,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -43,6 +44,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const isReservationsActive = location.pathname.startsWith('/reservations');
   const isInquiriesActive = location.pathname.startsWith('/inquiries');
   const isSellRequestsActive = location.pathname.startsWith('/sell-requests');
+  const isBackInStockActive = location.pathname.startsWith('/back-in-stock') || location.pathname.startsWith('/dashboard/back-in-stock');
   const isReviewsActive = location.pathname.startsWith('/reviews');
 
   const displayName = user?.display_name || user?.name || 'Admin';
@@ -316,6 +318,31 @@ export default function Sidebar({ isOpen, onClose }) {
                 }`}
               />
               <span className="truncate">Sell / Trade-In Requests</span>
+            </NavLink>
+
+            {/* 9. Back-in-Stock Requests (SRS ST-08) */}
+            <NavLink
+              to="/back-in-stock"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
+                  isBackInStockActive
+                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
+                }`
+              }
+            >
+              {isBackInStockActive && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+              )}
+              <BellRing
+                className={`w-4 h-4 shrink-0 transition-colors ${
+                  isBackInStockActive
+                    ? 'text-[#2563eb] dark:text-blue-400'
+                    : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                }`}
+              />
+              <span className="truncate">Back-in-Stock Alerts</span>
             </NavLink>
           </nav>
         </div>

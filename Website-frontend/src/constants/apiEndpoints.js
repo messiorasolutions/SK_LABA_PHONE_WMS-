@@ -32,6 +32,9 @@ export const API_ENDPOINTS = {
   reviews: {
     base: '/api/reviews',
   },
+  backInStockRequests: {
+    base: '/api/back-in-stock-requests',
+  },
   offers: {
     base: '/api/offers',
     active: '/api/offers/active',

@@ -11,6 +11,7 @@ import InquiryModal from './components/Modals/InquiryModal';
 import CartModal from './components/Modals/CartModal';
 import SellPhoneModal from './components/Modals/SellPhoneModal';
 import ReviewModal from './components/Modals/ReviewModal';
+import BackInStockModal from './components/Modals/BackInStockModal';
 import { setActiveTab } from './actions/heroActions';
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
   const [inquiryModalData, setInquiryModalData] = useState(null);
   const [sellModalData, setSellModalData] = useState(null);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedPhoneForBackInStock, setSelectedPhoneForBackInStock] = useState(null);
 
   useEffect(() => {
     const syncRoute = () => {
@@ -64,6 +66,11 @@ export default function App() {
     const handleOpenReview = () => setReviewModalOpen(true);
     window.addEventListener('sk_laba_open_review_modal', handleOpenReview);
 
+    const handleOpenBackInStock = (e) => {
+      setSelectedPhoneForBackInStock(e?.detail?.phone || null);
+    };
+    window.addEventListener('sk_laba_open_back_in_stock_modal', handleOpenBackInStock);
+
     return () => {
       window.removeEventListener('hashchange', syncRoute);
       window.removeEventListener('popstate', syncRoute);
@@ -72,6 +79,7 @@ export default function App() {
       window.removeEventListener('sk_laba_open_inquiry_modal', handleOpenInquiry);
       window.removeEventListener('sk_laba_open_sell_modal', handleOpenSell);
       window.removeEventListener('sk_laba_open_review_modal', handleOpenReview);
+      window.removeEventListener('sk_laba_open_back_in_stock_modal', handleOpenBackInStock);
     };
   }, [dispatch]);
 
@@ -147,6 +155,10 @@ export default function App() {
             setSellModalData({ desiredPhone: p });
             setSelectedPhoneForDetail(null);
           }}
+          onOpenNotifyBackInStock={(p) => {
+            setSelectedPhoneForBackInStock(p);
+            setSelectedPhoneForDetail(null);
+          }}
         />
       )}
 
@@ -177,6 +189,13 @@ export default function App() {
           onSuccess={() => {
             window.dispatchEvent(new CustomEvent('sk_laba_review_submitted'));
           }}
+        />
+      )}
+
+      {selectedPhoneForBackInStock && (
+        <BackInStockModal
+          phone={selectedPhoneForBackInStock}
+          onClose={() => setSelectedPhoneForBackInStock(null)}
         />
       )}
     </div>

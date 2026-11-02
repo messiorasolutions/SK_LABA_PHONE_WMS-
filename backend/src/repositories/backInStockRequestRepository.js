@@ -36,7 +36,10 @@ class BackInStockRequestRepository {
             email: row.email || null,
             status: row.status,
             notes: row.notes || null,
+            phone_name: row.phone_name || null,
+            brand_name: row.phone_brand_name || null,
             assigned_to_user_id: row.assigned_to_user_id || null,
+            assigned_staff_name: row.assigned_staff_name || null,
             assigned_staff: row.assigned_to_user_id ? {
                 user_id: row.assigned_to_user_id,
                 display_name: row.assigned_staff_name || null,

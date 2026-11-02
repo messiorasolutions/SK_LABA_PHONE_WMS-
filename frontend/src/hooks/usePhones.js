@@ -5,6 +5,8 @@ import {
   addPhone,
   updatePhone,
   deletePhone,
+  archivePhone,
+  restorePhone,
   findPhoneById,
 } from '../actions/phoneActions';
 import { fetchBrands } from '../actions/brandActions';
@@ -42,6 +44,8 @@ export default function usePhones() {
   const [editingPhone, setEditingPhone] = useState(null);
   const [detailPhone, setDetailPhone] = useState(null);
   const [deletingPhone, setDeletingPhone] = useState(null);
+  const [archivingPhone, setArchivingPhone] = useState(null);
+  const [restoringPhone, setRestoringPhone] = useState(null);
 
   const [toast, setToast] = useState(null);
 
@@ -51,15 +55,23 @@ export default function usePhones() {
   }, []);
 
   const loadPhones = useCallback(() => {
-    dispatch(
-      fetchPhones({
-        search: searchTerm || undefined,
-        brand_id: brandFilter || undefined,
-        status: statusFilter || undefined,
-        phone_condition: conditionFilter || undefined,
-        availability: availabilityFilter || undefined,
-      })
-    );
+    const filters = {
+      search: searchTerm || undefined,
+      brand_id: brandFilter || undefined,
+      phone_condition: conditionFilter || undefined,
+      availability: availabilityFilter || undefined,
+    };
+
+    if (statusFilter === 'ARCHIVED') {
+      filters.status = 'ARCHIVED';
+    } else if (statusFilter) {
+      filters.status = statusFilter;
+    } else {
+      // By default in admin dashboard, include archived so user can see all status options
+      filters.include_archived = true;
+    }
+
+    dispatch(fetchPhones(filters));
   }, [dispatch, searchTerm, brandFilter, statusFilter, conditionFilter, availabilityFilter]);
 
   useEffect(() => {
@@ -99,6 +111,7 @@ export default function usePhones() {
     if (res?.success) {
       showToast(`Phone "${data.name}" added to inventory!`);
       setIsAddOpen(false);
+      loadPhones();
     } else {
       showToast(res?.error || 'Failed to add phone', 'error');
     }
@@ -110,6 +123,7 @@ export default function usePhones() {
     if (res?.success) {
       showToast(`Phone #${id} updated successfully!`);
       setEditingPhone(null);
+      loadPhones();
     } else {
       showToast(res?.error || 'Failed to update phone', 'error');
     }
@@ -121,14 +135,44 @@ export default function usePhones() {
     if (res?.success) {
       showToast('Phone deleted successfully!');
       setDeletingPhone(null);
+      loadPhones();
     } else {
       showToast(res?.error || 'Failed to delete phone', 'error');
     }
     return res;
   };
 
+  const handleArchivePhone = async (phone) => {
+    const id = phone?.phone_id;
+    if (!id) return;
+    const res = await dispatch(archivePhone(id));
+    if (res?.success) {
+      showToast(`Phone "${phone.name || id}" archived successfully (hidden from website)`);
+      setArchivingPhone(null);
+      loadPhones();
+    } else {
+      showToast(res?.error || 'Failed to archive phone', 'error');
+    }
+    return res;
+  };
+
+  const handleRestorePhone = async (phone, restoreStatus = 'DRAFT') => {
+    const id = phone?.phone_id;
+    if (!id) return;
+    const res = await dispatch(restorePhone(id, restoreStatus));
+    if (res?.success) {
+      showToast(`Phone "${phone.name || id}" restored to ${restoreStatus}`);
+      setRestoringPhone(null);
+      loadPhones();
+    } else {
+      showToast(res?.error || 'Failed to restore phone', 'error');
+    }
+    return res;
+  };
+
   const publishedCount = phones.filter((p) => p.status === 'PUBLISHED').length;
   const inStockCount = phones.filter((p) => p.availability === 'IN_STOCK').length;
+  const archivedCount = phones.filter((p) => p.status === 'ARCHIVED' || p.is_archived === 1).length;
 
   return {
     phones,
@@ -141,6 +185,7 @@ export default function usePhones() {
     totalCount: phones.length,
     publishedCount,
     inStockCount,
+    archivedCount,
     searchTerm,
     setSearchTerm,
     brandFilter,
@@ -162,6 +207,10 @@ export default function usePhones() {
     setDetailPhone,
     deletingPhone,
     setDeletingPhone,
+    archivingPhone,
+    setArchivingPhone,
+    restoringPhone,
+    setRestoringPhone,
     toast,
     showToast,
     handleRefresh,
@@ -169,5 +218,7 @@ export default function usePhones() {
     handleAddPhone,
     handleUpdatePhone,
     handleDeletePhone,
+    handleArchivePhone,
+    handleRestorePhone,
   };
 }

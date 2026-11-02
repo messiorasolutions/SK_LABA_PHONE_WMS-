@@ -74,7 +74,7 @@ function PhoneModal({ open, onClose, onSubmit, initial, loading, brands }) {
         warranty: initial.warranty || '',
         description: initial.description || '',
         colour_options: Array.isArray(initial.colour_options)
-          ? initial.colour_options.join(', ')
+          ? initial.colour_options.map(c => typeof c === 'object' ? (c.color_name || c.name || '') : c).join(', ')
           : initial.colour_options || '',
         installment_enabled: !!initial.installment_enabled,
       })

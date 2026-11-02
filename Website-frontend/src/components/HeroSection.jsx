@@ -45,23 +45,16 @@ export default function HeroSection() {
         <div className="max-w-xl">
           {/* Eyebrow / Tagline */}
           <div className="inline-block mb-3.5">
-            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-theme-textSecondary">
+            <span className="text-[11px] sm:text-xs font-normal uppercase tracking-[0.22em] text-slate-300">
               {HERO_CONTENT.eyebrow}
             </span>
           </div>
 
-          {/* Main Title: "Find Your Next" (White) + "Smartphone" (Electric Sky/Cyan Glow) */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-theme-textPrimary tracking-tight leading-[1.08] mb-5">
-            {HERO_CONTENT.headlineWhite} <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-sky-300 to-blue-400 drop-shadow-[0_0_24px_rgba(56,189,248,0.35)]">
-              {HERO_CONTENT.headlineAccent}
-            </span>
+          {/* Main Title: "Find Your Next Smartphone" - Clean white, non-bold, official */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-normal text-white tracking-tight leading-[1.12] mb-8">
+            Find Your Next <br />
+            Smartphone
           </h1>
-
-          {/* Subtitle Description */}
-          <p className="text-sm sm:text-base md:text-lg text-theme-textSecondary font-normal leading-relaxed max-w-lg mb-8">
-            {HERO_CONTENT.description}
-          </p>
 
           {/* Action CTA Buttons */}
           <div className="flex flex-wrap items-center gap-4">

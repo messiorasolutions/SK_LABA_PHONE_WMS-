@@ -270,6 +270,18 @@ class PhoneRepository {
      * @param {string} newAvailability
      * @returns {Promise<Object>}
      */
+    async updateStockWithColours(phone_id, newTotalStock, newAvailability, updatedColourOptions) {
+        const query = `
+            UPDATE phones 
+            SET current_stock = ?,
+                availability = ?,
+                colour_options = ?
+            WHERE phone_id = ?
+        `;
+        await pool.execute(query, [newTotalStock, newAvailability, JSON.stringify(updatedColourOptions), phone_id]);
+        return this.findById(phone_id);
+    }
+
     async addStock(phone_id, quantity, newAvailability) {
         const query = `
             UPDATE phones 

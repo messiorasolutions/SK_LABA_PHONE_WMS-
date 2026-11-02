@@ -8,6 +8,7 @@ import FavoritesModal from './components/Modals/FavoritesModal';
 import PhoneDetailModal from './components/Modals/PhoneDetailModal';
 import ReservationModal from './components/Modals/ReservationModal';
 import InquiryModal from './components/Modals/InquiryModal';
+import CartModal from './components/Modals/CartModal';
 import SellPhoneModal from './components/Modals/SellPhoneModal';
 import { setActiveTab } from './actions/heroActions';
 
@@ -16,6 +17,7 @@ export default function App() {
   const { activeTab } = useSelector((state) => state.hero || { activeTab: 'Home' });
 
   const [favoritesModalOpen, setFavoritesModalOpen] = useState(false);
+  const [cartModalOpen, setCartModalOpen] = useState(false);
   const [selectedPhoneForDetail, setSelectedPhoneForDetail] = useState(null);
   const [selectedPhoneForReserve, setSelectedPhoneForReserve] = useState(null);
   const [inquiryModalData, setInquiryModalData] = useState(null);
@@ -37,12 +39,19 @@ export default function App() {
     window.addEventListener('hashchange', syncRoute);
     window.addEventListener('popstate', syncRoute);
 
-    const handleOpenFav = () => setFavoritesModalOpen(true);
+    function handleOpenFav() {
+      setFavoritesModalOpen(true);
+    }
     window.addEventListener('sk_laba_open_favorites_modal', handleOpenFav);
 
-    const handleOpenInquiry = (e) => {
-      setInquiryModalData({ phone: e.detail?.phone || null });
-    };
+    function handleOpenCart() {
+      setCartModalOpen(true);
+    }
+    window.addEventListener('sk_laba_open_cart_modal', handleOpenCart);
+
+    function handleOpenInquiry(e) {
+      setInquiryModalData({ phone: e?.detail?.phone || null });
+    }
     window.addEventListener('sk_laba_open_inquiry_modal', handleOpenInquiry);
 
     const handleOpenSell = (e) => {
@@ -54,6 +63,7 @@ export default function App() {
       window.removeEventListener('hashchange', syncRoute);
       window.removeEventListener('popstate', syncRoute);
       window.removeEventListener('sk_laba_open_favorites_modal', handleOpenFav);
+      window.removeEventListener('sk_laba_open_cart_modal', handleOpenCart);
       window.removeEventListener('sk_laba_open_inquiry_modal', handleOpenInquiry);
       window.removeEventListener('sk_laba_open_sell_modal', handleOpenSell);
     };
@@ -75,9 +85,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-theme-bg text-theme-textPrimary flex flex-col selection:bg-theme-accent selection:text-white">
+      {/* Navigation Header */}
       <Navbar
-        onOpenFavorites={() => setFavoritesModalOpen(true)}
-        onOpenSell={() => setSellModalData({ desiredPhone: null })}
+        onOpenFavorites={() => setFavoritesModalOpen((prev) => !prev)}
+        onOpenCart={() => setCartModalOpen((prev) => !prev)}
+        isFavoritesOpen={favoritesModalOpen}
+        isCartOpen={cartModalOpen}
       />
 
       <main className="flex-1">
@@ -90,6 +103,25 @@ export default function App() {
 
       <Footer onOpenSell={() => setSellModalData({ desiredPhone: null })} />
 
+      {/* Shopping Cart Modal (C-06) */}
+      <CartModal
+        isOpen={cartModalOpen}
+        onClose={() => setCartModalOpen(false)}
+        onCheckout={(items) => {
+          if (items.length > 0) {
+            setSelectedPhoneForReserve({
+              phone_id: items[0].phone_id,
+              name: items[0].name,
+              selectedColor: items[0].color,
+              selectedStorage: items[0].storage,
+              price: items[0].price,
+              image_url: items[0].photo,
+            });
+          }
+        }}
+      />
+
+      {/* Global Favorites Modal triggered from Navbar (C-06) */}
       {favoritesModalOpen && (
         <FavoritesModal
           onClose={() => setFavoritesModalOpen(false)}

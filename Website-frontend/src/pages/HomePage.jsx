@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { ArrowRight, Tag, Phone, MessageCircle, Star, Quote, MessageSquareHeart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Tag, Star, Quote, MessageSquareHeart, ChevronLeft, ChevronRight } from 'lucide-react';
 import HeroSection from '../components/HeroSection';
 import TrustBadges from '../components/TrustBadges';
 import { getActiveOffers } from '../services/offerService';
 import { reviewService } from '../services/reviewService';
 import { setActiveTab } from '../actions/heroActions';
-import { STORE_INFO } from '../constants/siteConfig';
 import upgradeVideo from '../assets/images/upgrade_vedio.mp4';
 
 export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenReview }) {
@@ -167,10 +166,6 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
     }
   };
 
-  const handleWhatsApp = () => {
-    const cleanNumber = (STORE_INFO.whatsapp || '').replace(/\D/g, '');
-    window.open(`https://wa.me/${cleanNumber}?text=Hello%20SK%20LABA%20PHONE!`, '_blank');
-  };
 
   return (
     <div className="flex flex-col w-full">
@@ -454,37 +449,6 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
         </div>
       </section>
 
-      <section className="py-16 bg-theme-bg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-theme-surface border border-theme-border rounded-3xl p-6 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="space-y-1 text-center sm:text-left">
-              <h3 className="text-xl font-bold text-white">Need Personal Advice on Choosing a Phone?</h3>
-              <p className="text-xs sm:text-sm text-theme-textSecondary">
-                Our support team in Seoul is available to answer questions on phone specs, condition, and warranty.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3 shrink-0">
-              <button
-                type="button"
-                onClick={handleWhatsApp}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md transition-all cursor-pointer"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>WhatsApp Shop</span>
-              </button>
-
-              <a
-                href={`tel:${STORE_INFO.phone}`}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-theme-input hover:bg-theme-hover border border-theme-border text-white text-xs font-semibold transition-colors"
-              >
-                <Phone className="w-4 h-4 text-sky-400" />
-                <span>Call Directly</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

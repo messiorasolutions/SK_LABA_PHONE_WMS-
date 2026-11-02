@@ -9,7 +9,8 @@ export default function Footer({ onOpenSell }) {
   };
 
   const handleOpenGeneralInquiry = () => {
-    window.dispatchEvent(new CustomEvent('sk_laba_open_inquiry_modal', { detail: { phone: null } }));
+    window.location.hash = '#contact';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleOpenSell = () => {

@@ -4,6 +4,7 @@ import Navbar from './layout/Navbar';
 import Footer from './layout/Footer';
 import HomePage from './pages/HomePage';
 import SmartphonesPage from './pages/SmartphonesPage';
+import ContactPage from './pages/ContactPage';
 import FavoritesModal from './components/Modals/FavoritesModal';
 import PhoneDetailModal from './components/Modals/PhoneDetailModal';
 import ReservationModal from './components/Modals/ReservationModal';
@@ -34,6 +35,8 @@ export default function App() {
 
       if (hash === '#smartphones' || pathname === '/smartphones') {
         dispatch(setActiveTab('Smartphones'));
+      } else if (hash === '#contact' || pathname === '/contact') {
+        dispatch(setActiveTab('Contact Us'));
       } else if (hash === '' || hash === '#' || hash === '#home' || hash === '#reviews' || pathname === '/') {
         dispatch(setActiveTab('Home'));
       }
@@ -103,8 +106,10 @@ export default function App() {
       <Navbar onOpenFavorites={() => setFavoritesModalOpen(true)} onOpenCart={() => setCartModalOpen(true)} />
 
       <main className="flex-1">
-        {isSmartphonesPage ? (
+        {activeTab === 'Smartphones' ? (
           <SmartphonesPage onNavigateToHome={handleNavigateToHome} />
+        ) : activeTab === 'Contact Us' || activeTab === 'Contact' ? (
+          <ContactPage onNavigateToHome={handleNavigateToHome} />
         ) : (
           <HomePage onNavigateToSmartphones={handleNavigateToSmartphones} onOpenSell={() => setSellModalData({})} onOpenReview={() => setReviewModalOpen(true)} />
         )}

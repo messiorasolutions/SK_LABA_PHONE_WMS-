@@ -1,29 +1,17 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Search, User, ShoppingCart, Menu, X, Heart } from 'lucide-react';
+import { Search, User, Menu, X, Heart } from 'lucide-react';
 import logoImg from '../assets/images/logo.png';
 import { setActiveTab, setSearchQuery } from '../actions/heroActions';
 import { NAV_LINKS, STORE_INFO } from '../constants/siteConfig';
 import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
-import { useCart } from '../hooks/useCart';
 
-export default function Navbar({ onOpenFavorites, onOpenCart }) {
+export default function Navbar({ onOpenFavorites, onOpenSell }) {
   const dispatch = useDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const { favoriteIds } = useFavoritesAndCompare();
-  const { totalCount: cartTotalCount } = useCart();
 
   const { activeTab, searchQuery } = useSelector((state) => state.hero);
-
-  // Sync hash change on mount
-  // Track scroll position for sticky styling
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const handleHash = () => {
@@ -32,6 +20,8 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
 
       if (hash === '#smartphones' || pathname === '/smartphones') {
         dispatch(setActiveTab('Smartphones'));
+      } else if (hash === '#contact' || pathname === '/contact') {
+        dispatch(setActiveTab('Contact Us'));
       } else if (hash === '#reviews') {
         dispatch(setActiveTab('Home'));
         setTimeout(() => {
@@ -59,6 +49,9 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
 
     if (tabName === 'Smartphones') {
       window.location.hash = '#smartphones';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (tabName === 'Contact Us' || tabName === 'Contact') {
+      window.location.hash = '#contact';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (tabName === 'Reviews') {
       dispatch(setActiveTab('Home'));
@@ -124,7 +117,7 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
               return (
                 <a
                   key={link.name}
-                  href={link.name === 'Smartphones' ? '#smartphones' : '#'}
+                  href={link.path || '#'}
                   onClick={(e) => handleTabClick(link.name, e)}
                   className="relative py-2 text-sm font-medium transition-colors duration-150"
                 >
@@ -192,19 +185,6 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
 
             <button
               type="button"
-              onClick={() => onOpenCart ? onOpenCart() : window.dispatchEvent(new CustomEvent('sk_laba_open_cart_modal'))}
-              className="relative p-2 rounded-full text-theme-textSecondary hover:text-theme-textPrimary hover:bg-white/5 transition-colors cursor-pointer"
-              title="Shopping Cart"
-              aria-label="Shopping Cart"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 bg-theme-accent text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center shadow-md">
-                {cartTotalCount}
-              </span>
-            </button>
-
-            <button
-              type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 text-theme-textSecondary hover:text-theme-textPrimary cursor-pointer"
               aria-label="Toggle Navigation Menu"
@@ -238,7 +218,7 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
             {NAV_LINKS.map((link) => (
               <a
                 key={link.name}
-                href={link.name === 'Smartphones' ? '#smartphones' : '#'}
+                href={link.path || '#'}
                 onClick={(e) => handleTabClick(link.name, e)}
                 className={`block px-3 py-2 rounded-lg text-sm font-medium ${
                   activeTab === link.name

@@ -9,6 +9,7 @@ import InstallmentPlansPage from '../pages/InstallmentPlansPage';
 import InquiriesPage from '../pages/InquiriesPage';
 import ReservationsPage from '../pages/ReservationsPage';
 import SellRequestsPage from '../pages/SellRequestsPage';
+import BackInStockPage from '../pages/BackInStockPage';
 import UsersPage from '../pages/UsersPage';
 import ReviewsPage from '../pages/ReviewsPage';
 import LoginPage from '../pages/auth/LoginPage';
@@ -203,6 +204,28 @@ export default function AppRoutes() {
           <ProtectedRoute>
             <MainLayout>
               <SellRequestsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/back-in-stock"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <BackInStockPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/back-in-stock"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <BackInStockPage />
             </MainLayout>
           </ProtectedRoute>
         }

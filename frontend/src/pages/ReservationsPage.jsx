@@ -500,7 +500,7 @@ export default function ReservationsPage() {
                       <td className="py-3 px-4 text-right">
                         <button
                           onClick={() => openDetailModal(resItem)}
-                          className="px-3 py-1 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-full text-xs font-semibold shadow-2xs hover:border-slate-300 transition-colors cursor-pointer"
+                          className="px-3 py-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/60 rounded-full text-xs font-semibold transition-colors cursor-pointer border border-blue-200 dark:border-blue-900"
                         >
                           Manage
                         </button>

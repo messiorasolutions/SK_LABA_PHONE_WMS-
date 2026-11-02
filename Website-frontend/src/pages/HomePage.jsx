@@ -199,10 +199,10 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
           />
 
           <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-start md:justify-center">
-            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-end">
-              <div className="w-full md:w-auto max-w-md lg:max-w-lg text-left space-y-3 sm:space-y-4 pt-8 md:pt-0 pointer-events-auto bg-black/40 md:bg-transparent backdrop-blur-xs md:backdrop-blur-none p-4 md:p-0 rounded-2xl md:rounded-none">
+            <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex justify-end">
+              <div className="w-fit ml-auto md:w-auto max-w-[78%] sm:max-w-md lg:max-w-lg text-left space-y-2.5 sm:space-y-4 pt-6 sm:pt-8 md:pt-0 pointer-events-auto bg-black/50 md:bg-transparent backdrop-blur-xs md:backdrop-blur-none p-3.5 sm:p-4 md:p-0 rounded-2xl md:rounded-none">
                 
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] sm:whitespace-nowrap">
+                <h2 className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] sm:whitespace-nowrap">
                   Trade in. Upgrade.
                 </h2>
 

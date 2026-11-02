@@ -98,7 +98,8 @@ class BackInStockRequestController {
     async getWaitingCustomersForPhone(req, res, next) {
         try {
             const phoneId = req.params.phoneId || req.params.id;
-            const result = await this.service.getWaitingCustomersForPhone(phoneId);
+            const { status } = req.query;
+            const result = await this.service.getWaitingCustomersForPhone(phoneId, { status });
 
             return res.status(200).json({
                 success: true,

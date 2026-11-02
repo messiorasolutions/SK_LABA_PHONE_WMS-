@@ -37,16 +37,17 @@ class BackInStockRequestService {
         }
 
         // 3. Verify phone availability eligibility:
-        // Must be currently SOLD_OUT or have zero available stock
+        // Must be currently SOLD_OUT or have zero available stock OR customer is requesting a specific out-of-stock variant
         const rawStock = phone.current_stock !== undefined ? phone.current_stock : phone.stock_quantity;
         const currentStock = rawStock !== undefined && rawStock !== null && !isNaN(Number(rawStock))
             ? Number(rawStock)
             : 0;
 
         const isSoldOut = phone.availability === 'SOLD_OUT' || currentStock <= 0;
+        const hasVariantSpecification = Boolean(notes && typeof notes === 'string' && notes.trim().length > 0);
 
-        if (!isSoldOut) {
-            throw new AppError('The selected phone is currently in stock. Back-in-stock requests can only be placed for sold-out phones.', 400);
+        if (!isSoldOut && !hasVariantSpecification) {
+            throw new AppError('The selected phone is currently in stock. Back-in-stock requests can only be placed for sold-out phones or specific out-of-stock variants.', 400);
         }
 
         // 4. Repeated submission handling:
@@ -132,14 +133,14 @@ class BackInStockRequestService {
      * @param {number|string} phoneId
      * @returns {Promise<Object>}
      */
-    async getWaitingCustomersForPhone(phoneId) {
+    async getWaitingCustomersForPhone(phoneId, { status } = {}) {
         const phone = await this.phoneRepository.findById(phoneId);
         if (!phone) {
             throw new AppError(`Phone with ID ${phoneId} not found.`, 404);
         }
 
         const waitingCount = await this.backInStockRequestRepository.countWaitingByPhoneId(phoneId);
-        const waitingCustomers = await this.backInStockRequestRepository.findByPhoneId(phoneId, 'Pending');
+        const waitingCustomers = await this.backInStockRequestRepository.findByPhoneId(phoneId, status !== undefined ? status : null);
 
         return {
             phone: {
@@ -152,7 +153,8 @@ class BackInStockRequestService {
                 price: phone.price !== undefined ? Number(phone.price) : null
             },
             waiting_customers_count: waitingCount,
-            waiting_customers: waitingCustomers
+            waiting_customers: waitingCustomers,
+            requests: waitingCustomers
         };
     }
 

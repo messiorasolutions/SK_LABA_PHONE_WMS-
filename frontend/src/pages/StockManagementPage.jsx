@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import useStock from '../hooks/useStock';
 import AddStockModal from '../components/Modals/AddStockModal';
 import RemoveStockModal from '../components/Modals/RemoveStockModal';
@@ -19,6 +20,7 @@ import {
   Bell,
   X,
   TrendingUp,
+  ChevronRight,
 } from 'lucide-react';
 
 // Price formatter
@@ -140,13 +142,22 @@ export default function StockManagementPage() {
               </div>
             </div>
           </div>
-          <button
-            onClick={() => setRestorationAlert(null)}
-            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-lg transition-colors cursor-pointer"
-            title="Dismiss notification"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2.5">
+            <Link
+              to={`/back-in-stock?phone_id=${restorationAlert.phone_id}`}
+              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <span>View Waiting Customers</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+            <button
+              onClick={() => setRestorationAlert(null)}
+              className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-lg transition-colors cursor-pointer"
+              title="Dismiss notification"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
 

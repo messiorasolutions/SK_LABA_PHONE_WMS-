@@ -58,6 +58,15 @@ export const API_ENDPOINTS = {
     byId: (id) => `/api/admin/reviews/${id}`,
     status: (id) => `/api/admin/reviews/${id}/status`,
   },
+
+  backInStockRequests: {
+    base: '/api/back-in-stock-requests',
+    grouped: '/api/back-in-stock-requests/grouped',
+    byPhoneId: (phoneId) => `/api/back-in-stock-requests/phones/${phoneId}`,
+    byId: (id) => `/api/back-in-stock-requests/${id}`,
+    status: (id) => `/api/back-in-stock-requests/${id}/status`,
+    assign: (id) => `/api/back-in-stock-requests/${id}/assign`,
+  },
 };
 
 export default API_ENDPOINTS;

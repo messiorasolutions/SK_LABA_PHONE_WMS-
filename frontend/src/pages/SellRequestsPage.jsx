@@ -738,7 +738,7 @@ export default function SellRequestsPage() {
                       </td>
 
                       <td className="py-3 px-4">
-                        <span className="font-mono text-slate-700 dark:text-slate-300">
+                        <span className="font-mono text-blue-600 dark:text-blue-400">
                           {item.phone_number}
                         </span>
                       </td>
@@ -799,9 +799,9 @@ export default function SellRequestsPage() {
                       <td className="py-3 px-4 text-right">
                         <button
                           onClick={() => openDetailModal(item)}
-                          className="px-3 py-1 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-700 hover:border-blue-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                          className="px-3 py-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/60 rounded-full text-xs font-semibold transition-colors cursor-pointer border border-blue-200 dark:border-blue-900"
                         >
-                          Manage &rsaquo;
+                          Manage
                         </button>
                       </td>
                     </tr>

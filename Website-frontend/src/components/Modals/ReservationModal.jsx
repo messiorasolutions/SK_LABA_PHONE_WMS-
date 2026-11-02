@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, CheckCircle2, AlertCircle, ShoppingBag, HardDrive, Palette, Calendar, Phone, Mail, User, FileText } from 'lucide-react';
+import { X, AlertCircle, HardDrive, Palette, Calendar, Phone, Mail, User, FileText } from 'lucide-react';
 import { createReservation } from '../../services/reservationService';
 import { getStorageOptions } from '../../services/storageService';
 
@@ -191,17 +191,7 @@ export default function ReservationModal({ phone, onClose }) {
       {/* Right-Side Slide-Over Drawer */}
       <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[500px] md:w-[540px] bg-[#0A0F1E] border-l border-theme-border shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
-              <ShoppingBag className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-white">Reserve Phone</h2>
-              <p className="text-[11px] text-theme-textMuted">Hold item for in-store pickup (SRS C-09)</p>
-            </div>
-          </div>
-
+        <div className="flex items-center justify-end px-6 py-4 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
           <button
             type="button"
             onClick={onClose}
@@ -215,64 +205,62 @@ export default function ReservationModal({ phone, onClose }) {
         {/* Content */}
         <div className="overflow-y-auto p-6 flex-1 space-y-4">
           {success ? (
-            <div className="py-8 text-center space-y-5 animate-in fade-in duration-300">
-              <div className="w-14 h-14 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-                <CheckCircle2 className="w-7 h-7" />
-              </div>
-
-              <div>
-                <h3 className="text-base font-semibold text-white">Reservation Submitted</h3>
+            <div className="py-8 sm:py-10 max-w-lg mx-auto text-center space-y-6 animate-in fade-in duration-300">
+              <div className="space-y-1.5">
+                <h3 className="text-xl font-bold text-white tracking-tight">Reservation Submitted</h3>
                 {submittedData?.reservation_id && (
-                  <span className="text-xs font-mono text-theme-textMuted mt-0.5 block">
-                    Ref ID: #{submittedData.reservation_id}
+                  <span className="inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-slate-300">
+                    Ref ID: {submittedData.reservation_id}
                   </span>
                 )}
               </div>
 
-              {/* Exact SRS Confirmation Copy */}
-              <div className="p-4 border border-emerald-500/30 bg-emerald-500/5 rounded-xl text-left space-y-2">
-                <p className="text-sm text-emerald-300 font-semibold text-center">
+              {/* Exact SRS Confirmation Card */}
+              <div className="p-5 sm:p-6 border border-emerald-500/25 bg-emerald-500/[0.04] rounded-2xl text-left space-y-4 shadow-xl shadow-black/40">
+                <p className="text-sm sm:text-base text-emerald-300 font-semibold text-center pb-3 border-b border-emerald-500/20">
                   &ldquo;Your request is received. The shop will confirm.&rdquo;
                 </p>
-                <div className="pt-2 border-t border-emerald-500/20 text-xs text-theme-textSecondary space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-theme-textMuted">Reserved Item:</span>
-                    <span className="text-white font-medium">{phone?.name}</span>
+                <div className="text-xs sm:text-sm divide-y divide-white/[0.07]">
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-slate-400 font-medium">Reserved Item:</span>
+                    <span className="text-white font-semibold text-right max-w-[60%] truncate">{phone?.name}</span>
                   </div>
                   {submittedData?.storageName && (
-                    <div className="flex justify-between">
-                      <span className="text-theme-textMuted">Storage:</span>
-                      <span className="text-white font-medium">{submittedData.storageName}</span>
+                    <div className="flex items-center justify-between py-2.5">
+                      <span className="text-slate-400 font-medium">Storage:</span>
+                      <span className="text-white font-semibold">{submittedData.storageName}</span>
                     </div>
                   )}
                   {submittedData?.selected_options?.colour && (
-                    <div className="flex justify-between">
-                      <span className="text-theme-textMuted">Colour:</span>
-                      <span className="text-white font-medium">{submittedData.selected_options.colour}</span>
+                    <div className="flex items-center justify-between py-2.5">
+                      <span className="text-slate-400 font-medium">Colour:</span>
+                      <span className="text-white font-semibold">{submittedData.selected_options.colour}</span>
                     </div>
                   )}
-                  <div className="flex justify-between">
-                    <span className="text-theme-textMuted">Preferred Date:</span>
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-slate-400 font-medium">Preferred Date:</span>
                     <span className="text-white font-medium">{submittedData?.preferred_collection_date}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-theme-textMuted">Contact:</span>
-                    <span className="text-white font-mono">{submittedData?.phone_number}</span>
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-slate-400 font-medium">Contact:</span>
+                    <span className="text-white font-mono font-semibold">{submittedData?.phone_number}</span>
                   </div>
                 </div>
               </div>
 
-              <p className="text-xs text-theme-textMuted leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm mx-auto">
                 Our staff will review your reservation and contact you via phone/WhatsApp to confirm collection time.
               </p>
 
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-500/20 transition-all cursor-pointer"
-              >
-                Done
-              </button>
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full py-3 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all cursor-pointer"
+                >
+                  Done
+                </button>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">

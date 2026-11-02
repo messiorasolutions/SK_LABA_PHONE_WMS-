@@ -1,5 +1,5 @@
-import React from 'react';
-import { Heart, GitCompare, Eye, ShoppingBag, Bell, Tag, Sparkles } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Heart, GitCompare, Tag, Sparkles } from 'lucide-react';
 import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
 
 export default function PhoneCard({
@@ -14,27 +14,77 @@ export default function PhoneCard({
   const favorited = isFavorite(phoneId);
   const inComparison = isInCompare(phoneId);
 
-  // Determine main image
-  let mainPhoto = '';
-  if (Array.isArray(phone.photos) && phone.photos.length > 0) {
-    mainPhoto = phone.photos[0];
-  } else if (phone.main_photo) {
-    mainPhoto = phone.main_photo;
-  } else if (typeof phone.photos === 'string' && phone.photos.startsWith('[')) {
-    try {
-      const parsed = JSON.parse(phone.photos);
-      mainPhoto = parsed[0] || '';
-    } catch (e) {
-      mainPhoto = '';
+  // Extract general fallback photos
+  const generalPhotos = useMemo(() => {
+    if (Array.isArray(phone.photos) && phone.photos.length > 0) return phone.photos;
+    if (phone.main_photo) return [phone.main_photo];
+    if (typeof phone.photos === 'string' && phone.photos.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(phone.photos);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
     }
-  }
+    return [];
+  }, [phone]);
 
-  // Stock status
-  const availability = (phone.availability || 'IN_STOCK').toUpperCase();
-  const currentStock = Number(phone.current_stock ?? phone.stock ?? 0);
-  const isSoldOut = availability === 'SOLD_OUT' || (availability !== 'COMING_SOON' && currentStock === 0);
-  const isLowStock = availability === 'LOW_STOCK' || (currentStock > 0 && currentStock <= (phone.low_stock_level || 5));
-  const isComingSoon = availability === 'COMING_SOON';
+  // Parse color options (objects with name, color_code, photos or legacy strings)
+  const parsedColors = useMemo(() => {
+    let raw = phone.colour_options;
+    if (!raw) return [];
+    if (typeof raw === 'string') {
+      if (raw.trim().startsWith('[')) {
+        try {
+          raw = JSON.parse(raw);
+        } catch (e) {
+          raw = raw.split(',').map((s) => s.trim()).filter(Boolean);
+        }
+      } else {
+        raw = raw.split(',').map((s) => s.trim()).filter(Boolean);
+      }
+    }
+    if (!Array.isArray(raw)) return [];
+
+    return raw.map((c, i) => {
+      if (typeof c === 'string') {
+        const fallbackPhoto = generalPhotos[i] || generalPhotos[0] || '';
+        return {
+          id: `color_${i}`,
+          name: c,
+          color_name: c,
+          color_code: '#475569',
+          photos: fallbackPhoto ? [fallbackPhoto] : [],
+        };
+      }
+      return {
+        id: `color_${i}`,
+        name: c.color_name || c.name || `Color #${i + 1}`,
+        color_name: c.color_name || c.name || `Color #${i + 1}`,
+        color_code: c.color_code || c.color || c.hex || '#475569',
+        photos:
+          Array.isArray(c.photos) && c.photos.length > 0
+            ? c.photos
+            : (generalPhotos[i] ? [generalPhotos[i]] : generalPhotos),
+      };
+    });
+  }, [phone, generalPhotos]);
+
+  // Default / auto-select the first color
+  const [selectedColorIdx, setSelectedColorIdx] = useState(0);
+
+  // Reset to first color when phone changes
+  useEffect(() => {
+    setSelectedColorIdx(0);
+  }, [phoneId]);
+
+  const activeColor = parsedColors[selectedColorIdx] || parsedColors[0];
+
+  // Active displayed photo: prioritizes active color's first photo, then general photo at index, then first general photo, then main_photo
+  const displayedPhoto =
+    activeColor?.photos?.[0] ||
+    generalPhotos[selectedColorIdx] ||
+    generalPhotos[0] ||
+    phone.main_photo ||
+    '';
 
   // Format pricing
   const regularPrice = Number(phone.price || phone.regular_price || 0);
@@ -43,21 +93,6 @@ export default function PhoneCard({
   const effectivePrice = hasOffer ? Number(offerPrice) : regularPrice;
   const savings = hasOffer ? regularPrice - effectivePrice : 0;
   const discountPercent = hasOffer ? Math.round((savings / regularPrice) * 100) : 0;
-
-  // Format colors & storage tags
-  let colors = [];
-  if (Array.isArray(phone.colour_options)) {
-    colors = phone.colour_options;
-  } else if (typeof phone.colour_options === 'string') {
-    try {
-      colors = JSON.parse(phone.colour_options);
-    } catch (e) {
-      colors = phone.colour_options.split(',').map((c) => c.trim()).filter(Boolean);
-    }
-  }
-
-  // Condition
-  const condition = (phone.phone_condition || 'NEW').toUpperCase();
 
   const handleFavoriteClick = (e) => {
     e.stopPropagation();
@@ -72,58 +107,41 @@ export default function PhoneCard({
     }
   };
 
+  const handleCardClick = () => {
+    if (onViewDetails) {
+      onViewDetails({ ...phone, initialColorIdx: selectedColorIdx });
+    }
+  };
+
   return (
     <div
-      onClick={() => onViewDetails && onViewDetails(phone)}
-      className="group relative flex flex-col bg-theme-surface/70 border border-theme-border hover:border-white/20 rounded-xl overflow-hidden transition-all duration-200 hover:bg-theme-surface cursor-pointer"
+      onClick={handleCardClick}
+      className="group relative flex flex-col bg-theme-surface/70 border border-theme-border hover:border-white/20 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/40 hover:-translate-y-1 cursor-pointer"
     >
       {/* Top Media Header */}
-      <div className="relative aspect-[3/3.4] w-full bg-[#080D1A] p-4 flex items-center justify-center overflow-hidden border-b border-theme-border/40">
-        {/* Subtle ambient gradient on card hover */}
-        <div className="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+      <div className="relative aspect-square w-full bg-[#080D1A] flex items-center justify-center overflow-hidden border-b border-theme-border/40">
+        {/* Subtle ambient light on hover */}
+        <div className="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
 
-        {/* Badges on Top Left: Condition & Availability (No highlighted neon bg, clean official tags) */}
-        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
-          {/* Condition Badge */}
-          <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider rounded border border-white/15 bg-black/50 backdrop-blur-md text-white/90">
-            {condition}
-          </span>
-
-          {/* Availability Badge */}
-          {isSoldOut ? (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-medium tracking-wide rounded border border-white/10 bg-black/50 backdrop-blur-md text-white/80">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-              <span>Sold Out</span>
-            </span>
-          ) : isLowStock ? (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-medium tracking-wide rounded border border-white/10 bg-black/50 backdrop-blur-md text-white/90">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              <span>Only {currentStock} left</span>
-            </span>
-          ) : isComingSoon ? (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-medium tracking-wide rounded border border-white/10 bg-black/50 backdrop-blur-md text-white/80">
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-              <span>Coming Soon</span>
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-medium tracking-wide rounded border border-white/10 bg-black/50 backdrop-blur-md text-white/90">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span>In Stock</span>
-            </span>
-          )}
-        </div>
+        {/* Top Left: Offer Badge if have offer (Light Gold styling) */}
+        {hasOffer && (
+          <div className="absolute top-3 left-3 z-20 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-amber-300/40 bg-black/65 backdrop-blur-md text-amber-200 text-[11px] font-semibold tracking-wide shadow-sm">
+            <Tag className="w-3 h-3 shrink-0 text-amber-300" />
+            <span>{discountPercent > 0 ? `${discountPercent}% OFF` : 'Special Offer'}</span>
+          </div>
+        )}
 
         {/* Action icons on Top Right: Favorite & Compare */}
-        <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1">
+        <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5">
           {/* Compare Button */}
           <button
             type="button"
-            title={inComparison ? 'Remove from Compare' : 'Add to Compare (C-05)'}
+            title={inComparison ? 'Remove from Compare' : 'Add to Compare'}
             onClick={handleCompareClick}
-            className={`p-1.5 rounded-md border backdrop-blur-md transition-colors cursor-pointer ${
+            className={`p-1.5 rounded-lg border backdrop-blur-md transition-colors cursor-pointer ${
               inComparison
-                ? 'bg-white/15 text-white border-white/30'
-                : 'bg-black/50 border-white/10 text-theme-textSecondary hover:text-white hover:bg-black/80'
+                ? 'bg-white/20 text-white border-white/40'
+                : 'bg-black/60 border-white/15 text-theme-textSecondary hover:text-white hover:bg-black/80'
             }`}
           >
             <GitCompare className="w-3.5 h-3.5" />
@@ -132,132 +150,113 @@ export default function PhoneCard({
           {/* Favorite Button */}
           <button
             type="button"
-            title={favorited ? 'Remove from Favourites' : 'Save to Favourites (C-06)'}
+            title={favorited ? 'Remove from Favourites' : 'Save to Favourites'}
             onClick={handleFavoriteClick}
-            className={`p-1.5 rounded-md border backdrop-blur-md transition-colors cursor-pointer ${
-              favorited
-                ? 'bg-red-950/50 text-red-400 border-red-500/30'
-                : 'bg-black/50 border-white/10 text-theme-textSecondary hover:text-red-400 hover:bg-black/80'
-            }`}
+            className="p-1.5 rounded-lg border backdrop-blur-md transition-colors cursor-pointer bg-black/60 border-white/15 text-theme-textSecondary hover:bg-black/80"
           >
-            <Heart className={`w-3.5 h-3.5 ${favorited ? 'fill-current' : ''}`} />
+            <Heart className={`w-3.5 h-3.5 transition-colors ${favorited ? 'text-rose-400 fill-rose-400/80' : 'text-theme-textSecondary hover:text-rose-400'}`} />
           </button>
         </div>
 
-        {/* Phone Photo */}
-        {mainPhoto ? (
+        {/* Phone Photo (Changes dynamically when color swatch is clicked or hovered) */}
+        {displayedPhoto ? (
           <img
-            src={mainPhoto}
+            key={displayedPhoto}
+            src={displayedPhoto}
             alt={phone.name}
             loading="lazy"
-            className="relative z-0 max-h-full max-w-full object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-[0_6px_12px_rgba(0,0,0,0.4)]"
+            className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
             onError={(e) => {
-              e.target.style.display = 'none';
+              e.currentTarget.style.display = 'none';
             }}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center text-theme-textMuted">
-            <Sparkles className="w-10 h-10 stroke-[1.2] mb-1 opacity-30" />
-            <span className="text-[11px]">SK LABA PHONE</span>
-          </div>
-        )}
-
-        {/* Offer Discount Tag (No neon background, clean official tag) */}
-        {hasOffer && (
-          <div className="absolute bottom-2 left-2 z-10 inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/15 bg-black/60 backdrop-blur-md text-white/90 text-[10px] font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-            <span>Save ${savings.toFixed(0)} ({discountPercent}% off)</span>
+          <div className="flex flex-col items-center justify-center text-theme-textMuted py-8">
+            <Sparkles className="w-10 h-10 stroke-[1.2] mb-1.5 opacity-30" />
+            <span className="text-[11px] tracking-wider uppercase text-theme-textMuted font-medium">
+              SK LABA PHONE
+            </span>
           </div>
         )}
       </div>
 
       {/* Card Info Content */}
-      <div className="p-3.5 flex flex-col flex-1 justify-between gap-3">
+      <div className="p-4 flex flex-col flex-1 justify-between gap-3">
         <div>
-          {/* Brand & Category */}
-          <div className="flex items-center justify-between text-xs text-theme-textMuted font-medium mb-1">
-            <span className="uppercase tracking-wider text-theme-textSecondary text-[11px]">
-              {phone.brand_name || 'Smartphone'}
-            </span>
-            {phone.warranty && (
-              <span className="text-[11px] text-theme-textMuted truncate max-w-[120px]" title={phone.warranty}>
-                {phone.warranty}
-              </span>
-            )}
-          </div>
+          {/* Brand */}
+          <span className="block uppercase tracking-wider text-theme-textSecondary text-[11px] font-semibold mb-1">
+            {phone.brand_name || 'Smartphone'}
+          </span>
 
           {/* Phone Title */}
-          <h3 className="text-sm font-medium text-white group-hover:text-sky-300 transition-colors line-clamp-1 mb-1">
+          <h3 className="text-sm font-semibold text-white group-hover:text-sky-300 transition-colors line-clamp-1 leading-snug">
             {phone.name}
           </h3>
         </div>
 
-        {/* Pricing & Call to Actions */}
-        <div className="pt-2.5 border-t border-theme-border/60 flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg font-semibold text-white tracking-tight">
-                ${effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-              {hasOffer && (
-                <span className="text-xs text-theme-textMuted line-through">
-                  ${regularPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-              )}
-            </div>
-
-            {/* Installment Badge if enabled (Clean official style, no highlighted neon bg) */}
-            {Boolean(phone.installment_enabled) && (
-              <span className="text-[10px] font-normal text-theme-textSecondary border border-white/10 px-2 py-0.5 rounded bg-transparent inline-flex items-center gap-1">
-                <span className="w-1 h-1 rounded-full bg-emerald-400" />
-                <span>Installment available</span>
-              </span>
-            )}
-          </div>
-
-          {/* Action Buttons Row: Rectangular, subtle, official button styling */}
-          <div className="flex items-center gap-2 pt-1">
-            {isSoldOut ? (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onNotifyBackInStock && onNotifyBackInStock(phone);
-                }}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-transparent hover:bg-white/[0.04] text-theme-textSecondary hover:text-white border border-theme-border text-xs font-medium transition-all cursor-pointer"
-              >
-                <Bell className="w-3.5 h-3.5" />
-                <span>Notify When Available</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onReserve && onReserve(phone);
-                }}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-medium shadow-sm transition-all cursor-pointer"
-              >
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span>Reserve Now</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onViewDetails && onViewDetails(phone);
-              }}
-              title="View Complete Specifications"
-              className="p-2 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white transition-colors cursor-pointer"
-            >
-              <Eye className="w-3.5 h-3.5" />
-            </button>
-          </div>
+        {/* Pricing */}
+        <div className="pt-2 border-t border-theme-border/40 flex items-baseline gap-2">
+          <span className="text-base sm:text-lg font-normal text-white tracking-tight">
+            ${effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
+          {hasOffer && (
+            <span className="text-xs text-theme-textMuted line-through font-normal">
+              ${regularPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+          )}
         </div>
+
+        {/* Color images under the phone card (larger thumbnail boxes clearly showing available color images) */}
+        {parsedColors.length > 0 && (
+          <div
+            className="flex items-center justify-center gap-2 pt-1 flex-wrap"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {parsedColors.map((color, idx) => {
+              const isSelected = selectedColorIdx === idx;
+              const colorPhoto =
+                color.photos?.[0] ||
+                generalPhotos[idx] ||
+                generalPhotos[0] ||
+                '';
+
+              return (
+                <button
+                  key={color.id || idx}
+                  type="button"
+                  title={color.name || `Color #${idx + 1}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedColorIdx(idx);
+                  }}
+                  onMouseEnter={() => setSelectedColorIdx(idx)}
+                  className={`group/thumb relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl p-0.5 border overflow-hidden transition-all duration-200 cursor-pointer flex items-center justify-center bg-black/40 ${
+                    isSelected
+                      ? 'border-white ring-2 ring-white/40 shadow-lg shadow-black/60 scale-105'
+                      : 'border-white/15 hover:border-white/50 opacity-70 hover:opacity-100 hover:scale-105'
+                  }`}
+                >
+                  {colorPhoto ? (
+                    <img
+                      src={colorPhoto}
+                      alt={color.name || `Color #${idx + 1}`}
+                      className="w-full h-full object-cover object-center rounded-lg"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span
+                      className="w-full h-full rounded-lg"
+                      style={{
+                        backgroundColor: color.color_code || '#475569',
+                      }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
 }
-

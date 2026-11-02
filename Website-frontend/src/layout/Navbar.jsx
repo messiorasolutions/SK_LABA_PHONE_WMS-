@@ -5,13 +5,25 @@ import logoImg from '../assets/images/logo.png';
 import { setActiveTab, setSearchQuery } from '../actions/heroActions';
 import { NAV_LINKS, STORE_INFO } from '../constants/siteConfig';
 import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
+import { useCart } from '../hooks/useCart';
 
-export default function Navbar({ onOpenFavorites }) {
+export default function Navbar({ onOpenFavorites, onOpenCart, isFavoritesOpen = false, isCartOpen = false }) {
   const dispatch = useDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [isScrolled, setIsScrolled] = React.useState(false);
   const { favoriteIds } = useFavoritesAndCompare();
+  const { totalCount: cartTotalCount } = useCart();
 
-  const { activeTab, searchQuery, cartCount } = useSelector((state) => state.hero);
+  const { activeTab, searchQuery } = useSelector((state) => state.hero);
+
+  // Track scroll position for sticky styling
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Sync hash change on mount
   useEffect(() => {
@@ -61,10 +73,10 @@ export default function Navbar({ onOpenFavorites }) {
 
   return (
     <header
-      className={`w-full z-50 transition-colors duration-200 ${
-        isHome
-          ? 'absolute top-0 left-0 right-0 bg-transparent'
-          : 'sticky top-0 bg-theme-bg'
+      className={`w-full z-[60] sticky top-0 transition-all duration-200 ${
+        isHome && !isScrolled
+          ? 'bg-theme-bg/80 backdrop-blur-md border-b border-white/5'
+          : 'bg-theme-bg/95 backdrop-blur-md border-b border-theme-border shadow-lg shadow-black/20'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -143,13 +155,17 @@ export default function Navbar({ onOpenFavorites }) {
             <button
               type="button"
               onClick={handleOpenFavorites}
-              className="relative p-2 rounded-full text-theme-textSecondary hover:text-red-400 hover:bg-white/5 transition-colors cursor-pointer"
+              className={`relative p-2 rounded-full transition-colors cursor-pointer ${
+                isFavoritesOpen
+                  ? 'text-white bg-white/10 ring-1 ring-white/20'
+                  : 'text-theme-textSecondary hover:text-white hover:bg-white/5'
+              }`}
               title="Saved Favourites (C-06)"
               aria-label="Favourites"
             >
-              <Heart className={`w-5 h-5 ${favoriteIds.length > 0 ? 'text-red-500 fill-current' : ''}`} />
+              <Heart className={`w-5 h-5 ${isFavoritesOpen || favoriteIds.length > 0 ? 'text-red-500 fill-current' : ''}`} />
               {favoriteIds.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center shadow-md animate-scale">
+                <span className="absolute -top-1 -right-1 bg-white/20 border border-white/30 text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center shadow-md animate-scale">
                   {favoriteIds.length}
                 </span>
               )}
@@ -168,13 +184,18 @@ export default function Navbar({ onOpenFavorites }) {
             {/* Shopping Cart Button */}
             <button
               type="button"
-              className="relative p-2 rounded-full text-theme-textSecondary hover:text-theme-textPrimary hover:bg-white/5 transition-colors cursor-pointer"
+              onClick={() => onOpenCart ? onOpenCart() : window.dispatchEvent(new CustomEvent('sk_laba_open_cart_modal'))}
+              className={`relative p-2 rounded-full transition-colors cursor-pointer ${
+                isCartOpen
+                  ? 'text-theme-accent bg-theme-accent/15 ring-1 ring-theme-accent/30'
+                  : 'text-theme-textSecondary hover:text-theme-textPrimary hover:bg-white/5'
+              }`}
               title="Shopping Cart"
               aria-label="Shopping Cart"
             >
               <ShoppingCart className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 bg-theme-accent text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center shadow-md">
-                {cartCount}
+                {cartTotalCount}
               </span>
             </button>
 

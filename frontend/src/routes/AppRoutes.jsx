@@ -6,6 +6,10 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layout/MainLayout';
+import PhoneManagementPage from '../pages/PhoneManagementPage';
+import StockManagementPage from '../pages/StockManagementPage';
+import OffersPage from '../pages/OffersPage';
+import InstallmentPlansPage from '../pages/InstallmentPlansPage';
 import InquiriesPage from '../pages/InquiriesPage';
 import ReservationsPage from '../pages/ReservationsPage';
 import UsersPage from '../pages/UsersPage';
@@ -17,7 +21,7 @@ import { useAuth } from '../context/AuthContext';
 
 function DefaultRedirect() {
   const { isAdmin } = useAuth();
-  return <Navigate to={isAdmin ? '/users' : '/reservations'} replace />;
+  return <Navigate to={isAdmin ? '/users' : '/phone-management'} replace />;
 }
 
 export default function AppRoutes() {
@@ -63,6 +67,104 @@ export default function AppRoutes() {
         }
       />
 
+      {/* Phone Management (ST-01, ST-02, ST-03, ST-05) */}
+      <Route
+        path="/phone-management"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <PhoneManagementPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/phones"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <PhoneManagementPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Stock Management (SRS ST-05) */}
+      <Route
+        path="/stock-management"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <StockManagementPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/stock"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <StockManagementPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/storage-management"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <StockManagementPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Offers Management (SRS MG-03) */}
+      <Route
+        path="/offers"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <OffersPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/offer-management"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <OffersPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Installment Plans Management (SRS MG-11) */}
+      <Route
+        path="/installment-plans"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <InstallmentPlansPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/installments"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <InstallmentPlansPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
       {/* Reservation Management (SRS ST-07) */}
       <Route
         path="/reservations"
@@ -90,14 +192,6 @@ export default function AppRoutes() {
       {/* Default / Fallback Routes */}
       <Route
         path="/"
-        element={
-          <ProtectedRoute>
-            <DefaultRedirect />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/phone-management"
         element={
           <ProtectedRoute>
             <DefaultRedirect />

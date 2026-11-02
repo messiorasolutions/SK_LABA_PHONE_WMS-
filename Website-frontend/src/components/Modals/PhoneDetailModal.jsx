@@ -6,10 +6,18 @@ import {
   Share2,
   ChevronLeft,
   ChevronRight,
+  Tag,
+  ShoppingCart,
+  HelpCircle,
+  MessageCircle,
+  PhoneCall,
 } from 'lucide-react';
 import { useFavoritesAndCompare } from '../../hooks/useFavoritesAndCompare';
 import { STORE_INFO } from '../../constants/siteConfig';
 import phoneService from '../../services/phoneService';
+import storageService from '../../services/storageService';
+import useCart from '../../hooks/useCart';
+import FormattedDescription from '../Common/FormattedDescription';
 
 export default function PhoneDetailModal({
   phone,
@@ -26,26 +34,99 @@ export default function PhoneDetailModal({
   const favorited = isFavorite(phoneId);
   const inComparison = isInCompare(phoneId);
 
-  // Photos
-  let photos = [];
-  if (Array.isArray(phone?.photos) && phone.photos.length > 0) {
-    photos = phone.photos;
-  } else if (phone?.main_photo) {
-    photos = [phone.main_photo];
-  } else if (typeof phone?.photos === 'string' && phone.photos.startsWith('[')) {
-    try {
-      photos = JSON.parse(phone.photos);
-    } catch (e) {
-      photos = [];
+  // Fallback general photos from phone record
+  const generalPhotos = React.useMemo(() => {
+    if (Array.isArray(phone?.photos) && phone.photos.length > 0) return phone.photos;
+    if (phone?.main_photo) return [phone.main_photo];
+    if (typeof phone?.photos === 'string' && phone.photos.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(phone.photos);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
     }
-  }
+    return [];
+  }, [phone]);
+
+  // Parse color options with per-color photos (Fallback gracefully for legacy string arrays)
+  const parsedColors = React.useMemo(() => {
+    let raw = phone?.colour_options;
+    if (typeof raw === 'string') {
+      try {
+        raw = JSON.parse(raw);
+      } catch (e) {
+        raw = raw.split(',').map((c) => c.trim()).filter(Boolean);
+      }
+    }
+
+    if (!Array.isArray(raw) || raw.length === 0) {
+      return [
+        {
+          id: 'default',
+          name: 'Standard',
+          color_name: 'Standard',
+          color_code: '#3B82F6',
+          photos: generalPhotos,
+          quantity: Number(phone?.current_stock ?? phone?.stock ?? 0),
+        },
+      ];
+    }
+
+    return raw.map((c, i) => {
+      if (typeof c === 'string') {
+        const fallbackPhoto = generalPhotos[i] || generalPhotos[0] || '';
+        return {
+          id: `color_${i}`,
+          name: c,
+          color_name: c,
+          color_code: '#374151',
+          photos: fallbackPhoto ? [fallbackPhoto] : [],
+          quantity: i === 0 ? Number(phone?.current_stock ?? phone?.stock ?? 0) : 0,
+        };
+      }
+      return {
+        id: `color_${i}`,
+        name: c.color_name || c.name || `Color #${i + 1}`,
+        color_name: c.color_name || c.name || `Color #${i + 1}`,
+        color_code: c.color_code || c.color || c.hex || '#374151',
+        quantity:
+          typeof c.quantity === 'number'
+            ? c.quantity
+            : i === 0
+            ? Number(phone?.current_stock ?? phone?.stock ?? 0)
+            : 0,
+        storage_quantities: c.storage_quantities || {},
+        photos:
+          Array.isArray(c.photos) && c.photos.length > 0
+            ? c.photos
+            : (generalPhotos[i] ? [generalPhotos[i]] : generalPhotos),
+      };
+    });
+  }, [phone, generalPhotos]);
+
+  // Auto-select the first added color by default (index 0 or initialColorIdx)
+  const [selectedColorIdx, setSelectedColorIdx] = useState(
+    typeof phone.initialColorIdx === 'number' ? phone.initialColorIdx : 0
+  );
+  const activeColor = parsedColors[selectedColorIdx] || parsedColors[0];
+  const photos = activeColor?.photos || [];
 
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
 
-  // Reset photo index when phone changes
+  // Reset to initial color and first photo when phone changes
   useEffect(() => {
+    setSelectedColorIdx(
+      typeof phone.initialColorIdx === 'number' ? phone.initialColorIdx : 0
+    );
     setActivePhotoIdx(0);
-  }, [phoneId]);
+  }, [phoneId, phone.initialColorIdx]);
+
+  // Handle color change: updates color and loads that color's photos
+  const handleSelectColor = (idx) => {
+    setSelectedColorIdx(idx);
+    setActivePhotoIdx(0);
+  };
+
+  const selectedColor = activeColor?.name || 'Default';
 
   // Photo swap controls (top swap buttons)
   const handlePrevPhoto = (e) => {
@@ -71,22 +152,51 @@ export default function PhoneDetailModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [photos.length]);
 
-  // Color options
-  let colorOptions = [];
-  if (Array.isArray(phone?.colour_options)) {
-    colorOptions = phone.colour_options;
-  } else if (typeof phone?.colour_options === 'string') {
-    try {
-      colorOptions = JSON.parse(phone.colour_options);
-    } catch (e) {
-      colorOptions = phone.colour_options.split(',').map((c) => c.trim()).filter(Boolean);
-    }
-  }
-  const [selectedColor, setSelectedColor] = useState(colorOptions[0] || 'Default');
+  // Load system storage options as a fallback dictionary
+  const [systemStorages, setSystemStorages] = useState([]);
+
+  useEffect(() => {
+    storageService
+      .getStorageOptions()
+      .then((res) => {
+        const data = res.data?.data || res.data || [];
+        setSystemStorages(Array.isArray(data) ? data : []);
+      })
+      .catch(() => {});
+  }, []);
 
   // Storage options
-  const storageIds = Array.isArray(phone?.storage_ids) ? phone.storage_ids : [];
-  const [selectedStorage, setSelectedStorage] = useState(storageIds[0] || 'Standard');
+  const phoneStorageOptions = React.useMemo(() => {
+    if (Array.isArray(phone?.storage_options) && phone.storage_options.length > 0) {
+      return phone.storage_options;
+    }
+    if (Array.isArray(phone?.storage_names) && phone.storage_names.length > 0) {
+      return phone.storage_names.map((name, i) => ({
+        storage_id: i + 1,
+        storage_name: name,
+      }));
+    }
+    if (Array.isArray(phone?.storage_ids) && phone.storage_ids.length > 0) {
+      return phone.storage_ids.map((id) => {
+        const matched = systemStorages.find((s) => Number(s.storage_id) === Number(id));
+        return {
+          storage_id: id,
+          storage_name: matched ? matched.storage_name : (typeof id === 'string' && id.includes('GB') ? id : 'Standard'),
+        };
+      });
+    }
+    return [{ storage_id: 'default', storage_name: 'Standard' }];
+  }, [phone, systemStorages]);
+
+  const [selectedStorage, setSelectedStorage] = useState(
+    phoneStorageOptions[0]?.storage_name || 'Standard'
+  );
+
+  useEffect(() => {
+    if (phoneStorageOptions.length > 0) {
+      setSelectedStorage(phoneStorageOptions[0].storage_name);
+    }
+  }, [phoneStorageOptions]);
 
   // Installments state
   const [installmentsData, setInstallmentsData] = useState(null);
@@ -94,6 +204,25 @@ export default function PhoneDetailModal({
 
   // Share feedback state
   const [copiedLink, setCopiedLink] = useState(false);
+  const { addToCart } = useCart();
+  const [addedToCart, setAddedToCart] = useState(false);
+
+  const handleAddToCart = () => {
+    if (isVariantSoldOut) return;
+    addToCart({
+      phone_id: phoneId,
+      name: phone.name,
+      brand_name: phone.brand_name,
+      color: selectedColor,
+      storage: selectedStorage,
+      price: effectivePrice,
+      photo: photos[activePhotoIdx] || photos[0] || phone.main_photo || '',
+      quantity: 1,
+    });
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 2000);
+  };
+
 
   useEffect(() => {
     if (phone?.installment_enabled && phoneId) {
@@ -118,6 +247,16 @@ export default function PhoneDetailModal({
   const availability = (phone.availability || 'IN_STOCK').toUpperCase();
   const currentStock = Number(phone.current_stock ?? phone.stock ?? 0);
   const isSoldOut = availability === 'SOLD_OUT' || (availability !== 'COMING_SOON' && currentStock === 0);
+  const activeColorQty = typeof activeColor?.quantity === 'number' ? activeColor.quantity : currentStock;
+
+  // Selected variant stock (Color + Storage)
+  let variantStock = activeColorQty;
+  if (activeColor?.storage_quantities && typeof activeColor.storage_quantities[selectedStorage] === 'number') {
+    variantStock = activeColor.storage_quantities[selectedStorage];
+  } else if (phoneStorageOptions.length === 1 && typeof activeColor?.quantity === 'number') {
+    variantStock = activeColor.quantity;
+  }
+  const isVariantSoldOut = isSoldOut || (availability !== 'COMING_SOON' && variantStock === 0);
   const isLowStock = availability === 'LOW_STOCK' || (currentStock > 0 && currentStock <= (phone.low_stock_level || 5));
   const isComingSoon = availability === 'COMING_SOON';
 
@@ -221,14 +360,10 @@ export default function PhoneDetailModal({
             <button
               type="button"
               onClick={() => toggleFavorite(phoneId)}
-              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                favorited
-                  ? 'bg-red-950/50 text-red-400 border-red-500/30'
-                  : 'border-theme-border bg-transparent hover:bg-white/[0.04] text-theme-textSecondary hover:text-red-400'
-              }`}
+              className="p-1.5 rounded-lg border border-theme-border bg-transparent hover:bg-white/[0.04] text-theme-textSecondary transition-colors cursor-pointer"
               title="Save to Favourites"
             >
-              <Heart className={`w-3.5 h-3.5 ${favorited ? 'fill-current' : ''}`} />
+              <Heart className={`w-3.5 h-3.5 ${favorited ? 'text-rose-400 fill-rose-400/80' : ''}`} />
             </button>
 
             {/* Close */}
@@ -245,81 +380,99 @@ export default function PhoneDetailModal({
 
         {/* Drawer Scrollable Body */}
         <div className="overflow-y-auto px-6 sm:px-8 py-6 space-y-6 flex-1">
-          {/* Main Grid: Gallery on left, Primary Purchase Info on right */}
+          {/* Main Grid: Gallery with Colors on left, Primary Purchase Info on right */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            {/* Photo Gallery with Top Swap Buttons */}
+            {/* Photo Gallery Column with Selected Color's Uploaded Photos on the Left */}
             <div className="flex flex-col gap-2.5">
-              <div className="relative aspect-[4/3] sm:aspect-square w-full bg-[#080D1A] rounded-xl border border-theme-border p-4 flex items-center justify-center overflow-hidden group">
-                
-                {/* Top Two Swap Buttons (< and >) */}
-                <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg px-2 py-1 shadow">
-                  <button
-                    type="button"
-                    onClick={handlePrevPhoto}
-                    className="p-0.5 rounded text-theme-textSecondary hover:text-white transition-colors cursor-pointer"
-                    title="Previous image"
-                    aria-label="Previous image"
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                  </button>
+              <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+                {/* ── LEFT OF IMAGE: 1 to 3 UPLOADED PHOTOS FOR CURRENT COLOR ── */}
+                {photos.length > 0 && (
+                  <div className="flex sm:flex-col gap-2 shrink-0 overflow-x-auto sm:overflow-y-auto max-h-[380px] p-0.5 [scrollbar-width:none]">
+                    {photos.map((photoUrl, idx) => {
+                      const isPhotoSelected = activePhotoIdx === idx;
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setActivePhotoIdx(idx)}
+                          className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl border p-1 bg-[#080D1A] shrink-0 transition-all cursor-pointer flex items-center justify-center overflow-hidden ${
+                            isPhotoSelected
+                              ? 'border-white ring-2 ring-white/30 shadow-md scale-105'
+                              : 'border-white/15 hover:border-white/40 opacity-70 hover:opacity-100 hover:scale-102'
+                          }`}
+                          title={`View photo ${idx + 1}`}
+                        >
+                          <img
+                            src={photoUrl}
+                            alt={`${activeColor?.name} photo ${idx + 1}`}
+                            className="w-full h-full object-contain"
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
 
-                  <span className="text-[10px] text-theme-textMuted px-1 font-mono select-none">
-                    {photos.length > 0 ? `${activePhotoIdx + 1} / ${photos.length}` : '1 / 1'}
-                  </span>
+                {/* ── MAIN IMAGE BOX ── */}
+                <div className="relative aspect-[4/3] sm:aspect-square flex-1 bg-[#080D1A] rounded-xl border border-theme-border p-4 flex items-center justify-center overflow-hidden group">
+                  {/* Top Two Swap Buttons (< 1 / 2 >) - Black text/arrows directly on the image with no dark blur */}
+                  {photos.length > 1 && (
+                    <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 bg-transparent px-1.5 py-0.5 select-none">
+                      <button
+                        type="button"
+                        onClick={handlePrevPhoto}
+                        className="p-0.5 text-black hover:opacity-60 transition-opacity cursor-pointer"
+                        title="Previous image"
+                        aria-label="Previous image"
+                      >
+                        <ChevronLeft className="w-4 h-4 text-black stroke-[2.5]" />
+                      </button>
 
-                  <button
-                    type="button"
-                    onClick={handleNextPhoto}
-                    className="p-0.5 rounded text-theme-textSecondary hover:text-white transition-colors cursor-pointer"
-                    title="Next image"
-                    aria-label="Next image"
-                  >
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
+                      <span className="text-xs text-black font-semibold font-mono px-0.5 tracking-wider">
+                        {photos.length > 0 ? `${activePhotoIdx + 1} / ${photos.length}` : '1 / 1'}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={handleNextPhoto}
+                        className="p-0.5 text-black hover:opacity-60 transition-opacity cursor-pointer"
+                        title="Next image"
+                        aria-label="Next image"
+                      >
+                        <ChevronRight className="w-4 h-4 text-black stroke-[2.5]" />
+                      </button>
+                    </div>
+                  )}
+
+                  {photos[activePhotoIdx] ? (
+                    <img
+                      src={photos[activePhotoIdx]}
+                      alt={`${phone.name} - ${activeColor?.name}`}
+                      className="max-h-full max-w-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)] transition-all duration-300"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-theme-textMuted">
+                      <span className="text-xs">SK LABA PHONE</span>
+                    </div>
+                  )}
+
+                  {/* Offer tag (Light Gold styling) */}
+                  {hasOffer && (
+                    <div className="absolute top-2.5 left-2.5 z-10 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-amber-300/40 bg-black/65 backdrop-blur-md text-amber-200 text-[10px] font-semibold tracking-wide shadow-sm">
+                      <Tag className="w-3 h-3 shrink-0 text-amber-300" />
+                      <span>Save ${savings.toFixed(0)} ({discountPercent}% off)</span>
+                    </div>
+                  )}
                 </div>
-
-                {photos[activePhotoIdx] ? (
-                  <img
-                    src={photos[activePhotoIdx]}
-                    alt={phone.name}
-                    className="max-h-full max-w-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)] transition-all duration-200"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-theme-textMuted">
-                    <span className="text-xs">SK LABA PHONE</span>
-                  </div>
-                )}
-
-                {/* Offer tag (clean official tag, no neon bg) */}
-                {hasOffer && (
-                  <div className="absolute top-2.5 left-2.5 z-10 inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/15 bg-black/60 backdrop-blur-md text-white/90 text-[10px] font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                    <span>Save ${savings.toFixed(0)} ({discountPercent}% off)</span>
-                  </div>
-                )}
               </div>
 
-              {/* Thumbnails row */}
-              {photos.length > 1 && (
-                <div className="flex items-center gap-2 overflow-x-auto py-1">
-                  {photos.map((photoUrl, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setActivePhotoIdx(idx)}
-                      className={`relative w-14 h-14 rounded-lg border p-1 bg-transparent shrink-0 transition-all cursor-pointer ${
-                        activePhotoIdx === idx
-                          ? 'border-white/30 bg-white/10'
-                          : 'border-theme-border opacity-70 hover:opacity-100'
-                      }`}
-                    >
-                      <img
-                        src={photoUrl}
-                        alt={`Thumbnail ${idx + 1}`}
-                        className="w-full h-full object-contain"
-                      />
-                    </button>
-                  ))}
+              {/* Description & Overview Section (Placed directly under the phone main image) */}
+              {phone.description && (
+                <div className="bg-transparent rounded-lg p-3.5 border border-theme-border mt-1">
+                  <h2 className="text-[11px] font-medium uppercase tracking-wider text-theme-textMuted mb-2">
+                    Description & Overview
+                  </h2>
+                  <FormattedDescription content={phone.description} isDark={true} className="text-theme-textSecondary font-normal" />
                 </div>
               )}
             </div>
@@ -327,34 +480,9 @@ export default function PhoneDetailModal({
             {/* Product Details & Actions */}
             <div className="flex flex-col justify-between h-full space-y-5">
               <div>
-                <h1 className="text-xl sm:text-2xl font-normal text-white leading-tight mb-2">
+                <h1 className="text-xl sm:text-2xl font-normal text-white leading-tight mb-3">
                   {phone.name}
                 </h1>
-
-                {/* Stock & Availability status (Official subtle status indicator, no highlighted neon bg) */}
-                <div className="flex items-center gap-2 mb-4">
-                  {isSoldOut ? (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/10 bg-transparent text-xs font-normal text-white/90">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                      <span>Sold Out</span>
-                    </span>
-                  ) : isLowStock ? (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/10 bg-transparent text-xs font-normal text-white/90">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                      <span>Only {currentStock} Left in Stock</span>
-                    </span>
-                  ) : isComingSoon ? (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/10 bg-transparent text-xs font-normal text-white/90">
-                      <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-                      <span>Coming Soon</span>
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/10 bg-transparent text-xs font-normal text-white/90">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      <span>In Stock & Ready for Collection</span>
-                    </span>
-                  )}
-                </div>
 
                 {/* Pricing Box (Clean transparent card, official typography) */}
                 <div className="bg-transparent border border-theme-border rounded-lg p-3.5 mb-4">
@@ -375,111 +503,230 @@ export default function PhoneDetailModal({
                   )}
                 </div>
 
-                {/* Options: Colours */}
-                {colorOptions.length > 0 && (
-                  <div className="mb-4">
-                    <label className="block text-[11px] font-normal uppercase tracking-wider text-theme-textMuted mb-2">
-                      Colour Options ({colorOptions.length})
+                {/* Options: Colours (First image of each color + normal text label under image) */}
+                {parsedColors.length > 0 && (
+                  <div className="mb-5">
+                    <label className="block text-[11px] font-normal uppercase tracking-wider text-theme-textMuted mb-2.5">
+                      Selected Color: <span className="text-white font-semibold">{activeColor?.name}</span>
                     </label>
-                    <div className="flex flex-wrap gap-2">
-                      {colorOptions.map((c, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => setSelectedColor(c)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
-                            selectedColor === c
-                              ? 'border-white/20 bg-white/10 text-white shadow-sm'
-                              : 'border-theme-border bg-transparent text-theme-textSecondary hover:text-white hover:bg-white/[0.04]'
-                          }`}
-                        >
-                          {c}
-                        </button>
-                      ))}
+                    <div className="flex flex-wrap items-start gap-4">
+                      {parsedColors.map((c, idx) => {
+                        const isSelected = selectedColorIdx === idx;
+                        const firstPhoto = c.photos?.[0] || generalPhotos[idx] || generalPhotos[0] || '';
+                        const colorQty = typeof c.quantity === 'number' ? c.quantity : Number(phone?.current_stock ?? 0);
+                        const isColorInStock = colorQty > 0;
+
+                        return (
+                          <div
+                            key={c.id || idx}
+                            onClick={() => handleSelectColor(idx)}
+                            className="flex flex-col items-center cursor-pointer group/colorOption"
+                          >
+                            {/* Color Image Card (Matches phone card with active indicator) */}
+                            <div
+                              className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl p-0.5 border overflow-hidden transition-all duration-200 flex items-center justify-center bg-black/40 ${
+                                isSelected
+                                  ? 'border-white ring-2 ring-white/40 shadow-lg shadow-black/60 scale-105'
+                                  : 'border-white/15 hover:border-white/40 opacity-75 hover:opacity-100 hover:scale-105'
+                              }`}
+                            >
+                              {firstPhoto ? (
+                                <img
+                                  src={firstPhoto}
+                                  alt={c.name}
+                                  className="w-full h-full object-cover object-center rounded-lg"
+                                />
+                              ) : (
+                                <span
+                                  className="w-full h-full rounded-lg"
+                                  style={{ backgroundColor: c.color_code || '#4B5563' }}
+                                />
+                              )}
+                            </div>
+
+                            {/* Normal text label under the color image (no box!) */}
+                            <span
+                              className={`text-[11px] sm:text-xs mt-1.5 text-center font-normal max-w-[80px] truncate leading-tight transition-colors ${
+                                isSelected
+                                  ? 'text-white font-medium'
+                                  : 'text-theme-textSecondary group-hover/colorOption:text-white'
+                              }`}
+                            >
+                              {c.name}
+                            </span>
+
+                            {/* Available stock quantity according to color (White text for both) */}
+                            <span className="text-[10px] font-medium mt-0.5 text-center leading-none text-white/80">
+                              {isColorInStock ? `${colorQty} in stock` : 'Out of stock'}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
 
-                {/* Warranty & Accessories (Clean official text boxes, no icons) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs">
-                  {phone.warranty && (
-                    <div className="bg-transparent p-2.5 rounded-lg border border-theme-border">
-                      <span className="text-[11px] text-theme-textMuted uppercase tracking-wider block mb-0.5">
-                        Warranty
-                      </span>
-                      <span className="text-xs text-white font-normal">
-                        {phone.warranty}
-                      </span>
-                    </div>
-                  )}
+                {/* Options: Storage (Selectable storage cards with available stock under each in white text) */}
+                {phoneStorageOptions.length > 0 && (
+                  <div className="mb-5">
+                    <label className="block text-[11px] font-normal uppercase tracking-wider text-theme-textMuted mb-2.5">
+                      Selected Storage: <span className="text-white font-semibold">{selectedStorage}</span>
+                    </label>
+                    <div className="flex flex-wrap items-start gap-3">
+                      {phoneStorageOptions.map((s) => {
+                        const isSelected = selectedStorage === s.storage_name;
+                        // Calculate stock for this storage option
+                        let storageQty = 0;
+                        if (
+                          activeColor?.storage_quantities &&
+                          typeof activeColor.storage_quantities[s.storage_name] === 'number'
+                        ) {
+                          storageQty = activeColor.storage_quantities[s.storage_name];
+                        } else if (phoneStorageOptions.length === 1 && typeof activeColor?.quantity === 'number') {
+                          storageQty = activeColor.quantity;
+                        } else {
+                          storageQty = typeof activeColor?.quantity === 'number'
+                            ? activeColor.quantity
+                            : Number(phone.current_stock ?? 0);
+                        }
+                        const isStorageInStock = storageQty > 0;
 
-                  <div className="bg-transparent p-2.5 rounded-lg border border-theme-border">
-                    <span className="text-[11px] text-theme-textMuted uppercase tracking-wider block mb-0.5">
-                      Package
+                        return (
+                          <div
+                            key={s.storage_id || s.storage_name}
+                            onClick={() => setSelectedStorage(s.storage_name)}
+                            className="flex flex-col items-center cursor-pointer group/storageOption"
+                          >
+                            {/* Storage Box Card */}
+                            <div
+                              className={`px-4 py-2 min-w-[70px] rounded-xl border text-center transition-all duration-200 flex items-center justify-center bg-black/40 ${
+                                isSelected
+                                  ? 'border-white ring-2 ring-white/40 shadow-lg shadow-black/60 scale-105 bg-white/10'
+                                  : 'border-white/15 hover:border-white/40 opacity-75 hover:opacity-100 hover:scale-105'
+                              }`}
+                            >
+                              <span
+                                className={`text-xs sm:text-sm font-semibold tracking-wide ${
+                                  isSelected
+                                    ? 'text-white'
+                                    : 'text-theme-textSecondary group-hover/storageOption:text-white'
+                                }`}
+                              >
+                                {s.storage_name}
+                              </span>
+                            </div>
+
+                            {/* Available stock quantity according to storage (White text for both) */}
+                            <span className="text-[10px] font-medium mt-1 text-center leading-none text-white/80">
+                              {isStorageInStock ? `${storageQty} in stock` : 'Out of stock'}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Warranty (Clean official line, NO border box, NO package box) */}
+                {phone.warranty && (
+                  <div className="pt-2 text-xs flex items-center gap-2">
+                    <span className="text-[11px] text-theme-textMuted uppercase tracking-wider font-medium">
+                      Warranty:
                     </span>
                     <span className="text-xs text-white font-normal">
-                      Original Box & Verified Accessories
+                      {phone.warranty}
                     </span>
                   </div>
-                </div>
+                )}
               </div>
 
-              {/* Action Buttons Row (Clean official rectangular buttons, NO icons) */}
-              <div className="space-y-2.5 pt-3 border-t border-theme-border">
-                {isSoldOut ? (
-                  <button
-                    type="button"
-                    onClick={() => onOpenNotifyBackInStock && onOpenNotifyBackInStock(phone)}
-                    className="w-full py-2.5 px-4 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white font-medium text-xs sm:text-sm transition-all cursor-pointer text-center"
-                  >
-                    Notify Me When Back in Stock
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onOpenReserve &&
-                      onOpenReserve({
-                        ...phone,
-                        selectedColor,
-                        selectedStorage,
-                        effectivePrice,
-                      })
-                    }
-                    className="w-full py-2.5 px-4 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-white font-medium text-xs sm:text-sm shadow-sm transition-all cursor-pointer text-center"
-                  >
-                    Reserve This Phone
-                  </button>
-                )}
+              {/* Action Buttons Row: Reserve & Add to Cart in 1 line */}
+              <div className="space-y-3 pt-3 border-t border-theme-border">
+                <div className="grid grid-cols-2 gap-2.5">
+                  {/* Button 1: Reserve or Notify */}
+                  {isVariantSoldOut ? (
+                    <button
+                      type="button"
+                      onClick={() => onOpenNotifyBackInStock && onOpenNotifyBackInStock({ ...phone, color_name: selectedColor, storage_name: selectedStorage })}
+                      className="w-full py-2.5 px-3 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white font-medium text-xs transition-all cursor-pointer text-center truncate"
+                      title={`Notify Me When ${selectedColor} (${selectedStorage}) is Back in Stock`}
+                    >
+                      Notify When Available
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onOpenReserve &&
+                        onOpenReserve({
+                          ...phone,
+                          selectedColor,
+                          selectedStorage,
+                          effectivePrice,
+                        })
+                      }
+                      className="w-full py-2.5 px-3 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-white font-medium text-xs shadow-sm transition-all cursor-pointer text-center truncate"
+                      title={`Reserve This Phone (${selectedColor} · ${selectedStorage})`}
+                    >
+                      Reserve ({selectedColor} · {selectedStorage})
+                    </button>
+                  )}
 
-                {/* Instant Inquiry & Contact Buttons (No icons, clean rectangular styling) */}
-                <div className="grid grid-cols-3 gap-2">
-                  {/* Send Inquiry */}
+                  {/* Button 2: Add to Cart */}
                   <button
                     type="button"
-                    onClick={() => onOpenInquiry && onOpenInquiry(phone)}
-                    className="py-2 px-3 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white text-xs font-medium transition-colors text-center cursor-pointer"
+                    disabled={isVariantSoldOut}
+                    onClick={handleAddToCart}
+                    className={`w-full py-2.5 px-3 rounded-lg font-medium text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm truncate ${
+                      isVariantSoldOut
+                        ? 'bg-white/5 border border-white/10 text-theme-textMuted cursor-not-allowed opacity-50'
+                        : 'bg-white/10 hover:bg-white/15 border border-white/20 text-white hover:shadow-sm'
+                    }`}
                   >
-                    Inquiry
+                    <ShoppingCart className="w-3.5 h-3.5 shrink-0" />
+                    <span>{addedToCart ? 'Added Successfully ✓' : 'Add to Cart'}</span>
                   </button>
+                </div>
 
-                  {/* WhatsApp Direct */}
-                  <button
-                    type="button"
-                    onClick={handleWhatsApp}
-                    className="py-2 px-3 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white text-xs font-medium transition-colors text-center cursor-pointer"
-                  >
-                    WhatsApp
-                  </button>
+                {/* 3 Circular Action Buttons: Inquiry, WhatsApp, Call Shop */}
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[11px] text-theme-textMuted uppercase tracking-wider">
+                    Quick Contact:
+                  </span>
+                  <div className="flex items-center gap-2.5">
+                    {/* Inquiry Circle Button */}
+                    <button
+                      type="button"
+                      onClick={() => onOpenInquiry && onOpenInquiry(phone)}
+                      className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-105"
+                      title="Send Customer Inquiry"
+                      aria-label="Send Customer Inquiry"
+                    >
+                      <HelpCircle className="w-3.5 h-3.5" />
+                    </button>
 
-                  {/* Phone Call Direct */}
-                  <button
-                    type="button"
-                    onClick={handleCall}
-                    className="py-2 px-3 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white text-xs font-medium transition-colors text-center cursor-pointer"
-                  >
-                    Call Shop
-                  </button>
+                    {/* WhatsApp Circle Button */}
+                    <button
+                      type="button"
+                      onClick={handleWhatsApp}
+                      className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-105"
+                      title="WhatsApp Direct"
+                      aria-label="WhatsApp Direct"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Call Shop Circle Button */}
+                    <button
+                      type="button"
+                      onClick={handleCall}
+                      className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-105"
+                      title="Call Shop Direct"
+                      aria-label="Call Shop Direct"
+                    >
+                      <PhoneCall className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
 
                 {copiedLink && (
@@ -487,82 +734,66 @@ export default function PhoneDetailModal({
                     Link copied to clipboard
                   </p>
                 )}
+
+                {/* Available Instalment Plans (Placed directly under the 3 circular contact buttons) */}
+                {Boolean(phone.installment_enabled) && (
+                  <div className="bg-transparent border border-theme-border rounded-lg p-3 mt-3">
+                    <div className="mb-2">
+                      <h2 className="text-[11px] font-medium uppercase tracking-wider text-theme-textMuted">
+                        Available Instalment Plans
+                      </h2>
+                    </div>
+
+                    {loadingInstallments ? (
+                      <div className="text-xs text-theme-textMuted py-1 font-normal">
+                        Loading flexible instalment plans...
+                      </div>
+                    ) : installmentsData?.plans && installmentsData.plans.length > 0 ? (
+                      <div className="grid grid-cols-1 gap-2 mt-1">
+                        {installmentsData.plans.map((plan, idx) => (
+                          <div
+                            key={plan.installment_plan_id || idx}
+                            className="bg-transparent border border-theme-border rounded-lg p-2.5 flex flex-col justify-between"
+                          >
+                            <div>
+                              <div className="flex items-baseline justify-between gap-2 mb-1">
+                                <span className="text-xs font-semibold text-white break-words">
+                                  {plan.plan_name}
+                                </span>
+                                <span className="text-xs font-semibold text-white shrink-0">
+                                  ${plan.monthly_payment}/mo
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-theme-textMuted font-normal">
+                                {plan.number_of_months} Months • Total: ${plan.total_payable}
+                              </p>
+                            </div>
+                            {plan.terms && (
+                              <p className="text-[11px] text-theme-textSecondary mt-1.5 pt-1.5 border-t border-theme-border/50 font-normal leading-relaxed break-words whitespace-normal">
+                                {plan.terms}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-theme-textSecondary font-normal">
+                        Instalment payment options available upon store collection or checkout.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Description Section (No icons, clean official box) */}
-          {phone.description && (
-            <div className="bg-transparent rounded-lg p-4 border border-theme-border">
-              <h2 className="text-[11px] font-medium uppercase tracking-wider text-theme-textMuted mb-2">
-                Description & Overview
-              </h2>
-              <p className="text-xs sm:text-sm text-theme-textSecondary leading-relaxed whitespace-pre-line font-normal">
-                {phone.description}
-              </p>
-            </div>
-          )}
-
-          {/* Installment Plans List (Clean official styling, no icons) */}
-          {Boolean(phone.installment_enabled) && (
-            <div className="bg-transparent border border-theme-border rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-[11px] font-medium uppercase tracking-wider text-theme-textMuted">
-                  Available Instalment Plans
-                </h2>
-                <span className="text-xs text-theme-textMuted font-normal">
-                  Zero or Low Interest
-                </span>
-              </div>
-
-              {loadingInstallments ? (
-                <div className="text-xs text-theme-textMuted py-2 font-normal">
-                  Loading flexible instalment plans...
-                </div>
-              ) : installmentsData?.plans && installmentsData.plans.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2">
-                  {installmentsData.plans.map((plan, idx) => (
-                    <div
-                      key={plan.installment_plan_id || idx}
-                      className="bg-transparent border border-theme-border rounded-lg p-3 flex flex-col justify-between"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-medium text-white">
-                            {plan.plan_name}
-                          </span>
-                          <span className="text-xs font-semibold text-emerald-400">
-                            ${plan.monthly_payment}/mo
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-theme-textMuted font-normal">
-                          {plan.number_of_months} Months • Total: ${plan.total_payable}
-                        </p>
-                      </div>
-                      {plan.terms && (
-                        <p className="text-[10px] text-theme-textSecondary mt-2 pt-2 border-t border-theme-border/50 font-normal">
-                          {plan.terms}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-theme-textSecondary font-normal">
-                  Instalment payment options available upon store collection or checkout. Contact shop for eligibility.
-                </p>
-              )}
-            </div>
-          )}
-
           {/* Similar Phones Section (No icons, clean official cards) */}
           {similarPhones.length > 0 && (
             <div className="pt-4 border-t border-theme-border">
-              <div className="flex items-center justify-between mb-3">
+              <div className="mb-3">
                 <h2 className="text-xs font-medium uppercase tracking-wider text-theme-textMuted">
                   {isSoldOut ? 'Similar Available Phones' : 'Similar Phones'}
                 </h2>
-                <span className="text-xs text-theme-textMuted font-normal">Same brand or price range</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

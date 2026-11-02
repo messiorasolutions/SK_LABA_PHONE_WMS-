@@ -43,7 +43,6 @@ export default function Header({ toggleSidebar }) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
-
     }
     function handleKeyDown(event) {
       if (event.key === 'Escape') {
@@ -73,7 +72,12 @@ export default function Header({ toggleSidebar }) {
   // Get simple breadcrumb title
   const getPageTitle = () => {
     const path = location.pathname;
+    if (path.startsWith('/phone-management') || path.startsWith('/phones')) return 'Phone Management';
+    if (path.startsWith('/stock-management') || path.startsWith('/stock') || path.startsWith('/storage-management')) return 'Stock Management';
+    if (path.startsWith('/offers') || path.startsWith('/offer-management')) return 'Offers Management';
+    if (path.startsWith('/installment-plans') || path.startsWith('/installments')) return 'Installment Plans Management';
     if (path.startsWith('/inquiries')) return 'Customer Inquiries';
+    if (path.startsWith('/reservations')) return 'Customer Reservations';
     if (path.startsWith('/users')) return 'User & Role Management';
     return 'WMS Portal';
   };
@@ -123,8 +127,6 @@ export default function Header({ toggleSidebar }) {
 
       {/* Right Controls: Status, Theme, Notifications & User Pill */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Live Warehouse Badge */}
-
         {/* Dark/Light mode toggle */}
         <button
           onClick={toggleTheme}
@@ -135,7 +137,7 @@ export default function Header({ toggleSidebar }) {
           {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
         </button>
 
-        {/* User Avatar & Dropdown Pill (Clean & Minimal: Admin and User Management moved to bottom) */}
+        {/* User Avatar & Dropdown Pill */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}

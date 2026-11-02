@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { X, Cpu, AlertCircle, Plus } from 'lucide-react';
+import { X, AlertCircle } from 'lucide-react';
 
 export default function SpecificationModal({ isOpen, onClose, onSubmit, initial = null, loading = false }) {
-  const [specName, setSpecName] = useState('');
-  const [specType, setSpecType] = useState('TECHNICAL');
+  const [specificationName, setSpecificationName] = useState('');
+  const [specCategory, setSpecCategory] = useState('Display');
+  const [dataType, setDataType] = useState('STRING');
   const [description, setDescription] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     if (initial) {
-      setSpecName(initial.specification_name || '');
-      setSpecType(initial.specification_type || 'TECHNICAL');
+      setSpecificationName(initial.specification_name || '');
+      setSpecCategory(initial.spec_category || 'Display');
+      setDataType(initial.data_type || 'STRING');
       setDescription(initial.description || '');
       setIsActive(initial.is_active === 1 || initial.is_active === true);
     } else {
-      setSpecName('');
-      setSpecType('TECHNICAL');
+      setSpecificationName('');
+      setSpecCategory('Display');
+      setDataType('STRING');
       setDescription('');
       setIsActive(true);
     }
@@ -27,14 +30,15 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!specName.trim()) {
+    if (!specificationName.trim()) {
       setSubmitError('Specification Name is required.');
       return;
     }
 
     const payload = {
-      specification_name: specName.trim(),
-      specification_type: specType,
+      specification_name: specificationName.trim(),
+      spec_category: specCategory.trim(),
+      data_type: dataType.trim(),
       description: description.trim(),
       is_active: isActive,
     };
@@ -53,20 +57,15 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
         onClick={onClose}
       />
 
-      {/* Slide-over Right Panel (Loads from side, not middle of page) */}
+      {/* Slide-over Right Panel */}
       <div className="fixed top-0 right-0 bottom-0 z-50 w-full sm:w-[410px] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col transform transition-transform duration-200 ease-out animate-in slide-in-from-right">
         {/* Panel Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#2563EB] flex items-center justify-center font-bold shrink-0">
-              <Cpu className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-slate-800 dark:text-slate-100">
-                {initial ? 'Edit Specification' : 'Create Specification'}
-              </h3>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500">Technical or accessory specification</p>
-            </div>
+          <div>
+            <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+              {initial ? 'Edit Specification' : 'Create Specification'}
+            </h3>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500">Technical specification category</p>
           </div>
           <button
             onClick={onClose}
@@ -83,7 +82,7 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
           </div>
         )}
 
-        {/* Form Body with pinned footer (no scroll required) */}
+        {/* Form Body with pinned footer */}
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
             <div>
@@ -92,36 +91,57 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
               </label>
               <input
                 type="text"
-                value={specName}
-                onChange={(e) => setSpecName(e.target.value)}
-                placeholder="e.g. 5G Ultra Wideband, OLED 120Hz"
+                value={specificationName}
+                onChange={(e) => setSpecificationName(e.target.value)}
+                placeholder="e.g. Screen Size, Battery Capacity"
                 required
                 className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] transition-colors"
               />
             </div>
 
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Specification Category <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={specType}
-                onChange={(e) => setSpecType(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] cursor-pointer transition-colors"
-              >
-                <option value="TECHNICAL">TECHNICAL (Processor, Display, Camera)</option>
-                <option value="ACCESSORY">ACCESSORY (Charger, Case, Earphones)</option>
-              </select>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Category
+                </label>
+                <select
+                  value={specCategory}
+                  onChange={(e) => setSpecCategory(e.target.value)}
+                  className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] transition-colors"
+                >
+                  <option value="Display">Display</option>
+                  <option value="Camera">Camera</option>
+                  <option value="Battery">Battery</option>
+                  <option value="Processor">Processor</option>
+                  <option value="Connectivity">Connectivity</option>
+                  <option value="General">General</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Data Type
+                </label>
+                <select
+                  value={dataType}
+                  onChange={(e) => setDataType(e.target.value)}
+                  className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] transition-colors"
+                >
+                  <option value="STRING">Text (String)</option>
+                  <option value="NUMBER">Number</option>
+                  <option value="BOOLEAN">Boolean</option>
+                </select>
+              </div>
             </div>
 
             <div>
               <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Description
+                Description / Notes
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Hardware details or bundled item descriptions..."
+                placeholder="Hardware specs, technical metrics..."
                 rows={3}
                 className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] transition-colors resize-none"
               />
@@ -149,7 +169,7 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
             </div>
           </div>
 
-          {/* Panel Footer (Pinned at Bottom) */}
+          {/* Panel Footer */}
           <div className="p-4 px-5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 flex items-center gap-3">
             <button
               type="button"
@@ -161,16 +181,9 @@ export default function SpecificationModal({ isOpen, onClose, onSubmit, initial 
             <button
               type="submit"
               disabled={loading}
-              className="w-1/2 py-2.5 px-4 text-xs font-semibold text-white bg-[#2563EB] hover:bg-blue-700 rounded-lg shadow-sm transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+              className="w-1/2 py-2.5 px-4 text-xs font-semibold text-white bg-[#2563EB] hover:bg-blue-700 rounded-lg shadow-sm transition-colors cursor-pointer disabled:opacity-50 text-center"
             >
-              {loading ? (
-                <span>Saving...</span>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4" />
-                  <span>{initial ? 'Save Changes' : 'Create Specification'}</span>
-                </>
-              )}
+              {loading ? 'Saving...' : initial ? 'Save Changes' : 'Create Spec'}
             </button>
           </div>
         </form>

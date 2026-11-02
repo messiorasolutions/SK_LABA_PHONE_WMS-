@@ -1,7 +1,3 @@
-// ============================================================
-// API ENDPOINTS — All routes in one place, never hardcode URLs
-// Base URL is read from .env (VITE_API_BASE_URL)
-// ============================================================
 
 export const API_ENDPOINTS = {
   brands: {
@@ -29,6 +25,9 @@ export const API_ENDPOINTS = {
   },
   reservations: {
     base: '/api/reservations',
+  },
+  sellRequests: {
+    base: '/api/sell-requests',
   },
   offers: {
     base: '/api/offers',

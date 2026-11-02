@@ -17,6 +17,7 @@ export default function PhoneDetailModal({
   onClose,
   onOpenReserve,
   onOpenInquiry,
+  onOpenSell,
   onOpenNotifyBackInStock,
   onSelectPhone,
 }) {
@@ -26,7 +27,6 @@ export default function PhoneDetailModal({
   const favorited = isFavorite(phoneId);
   const inComparison = isInCompare(phoneId);
 
-  // Photos
   let photos = [];
   if (Array.isArray(phone?.photos) && phone.photos.length > 0) {
     photos = phone.photos;
@@ -42,12 +42,10 @@ export default function PhoneDetailModal({
 
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
 
-  // Reset photo index when phone changes
   useEffect(() => {
     setActivePhotoIdx(0);
   }, [phoneId]);
 
-  // Photo swap controls (top swap buttons)
   const handlePrevPhoto = (e) => {
     e?.stopPropagation();
     if (photos.length <= 1) return;
@@ -60,7 +58,6 @@ export default function PhoneDetailModal({
     setActivePhotoIdx((prev) => (prev + 1) % photos.length);
   };
 
-  // Keyboard navigation for image swap & escape
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose && onClose();
@@ -71,7 +68,6 @@ export default function PhoneDetailModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [photos.length]);
 
-  // Color options
   let colorOptions = [];
   if (Array.isArray(phone?.colour_options)) {
     colorOptions = phone.colour_options;
@@ -84,15 +80,12 @@ export default function PhoneDetailModal({
   }
   const [selectedColor, setSelectedColor] = useState(colorOptions[0] || 'Default');
 
-  // Storage options
   const storageIds = Array.isArray(phone?.storage_ids) ? phone.storage_ids : [];
   const [selectedStorage, setSelectedStorage] = useState(storageIds[0] || 'Standard');
 
-  // Installments state
   const [installmentsData, setInstallmentsData] = useState(null);
   const [loadingInstallments, setLoadingInstallments] = useState(false);
 
-  // Share feedback state
   const [copiedLink, setCopiedLink] = useState(false);
 
   useEffect(() => {
@@ -114,14 +107,12 @@ export default function PhoneDetailModal({
 
   if (!phone) return null;
 
-  // Stock status
   const availability = (phone.availability || 'IN_STOCK').toUpperCase();
   const currentStock = Number(phone.current_stock ?? phone.stock ?? 0);
   const isSoldOut = availability === 'SOLD_OUT' || (availability !== 'COMING_SOON' && currentStock === 0);
   const isLowStock = availability === 'LOW_STOCK' || (currentStock > 0 && currentStock <= (phone.low_stock_level || 5));
   const isComingSoon = availability === 'COMING_SOON';
 
-  // Pricing
   const regularPrice = Number(phone.price || phone.regular_price || 0);
   const offerPrice = phone.offer_price || phone.active_offer?.offer_price;
   const hasOffer = Boolean(offerPrice && Number(offerPrice) < regularPrice);
@@ -129,7 +120,6 @@ export default function PhoneDetailModal({
   const savings = hasOffer ? regularPrice - effectivePrice : 0;
   const discountPercent = hasOffer ? Math.round((savings / regularPrice) * 100) : 0;
 
-  // WhatsApp click handler
   const handleWhatsApp = () => {
     const pageUrl = window.location.href;
     const cleanNumber = (STORE_INFO.whatsapp || '').replace(/\D/g, '');
@@ -139,12 +129,10 @@ export default function PhoneDetailModal({
     window.open(`https://wa.me/${cleanNumber}?text=${message}`, '_blank');
   };
 
-  // Direct phone call handler
   const handleCall = () => {
     window.location.href = `tel:${STORE_INFO.phone}`;
   };
 
-  // Share link handler
   const handleShare = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
@@ -153,7 +141,6 @@ export default function PhoneDetailModal({
     }
   };
 
-  // Similar phones calculation
   const similarPhones = allPhones
     .filter((p) => {
       const pId = p.phone_id || p.id;
@@ -168,16 +155,13 @@ export default function PhoneDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/70 backdrop-blur-sm transition-opacity duration-300">
-      {/* Click outside backdrop (left 40%) */}
       <div
         className="absolute inset-0 cursor-pointer"
         onClick={onClose}
         aria-label="Close drawer"
       />
 
-      {/* Right-Side 60% Slide-Over Drawer */}
       <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[85%] md:w-[60%] lg:w-[60%] bg-[#0A0F1E] border-l border-theme-border shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
-        {/* Modal Top Bar */}
         <div className="flex items-center justify-between px-6 py-3.5 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium uppercase tracking-wider text-theme-textSecondary">
@@ -190,7 +174,6 @@ export default function PhoneDetailModal({
           </div>
 
           <div className="flex items-center gap-1.5">
-            {/* Share */}
             <button
               type="button"
               onClick={handleShare}
@@ -200,7 +183,6 @@ export default function PhoneDetailModal({
               <Share2 className="w-3.5 h-3.5" />
             </button>
 
-            {/* Compare */}
             <button
               type="button"
               onClick={() => {
@@ -217,7 +199,6 @@ export default function PhoneDetailModal({
               <GitCompare className="w-3.5 h-3.5" />
             </button>
 
-            {/* Favorite */}
             <button
               type="button"
               onClick={() => toggleFavorite(phoneId)}
@@ -231,7 +212,6 @@ export default function PhoneDetailModal({
               <Heart className={`w-3.5 h-3.5 ${favorited ? 'fill-current' : ''}`} />
             </button>
 
-            {/* Close */}
             <button
               type="button"
               onClick={onClose}
@@ -243,15 +223,11 @@ export default function PhoneDetailModal({
           </div>
         </div>
 
-        {/* Drawer Scrollable Body */}
         <div className="overflow-y-auto px-6 sm:px-8 py-6 space-y-6 flex-1">
-          {/* Main Grid: Gallery on left, Primary Purchase Info on right */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            {/* Photo Gallery with Top Swap Buttons */}
             <div className="flex flex-col gap-2.5">
               <div className="relative aspect-[4/3] sm:aspect-square w-full bg-[#080D1A] rounded-xl border border-theme-border p-4 flex items-center justify-center overflow-hidden group">
                 
-                {/* Top Two Swap Buttons (< and >) */}
                 <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg px-2 py-1 shadow">
                   <button
                     type="button"
@@ -290,7 +266,6 @@ export default function PhoneDetailModal({
                   </div>
                 )}
 
-                {/* Offer tag (clean official tag, no neon bg) */}
                 {hasOffer && (
                   <div className="absolute top-2.5 left-2.5 z-10 inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/15 bg-black/60 backdrop-blur-md text-white/90 text-[10px] font-medium">
                     <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
@@ -299,7 +274,6 @@ export default function PhoneDetailModal({
                 )}
               </div>
 
-              {/* Thumbnails row */}
               {photos.length > 1 && (
                 <div className="flex items-center gap-2 overflow-x-auto py-1">
                   {photos.map((photoUrl, idx) => (
@@ -324,14 +298,12 @@ export default function PhoneDetailModal({
               )}
             </div>
 
-            {/* Product Details & Actions */}
             <div className="flex flex-col justify-between h-full space-y-5">
               <div>
                 <h1 className="text-xl sm:text-2xl font-normal text-white leading-tight mb-2">
                   {phone.name}
                 </h1>
 
-                {/* Stock & Availability status (Official subtle status indicator, no highlighted neon bg) */}
                 <div className="flex items-center gap-2 mb-4">
                   {isSoldOut ? (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/10 bg-transparent text-xs font-normal text-white/90">
@@ -356,7 +328,6 @@ export default function PhoneDetailModal({
                   )}
                 </div>
 
-                {/* Pricing Box (Clean transparent card, official typography) */}
                 <div className="bg-transparent border border-theme-border rounded-lg p-3.5 mb-4">
                   <div className="flex items-baseline gap-3">
                     <span className="text-2xl font-semibold text-white tracking-tight">
@@ -375,7 +346,6 @@ export default function PhoneDetailModal({
                   )}
                 </div>
 
-                {/* Options: Colours */}
                 {colorOptions.length > 0 && (
                   <div className="mb-4">
                     <label className="block text-[11px] font-normal uppercase tracking-wider text-theme-textMuted mb-2">
@@ -400,7 +370,6 @@ export default function PhoneDetailModal({
                   </div>
                 )}
 
-                {/* Warranty & Accessories (Clean official text boxes, no icons) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs">
                   {phone.warranty && (
                     <div className="bg-transparent p-2.5 rounded-lg border border-theme-border">
@@ -424,7 +393,6 @@ export default function PhoneDetailModal({
                 </div>
               </div>
 
-              {/* Action Buttons Row (Clean official rectangular buttons, NO icons) */}
               <div className="space-y-2.5 pt-3 border-t border-theme-border">
                 {isSoldOut ? (
                   <button
@@ -452,9 +420,7 @@ export default function PhoneDetailModal({
                   </button>
                 )}
 
-                {/* Instant Inquiry & Contact Buttons (No icons, clean rectangular styling) */}
                 <div className="grid grid-cols-3 gap-2">
-                  {/* Send Inquiry */}
                   <button
                     type="button"
                     onClick={() => onOpenInquiry && onOpenInquiry(phone)}
@@ -463,7 +429,6 @@ export default function PhoneDetailModal({
                     Inquiry
                   </button>
 
-                  {/* WhatsApp Direct */}
                   <button
                     type="button"
                     onClick={handleWhatsApp}
@@ -472,7 +437,6 @@ export default function PhoneDetailModal({
                     WhatsApp
                   </button>
 
-                  {/* Phone Call Direct */}
                   <button
                     type="button"
                     onClick={handleCall}
@@ -481,6 +445,20 @@ export default function PhoneDetailModal({
                     Call Shop
                   </button>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onOpenSell) {
+                      onOpenSell(phone);
+                    } else {
+                      window.dispatchEvent(new CustomEvent('sk_laba_open_sell_modal', { detail: { desiredPhone: phone } }));
+                    }
+                  }}
+                  className="w-full py-2 px-3 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white text-xs font-medium transition-colors text-center cursor-pointer"
+                >
+                  Trade-In Your Current Phone for This Device
+                </button>
 
                 {copiedLink && (
                   <p className="text-center text-xs text-theme-textSecondary font-normal animate-in fade-in">
@@ -491,7 +469,6 @@ export default function PhoneDetailModal({
             </div>
           </div>
 
-          {/* Description Section (No icons, clean official box) */}
           {phone.description && (
             <div className="bg-transparent rounded-lg p-4 border border-theme-border">
               <h2 className="text-[11px] font-medium uppercase tracking-wider text-theme-textMuted mb-2">
@@ -503,7 +480,6 @@ export default function PhoneDetailModal({
             </div>
           )}
 
-          {/* Installment Plans List (Clean official styling, no icons) */}
           {Boolean(phone.installment_enabled) && (
             <div className="bg-transparent border border-theme-border rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
@@ -555,7 +531,6 @@ export default function PhoneDetailModal({
             </div>
           )}
 
-          {/* Similar Phones Section (No icons, clean official cards) */}
           {similarPhones.length > 0 && (
             <div className="pt-4 border-t border-theme-border">
               <div className="flex items-center justify-between mb-3">

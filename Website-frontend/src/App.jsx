@@ -86,12 +86,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-theme-bg text-theme-textPrimary flex flex-col selection:bg-theme-accent selection:text-white">
       {/* Navigation Header */}
-      <Navbar
-        onOpenFavorites={() => setFavoritesModalOpen((prev) => !prev)}
-        onOpenCart={() => setCartModalOpen((prev) => !prev)}
-        isFavoritesOpen={favoritesModalOpen}
-        isCartOpen={cartModalOpen}
-      />
+      <Navbar onOpenFavorites={() => setFavoritesModalOpen(true)} onOpenCart={() => setCartModalOpen(true)} />
 
       <main className="flex-1">
         {isSmartphonesPage ? (

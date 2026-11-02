@@ -32,16 +32,16 @@ export default function CartModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden pointer-events-none">
-      {/* Click outside backdrop (dimmed content strictly below the Navbar) */}
+    <div className="fixed inset-0 z-50 overflow-hidden bg-black/70 backdrop-blur-sm transition-opacity duration-300">
+      {/* Click outside backdrop */}
       <div
-        className="fixed inset-0 top-32 sm:top-24 bg-black/60 backdrop-blur-sm cursor-pointer transition-opacity duration-300 pointer-events-auto"
+        className="absolute inset-0 cursor-pointer"
         onClick={onClose}
         aria-label="Close cart"
       />
 
-      {/* Right-Side Slide-Over Drawer: flush below the sticky Navbar */}
-      <div className="fixed top-32 sm:top-24 right-0 bottom-0 h-[calc(100vh-8rem)] sm:h-[calc(100vh-6rem)] w-full sm:w-[500px] md:w-[540px] bg-[#0A0F1E] border-l border-t sm:border-t-0 border-theme-border shadow-[-20px_0_50px_rgba(0,0,0,0.85)] flex flex-col z-50 pointer-events-auto animate-in slide-in-from-right duration-300 ease-out">
+      {/* Right-Side Slide-Over Drawer */}
+      <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[500px] md:w-[540px] bg-[#0A0F1E] border-l border-theme-border shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
           <div className="flex items-center gap-2.5">

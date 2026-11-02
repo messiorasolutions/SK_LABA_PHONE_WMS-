@@ -29,6 +29,9 @@ export const API_ENDPOINTS = {
   sellRequests: {
     base: '/api/sell-requests',
   },
+  reviews: {
+    base: '/api/reviews',
+  },
   offers: {
     base: '/api/offers',
     active: '/api/offers/active',

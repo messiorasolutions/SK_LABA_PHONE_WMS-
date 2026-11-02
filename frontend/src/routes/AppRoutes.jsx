@@ -6,6 +6,7 @@ import InquiriesPage from '../pages/InquiriesPage';
 import ReservationsPage from '../pages/ReservationsPage';
 import SellRequestsPage from '../pages/SellRequestsPage';
 import UsersPage from '../pages/UsersPage';
+import ReviewsPage from '../pages/ReviewsPage';
 import LoginPage from '../pages/auth/LoginPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
@@ -52,6 +53,19 @@ export default function AppRoutes() {
             <AdminRoute>
               <MainLayout>
                 <UsersPage />
+              </MainLayout>
+            </AdminRoute>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/reviews"
+        element={
+          <ProtectedRoute>
+            <AdminRoute>
+              <MainLayout>
+                <ReviewsPage />
               </MainLayout>
             </AdminRoute>
           </ProtectedRoute>

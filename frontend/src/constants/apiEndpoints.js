@@ -53,6 +53,11 @@ export const API_ENDPOINTS = {
     byId: (id) => `/api/phones/${id}`,
     installments: (id) => `/api/phones/${id}/installments`,
   },
+  reviews: {
+    base: '/api/admin/reviews',
+    byId: (id) => `/api/admin/reviews/${id}`,
+    status: (id) => `/api/admin/reviews/${id}/status`,
+  },
 };
 
 export default API_ENDPOINTS;

@@ -189,14 +189,29 @@ export default function ReservationModal({ phone, onClose }) {
       />
 
       {/* Right-Side Slide-Over Drawer */}
-      <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[500px] md:w-[540px] bg-[#0A0F1E] border-l border-theme-border shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
+      <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[500px] md:w-[540px] bg-[#0A0F1E] border-l border-white/10 shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
         {/* Header */}
-        <div className="flex items-center justify-end px-6 py-4 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
+        <div className="flex items-center justify-between px-6 py-3.5 border-b border-white/10 bg-[#0A0F1E]/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-normal uppercase tracking-wider text-theme-textSecondary">
+              {phone?.brand_name || 'Reservation Request'}
+            </span>
+            {phone?.phone_condition && (
+              <>
+                <span className="text-neutral-600">•</span>
+                <span className="px-2 py-0.5 text-[10px] font-normal uppercase rounded border border-white/15 bg-transparent text-white/90">
+                  {phone.phone_condition}
+                </span>
+              </>
+            )}
+          </div>
+
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg border border-theme-border bg-transparent hover:bg-white/[0.04] text-theme-textSecondary hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg border border-white/15 bg-transparent hover:bg-white/[0.06] text-theme-textSecondary hover:text-white transition-colors cursor-pointer"
             title="Close drawer"
+            aria-label="Close drawer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -207,48 +222,48 @@ export default function ReservationModal({ phone, onClose }) {
           {success ? (
             <div className="py-8 sm:py-10 max-w-lg mx-auto text-center space-y-6 animate-in fade-in duration-300">
               <div className="space-y-1.5">
-                <h3 className="text-xl font-bold text-white tracking-tight">Reservation Submitted</h3>
+                <h3 className="text-xl font-normal text-white tracking-tight">Reservation Submitted</h3>
                 {submittedData?.reservation_id && (
-                  <span className="inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-slate-300">
+                  <span className="inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-slate-300 font-normal">
                     Ref ID: {submittedData.reservation_id}
                   </span>
                 )}
               </div>
 
               {/* Exact SRS Confirmation Card */}
-              <div className="p-5 sm:p-6 border border-emerald-500/25 bg-emerald-500/[0.04] rounded-2xl text-left space-y-4 shadow-xl shadow-black/40">
-                <p className="text-sm sm:text-base text-emerald-300 font-semibold text-center pb-3 border-b border-emerald-500/20">
+              <div className="p-5 sm:p-6 border border-white/15 bg-black/40 rounded-2xl text-left space-y-4 shadow-xl shadow-black/40">
+                <p className="text-sm sm:text-base text-slate-200 font-normal text-center pb-3 border-b border-white/10">
                   &ldquo;Your request is received. The shop will confirm.&rdquo;
                 </p>
                 <div className="text-xs sm:text-sm divide-y divide-white/[0.07]">
                   <div className="flex items-center justify-between py-2.5">
-                    <span className="text-slate-400 font-medium">Reserved Item:</span>
-                    <span className="text-white font-semibold text-right max-w-[60%] truncate">{phone?.name}</span>
+                    <span className="text-slate-400 font-normal">Reserved Item:</span>
+                    <span className="text-white font-normal text-right max-w-[60%] truncate">{phone?.name}</span>
                   </div>
                   {submittedData?.storageName && (
                     <div className="flex items-center justify-between py-2.5">
-                      <span className="text-slate-400 font-medium">Storage:</span>
-                      <span className="text-white font-semibold">{submittedData.storageName}</span>
+                      <span className="text-slate-400 font-normal">Storage:</span>
+                      <span className="text-white font-normal">{submittedData.storageName}</span>
                     </div>
                   )}
                   {submittedData?.selected_options?.colour && (
                     <div className="flex items-center justify-between py-2.5">
-                      <span className="text-slate-400 font-medium">Colour:</span>
-                      <span className="text-white font-semibold">{submittedData.selected_options.colour}</span>
+                      <span className="text-slate-400 font-normal">Colour:</span>
+                      <span className="text-white font-normal">{submittedData.selected_options.colour}</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between py-2.5">
-                    <span className="text-slate-400 font-medium">Preferred Date:</span>
-                    <span className="text-white font-medium">{submittedData?.preferred_collection_date}</span>
+                    <span className="text-slate-400 font-normal">Preferred Date:</span>
+                    <span className="text-white font-normal">{submittedData?.preferred_collection_date}</span>
                   </div>
                   <div className="flex items-center justify-between py-2.5">
-                    <span className="text-slate-400 font-medium">Contact:</span>
-                    <span className="text-white font-mono font-semibold">{submittedData?.phone_number}</span>
+                    <span className="text-slate-400 font-normal">Contact:</span>
+                    <span className="text-white font-mono font-normal">{submittedData?.phone_number}</span>
                   </div>
                 </div>
               </div>
 
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm mx-auto">
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm mx-auto font-normal">
                 Our staff will review your reservation and contact you via phone/WhatsApp to confirm collection time.
               </p>
 
@@ -256,7 +271,7 @@ export default function ReservationModal({ phone, onClose }) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full py-3 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all cursor-pointer"
+                  className="w-full py-2.5 px-6 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/40 text-white text-xs font-normal shadow-sm transition-all cursor-pointer"
                 >
                   Done
                 </button>
@@ -266,8 +281,8 @@ export default function ReservationModal({ phone, onClose }) {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Selected Phone Summary Banner */}
               {phone && (
-                <div className="flex items-center gap-3 bg-white/[0.02] border border-theme-border rounded-xl p-3">
-                  <div className="w-14 h-14 bg-[#080D1A] rounded-lg p-1.5 flex items-center justify-center shrink-0 border border-white/5">
+                <div className="flex items-center gap-3 bg-black/40 border border-white/15 rounded-xl p-3">
+                  <div className="w-14 h-14 bg-black/60 rounded-lg p-1.5 flex items-center justify-center shrink-0 border border-white/10">
                     {phone.photos?.[0] || phone.main_photo ? (
                       <img
                         src={phone.photos?.[0] || phone.main_photo}
@@ -279,12 +294,12 @@ export default function ReservationModal({ phone, onClose }) {
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-theme-textMuted block">
+                    <span className="text-[10px] font-normal uppercase tracking-wider text-theme-textMuted block">
                       {phone.brand_name || 'Selected Device'}
                     </span>
-                    <h4 className="text-xs font-semibold text-white truncate">{phone.name}</h4>
+                    <h4 className="text-xs font-normal text-white truncate">{phone.name}</h4>
                     <div className="flex items-center gap-2 mt-1 text-[11px] text-theme-textSecondary">
-                      <span className="font-semibold text-blue-400">
+                      <span className="font-normal text-white">
                         ${Number(phone.effectivePrice || phone.price || 0).toLocaleString()}
                       </span>
                       {phone.phone_condition && (
@@ -296,7 +311,7 @@ export default function ReservationModal({ phone, onClose }) {
               )}
 
               {error && (
-                <div className="p-3 border border-red-500/30 bg-red-500/10 rounded-xl text-xs text-red-300 flex items-start gap-2 animate-in fade-in">
+                <div className="p-3 border border-red-500/30 bg-red-950/20 rounded-xl text-xs text-red-300 flex items-start gap-2 animate-in fade-in font-normal">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
                   <span>{error}</span>
                 </div>
@@ -305,11 +320,11 @@ export default function ReservationModal({ phone, onClose }) {
               {/* Colour Selection (if phone has colour options) */}
               {colourOptions.length > 0 && (
                 <div>
-                  <label className="block text-xs font-medium text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
+                  <label className="block text-xs font-normal text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
                     <Palette className="w-3.5 h-3.5 text-theme-textMuted" />
                     <span>Choose Colour</span>
                   </label>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-2">
                     {colourOptions.map((colour) => {
                       const isSelected = selectedColour === colour;
                       return (
@@ -317,10 +332,10 @@ export default function ReservationModal({ phone, onClose }) {
                           key={colour}
                           type="button"
                           onClick={() => setSelectedColour(colour)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
+                          className={`px-3.5 py-1.5 rounded-lg text-xs font-normal border transition-all cursor-pointer ${
                             isSelected
-                              ? 'bg-blue-600/20 border-blue-500 text-white shadow-sm shadow-blue-500/20'
-                              : 'bg-white/[0.02] border-theme-border text-theme-textSecondary hover:text-white hover:border-white/20'
+                              ? 'bg-white/10 border-white text-white ring-1 ring-white/30 shadow-md shadow-black/60'
+                              : 'bg-black/40 border-white/15 text-slate-400 hover:text-white hover:border-white/30'
                           }`}
                         >
                           {colour}
@@ -334,17 +349,17 @@ export default function ReservationModal({ phone, onClose }) {
               {/* Storage Selection (if phone has storage options) */}
               {availableStorages.length > 0 && (
                 <div>
-                  <label className="block text-xs font-medium text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
+                  <label className="block text-xs font-normal text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
                     <HardDrive className="w-3.5 h-3.5 text-theme-textMuted" />
                     <span>Choose Storage</span>
                   </label>
                   <select
                     value={selectedStorageId || ''}
                     onChange={(e) => setSelectedStorageId(Number(e.target.value))}
-                    className="w-full bg-[#080D1A] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none transition-all cursor-pointer"
+                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none transition-all cursor-pointer font-normal"
                   >
                     {availableStorages.map((storage) => (
-                      <option key={storage.storage_id} value={storage.storage_id}>
+                      <option key={storage.storage_id} value={storage.storage_id} className="bg-neutral-900 text-white">
                         {storage.storage_name || `${storage.capacity_gb} GB`}
                       </option>
                     ))}
@@ -354,7 +369,7 @@ export default function ReservationModal({ phone, onClose }) {
 
               {/* Customer Name */}
               <div>
-                <label className="block text-xs font-medium text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
+                <label className="block text-xs font-normal text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
                   <User className="w-3.5 h-3.5 text-theme-textMuted" />
                   <span>Full Name <span className="text-red-400">*</span></span>
                 </label>
@@ -365,13 +380,13 @@ export default function ReservationModal({ phone, onClose }) {
                   maxLength={150}
                   value={formData.customer_name}
                   onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                  className="w-full bg-white/[0.02] border border-theme-border hover:border-white/20 focus:border-blue-500 focus:bg-white/[0.04] rounded-lg px-3.5 py-2 text-xs text-white placeholder-theme-textMuted focus:outline-none transition-all"
+                  className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
                 />
               </div>
 
               {/* Phone Number */}
               <div>
-                <label className="block text-xs font-medium text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
+                <label className="block text-xs font-normal text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
                   <Phone className="w-3.5 h-3.5 text-theme-textMuted" />
                   <span>Phone / WhatsApp Number <span className="text-red-400">*</span></span>
                 </label>
@@ -382,16 +397,16 @@ export default function ReservationModal({ phone, onClose }) {
                   maxLength={25}
                   value={formData.phone_number}
                   onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                  className="w-full bg-white/[0.02] border border-theme-border hover:border-white/20 focus:border-blue-500 focus:bg-white/[0.04] rounded-lg px-3.5 py-2 text-xs text-white placeholder-theme-textMuted focus:outline-none transition-all"
+                  className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
                 />
-                <span className="text-[10px] text-theme-textMuted mt-1 block">
+                <span className="text-[10px] text-theme-textMuted mt-1 block font-normal">
                   7 to 15 digits. We will reach you to confirm your reservation.
                 </span>
               </div>
 
               {/* Email Address (Optional) */}
               <div>
-                <label className="block text-xs font-medium text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
+                <label className="block text-xs font-normal text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
                   <Mail className="w-3.5 h-3.5 text-theme-textMuted" />
                   <span>Email Address <span className="text-theme-textMuted text-[10px]">(Optional)</span></span>
                 </label>
@@ -401,13 +416,13 @@ export default function ReservationModal({ phone, onClose }) {
                   maxLength={255}
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full bg-white/[0.02] border border-theme-border hover:border-white/20 focus:border-blue-500 focus:bg-white/[0.04] rounded-lg px-3.5 py-2 text-xs text-white placeholder-theme-textMuted focus:outline-none transition-all"
+                  className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
                 />
               </div>
 
               {/* Preferred Collection Date */}
               <div>
-                <label className="block text-xs font-medium text-theme-textSecondary mb-1.5 flex items-center justify-between">
+                <label className="block text-xs font-normal text-theme-textSecondary mb-1.5 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-theme-textMuted" />
                     <span>Preferred Collection Date <span className="text-red-400">*</span></span>
@@ -422,18 +437,18 @@ export default function ReservationModal({ phone, onClose }) {
                   onChange={(e) =>
                     setFormData({ ...formData, preferred_collection_date: e.target.value })
                   }
-                  className="w-full bg-white/[0.02] border border-theme-border hover:border-white/20 focus:border-blue-500 focus:bg-white/[0.04] rounded-lg px-3.5 py-2 text-xs text-white placeholder-theme-textMuted focus:outline-none transition-all [color-scheme:dark]"
+                  className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none transition-all [color-scheme:dark] font-normal"
                 />
               </div>
 
               {/* Customer Note */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-medium text-theme-textSecondary flex items-center gap-1.5">
+                  <label className="text-xs font-normal text-theme-textSecondary flex items-center gap-1.5">
                     <FileText className="w-3.5 h-3.5 text-theme-textMuted" />
                     <span>Note to Shop <span className="text-theme-textMuted text-[10px]">(Optional)</span></span>
                   </label>
-                  <span className="text-[10px] text-theme-textMuted">
+                  <span className="text-[10px] text-theme-textMuted font-normal">
                     {formData.customer_note.length}/2000
                   </span>
                 </div>
@@ -443,7 +458,7 @@ export default function ReservationModal({ phone, onClose }) {
                   placeholder="Special requests, preferred collection hours, etc."
                   value={formData.customer_note}
                   onChange={(e) => setFormData({ ...formData, customer_note: e.target.value })}
-                  className="w-full bg-white/[0.02] border border-theme-border hover:border-white/20 focus:border-blue-500 focus:bg-white/[0.04] rounded-lg px-3.5 py-2 text-xs text-white placeholder-theme-textMuted focus:outline-none transition-all resize-none"
+                  className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none transition-all resize-none font-normal"
                 />
               </div>
 
@@ -452,7 +467,7 @@ export default function ReservationModal({ phone, onClose }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold shadow-lg shadow-blue-500/20 transition-all cursor-pointer text-center flex items-center justify-center gap-2"
+                  className="w-full py-2.5 px-4 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/40 disabled:opacity-50 text-white text-xs font-normal shadow-sm transition-all cursor-pointer text-center flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>

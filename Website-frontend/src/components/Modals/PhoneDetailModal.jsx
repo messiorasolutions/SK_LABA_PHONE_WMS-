@@ -7,8 +7,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Tag,
-  ShoppingCart,
-  HelpCircle,
   MessageCircle,
   PhoneCall,
 } from 'lucide-react';
@@ -16,7 +14,6 @@ import { useFavoritesAndCompare } from '../../hooks/useFavoritesAndCompare';
 import { STORE_INFO } from '../../constants/siteConfig';
 import phoneService from '../../services/phoneService';
 import storageService from '../../services/storageService';
-import useCart from '../../hooks/useCart';
 import FormattedDescription from '../Common/FormattedDescription';
 
 export default function PhoneDetailModal({
@@ -201,24 +198,6 @@ export default function PhoneDetailModal({
   const [loadingInstallments, setLoadingInstallments] = useState(false);
 
   const [copiedLink, setCopiedLink] = useState(false);
-  const { addToCart } = useCart();
-  const [addedToCart, setAddedToCart] = useState(false);
-
-  const handleAddToCart = () => {
-    if (isVariantSoldOut) return;
-    addToCart({
-      phone_id: phoneId,
-      name: phone.name,
-      brand_name: phone.brand_name,
-      color: selectedColor,
-      storage: selectedStorage,
-      price: effectivePrice,
-      photo: photos[activePhotoIdx] || photos[0] || phone.main_photo || '',
-      quantity: 1,
-    });
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
-  };
 
 
   useEffect(() => {
@@ -622,82 +601,54 @@ export default function PhoneDetailModal({
                 )}
               </div>
 
-              {/* Action Buttons Row: Reserve & Add to Cart in 1 line */}
+              {/* Action Button: Reserve or Notify */}
               <div className="space-y-3 pt-3 border-t border-theme-border">
-                <div className="grid grid-cols-2 gap-2.5">
-                  {/* Button 1: Reserve or Notify */}
-                  {isVariantSoldOut ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onOpenNotifyBackInStock &&
-                        onOpenNotifyBackInStock({
-                          ...phone,
-                          color_name: selectedColor,
-                          storage_name: selectedStorage,
-                        })
-                      }
-                      className="w-full py-2.5 px-3 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white font-medium text-xs transition-all cursor-pointer text-center truncate"
-                      title={
-                        isSoldOut
-                          ? 'This device is sold out. Click to get notified when back in stock.'
-                          : `Notify me when ${selectedColor} (${selectedStorage}) is back in stock`
-                      }
-                    >
-                      Notify When Available
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onOpenReserve &&
-                        onOpenReserve({
-                          ...phone,
-                          selectedColor,
-                          selectedStorage,
-                          effectivePrice,
-                        })
-                      }
-                      className="w-full py-2.5 px-3 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-white font-medium text-xs shadow-sm transition-all cursor-pointer text-center truncate"
-                      title={`Reserve This Phone (${selectedColor} · ${selectedStorage})`}
-                    >
-                      Reserve ({selectedColor} · {selectedStorage})
-                    </button>
-                  )}
-
-                  {/* Button 2: Add to Cart */}
+                {/* Button: Reserve or Notify */}
+                {isVariantSoldOut ? (
                   <button
                     type="button"
-                    disabled={isVariantSoldOut}
-                    onClick={handleAddToCart}
-                    className={`w-full py-2.5 px-3 rounded-lg font-medium text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm truncate ${
-                      isVariantSoldOut
-                        ? 'bg-white/5 border border-white/10 text-theme-textMuted cursor-not-allowed opacity-50'
-                        : 'bg-white/10 hover:bg-white/15 border border-white/20 text-white hover:shadow-sm'
-                    }`}
+                    onClick={() =>
+                      onOpenNotifyBackInStock &&
+                      onOpenNotifyBackInStock({
+                        ...phone,
+                        color_name: selectedColor,
+                        storage_name: selectedStorage,
+                      })
+                    }
+                    className="w-full py-2.5 px-3 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white font-medium text-xs transition-all cursor-pointer text-center truncate"
+                    title={
+                      isSoldOut
+                        ? 'This device is sold out. Click to get notified when back in stock.'
+                        : `Notify me when ${selectedColor} (${selectedStorage}) is back in stock`
+                    }
                   >
-                    <ShoppingCart className="w-3.5 h-3.5 shrink-0" />
-                    <span>{addedToCart ? 'Added Successfully ✓' : 'Add to Cart'}</span>
+                    Notify When Available
                   </button>
-                </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onOpenReserve &&
+                      onOpenReserve({
+                        ...phone,
+                        selectedColor,
+                        selectedStorage,
+                        effectivePrice,
+                      })
+                    }
+                    className="w-full py-2.5 px-3 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-white font-medium text-xs shadow-sm transition-all cursor-pointer text-center truncate"
+                    title={`Reserve This Phone (${selectedColor} · ${selectedStorage})`}
+                  >
+                    Reserve ({selectedColor} · {selectedStorage})
+                  </button>
+                )}
 
-                {/* 3 Circular Action Buttons: Inquiry, WhatsApp, Call Shop */}
+                {/* Quick Contact: WhatsApp, Call Shop */}
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[11px] text-theme-textMuted uppercase tracking-wider">
                     Quick Contact:
                   </span>
                   <div className="flex items-center gap-2.5">
-                    {/* Inquiry Circle Button */}
-                    <button
-                      type="button"
-                      onClick={() => onOpenInquiry && onOpenInquiry(phone)}
-                      className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-105"
-                      title="Send Customer Inquiry"
-                      aria-label="Send Customer Inquiry"
-                    >
-                      <HelpCircle className="w-3.5 h-3.5" />
-                    </button>
-
                     {/* WhatsApp Circle Button */}
                     <button
                       type="button"

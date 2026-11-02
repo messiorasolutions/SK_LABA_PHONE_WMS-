@@ -10,6 +10,7 @@ import {
   CreditCard,
   Tag,
   LogOut,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -40,6 +41,7 @@ export default function Sidebar({ isOpen, onClose }) {
     location.pathname.startsWith('/installments');
   const isReservationsActive = location.pathname.startsWith('/reservations');
   const isInquiriesActive = location.pathname.startsWith('/inquiries');
+  const isSellRequestsActive = location.pathname.startsWith('/sell-requests');
 
   const displayName = user?.display_name || user?.name || 'Admin';
   const userInitial = displayName.charAt(0).toUpperCase();
@@ -63,7 +65,6 @@ export default function Sidebar({ isOpen, onClose }) {
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Brand Header */}
         <div className="h-16 px-4 flex items-center gap-3 border-b border-slate-200/80 dark:border-slate-800 shrink-0">
           <div className="w-10 h-10 rounded-xl bg-slate-950 p-1.5 flex items-center justify-center border border-slate-800 shadow-sm shrink-0 overflow-hidden">
             <img
@@ -87,10 +88,8 @@ export default function Sidebar({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Scrollable Navigation Links */}
         <div className="flex-1 py-4 px-3 overflow-y-auto">
           <nav className="space-y-1.5 text-xs">
-            {/* 1. User & Role Management (ADMIN only) */}
             {isAdmin && (
               <NavLink
                 to="/users"
@@ -266,10 +265,33 @@ export default function Sidebar({ isOpen, onClose }) {
               />
               <span className="truncate">Customer Inquiries</span>
             </NavLink>
+
+            <NavLink
+              to="/sell-requests"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
+                  isSellRequestsActive
+                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
+                }`
+              }
+            >
+              {isSellRequestsActive && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+              )}
+              <ArrowLeftRight
+                className={`w-4 h-4 shrink-0 transition-colors ${
+                  isSellRequestsActive
+                    ? 'text-[#2563eb] dark:text-blue-400'
+                    : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                }`}
+              />
+              <span className="truncate">Sell / Trade-In Requests</span>
+            </NavLink>
           </nav>
         </div>
 
-        {/* Minimal Footer User Profile Card */}
         <div className="p-3 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/50">
           <div className="flex items-center justify-between gap-2.5 p-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <div className="flex items-center gap-2.5 min-w-0">

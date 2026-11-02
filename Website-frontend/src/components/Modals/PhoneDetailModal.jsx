@@ -25,6 +25,7 @@ export default function PhoneDetailModal({
   onClose,
   onOpenReserve,
   onOpenInquiry,
+  onOpenSell,
   onOpenNotifyBackInStock,
   onSelectPhone,
 }) {
@@ -128,7 +129,6 @@ export default function PhoneDetailModal({
 
   const selectedColor = activeColor?.name || 'Default';
 
-  // Photo swap controls (top swap buttons)
   const handlePrevPhoto = (e) => {
     e?.stopPropagation();
     if (photos.length <= 1) return;
@@ -141,7 +141,6 @@ export default function PhoneDetailModal({
     setActivePhotoIdx((prev) => (prev + 1) % photos.length);
   };
 
-  // Keyboard navigation for image swap & escape
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose && onClose();
@@ -198,11 +197,9 @@ export default function PhoneDetailModal({
     }
   }, [phoneStorageOptions]);
 
-  // Installments state
   const [installmentsData, setInstallmentsData] = useState(null);
   const [loadingInstallments, setLoadingInstallments] = useState(false);
 
-  // Share feedback state
   const [copiedLink, setCopiedLink] = useState(false);
   const { addToCart } = useCart();
   const [addedToCart, setAddedToCart] = useState(false);
@@ -243,7 +240,6 @@ export default function PhoneDetailModal({
 
   if (!phone) return null;
 
-  // Stock status
   const availability = (phone.availability || 'IN_STOCK').toUpperCase();
   const currentStock = Number(phone.current_stock ?? phone.stock ?? 0);
   const isSoldOut = availability === 'SOLD_OUT' || (availability !== 'COMING_SOON' && currentStock === 0);
@@ -260,7 +256,6 @@ export default function PhoneDetailModal({
   const isLowStock = availability === 'LOW_STOCK' || (currentStock > 0 && currentStock <= (phone.low_stock_level || 5));
   const isComingSoon = availability === 'COMING_SOON';
 
-  // Pricing
   const regularPrice = Number(phone.price || phone.regular_price || 0);
   const offerPrice = phone.offer_price || phone.active_offer?.offer_price;
   const hasOffer = Boolean(offerPrice && Number(offerPrice) < regularPrice);
@@ -268,7 +263,6 @@ export default function PhoneDetailModal({
   const savings = hasOffer ? regularPrice - effectivePrice : 0;
   const discountPercent = hasOffer ? Math.round((savings / regularPrice) * 100) : 0;
 
-  // WhatsApp click handler
   const handleWhatsApp = () => {
     const pageUrl = window.location.href;
     const cleanNumber = (STORE_INFO.whatsapp || '').replace(/\D/g, '');
@@ -278,12 +272,10 @@ export default function PhoneDetailModal({
     window.open(`https://wa.me/${cleanNumber}?text=${message}`, '_blank');
   };
 
-  // Direct phone call handler
   const handleCall = () => {
     window.location.href = `tel:${STORE_INFO.phone}`;
   };
 
-  // Share link handler
   const handleShare = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
@@ -292,7 +284,6 @@ export default function PhoneDetailModal({
     }
   };
 
-  // Similar phones calculation
   const similarPhones = allPhones
     .filter((p) => {
       const pId = p.phone_id || p.id;
@@ -307,16 +298,13 @@ export default function PhoneDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/70 backdrop-blur-sm transition-opacity duration-300">
-      {/* Click outside backdrop (left 40%) */}
       <div
         className="absolute inset-0 cursor-pointer"
         onClick={onClose}
         aria-label="Close drawer"
       />
 
-      {/* Right-Side 60% Slide-Over Drawer */}
       <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[85%] md:w-[60%] lg:w-[60%] bg-[#0A0F1E] border-l border-theme-border shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
-        {/* Modal Top Bar */}
         <div className="flex items-center justify-between px-6 py-3.5 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium uppercase tracking-wider text-theme-textSecondary">
@@ -329,7 +317,6 @@ export default function PhoneDetailModal({
           </div>
 
           <div className="flex items-center gap-1.5">
-            {/* Share */}
             <button
               type="button"
               onClick={handleShare}
@@ -339,7 +326,6 @@ export default function PhoneDetailModal({
               <Share2 className="w-3.5 h-3.5" />
             </button>
 
-            {/* Compare */}
             <button
               type="button"
               onClick={() => {
@@ -356,7 +342,6 @@ export default function PhoneDetailModal({
               <GitCompare className="w-3.5 h-3.5" />
             </button>
 
-            {/* Favorite */}
             <button
               type="button"
               onClick={() => toggleFavorite(phoneId)}
@@ -366,7 +351,6 @@ export default function PhoneDetailModal({
               <Heart className={`w-3.5 h-3.5 ${favorited ? 'text-rose-400 fill-rose-400/80' : ''}`} />
             </button>
 
-            {/* Close */}
             <button
               type="button"
               onClick={onClose}
@@ -378,7 +362,6 @@ export default function PhoneDetailModal({
           </div>
         </div>
 
-        {/* Drawer Scrollable Body */}
         <div className="overflow-y-auto px-6 sm:px-8 py-6 space-y-6 flex-1">
           {/* Main Grid: Gallery with Colors on left, Primary Purchase Info on right */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
@@ -477,7 +460,6 @@ export default function PhoneDetailModal({
               )}
             </div>
 
-            {/* Product Details & Actions */}
             <div className="flex flex-col justify-between h-full space-y-5">
               <div>
                 <h1 className="text-xl sm:text-2xl font-normal text-white leading-tight mb-3">
@@ -729,6 +711,20 @@ export default function PhoneDetailModal({
                   </div>
                 </div>
 
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onOpenSell) {
+                      onOpenSell(phone);
+                    } else {
+                      window.dispatchEvent(new CustomEvent('sk_laba_open_sell_modal', { detail: { desiredPhone: phone } }));
+                    }
+                  }}
+                  className="w-full py-2 px-3 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white text-xs font-medium transition-colors text-center cursor-pointer"
+                >
+                  Trade-In Your Current Phone for This Device
+                </button>
+
                 {copiedLink && (
                   <p className="text-center text-xs text-theme-textSecondary font-normal animate-in fade-in">
                     Link copied to clipboard
@@ -787,7 +783,6 @@ export default function PhoneDetailModal({
             </div>
           </div>
 
-          {/* Similar Phones Section (No icons, clean official cards) */}
           {similarPhones.length > 0 && (
             <div className="pt-4 border-t border-theme-border">
               <div className="mb-3">

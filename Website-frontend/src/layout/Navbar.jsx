@@ -16,6 +16,15 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
   const { activeTab, searchQuery } = useSelector((state) => state.hero);
 
   // Sync hash change on mount
+  // Track scroll position for sticky styling
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.toLowerCase();
@@ -59,6 +68,14 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
     }
   };
 
+  const handleOpenSellPhone = () => {
+    if (onOpenSell) {
+      onOpenSell();
+    } else {
+      window.dispatchEvent(new CustomEvent('sk_laba_open_sell_modal', { detail: {} }));
+    }
+  };
+
   const isHome = activeTab === 'Home';
 
   return (
@@ -71,13 +88,11 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 sm:h-24">
-          {/* Left: SK LABA Brand Logo (Enlarged & Highlighted) */}
           <a
             href="#"
             onClick={(e) => handleTabClick('Home', e)}
             className="relative flex items-center shrink-0 group py-1.5"
           >
-            {/* Luminous Glow Behind Logo */}
             <div className="absolute -inset-3 bg-gradient-to-r from-blue-600/30 via-red-600/20 to-sky-500/20 rounded-full blur-xl opacity-80 group-hover:opacity-100 transition-opacity" />
 
             <img
@@ -87,7 +102,6 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
             />
           </a>
 
-          {/* Center: Navigation Links */}
           <nav className="hidden md:flex items-center gap-8 lg:gap-10">
             {NAV_LINKS.map((link) => {
               const isActive = activeTab === link.name;
@@ -109,7 +123,6 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
                     {link.name}
                   </span>
 
-                  {/* Active indicator bar */}
                   {isActive && (
                     <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-theme-accent rounded-full shadow-[0_0_10px_rgba(37,99,235,0.8)]" />
                   )}
@@ -118,10 +131,8 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
             })}
           </nav>
 
-          {/* Right: Search, Favorites, Account & Cart */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Search Input Bar */}
-            <div className="relative hidden sm:block w-56 md:w-64 lg:w-72">
+            <div className="relative hidden sm:block w-48 md:w-56 lg:w-64">
               <div className="flex items-center bg-theme-input/70 backdrop-blur-md border border-theme-borderMedium rounded-full px-3.5 py-2 text-sm text-theme-textSecondary focus-within:border-theme-accent focus-within:ring-1 focus-within:ring-theme-accent transition-all shadow-inner">
                 <Search className="w-4 h-4 text-theme-textMuted mr-2.5 shrink-0" />
                 <input
@@ -129,19 +140,17 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
                   value={searchQuery}
                   onChange={(e) => {
                     dispatch(setSearchQuery(e.target.value));
-                    // If user starts searching from Home, switch to smartphones page
                     if (activeTab !== 'Smartphones' && e.target.value.trim().length > 0) {
                       dispatch(setActiveTab('Smartphones'));
                       window.location.hash = '#smartphones';
                     }
                   }}
-                  placeholder="Search smartphones, brands..."
+                  placeholder="Search smartphones..."
                   className="bg-transparent border-none outline-none text-xs md:text-sm text-theme-textPrimary placeholder-theme-textMuted w-full"
                 />
               </div>
             </div>
 
-            {/* Favourites Button (C-06) */}
             <button
               type="button"
               onClick={handleOpenFavorites}
@@ -157,7 +166,6 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
               )}
             </button>
 
-            {/* User Profile Button */}
             <button
               type="button"
               className="p-2 rounded-full text-theme-textSecondary hover:text-theme-textPrimary hover:bg-white/5 transition-colors cursor-pointer"
@@ -167,7 +175,6 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
               <User className="w-5 h-5" />
             </button>
 
-            {/* Shopping Cart Button */}
             <button
               type="button"
               onClick={() => onOpenCart ? onOpenCart() : window.dispatchEvent(new CustomEvent('sk_laba_open_cart_modal'))}
@@ -181,7 +188,6 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
               </span>
             </button>
 
-            {/* Mobile Menu Toggle Button */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -193,7 +199,6 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
           </div>
         </div>
 
-        {/* Mobile Search Bar */}
         <div className="sm:hidden pb-3">
           <div className="flex items-center bg-theme-input/80 backdrop-blur-md border border-theme-borderMedium rounded-full px-3.5 py-1.5 text-sm text-theme-textSecondary">
             <Search className="w-4 h-4 text-theme-textMuted mr-2.5 shrink-0" />
@@ -213,7 +218,6 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 bg-theme-surface/95 backdrop-blur-lg border border-theme-border rounded-2xl px-3 my-2 space-y-1 shadow-2xl">
             {NAV_LINKS.map((link) => (
@@ -230,6 +234,17 @@ export default function Navbar({ onOpenFavorites, onOpenCart }) {
                 {link.name}
               </a>
             ))}
+
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                handleOpenSellPhone();
+              }}
+              className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-theme-textSecondary hover:bg-white/5 hover:text-theme-textPrimary border-t border-theme-border/60 mt-2 pt-2"
+            >
+              Sell / Trade-In
+            </button>
           </div>
         )}
       </div>

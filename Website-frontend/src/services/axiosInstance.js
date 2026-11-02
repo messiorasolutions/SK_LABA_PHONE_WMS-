@@ -1,9 +1,3 @@
-// ============================================================
-// AXIOS INSTANCE
-// Base URL is always read from .env (VITE_API_BASE_URL)
-// Default fallback: http://localhost:5000
-// Never hardcode the base URL anywhere else!
-// ============================================================
 
 import axios from 'axios';
 
@@ -19,9 +13,15 @@ const axiosInstance = axios.create({
   timeout: 15000,
 });
 
-// Request interceptor — attach auth token if available
 axiosInstance.interceptors.request.use(
   (config) => {
+    if (config.data instanceof FormData || (config.data && typeof config.data.append === 'function')) {
+      if (config.headers) {
+        delete config.headers['Content-Type'];
+        delete config.headers['content-type'];
+      }
+    }
+
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -31,7 +31,6 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor — preserve error while setting error.message if API returns one
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {

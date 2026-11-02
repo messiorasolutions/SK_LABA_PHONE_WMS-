@@ -38,12 +38,10 @@ export default function UsersPage() {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Filters
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  // Modals & Drawers
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalUser, setEditModalUser] = useState(null);
   const [detailsModalUser, setDetailsModalUser] = useState(null);
@@ -53,7 +51,6 @@ export default function UsersPage() {
   const [modalError, setModalError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Create Form State (PDF Section 8.5)
   const [createForm, setCreateForm] = useState({
     display_name: '',
     email: '',
@@ -62,7 +59,6 @@ export default function UsersPage() {
     is_active: true,
   });
 
-  // Edit Form State (PDF Section 8.6)
   const [editForm, setEditForm] = useState({
     display_name: '',
     role: 'STAFF',
@@ -117,7 +113,6 @@ export default function UsersPage() {
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
-  // Open Create Modal
   const openCreateModal = () => {
     setCreateForm({
       display_name: '',
@@ -131,12 +126,10 @@ export default function UsersPage() {
     setCreateModalOpen(true);
   };
 
-  // Handle Create User (PDF Section 8.5 validation)
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     setModalError('');
 
-    // Validation rules per Section 8.5
     if (!createForm.display_name.trim()) {
       setModalError('Display name is required (1–150 characters).');
       return;
@@ -180,7 +173,6 @@ export default function UsersPage() {
     }
   };
 
-  // Open User Details Modal (Section 8.4 GET /api/users/:id)
   const openDetailsModal = async (userSummary) => {
     setDetailsModalUser(userSummary);
     setDetailsLoading(true);
@@ -190,13 +182,11 @@ export default function UsersPage() {
         setDetailsModalUser(res.data);
       }
     } catch (err) {
-      // fallback to row data
     } finally {
       setDetailsLoading(false);
     }
   };
 
-  // Open Edit Modal
   const openEditModal = (u) => {
     setEditModalUser(u);
     setEditForm({
@@ -206,7 +196,6 @@ export default function UsersPage() {
     setModalError('');
   };
 
-  // Handle Edit User (PDF Section 8.6)
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!editModalUser) return;
@@ -235,12 +224,10 @@ export default function UsersPage() {
     }
   };
 
-  // Handle Status Toggle (Activate / Deactivate) per PDF Section 8.7
   const handleToggleStatus = async (targetUser) => {
     const nextStatus = !Boolean(targetUser.is_active);
     const actionWord = nextStatus ? 'activate' : 'deactivate';
 
-    // Business rule: Self-deactivation is blocked for the currently logged-in administrator
     if (targetUser.user_id === currentUser?.user_id && !nextStatus) {
       alert('Administrators cannot deactivate their own account.');
       return;
@@ -264,7 +251,6 @@ export default function UsersPage() {
     }
   };
 
-  // Handle Trigger Password Reset (PDF Section 3.5 POST /api/auth/forgot-password)
   const handleSendPasswordReset = async (targetEmail, targetName) => {
     if (!confirm(`Send password reset email link to "${targetEmail}"?`)) {
       return;
@@ -279,14 +265,12 @@ export default function UsersPage() {
     }
   };
 
-  // Metric Computations
   const totalUsers = pagination.total || users.length;
   const adminCount = users.filter((u) => u.role === 'ADMIN').length;
   const staffCount = users.filter((u) => u.role === 'STAFF').length;
   const activeCount = users.filter((u) => Boolean(u.is_active)).length;
   const activePercentage = users.length > 0 ? Math.round((activeCount / users.length) * 100) : 100;
 
-  // Filtered users for table display (ensures exact match with status & role filters)
   const filteredUsers = users.filter((u) => {
     if (statusFilter === 'active' && !Boolean(u.is_active)) return false;
     if (statusFilter === 'inactive' && Boolean(u.is_active)) return false;
@@ -296,7 +280,6 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
-      {/* ── Top Header & Actions (Unified Standard) ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3.5 border-b border-slate-200/80 dark:border-slate-800">
         <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
           User & Role Management
@@ -324,7 +307,6 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* ── Notification Banner ── */}
       {successMessage && (
         <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-xs flex items-center justify-between rounded-2xl animate-fadeIn">
           <div className="flex items-center gap-2">
@@ -337,9 +319,7 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* ── Compact Stat Cards (Human-crafted layout with icons at start) ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-        {/* Total Users */}
         <div className="p-3.5 sm:px-4 sm:py-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex items-center gap-4 sm:gap-5 transition-colors hover:border-slate-300 dark:hover:border-slate-700">
           <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 ring-4 ring-blue-50/60 dark:ring-blue-950/40">
             <Users className="w-4.5 h-4.5" />
@@ -354,7 +334,6 @@ export default function UsersPage() {
           </div>
         </div>
 
-        {/* Administrators */}
         <div className="p-3.5 sm:px-4 sm:py-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex items-center gap-4 sm:gap-5 transition-colors hover:border-slate-300 dark:hover:border-slate-700">
           <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 ring-4 ring-indigo-50/60 dark:ring-indigo-950/40">
             <Shield className="w-4.5 h-4.5" />
@@ -369,7 +348,6 @@ export default function UsersPage() {
           </div>
         </div>
 
-        {/* Warehouse Staff */}
         <div className="p-3.5 sm:px-4 sm:py-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex items-center gap-4 sm:gap-5 transition-colors hover:border-slate-300 dark:hover:border-slate-700">
           <div className="w-10 h-10 rounded-full bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 ring-4 ring-cyan-50/60 dark:ring-cyan-950/40">
             <UserCheck className="w-4.5 h-4.5" />
@@ -384,7 +362,6 @@ export default function UsersPage() {
           </div>
         </div>
 
-        {/* Active Accounts */}
         <div className="p-3.5 sm:px-4 sm:py-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex items-center gap-4 sm:gap-5 transition-colors hover:border-slate-300 dark:hover:border-slate-700">
           <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 ring-4 ring-emerald-50/60 dark:ring-emerald-950/40">
             <CheckCircle2 className="w-4.5 h-4.5" />
@@ -400,9 +377,7 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* ── Filters & Search Toolbar ── */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3.5 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-2xs">
-        {/* Role, Status & Limit Filters */}
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="flex items-center gap-1.5 text-xs">
             <span className="text-[11px] font-medium text-slate-400">Role:</span>
@@ -450,7 +425,6 @@ export default function UsersPage() {
           )}
         </div>
 
-        {/* Search Input */}
         <form onSubmit={handleSearchSubmit} className="flex gap-2">
           <div className="relative flex-1 sm:w-64">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
@@ -471,7 +445,6 @@ export default function UsersPage() {
         </form>
       </div>
 
-      {/* ── Error Banner ── */}
       {error && (
         <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2 rounded-xl">
           <AlertCircle className="w-4 h-4 shrink-0" />
@@ -479,7 +452,6 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* ── Users Table Card ── */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
@@ -520,7 +492,7 @@ export default function UsersPage() {
                       key={u.user_id}
                       className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
                     >
-                      <td className="py-3 px-4 font-mono text-slate-400">#{u.user_id}</td>
+                      <td className="py-3 px-4 font-mono text-slate-400">{u.user_id}</td>
 
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
@@ -549,7 +521,6 @@ export default function UsersPage() {
                         </div>
                       </td>
 
-                      {/* Role Permission (Clean transparent text, icons removed) */}
                       <td className="py-3 px-4">
                         {u.role === 'ADMIN' ? (
                           <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
@@ -562,7 +533,6 @@ export default function UsersPage() {
                         )}
                       </td>
 
-                      {/* Status (Linear-style live status indicator) */}
                       <td className="py-3 px-4">
                         {isActive ? (
                           <div className="inline-flex items-center gap-2">
@@ -594,7 +564,6 @@ export default function UsersPage() {
 
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          {/* View Details (Section 8.4) */}
                           <button
                             onClick={() => openDetailsModal(u)}
                             className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-full transition-colors cursor-pointer"
@@ -603,7 +572,6 @@ export default function UsersPage() {
                             <Eye className="w-3.5 h-3.5" />
                           </button>
 
-                          {/* Edit User (Section 8.6) */}
                           <button
                             onClick={() => openEditModal(u)}
                             className="px-3 py-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-xs font-semibold transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
@@ -611,7 +579,6 @@ export default function UsersPage() {
                             Edit
                           </button>
 
-                          {/* Activate / Deactivate (Section 8.7) */}
                           <button
                             disabled={isCurrent && isActive}
                             onClick={() => handleToggleStatus(u)}
@@ -643,7 +610,6 @@ export default function UsersPage() {
 
       </div>
 
-      {/* ── Slide-over Panel 1: View User Details (Opens from right side) ── */}
       {detailsModalUser && createPortal(
         <>
           <div
@@ -651,7 +617,6 @@ export default function UsersPage() {
             onClick={() => setDetailsModalUser(null)}
           />
           <div className="fixed top-0 right-0 bottom-0 z-[100] w-full sm:w-[460px] bg-white dark:bg-slate-900 border-l border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-slideInRight">
-            {/* Header */}
             <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between bg-slate-50/60 dark:bg-slate-950/40 shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 <div
@@ -684,7 +649,6 @@ export default function UsersPage() {
               </button>
             </div>
 
-            {/* Scrollable Body */}
             <div className="p-4 sm:p-5 space-y-4 text-xs overflow-y-auto flex-1">
               {detailsLoading && (
                 <div className="flex items-center gap-2 text-blue-600 py-1">
@@ -693,7 +657,6 @@ export default function UsersPage() {
                 </div>
               )}
 
-              {/* Status and Role badges */}
               <div className="grid grid-cols-2 gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-800">
                 <div>
                   <span className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">
@@ -719,7 +682,6 @@ export default function UsersPage() {
                 </div>
               </div>
 
-              {/* Audit Timestamps */}
               <div className="space-y-2 border-t border-slate-100 dark:border-slate-800 pt-3">
                 <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">
                   Audit & Session Details
@@ -727,7 +689,7 @@ export default function UsersPage() {
                 <div className="grid grid-cols-2 gap-3 text-slate-600 dark:text-slate-300">
                   <div>
                     <span className="text-[10px] text-slate-400 block">User ID:</span>
-                    <span className="font-mono font-semibold">#{detailsModalUser.user_id}</span>
+                    <span className="font-mono font-semibold">{detailsModalUser.user_id}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 block">Last Login:</span>
@@ -756,7 +718,6 @@ export default function UsersPage() {
                 </div>
               </div>
 
-              {/* Permissions & Security Note */}
               <div className="p-3.5 rounded-2xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-900/40 text-[11px] text-slate-600 dark:text-slate-300 space-y-1">
                 <div className="font-semibold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
                   <Info className="w-3.5 h-3.5 shrink-0" />
@@ -770,7 +731,6 @@ export default function UsersPage() {
               </div>
             </div>
 
-            {/* Pinned Footer */}
             <div className="p-4 sm:p-5 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 flex flex-wrap items-center justify-between gap-2 shrink-0">
               <button
                 type="button"
@@ -807,7 +767,6 @@ export default function UsersPage() {
         document.body
       )}
 
-      {/* ── Slide-over Panel 2: Create User Account (Opens from right side) ── */}
       {createModalOpen && createPortal(
         <>
           <div
@@ -815,7 +774,6 @@ export default function UsersPage() {
             onClick={() => setCreateModalOpen(false)}
           />
           <div className="fixed top-0 right-0 bottom-0 z-[100] w-full sm:w-[480px] bg-white dark:bg-slate-900 border-l border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-slideInRight">
-            {/* Header */}
             <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 ring-4 ring-blue-50/60 dark:ring-blue-950/40">
@@ -834,7 +792,6 @@ export default function UsersPage() {
               </button>
             </div>
 
-            {/* Scrollable Form Body with Generous Spacing & Clean Alignment */}
             <form id="create-user-form" onSubmit={handleCreateSubmit} className="p-5 sm:p-6 space-y-5 sm:space-y-6 text-xs overflow-y-auto flex-1">
               {modalError && (
                 <div className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400 rounded-2xl flex items-start gap-2.5 animate-fadeIn">
@@ -843,7 +800,6 @@ export default function UsersPage() {
                 </div>
               )}
 
-              {/* Field 1: Display Name */}
               <div className="space-y-2">
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 tracking-wide">
                   Display Name <span className="text-rose-500">*</span>
@@ -858,7 +814,6 @@ export default function UsersPage() {
                 />
               </div>
 
-              {/* Field 2: Email Address */}
               <div className="space-y-2">
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 tracking-wide">
                   Email Address <span className="text-rose-500">*</span>
@@ -873,7 +828,6 @@ export default function UsersPage() {
                 />
               </div>
 
-              {/* Field 3: Temporary Password */}
               <div className="space-y-2">
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 tracking-wide">
                   Temporary Password <span className="text-rose-500">*</span>
@@ -901,7 +855,6 @@ export default function UsersPage() {
                 </p>
               </div>
 
-              {/* Field 4 & 5: Role & Initial Status (Balanced 2-Column Grid) */}
               <div className="grid grid-cols-2 gap-4 pt-1">
                 <div className="space-y-2">
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 tracking-wide">
@@ -935,7 +888,6 @@ export default function UsersPage() {
               </div>
             </form>
 
-            {/* Pinned Footer */}
             <div className="p-4 sm:p-5 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 flex justify-end gap-3 shrink-0">
               <button
                 type="button"
@@ -958,7 +910,6 @@ export default function UsersPage() {
         document.body
       )}
 
-      {/* ── Slide-over Panel 3: Edit User Profile (Opens from right side) ── */}
       {editModalUser && createPortal(
         <>
           <div
@@ -966,7 +917,6 @@ export default function UsersPage() {
             onClick={() => setEditModalUser(null)}
           />
           <div className="fixed top-0 right-0 bottom-0 z-[100] w-full sm:w-[480px] bg-white dark:bg-slate-900 border-l border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-slideInRight">
-            {/* Header */}
             <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 ring-4 ring-blue-50/60 dark:ring-blue-950/40">
@@ -985,7 +935,6 @@ export default function UsersPage() {
               </button>
             </div>
 
-            {/* Scrollable Form Body with Generous Spacing & Clean Alignment */}
             <form id="edit-user-form" onSubmit={handleEditSubmit} className="p-5 sm:p-6 space-y-5 sm:space-y-6 text-xs overflow-y-auto flex-1">
               {modalError && (
                 <div className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400 rounded-2xl flex items-start gap-2.5 animate-fadeIn">
@@ -1038,7 +987,6 @@ export default function UsersPage() {
               </div>
             </form>
 
-            {/* Pinned Footer */}
             <div className="p-4 sm:p-5 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 flex justify-end gap-3 shrink-0">
               <button
                 type="button"

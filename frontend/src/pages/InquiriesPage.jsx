@@ -15,16 +15,12 @@ import { inquiryService } from '../services/inquiryService';
 import { userService } from '../services/userService';
 
 const STATUS_CONFIG = {
-  New: { label: 'New', dot: 'bg-rose-500 text-rose-500', badge: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border-rose-200 dark:border-rose-900' },
-  'In Progress': { label: 'In Progress', dot: 'bg-amber-500 text-amber-500', badge: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200 dark:border-amber-900' },
-  Contacted: { label: 'Contacted', dot: 'bg-sky-500 text-sky-500', badge: 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400 border-sky-200 dark:border-sky-900' },
-  Closed: { label: 'Closed', dot: 'bg-slate-400 text-slate-400', badge: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700' },
+  New: { label: 'New', text: 'text-rose-600 dark:text-rose-400', dot: 'bg-rose-500 text-rose-500', badge: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border-rose-200 dark:border-rose-900' },
+  'In Progress': { label: 'In Progress', text: 'text-amber-600 dark:text-amber-400', dot: 'bg-amber-500 text-amber-500', badge: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200 dark:border-amber-900' },
+  Contacted: { label: 'Contacted', text: 'text-sky-600 dark:text-sky-400', dot: 'bg-sky-500 text-sky-500', badge: 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400 border-sky-200 dark:border-sky-900' },
+  Closed: { label: 'Closed', text: 'text-slate-500 dark:text-slate-400', dot: 'bg-slate-400 text-slate-400', badge: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700' },
 };
 
-/**
- * Robust date-time formatter that correctly interprets UTC timestamps from backend
- * and displays them in the user's local timezone (e.g. Asia/Colombo, IST, etc.)
- */
 function formatDateTime(dateInput) {
   if (!dateInput) return '-';
   let date;
@@ -33,8 +29,6 @@ function formatDateTime(dateInput) {
     date = dateInput;
   } else {
     let str = String(dateInput).trim();
-    // If string doesn't have a timezone specifier ('Z' or '+/-HH:MM'),
-    // it was saved as UTC by MySQL. Treat it as UTC by appending 'Z'.
     if (!str.endsWith('Z') && !/[+-]\d{2}(:\d{2})?$/.test(str)) {
       str = str.replace(' ', 'T') + 'Z';
     }
@@ -58,12 +52,10 @@ export default function InquiriesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Filters
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [assignedStaffFilter, setAssignedStaffFilter] = useState('');
 
-  // Detail / Manage Drawer State
   const [selectedInquiry, setSelectedInquiry] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
   const [modalSaving, setModalSaving] = useState(false);
@@ -71,11 +63,9 @@ export default function InquiriesPage() {
   const [modalSuccess, setModalSuccess] = useState('');
   const [staffList, setStaffList] = useState([]);
 
-  // Edit fields
   const [editStatus, setEditStatus] = useState('New');
   const [editAssignedStaff, setEditAssignedStaff] = useState('');
 
-  // Load Inquiries matching PDF specs (GET /api/inquiries)
   const fetchInquiries = async () => {
     setLoading(true);
     setError('');
@@ -105,7 +95,6 @@ export default function InquiriesPage() {
     fetchInquiries();
   }, [pagination.page, statusFilter, assignedStaffFilter]);
 
-  // Load active staff members for assignment (PDF Section 4)
   useEffect(() => {
     userService
       .getUsers({ limit: 100, is_active: true })
@@ -123,7 +112,6 @@ export default function InquiriesPage() {
     fetchInquiries();
   };
 
-  // Open Manage Drawer & Fetch fresh details (PDF Endpoint 3: GET /api/inquiries/:id)
   const openDetailModal = async (inq) => {
     setSelectedInquiry(inq);
     setEditStatus(inq.status || 'New');
@@ -146,7 +134,6 @@ export default function InquiriesPage() {
     }
   };
 
-  // Update Status & Staff Assignment (PDF Endpoint 4: PATCH /api/inquiries/:id/status)
   const handleUpdateStatus = async () => {
     if (!selectedInquiry) return;
     setModalSaving(true);
@@ -164,7 +151,6 @@ export default function InquiriesPage() {
         setModalSuccess('Inquiry updated successfully!');
         const updatedData = res.data;
 
-        // Update local list
         setInquiries((prev) =>
           prev.map((item) =>
             item.inquiry_id === selectedInquiry.inquiry_id
@@ -204,11 +190,9 @@ export default function InquiriesPage() {
 
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
-      {/* Page Title & Action Bar (Clean & Professional) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3.5 border-b border-slate-200/80 dark:border-slate-800">
-        <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-2.5">
-          <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-          <span>Customer Inquiries & Leads</span>
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+          Customer Inquiries & Leads
         </h1>
 
         <button
@@ -220,9 +204,7 @@ export default function InquiriesPage() {
         </button>
       </div>
 
-      {/* Filter Tabs & Search Controls (PDF Query Parameters) */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-2xs">
-        {/* Status Segmented Control */}
         <div className="flex flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl sm:rounded-full">
           {['', 'New', 'In Progress', 'Contacted', 'Closed'].map((st) => (
             <button
@@ -242,9 +224,7 @@ export default function InquiriesPage() {
           ))}
         </div>
 
-        {/* Assigned Staff Filter & Search Input */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          {/* Staff Filter Dropdown */}
           <div className="relative">
             <select
               value={assignedStaffFilter}
@@ -263,7 +243,6 @@ export default function InquiriesPage() {
             </select>
           </div>
 
-          {/* Search Form */}
           <form onSubmit={handleSearchSubmit} className="flex gap-2">
             <div className="relative flex-1 sm:w-60">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
@@ -285,7 +264,6 @@ export default function InquiriesPage() {
         </div>
       </div>
 
-      {/* Error state */}
       {error && (
         <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2 rounded-xl">
           <AlertCircle className="w-4 h-4 shrink-0" />
@@ -293,13 +271,12 @@ export default function InquiriesPage() {
         </div>
       )}
 
-      {/* Inquiries Table */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                <th className="py-3 px-4 w-12">#</th>
+                <th className="py-3 px-4 w-12">ID</th>
                 <th className="py-3 px-4">Customer</th>
                 <th className="py-3 px-4">Phone Number</th>
                 <th className="py-3 px-4">Target Phone</th>
@@ -327,7 +304,7 @@ export default function InquiriesPage() {
                       key={inq.inquiry_id}
                       className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
                     >
-                      <td className="py-3 px-4 font-mono text-slate-400 font-semibold">#{inq.inquiry_id}</td>
+                      <td className="py-3 px-4 font-mono text-slate-400 font-semibold">{inq.inquiry_id}</td>
 
                       <td className="py-3 px-4 font-semibold text-slate-900 dark:text-slate-100">
                         {inq.customer_name || inq.name}
@@ -341,9 +318,8 @@ export default function InquiriesPage() {
 
                       <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
                         {inq.selected_phone ? (
-                          <div className="flex items-center gap-1.5">
-                            <Smartphone className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                            <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[150px]">
+                          <div>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[150px] block">
                               {inq.selected_phone.name}
                             </span>
                           </div>
@@ -357,7 +333,7 @@ export default function InquiriesPage() {
                       </td>
 
                       <td className="py-3 px-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${statusStyle.badge}`}>
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${statusStyle.text || 'text-slate-600 dark:text-slate-400'}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`} />
                           <span>{inq.status}</span>
                         </span>
@@ -399,7 +375,6 @@ export default function InquiriesPage() {
           </table>
         </div>
 
-        {/* Pagination Footer */}
         {pagination.totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200/80 dark:border-slate-800 text-xs text-slate-500 bg-slate-50/50 dark:bg-slate-950/30">
             <span>
@@ -425,7 +400,6 @@ export default function InquiriesPage() {
         )}
       </div>
 
-      {/* ── Slide-over Panel: Manage Inquiry (Opens from right side) ── */}
       {selectedInquiry && createPortal(
         <>
           <div
@@ -433,7 +407,6 @@ export default function InquiriesPage() {
             onClick={() => setSelectedInquiry(null)}
           />
           <div className="fixed top-0 right-0 bottom-0 z-[100] w-full sm:w-[480px] bg-white dark:bg-slate-900 border-l border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-slideInRight">
-            {/* Header */}
             <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
@@ -441,7 +414,7 @@ export default function InquiriesPage() {
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
-                    Inquiry #{selectedInquiry.inquiry_id}
+                    Inquiry {selectedInquiry.inquiry_id}
                   </h2>
                   <span className="text-[11px] text-slate-400">
                     Received {formatDateTime(selectedInquiry.created_at)}
@@ -457,7 +430,6 @@ export default function InquiriesPage() {
               </button>
             </div>
 
-            {/* Scrollable Body */}
             <div className="p-4 sm:p-5 space-y-4 text-xs overflow-y-auto flex-1">
               {modalError && (
                 <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400 rounded-xl flex items-center gap-2">
@@ -473,7 +445,6 @@ export default function InquiriesPage() {
                 </div>
               )}
 
-              {/* Customer info card */}
               <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl space-y-2.5">
                 <div className="flex justify-between items-start">
                   <div>
@@ -483,7 +454,6 @@ export default function InquiriesPage() {
                     </span>
                   </div>
 
-                  {/* Direct Contact Actions */}
                   <div className="flex items-center gap-2">
                     <a
                       href={`tel:${selectedInquiry.phone_number}`}
@@ -511,7 +481,6 @@ export default function InquiriesPage() {
                 </div>
               </div>
 
-              {/* Targeted Phone Card (if linked) */}
               {selectedInquiry.selected_phone ? (
                 <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl space-y-2">
                   <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
@@ -552,7 +521,6 @@ export default function InquiriesPage() {
                 </div>
               )}
 
-              {/* Customer Message */}
               <div>
                 <label className="block text-[11px] font-semibold text-slate-500 mb-1.5">
                   Customer Message
@@ -562,7 +530,6 @@ export default function InquiriesPage() {
                 </div>
               </div>
 
-              {/* Status & Staff Update Form (PDF Endpoint 4) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
@@ -599,7 +566,6 @@ export default function InquiriesPage() {
                 </div>
               </div>
 
-              {/* Audit Information (PDF Note on updated_by_staff) */}
               {selectedInquiry.updated_by_staff && (
                 <div className="pt-2 text-[10px] text-slate-400 border-t border-slate-200/60 dark:border-slate-800">
                   Last updated by{' '}
@@ -612,7 +578,6 @@ export default function InquiriesPage() {
               )}
             </div>
 
-            {/* Pinned Footer */}
             <div className="p-4 sm:p-5 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 flex justify-end gap-2.5 shrink-0">
               <button
                 type="button"

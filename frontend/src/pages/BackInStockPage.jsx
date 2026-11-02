@@ -464,11 +464,6 @@ export default function BackInStockPage() {
                               <span className="font-semibold text-slate-900 dark:text-white block truncate max-w-[220px]">
                                 {phone.phone_name}
                               </span>
-                              {phone.brand_name && (
-                                <span className="text-[10px] text-slate-400 uppercase block font-medium">
-                                  {phone.brand_name}
-                                </span>
-                              )}
                             </div>
                           </div>
                         </td>
@@ -583,48 +578,22 @@ export default function BackInStockPage() {
                           <span className="font-semibold text-slate-900 dark:text-white block">
                             {req.customer_name}
                           </span>
-                          <span className="text-[10px] text-slate-400 font-mono">
-                            {req.request_id}
-                          </span>
                         </td>
 
                         <td className="px-4 py-3.5">
-                          <div className="flex items-center gap-2">
-                            <a
-                              href={`tel:${req.phone_number}`}
-                              className="font-mono text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
-                              title="Call customer"
-                            >
-                              {req.phone_number}
-                            </a>
-                            {cleanPhone && (
-                              <a
-                                href={`https://wa.me/${cleanPhone}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-emerald-500 hover:text-emerald-600 transition-colors"
-                                title="Open WhatsApp"
-                              >
-                                <MessageCircle className="w-3.5 h-3.5" />
-                              </a>
-                            )}
-                          </div>
-                          {req.email && (
-                            <span className="text-[11px] text-slate-400 block truncate max-w-[150px]">
-                              {req.email}
-                            </span>
-                          )}
+                          <a
+                            href={`tel:${req.phone_number}`}
+                            className="font-mono text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                            title="Call customer"
+                          >
+                            {req.phone_number}
+                          </a>
                         </td>
 
                         <td className="px-4 py-3.5">
                           <span className="font-semibold text-slate-900 dark:text-white block">
                             {req.phone?.name || req.phone_name || (req.phone_id ? `Phone ${req.phone_id}` : 'Phone')}
                           </span>
-                          {(req.phone?.brand_name || req.brand_name) && (
-                            <span className="text-[10px] text-slate-400 uppercase">
-                              {req.phone?.brand_name || req.brand_name}
-                            </span>
-                          )}
                         </td>
 
                         <td className="px-4 py-3.5 max-w-[200px]">
@@ -741,9 +710,6 @@ export default function BackInStockPage() {
               {/* Header: Phone Details & Close Button */}
               <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 flex items-center justify-between shrink-0">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    {selectedPhoneData?.phone?.brand_name || 'Device'}
-                  </span>
                   <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-tight">
                     {selectedPhoneData?.phone?.name || 'Waiting Customers'}
                   </h3>
@@ -810,9 +776,6 @@ export default function BackInStockPage() {
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-sm text-slate-900 dark:text-white">
                                   {item.customer_name}
-                                </span>
-                                <span className="text-[10px] text-slate-400 font-mono">
-                                  {item.request_id}
                                 </span>
                               </div>
                               <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">

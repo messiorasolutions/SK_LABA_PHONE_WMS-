@@ -2,7 +2,7 @@ import React from 'react';
 import { Phone, MessageCircle, MapPin, Clock, Mail, ShieldCheck, MessageSquare } from 'lucide-react';
 import { STORE_INFO } from '../constants/siteConfig';
 
-export default function Footer() {
+export default function Footer({ onOpenSell }) {
   const handleWhatsApp = () => {
     const clean = (STORE_INFO.whatsapp || '').replace(/\D/g, '');
     window.open(`https://wa.me/${clean}?text=Hello%20SK%20LABA%20PHONE!`, '_blank');
@@ -12,11 +12,18 @@ export default function Footer() {
     window.dispatchEvent(new CustomEvent('sk_laba_open_inquiry_modal', { detail: { phone: null } }));
   };
 
+  const handleOpenSell = () => {
+    if (onOpenSell) {
+      onOpenSell();
+    } else {
+      window.dispatchEvent(new CustomEvent('sk_laba_open_sell_modal', { detail: {} }));
+    }
+  };
+
   return (
     <footer className="w-full bg-[#03060E] border-t border-theme-border text-theme-textSecondary pt-12 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-theme-border/60">
-          {/* Brand Info */}
           <div className="md:col-span-2 space-y-3">
             <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
               <span>{STORE_INFO.name}</span>
@@ -31,9 +38,9 @@ export default function Footer() {
               <button
                 type="button"
                 onClick={handleWhatsApp}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 text-xs font-semibold transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-theme-border text-white text-xs font-semibold transition-colors cursor-pointer"
               >
-                <MessageCircle className="w-3.5 h-3.5" />
+                <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
                 <span>WhatsApp Shop</span>
               </button>
 
@@ -56,7 +63,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
           <div>
             <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">
               Shop Categories
@@ -73,6 +79,15 @@ export default function Footer() {
                 </a>
               </li>
               <li>
+                <button
+                  type="button"
+                  onClick={handleOpenSell}
+                  className="hover:text-emerald-400 transition-colors text-left"
+                >
+                  Sell Your Old Phone
+                </button>
+              </li>
+              <li>
                 <a href="#smartphones" className="hover:text-white transition-colors">
                   Special Promotional Deals
                 </a>
@@ -85,7 +100,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact Details (C-01 & C-08) */}
           <div>
             <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">
               Shop Information
@@ -103,19 +117,22 @@ export default function Footer() {
                 <Mail className="w-3.5 h-3.5 text-theme-accent shrink-0" />
                 <span>{STORE_INFO.email}</span>
               </div>
+              <div className="flex items-center gap-2 text-emerald-400 font-semibold pt-1">
+                <ShieldCheck className="w-4 h-4" />
+                <span>Verified South Korea Warehouse</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom copyright */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-theme-textMuted gap-2">
-          <p>© {new Date().getFullYear()} {STORE_INFO.name}. All rights reserved.</p>
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-theme-textMuted">
+          <div>
+            &copy; {new Date().getFullYear()} {STORE_INFO.name}. All rights reserved.
+          </div>
           <div className="flex items-center gap-4">
-            <span>Genuine Quality Guarantee</span>
-            <span>•</span>
-            <span>Islandwide Delivery</span>
-            <span>•</span>
-            <span>Customer Protection</span>
+            <span className="text-[11px] text-theme-textMuted">Direct South Korea Import</span>
+            <span className="w-1 h-1 rounded-full bg-theme-border" />
+            <span className="text-[11px] text-emerald-400">100% Genuine Devices</span>
           </div>
         </div>
       </div>

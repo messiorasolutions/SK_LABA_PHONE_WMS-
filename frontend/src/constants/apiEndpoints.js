@@ -1,10 +1,5 @@
-// ============================================================
-// API ENDPOINTS — SK LABA PHONE WMS DASHBOARD
-// Base URL is read from .env (VITE_API_BASE_URL)
-// ============================================================
 
 export const API_ENDPOINTS = {
-  // Authentication (PDF 2)
   auth: {
     login: '/api/auth/login',
     me: '/api/auth/me',
@@ -14,21 +9,18 @@ export const API_ENDPOINTS = {
     resetPassword: '/api/auth/reset-password',
   },
 
-  // User & Role Management (PDF 2)
   users: {
     base: '/api/users',
     byId: (id) => `/api/users/${id}`,
     status: (id) => `/api/users/${id}/status`,
   },
 
-  // Inquiries & Leads (PDF 1)
   inquiries: {
     base: '/api/inquiries',
     byId: (id) => `/api/inquiries/${id}`,
     status: (id) => `/api/inquiries/${id}/status`,
   },
 
-  // Reservations Management (SRS C-09, C-03, ST-07)
   reservations: {
     base: '/api/reservations',
     byId: (id) => `/api/reservations/${id}`,
@@ -36,7 +28,14 @@ export const API_ENDPOINTS = {
     assign: (id) => `/api/reservations/${id}/assign`,
   },
 
-  // WMS Inventory & Catalog
+  sellRequests: {
+    base: '/api/sell-requests',
+    byId: (id) => `/api/sell-requests/${id}`,
+    status: (id) => `/api/sell-requests/${id}/status`,
+    assign: (id) => `/api/sell-requests/${id}/assign`,
+    photo: (id, filename) => `/api/sell-requests/${id}/photos/${encodeURIComponent(filename)}`,
+  },
+
   brands: {
     base: '/api/brands',
     byId: (id) => `/api/brands/${id}`,

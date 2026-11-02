@@ -5,9 +5,6 @@ class SellRequestRepository {
         this.pool = pool;
     }
 
-    /**
-     * Safely parse JSON fields (photos)
-     */
     _parseJson(val) {
         if (!val) return null;
         if (typeof val === 'string') {
@@ -20,9 +17,6 @@ class SellRequestRepository {
         return val;
     }
 
-    /**
-     * Format raw database sell_request row into structured domain object
-     */
     _formatSellRequest(row) {
         if (!row) return null;
 
@@ -62,16 +56,13 @@ class SellRequestRepository {
                 phone_condition: row.desired_phone_condition || null,
                 photos: this._parseJson(row.desired_phone_photos)
             } : null,
-            created_at: row.created_at,
-            updated_at: row.updated_at
+            created_at: row.created_at ? (row.created_at instanceof Date ? row.created_at.toISOString() : (String(row.created_at).includes('T') ? (String(row.created_at).endsWith('Z') ? String(row.created_at) : String(row.created_at) + 'Z') : new Date(row.created_at).toISOString())) : null,
+            updated_at: row.updated_at ? (row.updated_at instanceof Date ? row.updated_at.toISOString() : (String(row.updated_at).includes('T') ? (String(row.updated_at).endsWith('Z') ? String(row.updated_at) : String(row.updated_at) + 'Z') : new Date(row.updated_at).toISOString())) : null
         };
 
         return formatted;
     }
 
-    /**
-     * Insert a new sell-your-phone request 
-     */
     async create(
         {
             customer_name,
@@ -123,9 +114,6 @@ class SellRequestRepository {
         return await this.findById(result.insertId, executor);
     }
 
-    /**
-     * Find a sell request by ID with desired phone, brand, and staff associations
-     */
     async findById(requestId, executor = this.pool) {
         const query = `
             SELECT 
@@ -169,9 +157,6 @@ class SellRequestRepository {
         return rows.length > 0 ? this._formatSellRequest(rows[0]) : null;
     }
 
-    /**
-     * List sell requests with pagination, searching, and filtering 
-     */
     async findSellRequests(
         {
             page = 1,
@@ -221,18 +206,15 @@ class SellRequestRepository {
 
         const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-        // 1. Total count query
         const countQuery = `SELECT COUNT(*) AS total FROM sell_requests sr ${whereClause}`;
         const [countRows] = await executor.execute(countQuery, params);
         const total = countRows[0] ? Number(countRows[0].total) : 0;
 
-        // 2. Pagination calculation
         const safePage = Math.max(1, parseInt(page, 10) || 1);
         const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
         const offset = (safePage - 1) * safeLimit;
         const totalPages = total > 0 ? Math.ceil(total / safeLimit) : 0;
 
-        // 3. Paginated rows query
         const dataQuery = `
             SELECT 
                 sr.request_id,
@@ -286,9 +268,6 @@ class SellRequestRepository {
         };
     }
 
-    /**
-     * Update sell request status and staff audit attribution 
-     */
     async updateStatus(
         requestId,
         { status, updated_by_user_id, assigned_to_user_id },
@@ -314,9 +293,6 @@ class SellRequestRepository {
         return await this.findById(requestId, executor);
     }
 
-    /**
-     * Update assigned staff member on a sell request
-     */
     async updateAssignment(
         requestId,
         { assigned_to_user_id, updated_by_user_id },

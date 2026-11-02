@@ -8,6 +8,7 @@ import FavoritesModal from './components/Modals/FavoritesModal';
 import PhoneDetailModal from './components/Modals/PhoneDetailModal';
 import ReservationModal from './components/Modals/ReservationModal';
 import InquiryModal from './components/Modals/InquiryModal';
+import SellPhoneModal from './components/Modals/SellPhoneModal';
 import { setActiveTab } from './actions/heroActions';
 
 export default function App() {
@@ -17,9 +18,9 @@ export default function App() {
   const [favoritesModalOpen, setFavoritesModalOpen] = useState(false);
   const [selectedPhoneForDetail, setSelectedPhoneForDetail] = useState(null);
   const [selectedPhoneForReserve, setSelectedPhoneForReserve] = useState(null);
-  const [inquiryModalData, setInquiryModalData] = useState(null); // { phone: phoneObj | null } when open
+  const [inquiryModalData, setInquiryModalData] = useState(null);
+  const [sellModalData, setSellModalData] = useState(null);
 
-  // Sync route / hash on initial mount and browser back/forward
   useEffect(() => {
     const syncRoute = () => {
       const hash = window.location.hash.toLowerCase();
@@ -44,11 +45,17 @@ export default function App() {
     };
     window.addEventListener('sk_laba_open_inquiry_modal', handleOpenInquiry);
 
+    const handleOpenSell = (e) => {
+      setSellModalData({ desiredPhone: e.detail?.desiredPhone || null });
+    };
+    window.addEventListener('sk_laba_open_sell_modal', handleOpenSell);
+
     return () => {
       window.removeEventListener('hashchange', syncRoute);
       window.removeEventListener('popstate', syncRoute);
       window.removeEventListener('sk_laba_open_favorites_modal', handleOpenFav);
       window.removeEventListener('sk_laba_open_inquiry_modal', handleOpenInquiry);
+      window.removeEventListener('sk_laba_open_sell_modal', handleOpenSell);
     };
   }, [dispatch]);
 
@@ -68,24 +75,21 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-theme-bg text-theme-textPrimary flex flex-col selection:bg-theme-accent selection:text-white">
-      {/* Navigation Header */}
-      <Navbar onOpenFavorites={() => setFavoritesModalOpen(true)} />
+      <Navbar
+        onOpenFavorites={() => setFavoritesModalOpen(true)}
+        onOpenSell={() => setSellModalData({ desiredPhone: null })}
+      />
 
-      {/* Distinct Separate Pages */}
       <main className="flex-1">
         {isSmartphonesPage ? (
-          /* Separate Dedicated Smartphones Page (C-02 & C-03) */
           <SmartphonesPage onNavigateToHome={handleNavigateToHome} />
         ) : (
-          /* Separate Dedicated Home Page (C-01) */
-          <HomePage onNavigateToSmartphones={handleNavigateToSmartphones} />
+          <HomePage onNavigateToSmartphones={handleNavigateToSmartphones} onOpenSell={() => setSellModalData({})} />
         )}
       </main>
 
-      {/* Shop Information & Footer (C-01 & C-08) */}
-      <Footer />
+      <Footer onOpenSell={() => setSellModalData({ desiredPhone: null })} />
 
-      {/* Global Favorites Modal triggered from Navbar (C-06) */}
       {favoritesModalOpen && (
         <FavoritesModal
           onClose={() => setFavoritesModalOpen(false)}
@@ -94,7 +98,6 @@ export default function App() {
         />
       )}
 
-      {/* Detail Modal if opened from favorites */}
       {selectedPhoneForDetail && (
         <PhoneDetailModal
           phone={selectedPhoneForDetail}
@@ -107,10 +110,13 @@ export default function App() {
             setInquiryModalData({ phone: p });
             setSelectedPhoneForDetail(null);
           }}
+          onOpenSell={(p) => {
+            setSellModalData({ desiredPhone: p });
+            setSelectedPhoneForDetail(null);
+          }}
         />
       )}
 
-      {/* Reservation Modal if opened from favorites */}
       {selectedPhoneForReserve && (
         <ReservationModal
           phone={selectedPhoneForReserve}
@@ -118,11 +124,17 @@ export default function App() {
         />
       )}
 
-      {/* Global Customer Inquiry Modal (PDF 1 / C-08) */}
       {inquiryModalData && (
         <InquiryModal
           phone={inquiryModalData.phone}
           onClose={() => setInquiryModalData(null)}
+        />
+      )}
+
+      {sellModalData && (
+        <SellPhoneModal
+          desiredPhone={sellModalData.desiredPhone}
+          onClose={() => setSellModalData(null)}
         />
       )}
     </div>

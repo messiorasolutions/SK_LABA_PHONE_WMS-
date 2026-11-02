@@ -1,13 +1,10 @@
-// ============================================================
-// APP ROUTES — SK LABA PHONE WMS
-// Authenticated & Protected Dashboard Routes
-// ============================================================
 
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layout/MainLayout';
 import InquiriesPage from '../pages/InquiriesPage';
 import ReservationsPage from '../pages/ReservationsPage';
+import SellRequestsPage from '../pages/SellRequestsPage';
 import UsersPage from '../pages/UsersPage';
 import LoginPage from '../pages/auth/LoginPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
@@ -23,7 +20,6 @@ function DefaultRedirect() {
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public Authentication Routes */}
       <Route
         path="/login"
         element={
@@ -49,7 +45,6 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Protected Dashboard Routes */}
       <Route
         path="/users"
         element={
@@ -63,7 +58,6 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Reservation Management (SRS ST-07) */}
       <Route
         path="/reservations"
         element={
@@ -75,7 +69,6 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Customer Inquiries */}
       <Route
         path="/inquiries"
         element={
@@ -87,7 +80,17 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Default / Fallback Routes */}
+      <Route
+        path="/sell-requests"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <SellRequestsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/"
         element={

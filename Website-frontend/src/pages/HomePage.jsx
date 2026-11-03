@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { ArrowRight, Tag, Star, MessageSquareHeart } from 'lucide-react';
+import { ArrowRight, Tag, Star, MessageSquareHeart, ChevronLeft, ChevronRight } from 'lucide-react';
 import HeroSection from '../components/HeroSection';
 import TrustBadges from '../components/TrustBadges';
 import { getActiveOffers } from '../services/offerService';
+import phoneService from '../services/phoneService';
 import { reviewService } from '../services/reviewService';
 import { setActiveTab } from '../actions/heroActions';
 import upgradeVideo from '../assets/images/upgrade_vedio.mp4';
@@ -31,6 +32,193 @@ function ReviewComment({ comment }) {
         {isExpanded ? 'See less' : 'See more..'}
       </button>
     </span>
+  );
+}
+
+function OfferCard({ offer, allPhones, onNavigate }) {
+  const regularPrice = Number(offer.regular_price || 0);
+  const offerPrice = Number(offer.offer_price || 0);
+  const savings = regularPrice > offerPrice ? regularPrice - offerPrice : 0;
+
+  // Format discount label (e.g. 14.2% OFF)
+  const discountLabel = React.useMemo(() => {
+    if (offer.discount_percentage) {
+      const num = Number(offer.discount_percentage);
+      return (Number.isInteger(num) ? num : num.toFixed(1)) + '% OFF';
+    }
+    if (regularPrice > 0 && offerPrice > 0 && regularPrice > offerPrice) {
+      const pct = ((regularPrice - offerPrice) / regularPrice) * 100;
+      return (Number.isInteger(pct) ? pct : pct.toFixed(1)) + '% OFF';
+    }
+    return 'SPECIAL OFFER';
+  }, [offer, regularPrice, offerPrice]);
+
+  // Find matching phone from allPhones
+  const matchedPhone = React.useMemo(() => {
+    if (!Array.isArray(allPhones) || allPhones.length === 0) return null;
+    if (Array.isArray(offer.phone_ids) && offer.phone_ids.length > 0) {
+      const found = allPhones.find((p) =>
+        offer.phone_ids.some((id) => String(id) === String(p.phone_id || p.id))
+      );
+      if (found) return found;
+    }
+    if (Array.isArray(offer.phones) && offer.phones.length > 0) {
+      const found = allPhones.find((p) =>
+        offer.phones.some((ph) => String(ph.phone_id || ph.id) === String(p.phone_id || p.id))
+      );
+      if (found) return found;
+    }
+    const combined = ((offer.title || '') + ' ' + (offer.description || '')).toLowerCase();
+    return allPhones.find((p) => p.name && combined.includes(p.name.toLowerCase())) || null;
+  }, [offer, allPhones]);
+
+  // Resolve best photo
+  const resolvedPhoto = React.useMemo(() => {
+    if (offer.banner_image && typeof offer.banner_image === 'string' && offer.banner_image.trim()) {
+      return offer.banner_image;
+    }
+    if (matchedPhone) {
+      if (matchedPhone.main_photo) return matchedPhone.main_photo;
+      if (Array.isArray(matchedPhone.photos) && matchedPhone.photos.length > 0) return matchedPhone.photos[0];
+      if (typeof matchedPhone.photos === 'string' && matchedPhone.photos.trim()) {
+        try {
+          const parsed = JSON.parse(matchedPhone.photos);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
+        } catch (e) {}
+      }
+    }
+    if (Array.isArray(offer.phones) && offer.phones.length > 0) {
+      const p = offer.phones[0];
+      if (p.main_photo) return p.main_photo;
+      if (Array.isArray(p.photos) && p.photos.length > 0) return p.photos[0];
+    }
+    return null;
+  }, [offer, matchedPhone]);
+
+  const [imgSrc, setImgSrc] = useState(resolvedPhoto || matchedPhone?.main_photo || '');
+  useEffect(() => {
+    setImgSrc(resolvedPhoto || matchedPhone?.main_photo || '');
+  }, [resolvedPhoto, matchedPhone]);
+
+  const phoneTitle = matchedPhone?.name || offer.title || 'Special Device';
+  const offerSubtitle = offer.title && offer.title !== phoneTitle
+    ? offer.title
+    : (offer.description || 'Avurudu Mega Savings (Limited Stock)');
+
+  return (
+    <div
+      onClick={() => onNavigate(matchedPhone)}
+      className="relative w-full bg-black hover:bg-neutral-950 rounded-2xl p-3.5 sm:p-4 flex flex-col justify-between transition-all duration-300 shadow-xl shadow-black/90 group cursor-pointer overflow-hidden hover:scale-[1.01]"
+    >
+      {/* Top Media Container: Dark Mode, no container stroke */}
+      <div className="relative w-full aspect-[4/5] rounded-xl bg-neutral-950 flex items-center justify-center p-3 overflow-hidden shrink-0 mb-3.5">
+        {/* Top-Left: Red Color Stroke & Dark Red Background on 14.2% OFF Badge */}
+        <div
+          style={{
+            backgroundColor: 'rgba(69, 10, 10, 0.85)',
+            borderColor: '#ef4444',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+          }}
+          className="absolute top-2.5 left-2.5 z-20 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-950/85 backdrop-blur-md border border-red-500 text-red-200 text-[10px] sm:text-[11px] font-normal tracking-wide shadow-md shadow-red-950/60"
+        >
+          <Tag className="w-3 h-3 text-red-400" style={{ color: '#f87171' }} />
+          <span style={{ color: '#fecaca' }}>{discountLabel}</span>
+        </div>
+
+        {/* Phone Photo */}
+        {imgSrc ? (
+          <img
+            src={imgSrc}
+            alt={phoneTitle}
+            className="max-h-[82%] max-w-[82%] object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.95)] transition-transform duration-300 group-hover:scale-105 relative z-10"
+            loading="lazy"
+            onError={() => {
+              if (matchedPhone?.main_photo && imgSrc !== matchedPhone.main_photo) {
+                setImgSrc(matchedPhone.main_photo);
+              } else if (Array.isArray(matchedPhone?.photos) && matchedPhone.photos[0] && imgSrc !== matchedPhone.photos[0]) {
+                setImgSrc(matchedPhone.photos[0]);
+              } else {
+                setImgSrc('');
+              }
+            }}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center text-slate-500 relative z-10 text-center px-2">
+            <span className="text-[11px] uppercase tracking-widest font-light text-slate-400">SK LABA PHONE</span>
+            <span className="text-[10px] text-red-400 mt-0.5">Special Offer</span>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Details Section with Balanced Spacing */}
+      <div className="flex flex-col flex-1 justify-between w-full relative z-10">
+        <div>
+          {/* Row 1: Active Promotion (No stroke, green color) + Save $X */}
+          <div className="flex items-center justify-between gap-2 mb-2.5">
+            <span
+              style={{ color: '#34d399' }}
+              className="inline-flex items-center gap-1.5 text-xs font-normal text-emerald-400"
+            >
+              <span
+                style={{ backgroundColor: '#34d399' }}
+                className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"
+              />
+              <span>Active Promotion</span>
+            </span>
+            {savings > 0 && (
+              <span
+                style={{
+                  backgroundColor: 'rgba(69, 10, 10, 0.75)',
+                  borderColor: 'rgba(239, 68, 68, 0.45)',
+                  borderWidth: '1px',
+                  borderStyle: 'solid',
+                  color: '#fca5a5',
+                }}
+                className="text-[10px] sm:text-[11px] font-normal text-red-300 bg-red-950/75 border border-red-500/40 px-2 py-0.5 rounded-full"
+              >
+                Save ${Math.round(savings).toLocaleString()}
+              </span>
+            )}
+          </div>
+
+          {/* Row 2: Phone Title */}
+          <h3 className="text-sm sm:text-base font-normal text-white leading-snug truncate group-hover:text-slate-200 transition-colors">
+            {phoneTitle}
+          </h3>
+
+          {/* Row 3: Subtitle / Campaign Name */}
+          <p className="text-xs text-slate-400 font-normal mt-1 mb-3.5 line-clamp-1">
+            {offerSubtitle}
+          </p>
+
+          {/* Row 4: Price Section */}
+          <div className="flex items-baseline gap-2.5 mb-3.5">
+            <span className="text-lg sm:text-xl font-normal text-white tracking-tight">
+              ${Number(offer.offer_price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            {regularPrice > 0 && (
+              <span className="text-xs sm:text-sm text-slate-500 line-through font-normal">
+                ${regularPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Row 5: CTA Button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onNavigate(matchedPhone);
+          }}
+          className="w-full mt-auto py-2.5 px-4 rounded-full bg-black hover:bg-neutral-900 border border-neutral-700 hover:border-neutral-500 text-white text-xs sm:text-sm font-normal flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-md group/btn cursor-pointer"
+        >
+          <span>Discover Offer</span>
+          <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover/btn:translate-x-1 transition-transform" />
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -159,18 +347,23 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
     };
   }, []);
 
+  const [allPhones, setAllPhones] = useState([]);
+
   useEffect(() => {
     let isMounted = true;
 
-    getActiveOffers()
-      .then((res) => {
-        if (!isMounted) return;
-        const offers = res.data?.data || res.data || [];
-        setActiveOffers(Array.isArray(offers) ? offers : []);
-      })
-      .catch((err) => {
-        console.error('Failed to fetch promotional offers', err);
-      });
+    Promise.all([
+      getActiveOffers().catch(() => ({ data: [] })),
+      phoneService.getPhones().catch(() => ({ data: [] })),
+    ]).then(([offerRes, phoneRes]) => {
+      if (!isMounted) return;
+      const rawOffers = offerRes.data?.data || offerRes.data || [];
+      const rawPhones = phoneRes.data?.data || phoneRes.data || [];
+      setActiveOffers(Array.isArray(rawOffers) ? rawOffers : []);
+      setAllPhones(Array.isArray(rawPhones) ? rawPhones : []);
+    }).catch((err) => {
+      console.error('Failed to fetch promotional offers or phones', err);
+    });
 
     return () => {
       isMounted = false;
@@ -182,9 +375,9 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
     else window.dispatchEvent(new CustomEvent('sk_laba_open_sell_modal', { detail: {} }));
   };
 
-  const handleGoToSmartphones = () => {
+  const handleGoToSmartphones = (phone) => {
     if (onNavigateToSmartphones) {
-      onNavigateToSmartphones();
+      onNavigateToSmartphones(phone);
     } else {
       dispatch(setActiveTab('Smartphones'));
       window.location.hash = '#smartphones';
@@ -249,7 +442,7 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       </section>
 
       {activeOffers.length > 0 && (
-        <section className="pt-16 pb-12 sm:pb-16 bg-black">
+        <section id="deals" className="pt-16 pb-12 sm:pb-16 bg-black scroll-mt-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
               <div>
@@ -274,50 +467,14 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
               {activeOffers.map((offer) => (
-                <div
+                <OfferCard
                   key={offer.offer_id}
-                  className="bg-black border border-white/15 hover:border-white/30 rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 shadow-xl shadow-black/80"
-                >
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <span className="px-3 py-1 rounded-full text-xs font-normal bg-black text-slate-300 border border-white/15">
-                          {offer.discount_percentage ? `${offer.discount_percentage}% OFF` : 'SPECIAL DEAL'}
-                        </span>
-                        <span className="text-xs text-theme-textMuted">
-                          Active Promotion
-                        </span>
-                      </div>
-
-                      <h3 className="text-lg sm:text-xl font-normal text-white mb-2">
-                        {offer.title}
-                      </h3>
-                      <p className="text-xs text-theme-textSecondary leading-relaxed mb-4 font-normal">
-                        {offer.description}
-                      </p>
-
-                      <div className="flex items-baseline gap-3 mb-4">
-                        <span className="text-2xl font-normal text-white">
-                          ${Number(offer.offer_price).toLocaleString()}
-                        </span>
-                        {offer.regular_price && (
-                          <span className="text-sm text-theme-textMuted line-through font-normal">
-                            ${Number(offer.regular_price).toLocaleString()}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                  <button
-                    type="button"
-                    onClick={handleGoToSmartphones}
-                    className="w-full py-2.5 px-4 rounded-full bg-black hover:bg-neutral-900 border border-white/20 hover:border-white/40 text-white text-xs font-normal flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-black/60 group cursor-pointer"
-                  >
-                    <span>Discover Smartphones Catalog</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-                </div>
+                  offer={offer}
+                  allPhones={allPhones}
+                  onNavigate={handleGoToSmartphones}
+                />
               ))}
             </div>
           </div>
@@ -376,7 +533,7 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       {/* Customer Reviews Section */}
       <section id="reviews" className="pt-20 sm:pt-24 pb-24 sm:pb-32 bg-black border-b border-white/10 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 sm:mb-14">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10 sm:mb-12">
             <div>
               <h2 className="text-2xl sm:text-3xl font-normal text-white tracking-tight flex items-center gap-2.5">
                 <span>Verified Customer Reviews</span>
@@ -386,65 +543,109 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={handleOpenReviewModal}
-              className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer self-start sm:self-auto shrink-0"
-            >
-              <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
-                <MessageSquareHeart className="w-4 h-4" />
-                <span>Write a Review</span>
-              </span>
-            </button>
+            <div className="flex items-center gap-3 self-start sm:self-auto shrink-0">
+              {reviews.length > 4 && (
+                <div className="hidden sm:flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (reviewsCarouselRef.current) {
+                        reviewsCarouselRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+                      }
+                    }}
+                    className="w-9 h-9 rounded-full bg-black hover:bg-neutral-900 border border-white/20 hover:border-white/40 text-white flex items-center justify-center transition-colors cursor-pointer shadow-sm"
+                    title="Previous reviews"
+                    aria-label="Previous reviews"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (reviewsCarouselRef.current) {
+                        reviewsCarouselRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+                      }
+                    }}
+                    className="w-9 h-9 rounded-full bg-black hover:bg-neutral-900 border border-white/20 hover:border-white/40 text-white flex items-center justify-center transition-colors cursor-pointer shadow-sm"
+                    title="Next reviews"
+                    aria-label="Next reviews"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={handleOpenReviewModal}
+                className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer shrink-0"
+              >
+                <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                  <MessageSquareHeart className="w-4 h-4" />
+                  <span>Write a Review</span>
+                </span>
+              </button>
+            </div>
           </div>
 
           {reviewsLoading ? (
-            <div className="bg-black border border-white/10 rounded-2xl overflow-hidden shadow-xl shadow-black/80">
-              <div className="divide-y divide-white/10">
-                {[1, 2, 3].map((n) => (
-                  <div key={n} className="p-4 sm:p-5 flex items-center justify-between gap-4 animate-pulse">
-                    <div className="flex items-center gap-3 w-1/4">
-                      <div className="w-8 h-8 rounded-full bg-white/10 shrink-0" />
-                      <div className="h-3.5 bg-white/10 rounded w-24" />
-                    </div>
-                    <div className="h-3.5 bg-white/10 rounded w-20" />
-                    <div className="h-3.5 bg-white/5 rounded w-1/2" />
-                    <div className="h-3.5 bg-white/10 rounded w-16" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((n) => (
+                <div key={n} className="bg-black border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col justify-between h-48 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white/10 shrink-0" />
+                    <div className="h-3.5 bg-white/10 rounded w-24" />
                   </div>
-                ))}
-              </div>
+                  <div className="space-y-2 my-3">
+                    <div className="h-3 bg-white/5 rounded w-full" />
+                    <div className="h-3 bg-white/5 rounded w-3/4" />
+                  </div>
+                  <div className="h-3 bg-white/10 rounded w-16" />
+                </div>
+              ))}
             </div>
           ) : reviews.length > 0 ? (
-            <div className="bg-black border border-white/10 rounded-2xl overflow-hidden shadow-xl shadow-black/80">
-              <div className="max-h-[240px] sm:max-h-[250px] overflow-y-auto overflow-x-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-black [&::-webkit-scrollbar-thumb]:bg-white/20 hover:[&::-webkit-scrollbar-thumb]:bg-white/30 [&::-webkit-scrollbar-thumb]:rounded-full">
-                <table className="w-full text-left text-xs sm:text-sm text-slate-300">
-                  <tbody className="divide-y divide-white/10 font-normal">
-                    {reviews.map((r) => (
-                      <tr key={r.review_id} className="hover:bg-neutral-950 transition-colors">
-                        <td className="py-3.5 sm:py-4 px-4 sm:px-6 whitespace-nowrap">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full border border-white/20 bg-neutral-900 flex items-center justify-center text-white text-xs font-normal shrink-0">
-                              {(r.customer_name || 'C').charAt(0)}
-                            </div>
-                            <span className="text-white font-normal">{r.customer_name}</span>
-                          </div>
-                        </td>
-                        <td className="py-3.5 sm:py-4 px-4 sm:px-6 whitespace-nowrap">
-                          <div className="flex items-center gap-0.5 transform -skew-x-12">
-                            {[1, 2, 3, 4, 5].map((star) => (
+            <div>
+              <div
+                ref={reviewsCarouselRef}
+                onScroll={handleCarouselScroll}
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                className="no-scrollbar flex gap-4 overflow-x-auto pb-2 pt-1 snap-x snap-mandatory scroll-smooth"
+              >
+                {reviews.map((r) => (
+                  <div
+                    key={r.review_id}
+                    style={{
+                      flex: '0 0 calc(25% - 12px)',
+                      minWidth: '260px',
+                      backgroundColor: '#09090d',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                    }}
+                    className="snap-start rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 shadow-xl shadow-black/80"
+                  >
+                    <div>
+                      {/* Top Row: Stars (dark yellow) on left, Date on right */}
+                      <div className="flex items-center justify-between gap-2 mb-3.5">
+                        <div className="flex items-center gap-0.5 transform -skew-x-12">
+                          {[1, 2, 3, 4, 5].map((star) => {
+                            const isFilled = star <= r.rating;
+                            return (
                               <Star
                                 key={star}
-                                className={`w-3 h-3 ${
-                                  star <= r.rating ? 'text-amber-600/90 fill-amber-600/90' : 'text-neutral-800 fill-neutral-900'
+                                style={
+                                  isFilled
+                                    ? { color: '#d97706', fill: '#d97706' }
+                                    : { color: '#262626', fill: '#171717' }
+                                }
+                                className={`w-3.5 h-3.5 ${
+                                  isFilled ? 'text-amber-600/90 fill-amber-600/90' : 'text-neutral-800 fill-neutral-900'
                                 }`}
                               />
-                            ))}
-                          </div>
-                        </td>
-                        <td className="py-3.5 sm:py-4 px-4 sm:px-6 min-w-[260px] max-w-xl text-slate-300 font-normal italic leading-relaxed">
-                          <ReviewComment comment={r.comment} />
-                        </td>
-                        <td className="py-3.5 sm:py-4 px-4 sm:px-6 whitespace-nowrap text-right text-[11px] text-theme-textMuted font-normal">
+                            );
+                          })}
+                        </div>
+
+                        <span className="text-[11px] text-theme-textMuted font-normal">
                           {r.created_at
                             ? new Date(r.created_at).toLocaleDateString(undefined, {
                                 month: 'short',
@@ -452,16 +653,63 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
                                 year: 'numeric',
                               })
                             : ''}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </span>
+                      </div>
+
+                      {/* Review quote - full text without 'See more' */}
+                      <p className="text-xs sm:text-sm text-slate-300 font-normal italic leading-relaxed">
+                        &ldquo;{r.comment}&rdquo;
+                      </p>
+                    </div>
+
+                    {/* Customer name at bottom without bright stroke */}
+                    {r.customer_name && (
+                      <div className="pt-3 mt-3 flex items-center gap-2" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.04)' }}>
+                        <div
+                          style={{
+                            backgroundColor: '#141418',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                          }}
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-normal shrink-0"
+                        >
+                          {r.customer_name.charAt(0)}
+                        </div>
+                        <span className="text-xs font-normal text-slate-400 truncate">
+                          {r.customer_name}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
+
+              {/* Pagination Dots below the containers (instead of scrollbar) */}
+              {reviews.length > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-6">
+                  {reviews.map((_, idx) => {
+                    const isActive = activeIndex === idx;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => scrollToIndex(idx)}
+                        aria-label={`Go to review ${idx + 1}`}
+                        style={{
+                          width: isActive ? '22px' : '7px',
+                          height: '7px',
+                          borderRadius: '9999px',
+                          backgroundColor: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.2)',
+                          transition: 'all 0.3s ease',
+                        }}
+                        className="cursor-pointer hover:opacity-90"
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center py-12 px-4 rounded-3xl border border-dashed border-theme-border/80 bg-theme-surface/50 max-w-xl mx-auto space-y-4">
-
               <div className="space-y-1">
                 <h3 className="text-base font-bold text-white">Be the First to Leave a Review!</h3>
                 <p className="text-xs text-theme-textSecondary max-w-sm mx-auto">

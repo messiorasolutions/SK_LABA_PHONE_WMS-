@@ -27,22 +27,120 @@ export default function ReservationModal({ phone, onClose }) {
   // Minimum date is today (YYYY-MM-DD)
   const todayStr = new Date().toISOString().split('T')[0];
 
-  // Parse colour options from phone
-  let colourOptions = [];
-  if (Array.isArray(phone?.colour_options)) {
-    colourOptions = phone.colour_options.map((c) => (typeof c === 'string' ? c : c?.name || c?.colour || String(c)));
-  } else if (typeof phone?.colour_options === 'string') {
-    try {
-      const parsed = JSON.parse(phone.colour_options);
-      if (Array.isArray(parsed)) {
-        colourOptions = parsed.map((c) => (typeof c === 'string' ? c : c?.name || c?.colour || String(c)));
-      } else {
-        colourOptions = phone.colour_options.split(',').map((c) => c.trim()).filter(Boolean);
+  // Parse all colour options from phone record
+  const parsedAllColors = React.useMemo(() => {
+    let raw = phone?.colour_options;
+    if (typeof raw === 'string') {
+      try {
+        raw = JSON.parse(raw);
+      } catch (e) {
+        raw = raw.split(',').map((c) => c.trim()).filter(Boolean);
       }
-    } catch {
-      colourOptions = phone.colour_options.split(',').map((c) => c.trim()).filter(Boolean);
     }
-  }
+
+    if (!Array.isArray(raw)) return [];
+
+    return raw.map((c, i) => {
+      if (typeof c === 'string') {
+        const totalStock = Number(phone?.current_stock ?? phone?.stock ?? 0);
+        return {
+          id: `color_${i}`,
+          name: c,
+          color_name: c,
+          color_code: '#4B5563',
+          quantity: totalStock,
+          storage_quantities: {},
+          photos: [],
+        };
+      }
+      return {
+        id: c.id || `color_${i}`,
+        name: c.color_name || c.name || `Color #${i + 1}`,
+        color_name: c.color_name || c.name || `Color #${i + 1}`,
+        color_code: c.color_code || c.color || c.hex || '#4B5563',
+        quantity:
+          typeof c.quantity === 'number'
+            ? c.quantity
+            : (c.quantity !== undefined && c.quantity !== null && !isNaN(Number(c.quantity)))
+              ? Number(c.quantity)
+              : Number(phone?.current_stock ?? phone?.stock ?? 0),
+        storage_quantities: c.storage_quantities || {},
+        photos: Array.isArray(c.photos) ? c.photos : [],
+      };
+    });
+  }, [phone?.colour_options, phone?.current_stock, phone?.stock]);
+
+  // Filter out of stock colours (only keep in-stock variants for reservation)
+  const inStockColors = React.useMemo(() => {
+    return parsedAllColors.filter((col) => {
+      // 1. If storage_quantities has entries, check if any storage has positive stock
+      if (
+        col.storage_quantities &&
+        typeof col.storage_quantities === 'object' &&
+        Object.keys(col.storage_quantities).length > 0
+      ) {
+        const qtys = Object.values(col.storage_quantities)
+          .map(Number)
+          .filter((n) => !isNaN(n));
+        if (qtys.length > 0) {
+          return qtys.some((q) => q > 0);
+        }
+      }
+
+      // 2. Otherwise check col.quantity
+      if (typeof col.quantity === 'number') {
+        return col.quantity > 0;
+      }
+
+      // 3. Fallback to phone current_stock
+      const totalStock = Number(phone?.current_stock ?? phone?.stock ?? 0);
+      return totalStock > 0;
+    });
+  }, [parsedAllColors, phone?.current_stock, phone?.stock]);
+
+  // Colour string names: If a colour was already selected when clicking Reserve, ONLY show that colour
+  const colourOptions = React.useMemo(() => {
+    if (phone?.selectedColor) {
+      const targetColor = String(phone.selectedColor).trim().toLowerCase();
+      const matched = inStockColors.find(
+        (c) =>
+          (c.name && c.name.trim().toLowerCase() === targetColor) ||
+          (c.color_name && c.color_name.trim().toLowerCase() === targetColor)
+      );
+      if (matched) {
+        return [matched.name];
+      }
+      return [phone.selectedColor];
+    }
+    return inStockColors.map((c) => c.name);
+  }, [inStockColors, phone?.selectedColor]);
+
+  // Active colour object based on current selectedColour
+  const activeColorObj = React.useMemo(() => {
+    if (!selectedColour) return inStockColors[0] || null;
+    return (
+      inStockColors.find(
+        (c) =>
+          c.name?.toLowerCase() === selectedColour?.toLowerCase() ||
+          c.color_name?.toLowerCase() === selectedColour?.toLowerCase()
+      ) || inStockColors[0] || null
+    );
+  }, [inStockColors, selectedColour]);
+
+  // Active photo based on selected colour or phone photos
+  const activePhonePhoto =
+    activeColorObj?.photos?.[0] ||
+    phone?.photos?.[0] ||
+    phone?.main_photo ||
+    '';
+
+  // Overall phone availability check
+  const availability = (phone?.availability || 'IN_STOCK').toUpperCase();
+  const currentStock = Number(phone?.current_stock ?? phone?.stock ?? 0);
+  const isPhoneSoldOut =
+    availability === 'SOLD_OUT' ||
+    (availability !== 'COMING_SOON' && currentStock === 0) ||
+    (parsedAllColors.length > 0 && inStockColors.length === 0);
 
   // Load and match storage options for this phone (C-09)
   useEffect(() => {
@@ -60,11 +158,28 @@ export default function ReservationModal({ phone, onClose }) {
             const matched = allOptions.filter((opt) =>
               phoneStorageIds.includes(Number(opt.storage_id))
             );
-            setAvailableStorages(matched.length > 0 ? matched : allOptions);
-            if (phone?.selectedStorageId && phoneStorageIds.includes(Number(phone.selectedStorageId))) {
-              setSelectedStorageId(Number(phone.selectedStorageId));
-            } else if (matched.length > 0) {
-              setSelectedStorageId(Number(matched[0].storage_id));
+            const storages = matched.length > 0 ? matched : allOptions;
+            setAvailableStorages(storages);
+
+            let initialOpt = null;
+            if (phone?.selectedStorage) {
+              initialOpt = storages.find(
+                (s) =>
+                  s.storage_name === phone.selectedStorage ||
+                  s.storage_name?.toLowerCase() === phone.selectedStorage?.toLowerCase() ||
+                  (s.capacity_gb && `${s.capacity_gb}GB`.toLowerCase() === phone.selectedStorage?.replace(/\s+/g, '').toLowerCase())
+              );
+            }
+            if (!initialOpt && phone?.selectedStorageId) {
+              initialOpt = storages.find(
+                (s) => Number(s.storage_id) === Number(phone.selectedStorageId)
+              );
+            }
+            if (!initialOpt && storages.length > 0) {
+              initialOpt = storages[0];
+            }
+            if (initialOpt) {
+              setSelectedStorageId(Number(initialOpt.storage_id));
             }
           }
         })
@@ -77,13 +192,16 @@ export default function ReservationModal({ phone, onClose }) {
             setSelectedStorageId(phoneStorageIds[0]);
           }
         });
-    }
-
-    // Set initial colour if passed or default to first
-    if (phone?.selectedColor && colourOptions.includes(phone.selectedColor)) {
-      setSelectedColour(phone.selectedColor);
-    } else if (colourOptions.length > 0) {
-      setSelectedColour(colourOptions[0]);
+    } else if (Array.isArray(phone?.storage_options) && phone.storage_options.length > 0) {
+      setAvailableStorages(phone.storage_options);
+      setSelectedStorageId(phone.storage_options[0]?.storage_id || 1);
+    } else if (Array.isArray(phone?.storage_names) && phone.storage_names.length > 0) {
+      const derived = phone.storage_names.map((name, i) => ({
+        storage_id: i + 1,
+        storage_name: name,
+      }));
+      setAvailableStorages(derived);
+      setSelectedStorageId(1);
     }
 
     return () => {
@@ -91,9 +209,100 @@ export default function ReservationModal({ phone, onClose }) {
     };
   }, [phoneId]);
 
+  // Set initial colour if passed and in stock, or default to first in-stock colour
+  useEffect(() => {
+    if (phone?.selectedColor && colourOptions.includes(phone.selectedColor)) {
+      setSelectedColour(phone.selectedColor);
+    } else if (colourOptions.length > 0) {
+      setSelectedColour(colourOptions[0]);
+    } else {
+      setSelectedColour('');
+    }
+  }, [phoneId, phone?.selectedColor, colourOptions]);
+
+  // Filter storages: If a storage was already selected when clicking Reserve, ONLY show that selected storage
+  const displayedStorages = React.useMemo(() => {
+    // 1. If phone has a pre-selected storage from detail page
+    if (phone?.selectedStorage || phone?.selectedStorageId) {
+      const targetName = phone?.selectedStorage ? String(phone.selectedStorage).trim().toLowerCase() : '';
+      const targetCap = targetName ? targetName.replace(/\D/g, '') : '';
+
+      const matched = availableStorages.find((s) => {
+        if (phone?.selectedStorageId && Number(s.storage_id) === Number(phone.selectedStorageId)) {
+          return true;
+        }
+        const sName = (s.storage_name || '').trim().toLowerCase();
+        const sCap = String(s.capacity_gb || '').trim();
+        return (
+          (targetName && (sName === targetName || sName.replace(/\s+/g, '') === targetName.replace(/\s+/g, ''))) ||
+          (targetCap && (sCap === targetCap || sName.replace(/\s+/g, '') === `${targetCap}gb`))
+        );
+      });
+
+      if (matched) {
+        return [matched];
+      }
+
+      if (phone?.selectedStorageId && availableStorages.length > 0) {
+        const byId = availableStorages.find((s) => Number(s.storage_id) === Number(phone.selectedStorageId));
+        if (byId) return [byId];
+      }
+
+      if (phone?.selectedStorage) {
+        return [
+          {
+            storage_id: phone.selectedStorageId || (targetCap ? Number(targetCap) : 1),
+            storage_name: phone.selectedStorage,
+            capacity_gb: targetCap ? Number(targetCap) : undefined,
+          },
+        ];
+      }
+    }
+
+    if (!availableStorages || availableStorages.length === 0) return [];
+
+    if (
+      activeColorObj?.storage_quantities &&
+      typeof activeColorObj.storage_quantities === 'object' &&
+      Object.keys(activeColorObj.storage_quantities).length > 0
+    ) {
+      const filtered = availableStorages.filter((storage) => {
+        const name = storage.storage_name;
+        const capName = storage.capacity_gb ? `${storage.capacity_gb}GB` : '';
+        const qty =
+          activeColorObj.storage_quantities[name] ??
+          (capName ? activeColorObj.storage_quantities[capName] : undefined);
+        if (qty !== undefined) {
+          return Number(qty) > 0;
+        }
+        return true;
+      });
+      return filtered.length > 0 ? filtered : availableStorages;
+    }
+
+    return availableStorages;
+  }, [availableStorages, activeColorObj, phone?.selectedStorage, phone?.selectedStorageId]);
+
+  // Keep selectedStorageId pointing to the displayed storage
+  useEffect(() => {
+    if (displayedStorages.length > 0) {
+      const currentExists = displayedStorages.some(
+        (s) => Number(s.storage_id) === Number(selectedStorageId)
+      );
+      if (!currentExists) {
+        setSelectedStorageId(Number(displayedStorages[0].storage_id));
+      }
+    }
+  }, [displayedStorages, selectedStorageId]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+
+    if (isPhoneSoldOut) {
+      setError('This device is currently out of stock and cannot be reserved.');
+      return;
+    }
 
     // Validation matching backend reservationValidation.js
     const cleanName = formData.customer_name.trim();
@@ -163,7 +372,7 @@ export default function ReservationModal({ phone, onClose }) {
       const res = await createReservation(payload);
       setSubmittedData({
         ...payload,
-        storageName: availableStorages.find((s) => Number(s.storage_id) === Number(selectedStorageId))?.storage_name,
+        storageName: displayedStorages.find((s) => Number(s.storage_id) === Number(selectedStorageId))?.storage_name || availableStorages.find((s) => Number(s.storage_id) === Number(selectedStorageId))?.storage_name,
         reservation_id: res?.data?.data?.reservation_id || res?.data?.reservation_id,
       });
       setSuccess(true);
@@ -190,37 +399,87 @@ export default function ReservationModal({ phone, onClose }) {
 
       {/* Right-Side Slide-Over Drawer */}
       <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[500px] md:w-[540px] bg-[#0A0F1E] border-l border-white/10 shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-3.5 border-b border-white/10 bg-[#0A0F1E]/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-normal uppercase tracking-wider text-theme-textSecondary">
-              {phone?.brand_name || 'Reservation Request'}
-            </span>
-            {phone?.phone_condition && (
-              <>
-                <span className="text-neutral-600">•</span>
-                <span className="px-2 py-0.5 text-[10px] font-normal uppercase rounded border border-white/15 bg-transparent text-white/90">
-                  {phone.phone_condition}
-                </span>
-              </>
-            )}
-          </div>
+        {/* Header / Selected Device Card */}
+        <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-white/10 bg-[#0A0F1E]/95 backdrop-blur-md sticky top-0 z-20 shrink-0">
+          <div className="flex items-center justify-between gap-3.5 sm:gap-4">
+            {/* Phone Summary Info */}
+            <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
+              <div className="relative w-[56px] h-[56px] sm:w-[64px] sm:h-[64px] rounded-2xl bg-gradient-to-b from-white/[0.08] to-black/80 border border-white/15 p-1.5 flex items-center justify-center shrink-0 shadow-lg shadow-black/70 group overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-white/[0.06] pointer-events-none" />
+                {activePhonePhoto ? (
+                  <img
+                    src={activePhonePhoto}
+                    alt={phone?.name}
+                    className="w-full h-full object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.85)] transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <span className="text-[10px] text-theme-textMuted font-mono">SK LABA</span>
+                )}
+              </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-lg border border-white/15 bg-transparent hover:bg-white/[0.06] text-theme-textSecondary hover:text-white transition-colors cursor-pointer"
-            title="Close drawer"
-            aria-label="Close drawer"
-          >
-            <X className="w-4 h-4" />
-          </button>
+              <div className="min-w-0 flex-1 space-y-0.5">
+                {/* Brand & Condition */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+                    {phone?.brand_name || 'Smartphone'}
+                  </span>
+                  {phone?.phone_condition && (
+                    <span className="px-2 py-0.5 rounded-md border border-white/20 bg-white/[0.06] text-[9px] sm:text-[10px] font-medium uppercase tracking-wider text-slate-300">
+                      {phone.phone_condition}
+                    </span>
+                  )}
+                </div>
+
+                {/* Device Title */}
+                <h3 className="text-sm sm:text-base font-semibold text-white truncate tracking-tight leading-snug">
+                  {phone?.name}
+                </h3>
+
+                {/* Price & Variant Specs */}
+                <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                  <span className="text-xs sm:text-sm font-bold text-white tracking-tight">
+                    ${Number(phone?.effectivePrice || phone?.price || 0).toLocaleString()}
+                  </span>
+
+                  {(selectedColour || phone?.selectedStorage || displayedStorages[0]?.storage_name) && (
+                    <div className="flex items-center gap-1.5 text-[11px]">
+                      <span className="text-neutral-600">•</span>
+                      {selectedColour && (
+                        <span className="text-slate-300 font-normal">
+                          {selectedColour}
+                        </span>
+                      )}
+                      {(phone?.selectedStorage || displayedStorages[0]?.storage_name) && (
+                        <>
+                          <span className="text-neutral-600">/</span>
+                          <span className="px-2 py-0.5 rounded-md bg-white/[0.08] border border-white/10 text-white font-mono text-[10px] font-medium">
+                            {phone?.selectedStorage || displayedStorages[0]?.storage_name}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/10 hover:border-white/30 text-slate-400 hover:text-white transition-all flex items-center justify-center shrink-0 cursor-pointer"
+              title="Close drawer"
+              aria-label="Close drawer"
+            >
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="overflow-y-auto p-6 flex-1 space-y-4">
-          {success ? (
-            <div className="py-8 sm:py-10 max-w-lg mx-auto text-center space-y-6 animate-in fade-in duration-300">
+        {/* Drawer Body & Footer */}
+        {success ? (
+          <div className="overflow-y-auto px-5 sm:px-6 py-8 flex-1 flex flex-col justify-center">
+            <div className="max-w-lg mx-auto text-center space-y-6 animate-in fade-in duration-300 w-full">
               <div className="space-y-1.5">
                 <h3 className="text-xl font-normal text-white tracking-tight">Reservation Submitted</h3>
                 {submittedData?.reservation_id && (
@@ -277,214 +536,145 @@ export default function ReservationModal({ phone, onClose }) {
                 </button>
               </div>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Selected Phone Summary Banner */}
-              {phone && (
-                <div className="flex items-center gap-3 bg-black/40 border border-white/15 rounded-xl p-3">
-                  <div className="w-14 h-14 bg-black/60 rounded-lg p-1.5 flex items-center justify-center shrink-0 border border-white/10">
-                    {phone.photos?.[0] || phone.main_photo ? (
-                      <img
-                        src={phone.photos?.[0] || phone.main_photo}
-                        alt={phone.name}
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    ) : (
-                      <span className="text-[10px] text-theme-textMuted font-mono">SK LABA</span>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="text-[10px] font-normal uppercase tracking-wider text-theme-textMuted block">
-                      {phone.brand_name || 'Selected Device'}
-                    </span>
-                    <h4 className="text-xs font-normal text-white truncate">{phone.name}</h4>
-                    <div className="flex items-center gap-2 mt-1 text-[11px] text-theme-textSecondary">
-                      <span className="font-normal text-white">
-                        ${Number(phone.effectivePrice || phone.price || 0).toLocaleString()}
-                      </span>
-                      {phone.phone_condition && (
-                        <span className="text-theme-textMuted">• {phone.phone_condition}</span>
-                      )}
-                    </div>
-                  </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+            {/* Scrollable Form Fields Content */}
+            <div className="overflow-y-auto px-5 sm:px-6 pt-3.5 pb-3 sm:pt-4 sm:pb-3 flex-1 min-h-0">
+              {isPhoneSoldOut && (
+                <div className="p-2.5 mb-2.5 border border-amber-500/30 bg-amber-950/20 rounded-xl text-xs text-amber-300 flex items-start gap-2 animate-in fade-in font-normal shrink-0">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                  <span>This phone is currently out of stock. You cannot submit a reservation request at this time.</span>
                 </div>
               )}
 
               {error && (
-                <div className="p-3 border border-red-500/30 bg-red-950/20 rounded-xl text-xs text-red-300 flex items-start gap-2 animate-in fade-in font-normal">
+                <div className="p-2.5 mb-2.5 border border-red-500/30 bg-red-950/20 rounded-xl text-xs text-red-300 flex items-start gap-2 animate-in fade-in font-normal shrink-0">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
                   <span>{error}</span>
                 </div>
               )}
 
-              {/* Colour Selection (if phone has colour options) */}
-              {colourOptions.length > 0 && (
+              {/* Form Fields with Compact, Natural Gaps */}
+              <div className="w-full space-y-2.5 sm:space-y-3">
+                {/* Customer Name */}
                 <div>
-                  <label className="block text-xs font-normal text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
-                    <Palette className="w-3.5 h-3.5 text-theme-textMuted" />
-                    <span>Choose Colour</span>
+                  <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Full Name <span className="text-red-400">*</span></span>
                   </label>
-                  <div className="flex flex-wrap gap-2">
-                    {colourOptions.map((colour) => {
-                      const isSelected = selectedColour === colour;
-                      return (
-                        <button
-                          key={colour}
-                          type="button"
-                          onClick={() => setSelectedColour(colour)}
-                          className={`px-3.5 py-1.5 rounded-lg text-xs font-normal border transition-all cursor-pointer ${
-                            isSelected
-                              ? 'bg-white/10 border-white text-white ring-1 ring-white/30 shadow-md shadow-black/60'
-                              : 'bg-black/40 border-white/15 text-slate-400 hover:text-white hover:border-white/30'
-                          }`}
-                        >
-                          {colour}
-                        </button>
-                      );
-                    })}
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Kasun Perera"
+                    maxLength={150}
+                    value={formData.customer_name}
+                    onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
+                  />
+                </div>
+
+                {/* Phone Number */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Phone / WhatsApp Number <span className="text-red-400">*</span></span>
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="e.g. +82 10-1234-5678 or +94 77 123 4567"
+                    maxLength={25}
+                    value={formData.phone_number}
+                    onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
+                  />
+                </div>
+
+                {/* Email Address (Optional) */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Email Address <span className="text-theme-textMuted text-[11px] font-normal">(Optional)</span></span>
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="e.g. customer@example.com"
+                    maxLength={255}
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
+                  />
+                </div>
+
+                {/* Preferred Collection Date */}
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Preferred Collection Date <span className="text-red-400">*</span></span>
+                    </span>
+                    <span className="text-[10px] text-theme-textMuted font-normal">YYYY-MM-DD</span>
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    min={todayStr}
+                    value={formData.preferred_collection_date}
+                    onChange={(e) =>
+                      setFormData({ ...formData, preferred_collection_date: e.target.value })
+                    }
+                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all [color-scheme:dark] font-normal"
+                  />
+                </div>
+
+                {/* Customer Note */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[13px] font-medium text-slate-200 flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Note to Shop <span className="text-theme-textMuted text-[11px] font-normal">(Optional)</span></span>
+                    </label>
+                    <span className="text-[10px] text-theme-textMuted font-normal">
+                      {formData.customer_note.length}/2000
+                    </span>
                   </div>
+                  <textarea
+                    rows={2}
+                    maxLength={2000}
+                    placeholder="Special requests, preferred collection hours, etc."
+                    value={formData.customer_note}
+                    onChange={(e) => setFormData({ ...formData, customer_note: e.target.value })}
+                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all resize-none font-normal"
+                  />
                 </div>
-              )}
-
-              {/* Storage Selection (if phone has storage options) */}
-              {availableStorages.length > 0 && (
-                <div>
-                  <label className="block text-xs font-normal text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
-                    <HardDrive className="w-3.5 h-3.5 text-theme-textMuted" />
-                    <span>Choose Storage</span>
-                  </label>
-                  <select
-                    value={selectedStorageId || ''}
-                    onChange={(e) => setSelectedStorageId(Number(e.target.value))}
-                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none transition-all cursor-pointer font-normal"
-                  >
-                    {availableStorages.map((storage) => (
-                      <option key={storage.storage_id} value={storage.storage_id} className="bg-neutral-900 text-white">
-                        {storage.storage_name || `${storage.capacity_gb} GB`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Customer Name */}
-              <div>
-                <label className="block text-xs font-normal text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-theme-textMuted" />
-                  <span>Full Name <span className="text-red-400">*</span></span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Kasun Perera"
-                  maxLength={150}
-                  value={formData.customer_name}
-                  onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                  className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
-                />
               </div>
+            </div>
 
-              {/* Phone Number */}
-              <div>
-                <label className="block text-xs font-normal text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5 text-theme-textMuted" />
-                  <span>Phone / WhatsApp Number <span className="text-red-400">*</span></span>
-                </label>
-                <input
-                  type="tel"
-                  required
-                  placeholder="e.g. +82 10-1234-5678 or +94 77 123 4567"
-                  maxLength={25}
-                  value={formData.phone_number}
-                  onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                  className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
-                />
-                <span className="text-[10px] text-theme-textMuted mt-1 block font-normal">
-                  7 to 15 digits. We will reach you to confirm your reservation.
-                </span>
-              </div>
-
-              {/* Email Address (Optional) */}
-              <div>
-                <label className="block text-xs font-normal text-theme-textSecondary mb-1.5 flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-theme-textMuted" />
-                  <span>Email Address <span className="text-theme-textMuted text-[10px]">(Optional)</span></span>
-                </label>
-                <input
-                  type="email"
-                  placeholder="e.g. customer@example.com"
-                  maxLength={255}
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
-                />
-              </div>
-
-              {/* Preferred Collection Date */}
-              <div>
-                <label className="block text-xs font-normal text-theme-textSecondary mb-1.5 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-theme-textMuted" />
-                    <span>Preferred Collection Date <span className="text-red-400">*</span></span>
-                  </span>
-                  <span className="text-[10px] text-theme-textMuted">YYYY-MM-DD</span>
-                </label>
-                <input
-                  type="date"
-                  required
-                  min={todayStr}
-                  value={formData.preferred_collection_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, preferred_collection_date: e.target.value })
-                  }
-                  className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none transition-all [color-scheme:dark] font-normal"
-                />
-              </div>
-
-              {/* Customer Note */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-normal text-theme-textSecondary flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5 text-theme-textMuted" />
-                    <span>Note to Shop <span className="text-theme-textMuted text-[10px]">(Optional)</span></span>
-                  </label>
-                  <span className="text-[10px] text-theme-textMuted font-normal">
-                    {formData.customer_note.length}/2000
-                  </span>
-                </div>
-                <textarea
-                  rows={2}
-                  maxLength={2000}
-                  placeholder="Special requests, preferred collection hours, etc."
-                  value={formData.customer_note}
-                  onChange={(e) => setFormData({ ...formData, customer_note: e.target.value })}
-                  className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none transition-all resize-none font-normal"
-                />
-              </div>
-
-              {/* Submit Button */}
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-2.5 px-4 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/40 disabled:opacity-50 text-white text-xs font-normal shadow-sm transition-all cursor-pointer text-center flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Submitting Reservation...</span>
-                    </>
-                  ) : (
-                    <span>Confirm Reservation Request</span>
-                  )}
-                </button>
-                <p className="text-center text-[10px] text-theme-textMuted mt-2 font-normal">
-                  No payment required now. The shop will contact you to verify and hold the phone.
-                </p>
-              </div>
-            </form>
-          )}
-        </div>
+            {/* Pinned Bottom Submit Button Bar */}
+            <div className="px-5 sm:px-6 pt-3 pb-11 sm:pb-12 border-t border-white/10 bg-[#0A0F1E] shrink-0">
+              <button
+                type="submit"
+                disabled={loading || isPhoneSoldOut}
+                className="w-full py-2.5 px-4 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/40 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium shadow-sm transition-all cursor-pointer text-center flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Submitting Reservation...</span>
+                  </>
+                ) : isPhoneSoldOut ? (
+                  <span>Out of Stock</span>
+                ) : (
+                  <span>Confirm Reservation Request</span>
+                )}
+              </button>
+              <p className="text-center text-[10px] text-theme-textMuted mt-2 font-normal">
+                No payment required now. The shop will contact you to verify and hold the phone.
+              </p>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

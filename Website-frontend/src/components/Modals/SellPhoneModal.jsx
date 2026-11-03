@@ -5,8 +5,6 @@ import {
   AlertCircle,
   UploadCloud,
   Trash2,
-  Smartphone,
-  Info,
   Clock,
   MessageCircle,
   ArrowRight,
@@ -321,7 +319,7 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full py-3 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all cursor-pointer"
+                  className="w-full py-2.5 px-6 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/40 text-white text-sm font-medium shadow-sm transition-all cursor-pointer text-center"
                 >
                   Done
                 </button>
@@ -331,18 +329,7 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 space-y-4">
               
               {tradeInTarget && (
-                <div className="flex items-center gap-3 bg-gradient-to-r from-blue-950/40 to-blue-900/10 border border-blue-500/30 rounded-xl p-2.5 shrink-0">
-                  <div className="w-10 h-10 bg-[#080D1A] rounded-lg p-1 flex items-center justify-center shrink-0 border border-white/10">
-                    {tradeInTarget.main_photo || tradeInTarget.photo ? (
-                      <img
-                        src={tradeInTarget.main_photo || tradeInTarget.photo}
-                        alt=""
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    ) : (
-                      <Smartphone className="w-5 h-5 text-blue-400" />
-                    )}
-                  </div>
+                <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-blue-950/40 to-blue-900/10 border border-blue-500/30 rounded-xl px-4 py-2.5 shrink-0">
                   <div className="min-w-0 flex-1">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400 block">
                       Trading In Towards
@@ -472,10 +459,6 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                           className="w-full bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none transition-all shadow-inner font-mono"
                         />
                       </div>
-                      <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
-                        <Info className="w-3 h-3 text-slate-400 shrink-0" />
-                        <span>Settings &gt; Battery &gt; Battery Health on iPhone, or approximate %</span>
-                      </p>
                     </div>
 
                     <div className="flex-1 flex flex-col">
@@ -538,10 +521,6 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                       </div>
                     </div>
 
-                    <p className="text-[11px] text-slate-400">
-                      Our team will contact you via WhatsApp or phone call with the valuation quote
-                    </p>
-
                     <div className="flex-1 flex flex-col justify-center">
                       <div className="flex justify-between items-center mb-1.5">
                         <label className="text-xs font-semibold text-slate-200">
@@ -602,11 +581,17 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-3.5 px-5 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-sm sm:text-base font-bold shadow-lg shadow-blue-600/40 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer text-center disabled:opacity-50"
+                      className="w-full py-2.5 px-4 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/40 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium shadow-sm transition-all cursor-pointer text-center flex items-center justify-center gap-2"
                     >
-                      {loading ? 'Submitting Valuation Request...' : 'Submit Valuation Request'}
+                      {loading ? (
+                        <>
+                          <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Submitting Valuation Request...</span>
+                        </>
+                      ) : (
+                        <span>Submit Valuation Request</span>
+                      )}
                     </button>
-
                   </div>
 
                 </div>

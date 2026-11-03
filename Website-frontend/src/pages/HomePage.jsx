@@ -393,50 +393,53 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       <TrustBadges />
 
 
-      <section className="relative w-full bg-black overflow-hidden select-none mt-12 sm:mt-16 md:mt-20">
-        <div className="absolute top-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
-        <div className="absolute bottom-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
+      {/* Trade-in Upgrade Video Section */}
+      <section className="relative w-full bg-gradient-to-b from-theme-bg via-black to-black overflow-hidden select-none py-10 sm:py-14">
+        {/* Section Heading & CTA over / above the video */}
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 text-center space-y-3 sm:space-y-4 -mb-10 sm:-mb-16 md:-mb-24 pointer-events-none">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)] pointer-events-auto">
+            Trade in. Upgrade.
+          </h2>
 
-        <div
-          className="relative w-full h-[380px] sm:h-[480px] md:h-[580px] lg:h-[660px] xl:h-[700px] max-h-[720px] flex items-center justify-center overflow-hidden cursor-pointer group"
-          onClick={handleOpenSell}
-          title="Click to Trade-In or Sell Your Phone"
-        >
-          <video
-            ref={tradeInVideoRef}
-            src={upgradeVideo}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.01]"
-          />
+          <div className="pt-2 sm:pt-3 pointer-events-auto">
+            <button
+              type="button"
+              onClick={handleOpenSell}
+              className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-xl shadow-black/80 group cursor-pointer"
+            >
+              <span className="inline-flex items-center gap-2 px-6 py-2.5 sm:py-3 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs sm:text-sm font-normal transition-colors duration-200">
+                <span>Get your estimate</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </span>
+            </button>
+          </div>
+        </div>
 
-          <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-start md:justify-center">
-            <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex justify-end">
-              <div className="w-fit ml-auto md:w-auto max-w-[78%] sm:max-w-md lg:max-w-lg text-left space-y-2.5 sm:space-y-4 pt-6 sm:pt-8 md:pt-0 pointer-events-auto bg-black/50 md:bg-transparent backdrop-blur-xs md:backdrop-blur-none p-3.5 sm:p-4 md:p-0 rounded-2xl md:rounded-none">
-                
-                <h2 className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-normal text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] sm:whitespace-nowrap">
-                  Trade in. Upgrade.
-                </h2>
+        {/* Video Banner */}
+        <div className="w-full max-w-[1500px] mx-auto px-2 sm:px-4">
+          <div
+            className="relative w-full aspect-video flex items-center justify-center overflow-hidden cursor-pointer group"
+            onClick={handleOpenSell}
+            title="Click to Trade-In or Sell Your Phone"
+          >
+            {/* Subtle 4-Side Edge Feathering / Shade: Left, Right, Top, Bottom */}
+            <div className="absolute inset-y-0 left-0 w-8 sm:w-12 md:w-16 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-8 sm:w-12 md:w-16 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-6 sm:h-8 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-6 sm:h-8 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
 
-                <p className="text-xs sm:text-sm lg:text-base text-slate-200 leading-relaxed font-normal max-w-xs sm:max-w-md drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
-                  Submit your device details and receive an expert valuation quote to trade in toward your next phone.
-                </p>
+            {/* Seamlessly cover bottom-right KlingAI watermark without touching the arrows */}
+            <div className="absolute bottom-0 right-0 w-[18%] max-w-[240px] h-[11%] min-h-[48px] bg-black z-20 pointer-events-none" />
 
-                <div className="pt-1.5 sm:pt-2">
-                  <button
-                    type="button"
-                    onClick={handleOpenSell}
-                    className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 hover:border-white/40 text-white text-xs sm:text-sm font-normal backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
-                  >
-                    <span>Get your estimate</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <video
+              ref={tradeInVideoRef}
+              src={upgradeVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.01]"
+            />
           </div>
         </div>
       </section>

@@ -9,12 +9,162 @@ import {
   Tag,
   MessageCircle,
   PhoneCall,
+  ArrowLeft,
 } from 'lucide-react';
 import { useFavoritesAndCompare } from '../../hooks/useFavoritesAndCompare';
 import { STORE_INFO } from '../../constants/siteConfig';
 import phoneService from '../../services/phoneService';
 import storageService from '../../services/storageService';
 import FormattedDescription from '../Common/FormattedDescription';
+
+function SimilarPhoneCard({ simPhone, onSelectPhone }) {
+  const generalPhotos = React.useMemo(() => {
+    if (Array.isArray(simPhone?.photos) && simPhone.photos.length > 0) return simPhone.photos;
+    if (Array.isArray(simPhone?.photo_urls) && simPhone.photo_urls.length > 0) return simPhone.photo_urls;
+    if (simPhone?.main_photo) return [simPhone.main_photo];
+    if (typeof simPhone?.photos === 'string' && simPhone.photos.trim().startsWith('[')) {
+      try {
+        return JSON.parse(simPhone.photos);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  }, [simPhone]);
+
+  const parsedColors = React.useMemo(() => {
+    let raw = simPhone?.colour_options;
+    if (!raw) return [];
+    if (typeof raw === 'string') {
+      if (raw.trim().startsWith('[')) {
+        try {
+          raw = JSON.parse(raw);
+        } catch (e) {
+          raw = raw.split(',').map((s) => s.trim()).filter(Boolean);
+        }
+      } else {
+        raw = raw.split(',').map((s) => s.trim()).filter(Boolean);
+      }
+    }
+    if (!Array.isArray(raw)) return [];
+
+    return raw.map((c, i) => {
+      if (typeof c === 'string') {
+        const fallbackPhoto = generalPhotos[i] || generalPhotos[0] || '';
+        return {
+          id: `color_${i}`,
+          name: c,
+          color_code: '#475569',
+          photos: fallbackPhoto ? [fallbackPhoto] : [],
+        };
+      }
+      return {
+        id: `color_${i}`,
+        name: c.color_name || c.name || `Color #${i + 1}`,
+        color_code: c.color_code || c.color || c.hex || '#475569',
+        photos:
+          Array.isArray(c.photos) && c.photos.length > 0
+            ? c.photos
+            : (generalPhotos[i] ? [generalPhotos[i]] : generalPhotos),
+      };
+    });
+  }, [simPhone, generalPhotos]);
+
+  const [selectedColorIdx, setSelectedColorIdx] = useState(0);
+
+  const activeColor = parsedColors[selectedColorIdx] || parsedColors[0];
+  const displayedPhoto =
+    activeColor?.photos?.[0] ||
+    generalPhotos[selectedColorIdx] ||
+    generalPhotos[0] ||
+    simPhone.main_photo ||
+    '';
+
+  return (
+    <div
+      onClick={() => {
+        if (onSelectPhone) onSelectPhone(simPhone);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }}
+      className="bg-black hover:bg-neutral-950 rounded-2xl p-3 sm:p-4 flex flex-col justify-between cursor-pointer transition-all duration-300 group shadow-sm hover:scale-[1.01]"
+    >
+      <div className="relative aspect-[4/5] w-full bg-transparent rounded-xl mb-3 flex items-center justify-center p-2.5 sm:p-3 overflow-hidden">
+        {displayedPhoto ? (
+          <img
+            src={displayedPhoto}
+            alt={simPhone.name}
+            className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]"
+          />
+        ) : (
+          <span className="text-xs text-slate-400">SK LABA</span>
+        )}
+      </div>
+
+      <div className="text-center space-y-1">
+        <h3 className="text-xs sm:text-sm font-normal text-white truncate group-hover:text-slate-200 transition-colors">
+          {simPhone.name}
+        </h3>
+        <p className="text-xs font-normal text-slate-300">
+          ${Number(simPhone.price || 0).toLocaleString()}
+        </p>
+
+        {/* Small phone color thumbnail boxes just like in reference image */}
+        {parsedColors.length > 0 && (
+          <div
+            className="flex items-center justify-center gap-1.5 pt-2 flex-wrap"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {parsedColors.slice(0, 4).map((color, idx) => {
+              const isSelected = selectedColorIdx === idx;
+              const colorPhoto =
+                color.photos?.[0] ||
+                generalPhotos[idx] ||
+                generalPhotos[0] ||
+                '';
+
+              return (
+                <button
+                  key={color.id || idx}
+                  type="button"
+                  title={color.name}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedColorIdx(idx);
+                  }}
+                  onMouseEnter={() => setSelectedColorIdx(idx)}
+                  className={`relative w-7 h-7 sm:w-8 sm:h-8 rounded-lg p-0.5 border overflow-hidden transition-all duration-200 cursor-pointer flex items-center justify-center bg-black/60 ${
+                    isSelected
+                      ? 'border-white ring-1 ring-white/50 shadow-md scale-105'
+                      : 'border-white/15 hover:border-white/40 opacity-70 hover:opacity-100 hover:scale-105'
+                  }`}
+                >
+                  {colorPhoto ? (
+                    <img
+                      src={colorPhoto}
+                      alt={color.name}
+                      className="w-full h-full object-cover object-center rounded-[6px]"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span
+                      className="w-full h-full rounded-[6px]"
+                      style={{ backgroundColor: color.color_code || '#475569' }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+            {parsedColors.length > 4 && (
+              <span className="text-[10px] text-slate-400 font-normal pl-0.5 select-none">
+                +{parsedColors.length - 4}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function PhoneDetailModal({
   phone,
@@ -40,7 +190,7 @@ export default function PhoneDetailModal({
       try {
         const parsed = JSON.parse(phone.photos);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {}
+      } catch (e) { }
     }
     return [];
   }, [phone]);
@@ -90,8 +240,8 @@ export default function PhoneDetailModal({
           typeof c.quantity === 'number'
             ? c.quantity
             : i === 0
-            ? Number(phone?.current_stock ?? phone?.stock ?? 0)
-            : 0,
+              ? Number(phone?.current_stock ?? phone?.stock ?? 0)
+              : 0,
         storage_quantities: c.storage_quantities || {},
         photos:
           Array.isArray(c.photos) && c.photos.length > 0
@@ -158,7 +308,7 @@ export default function PhoneDetailModal({
         const data = res.data?.data || res.data || [];
         setSystemStorages(Array.isArray(data) ? data : []);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Storage options
@@ -199,7 +349,6 @@ export default function PhoneDetailModal({
 
   const [copiedLink, setCopiedLink] = useState(false);
 
-
   useEffect(() => {
     if (phone?.installment_enabled && phoneId) {
       setLoadingInstallments(true);
@@ -210,7 +359,7 @@ export default function PhoneDetailModal({
             setInstallmentsData(res.data.data);
           }
         })
-        .catch(() => {})
+        .catch(() => { })
         .finally(() => setLoadingInstallments(false));
     } else {
       setInstallmentsData(null);
@@ -232,8 +381,6 @@ export default function PhoneDetailModal({
     variantStock = activeColor.quantity;
   }
   const isVariantSoldOut = isSoldOut || (availability !== 'COMING_SOON' && variantStock === 0);
-  const isLowStock = availability === 'LOW_STOCK' || (currentStock > 0 && currentStock <= (phone.low_stock_level || 5));
-  const isComingSoon = availability === 'COMING_SOON';
 
   const regularPrice = Number(phone.price || phone.regular_price || 0);
   const offerPrice = phone.offer_price || phone.active_offer?.offer_price;
@@ -263,46 +410,62 @@ export default function PhoneDetailModal({
     }
   };
 
-  const similarPhones = allPhones
-    .filter((p) => {
-      const pId = p.phone_id || p.id;
-      return pId !== phoneId;
-    })
+  const candidateSimilar = allPhones.filter((p) => {
+    const pId = p.phone_id || p.id;
+    return pId !== phoneId;
+  });
+
+  let similarPhones = candidateSimilar
     .filter((p) => {
       const sameBrand = (p.brand_name || '').toLowerCase() === (phone.brand_name || '').toLowerCase();
       const diffPrice = Math.abs(Number(p.price || 0) - regularPrice);
-      return sameBrand || diffPrice <= 200;
+      return sameBrand || diffPrice <= 400;
     })
-    .slice(0, 3);
+    .slice(0, 4);
+
+  if (similarPhones.length < 4 && candidateSimilar.length > similarPhones.length) {
+    const existingIds = new Set(similarPhones.map((p) => p.phone_id || p.id));
+    const extras = candidateSimilar.filter((p) => !existingIds.has(p.phone_id || p.id)).slice(0, 4 - similarPhones.length);
+    similarPhones = [...similarPhones, ...extras];
+  }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-black/70 backdrop-blur-sm transition-opacity duration-300">
-      <div
-        className="absolute inset-0 cursor-pointer"
-        onClick={onClose}
-        aria-label="Close drawer"
-      />
+    <div className="w-full min-h-screen bg-black text-white pt-5 sm:pt-8 pb-16 sm:pb-24 animate-in fade-in duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Top Header / Breadcrumb Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 mb-6 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-black hover:bg-neutral-900 text-white text-xs font-normal transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm group"
+              title="Back to Smartphones"
+            >
+              <ArrowLeft className="w-4 h-4 text-white group-hover:-translate-x-0.5 transition-transform" />
+              <span>Back to Smartphones</span>
+            </button>
 
-      <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[85%] md:w-[60%] lg:w-[60%] bg-[#0A0F1E] border-l border-theme-border shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
-        <div className="flex items-center justify-between px-6 py-3.5 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium uppercase tracking-wider text-theme-textSecondary">
-              {phone.brand_name || 'Smartphone'}
-            </span>
-            <span className="text-theme-borderLight">•</span>
-            <span className="px-2 py-0.5 text-[10px] font-medium uppercase rounded border border-white/15 bg-transparent text-white/90">
-              {phone.phone_condition || 'NEW'}
-            </span>
+            <span className="text-white/30 hidden sm:inline">/</span>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-normal uppercase tracking-wider text-slate-300">
+                {phone.brand_name || 'Smartphone'}
+              </span>
+              <span className="text-neutral-500">•</span>
+              <span className="px-2.5 py-0.5 text-[10px] font-normal uppercase rounded border border-white/20 bg-black text-white">
+                {phone.phone_condition || 'NEW'}
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleShare}
-              className="p-1.5 rounded-lg border border-theme-border bg-transparent hover:bg-white/[0.04] text-theme-textSecondary hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded-full border border-white/20 bg-black hover:bg-neutral-900 text-slate-300 hover:text-white transition-colors cursor-pointer"
               title="Share Link & Preview"
             >
-              <Share2 className="w-3.5 h-3.5" />
+              <Share2 className="w-4 h-4" />
             </button>
 
             <button
@@ -311,45 +474,35 @@ export default function PhoneDetailModal({
                 const res = toggleCompare(phoneId);
                 if (res && !res.success && res.error) alert(res.error);
               }}
-              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                inComparison
-                  ? 'bg-white/15 text-white border-white/30'
-                  : 'border-theme-border bg-transparent hover:bg-white/[0.04] text-theme-textSecondary hover:text-white'
-              }`}
+              className={`p-2 rounded-full border transition-colors cursor-pointer ${inComparison
+                  ? 'bg-white/20 text-white border-white/40'
+                  : 'border-white/20 bg-black hover:bg-neutral-900 text-slate-300 hover:text-white'
+                }`}
               title="Compare Phone"
             >
-              <GitCompare className="w-3.5 h-3.5" />
+              <GitCompare className="w-4 h-4" />
             </button>
 
             <button
               type="button"
               onClick={() => toggleFavorite(phoneId)}
-              className="p-1.5 rounded-lg border border-theme-border bg-transparent hover:bg-white/[0.04] text-theme-textSecondary transition-colors cursor-pointer"
+              className="p-2 rounded-full border border-white/20 bg-black hover:bg-neutral-900 text-slate-300 transition-colors cursor-pointer"
               title="Save to Favourites"
             >
-              <Heart className={`w-3.5 h-3.5 ${favorited ? 'text-rose-400 fill-rose-400/80' : ''}`} />
-            </button>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-lg border border-theme-border bg-transparent hover:bg-white/[0.04] text-theme-textSecondary hover:text-white transition-colors ml-1.5 cursor-pointer"
-              title="Close drawer"
-            >
-              <X className="w-4 h-4" />
+              <Heart className={`w-4 h-4 ${favorited ? 'text-rose-400 fill-rose-400/80' : 'text-slate-300'}`} />
             </button>
           </div>
         </div>
 
-        <div className="overflow-y-auto px-6 sm:px-8 py-6 space-y-6 flex-1">
-          {/* Main Grid: Gallery with Colors on left, Primary Purchase Info on right */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            {/* Photo Gallery Column with Selected Color's Uploaded Photos on the Left */}
-            <div className="flex flex-col gap-2.5">
-              <div className="flex flex-col sm:flex-row gap-3 items-stretch">
-                {/* ── LEFT OF IMAGE: 1 to 3 UPLOADED PHOTOS FOR CURRENT COLOR ── */}
-                {photos.length > 0 && (
-                  <div className="flex sm:flex-col gap-2 shrink-0 overflow-x-auto sm:overflow-y-auto max-h-[380px] p-0.5 [scrollbar-width:none]">
+        {/* Main Grid: Gallery on left, Purchase Info on right */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
+          {/* Photo Gallery Column (Left: lg:col-span-6) */}
+          <div className="lg:col-span-6 space-y-4">
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row gap-3.5 items-stretch">
+                {/* Thumbnails */}
+                {photos.length > 1 && (
+                  <div className="flex sm:flex-col gap-2.5 shrink-0 overflow-x-auto sm:overflow-y-auto max-h-[480px] p-0.5 [scrollbar-width:none]">
                     {photos.map((photoUrl, idx) => {
                       const isPhotoSelected = activePhotoIdx === idx;
                       return (
@@ -357,51 +510,52 @@ export default function PhoneDetailModal({
                           key={idx}
                           type="button"
                           onClick={() => setActivePhotoIdx(idx)}
-                          className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl border p-1 bg-[#080D1A] shrink-0 transition-all cursor-pointer flex items-center justify-center overflow-hidden ${
-                            isPhotoSelected
-                              ? 'border-white ring-2 ring-white/30 shadow-md scale-105'
-                              : 'border-white/15 hover:border-white/40 opacity-70 hover:opacity-100 hover:scale-102'
-                          }`}
+                          className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl p-[1px] shrink-0 transition-all duration-300 cursor-pointer flex items-center justify-center overflow-hidden ${isPhotoSelected
+                              ? 'bg-gradient-to-r from-red-600/75 via-blue-600/70 to-blue-700/80 shadow-md scale-105 ring-1 ring-white/10'
+                              : 'bg-white/15 hover:bg-gradient-to-r hover:from-red-600/50 hover:via-blue-600/50 hover:to-blue-700/60 opacity-70 hover:opacity-100 hover:scale-102'
+                            }`}
                           title={`View photo ${idx + 1}`}
                         >
-                          <img
-                            src={photoUrl}
-                            alt={`${activeColor?.name} photo ${idx + 1}`}
-                            className="w-full h-full object-contain"
-                          />
+                          <div className="w-full h-full bg-neutral-950 rounded-[11px] p-1 flex items-center justify-center overflow-hidden">
+                            <img
+                              src={photoUrl}
+                              alt={`${activeColor?.name} photo ${idx + 1}`}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
                         </button>
                       );
                     })}
                   </div>
                 )}
 
-                {/* ── MAIN IMAGE BOX ── */}
-                <div className="relative aspect-[4/3] sm:aspect-square flex-1 bg-[#080D1A] rounded-xl border border-theme-border p-4 flex items-center justify-center overflow-hidden group">
-                  {/* Top Two Swap Buttons (< 1 / 2 >) - Black text/arrows directly on the image with no dark blur */}
+                {/* Main Image Box */}
+                <div className="relative aspect-[4/3] max-h-[360px] sm:max-h-[400px] flex-1 bg-neutral-950 rounded-2xl p-6 sm:p-8 flex items-center justify-center overflow-hidden group">
+                  {/* Swap Buttons (< 1 / 2 >) */}
                   {photos.length > 1 && (
-                    <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 bg-transparent px-1.5 py-0.5 select-none">
+                    <div className="absolute top-3.5 right-3.5 z-20 flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 select-none">
                       <button
                         type="button"
                         onClick={handlePrevPhoto}
-                        className="p-0.5 text-black hover:opacity-60 transition-opacity cursor-pointer"
+                        className="p-0.5 text-white hover:text-slate-300 transition-colors cursor-pointer"
                         title="Previous image"
                         aria-label="Previous image"
                       >
-                        <ChevronLeft className="w-4 h-4 text-black stroke-[2.5]" />
+                        <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
                       </button>
 
-                      <span className="text-xs text-black font-semibold font-mono px-0.5 tracking-wider">
+                      <span className="text-xs text-white font-mono px-1">
                         {photos.length > 0 ? `${activePhotoIdx + 1} / ${photos.length}` : '1 / 1'}
                       </span>
 
                       <button
                         type="button"
                         onClick={handleNextPhoto}
-                        className="p-0.5 text-black hover:opacity-60 transition-opacity cursor-pointer"
+                        className="p-0.5 text-white hover:text-slate-300 transition-colors cursor-pointer"
                         title="Next image"
                         aria-label="Next image"
                       >
-                        <ChevronRight className="w-4 h-4 text-black stroke-[2.5]" />
+                        <ChevronRight className="w-4 h-4 stroke-[2.5]" />
                       </button>
                     </div>
                   )}
@@ -410,200 +564,199 @@ export default function PhoneDetailModal({
                     <img
                       src={photos[activePhotoIdx]}
                       alt={`${phone.name} - ${activeColor?.name}`}
-                      className="max-h-full max-w-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)] transition-all duration-300"
+                      className="max-h-[78%] max-w-[78%] object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)] transition-all duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="flex flex-col items-center justify-center text-theme-textMuted">
+                    <div className="flex flex-col items-center justify-center text-slate-400">
                       <span className="text-xs">SK LABA PHONE</span>
                     </div>
                   )}
 
-                  {/* Offer tag (Light Gold styling) */}
+                  {/* Offer tag */}
                   {hasOffer && (
-                    <div className="absolute top-2.5 left-2.5 z-10 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-amber-300/40 bg-black/65 backdrop-blur-md text-amber-200 text-[10px] font-semibold tracking-wide shadow-sm">
-                      <Tag className="w-3 h-3 shrink-0 text-amber-300" />
+                    <div className="absolute top-3.5 left-3.5 z-10 inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-500/40 bg-black/80 backdrop-blur-md text-amber-300 text-xs font-normal tracking-wide shadow-sm">
+                      <Tag className="w-3.5 h-3.5 shrink-0" />
                       <span>Save ${savings.toFixed(0)} ({discountPercent}% off)</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Description & Overview Section (Placed directly under the phone main image) */}
+              {/* Description & Overview Section */}
               {phone.description && (
-                <div className="bg-transparent rounded-lg p-3.5 border border-theme-border mt-1">
-                  <h2 className="text-[11px] font-medium uppercase tracking-wider text-theme-textMuted mb-2">
-                    Description & Overview
+                <div className="bg-black rounded-2xl p-4 sm:p-5 mt-3">
+                  <h2 className="text-xs font-normal uppercase tracking-wider text-slate-300 mb-2.5">
+                    Description &amp; Overview
                   </h2>
-                  <FormattedDescription content={phone.description} isDark={true} className="text-theme-textSecondary font-normal" />
+                  <FormattedDescription content={phone.description} isDark={true} className="text-slate-200 font-normal leading-relaxed text-xs sm:text-sm" />
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="flex flex-col justify-between h-full space-y-5">
-              <div>
-                <h1 className="text-xl sm:text-2xl font-normal text-white leading-tight mb-3">
+          {/* Right Column: Title, Pricing, Color, Storage, Purchase, Installments */}
+          <div className="lg:col-span-6 flex flex-col justify-start space-y-5">
+            <div>
+              {/* Title & Price on the same line with same font size and wider spacing */}
+              <div className="flex flex-wrap items-baseline gap-x-8 sm:gap-x-10 gap-y-2 mb-4">
+                <h1 className="text-2xl sm:text-3xl font-normal text-white leading-snug">
                   {phone.name}
                 </h1>
-
-                {/* Pricing Box (Clean transparent card, official typography) */}
-                <div className="bg-transparent border border-theme-border rounded-lg p-3.5 mb-4">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-2xl font-semibold text-white tracking-tight">
-                      ${effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                    {hasOffer && (
-                      <span className="text-sm text-theme-textMuted line-through">
-                        ${regularPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </span>
-                    )}
-                  </div>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-2xl sm:text-3xl font-normal text-white tracking-tight">
+                    ${effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
                   {hasOffer && (
-                    <p className="text-xs text-theme-textSecondary mt-1">
-                      Promotional offer active. Save ${savings.toFixed(2)} with SK LABA.
-                    </p>
+                    <span className="text-sm sm:text-base text-slate-400 line-through font-normal">
+                      ${regularPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
                   )}
                 </div>
+              </div>
+              {hasOffer && (
+                <p className="text-xs text-slate-300 -mt-2 mb-4 font-normal">
+                  Promotional offer active. Save ${savings.toFixed(2)} with SK LABA.
+                </p>
+              )}
 
-                {/* Options: Colours (First image of each color + normal text label under image) */}
-                {parsedColors.length > 0 && (
-                  <div className="mb-5">
-                    <label className="block text-[11px] font-normal uppercase tracking-wider text-theme-textMuted mb-2.5">
-                      Selected Color: <span className="text-white font-semibold">{activeColor?.name}</span>
-                    </label>
-                    <div className="flex flex-wrap items-start gap-4">
-                      {parsedColors.map((c, idx) => {
-                        const isSelected = selectedColorIdx === idx;
-                        const firstPhoto = c.photos?.[0] || generalPhotos[idx] || generalPhotos[0] || '';
-                        const colorQty = typeof c.quantity === 'number' ? c.quantity : Number(phone?.current_stock ?? 0);
-                        const isColorInStock = colorQty > 0;
+              {/* Options: Colours */}
+              {parsedColors.length > 0 && (
+                <div className="mb-8 sm:mb-9">
+                  <div className="flex items-center gap-2.5 text-xs sm:text-sm font-normal uppercase tracking-wider text-slate-400 mb-4">
+                    <span>Selected Color:</span>
+                    <span className="text-white font-medium capitalize tracking-normal">{activeColor?.name}</span>
+                  </div>
+                  <div className="flex flex-wrap items-start gap-6 sm:gap-8 pl-1 sm:pl-2">
+                    {parsedColors.map((c, idx) => {
+                      const isSelected = selectedColorIdx === idx;
+                      const firstPhoto = c.photos?.[0] || generalPhotos[idx] || generalPhotos[0] || '';
+                      const colorQty = typeof c.quantity === 'number' ? c.quantity : Number(phone?.current_stock ?? 0);
+                      const isColorInStock = colorQty > 0;
 
-                        return (
+                      return (
+                        <div
+                          key={c.id || idx}
+                          onClick={() => handleSelectColor(idx)}
+                          className="flex flex-col items-center cursor-pointer group/colorOption w-24 sm:w-28 text-center"
+                        >
                           <div
-                            key={c.id || idx}
-                            onClick={() => handleSelectColor(idx)}
-                            className="flex flex-col items-center cursor-pointer group/colorOption"
-                          >
-                            {/* Color Image Card (Matches phone card with active indicator) */}
-                            <div
-                              className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl p-0.5 border overflow-hidden transition-all duration-200 flex items-center justify-center bg-black/40 ${
-                                isSelected
-                                  ? 'border-white ring-2 ring-white/40 shadow-lg shadow-black/60 scale-105'
-                                  : 'border-white/15 hover:border-white/40 opacity-75 hover:opacity-100 hover:scale-105'
+                            className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl p-[1px] transition-all duration-300 flex items-center justify-center ${isSelected
+                                ? 'bg-gradient-to-r from-red-600/75 via-blue-600/70 to-blue-700/80 shadow-md shadow-black/80 scale-105 ring-1 ring-white/10'
+                                : 'bg-white/15 hover:bg-gradient-to-r hover:from-red-600/50 hover:via-blue-600/50 hover:to-blue-700/60 opacity-80 hover:opacity-100 hover:scale-105'
                               }`}
-                            >
+                          >
+                            <div className="w-full h-full rounded-[15px] bg-black p-1 overflow-hidden flex items-center justify-center">
                               {firstPhoto ? (
                                 <img
                                   src={firstPhoto}
                                   alt={c.name}
-                                  className="w-full h-full object-cover object-center rounded-lg"
+                                  className="w-full h-full object-cover object-center rounded-xl"
                                 />
                               ) : (
                                 <span
-                                  className="w-full h-full rounded-lg"
+                                  className="w-full h-full rounded-xl"
                                   style={{ backgroundColor: c.color_code || '#4B5563' }}
                                 />
                               )}
                             </div>
-
-                            {/* Normal text label under the color image (no box!) */}
-                            <span
-                              className={`text-[11px] sm:text-xs mt-1.5 text-center font-normal max-w-[80px] truncate leading-tight transition-colors ${
-                                isSelected
-                                  ? 'text-white font-medium'
-                                  : 'text-theme-textSecondary group-hover/colorOption:text-white'
-                              }`}
-                            >
-                              {c.name}
-                            </span>
-
-                            {/* Available stock quantity according to color (White text for both) */}
-                            <span className="text-[10px] font-medium mt-0.5 text-center leading-none text-white/80">
-                              {isColorInStock ? `${colorQty} in stock` : 'Out of stock'}
-                            </span>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
 
-                {/* Options: Storage (Selectable storage cards with available stock under each in white text) */}
-                {phoneStorageOptions.length > 0 && (
-                  <div className="mb-5">
-                    <label className="block text-[11px] font-normal uppercase tracking-wider text-theme-textMuted mb-2.5">
-                      Selected Storage: <span className="text-white font-semibold">{selectedStorage}</span>
-                    </label>
-                    <div className="flex flex-wrap items-start gap-3">
-                      {phoneStorageOptions.map((s) => {
-                        const isSelected = selectedStorage === s.storage_name;
-                        // Calculate stock for this storage option
-                        let storageQty = 0;
-                        if (
-                          activeColor?.storage_quantities &&
-                          typeof activeColor.storage_quantities[s.storage_name] === 'number'
-                        ) {
-                          storageQty = activeColor.storage_quantities[s.storage_name];
-                        } else if (phoneStorageOptions.length === 1 && typeof activeColor?.quantity === 'number') {
-                          storageQty = activeColor.quantity;
-                        } else {
-                          storageQty = typeof activeColor?.quantity === 'number'
-                            ? activeColor.quantity
-                            : Number(phone.current_stock ?? 0);
-                        }
-                        const isStorageInStock = storageQty > 0;
-
-                        return (
-                          <div
-                            key={s.storage_id || s.storage_name}
-                            onClick={() => setSelectedStorage(s.storage_name)}
-                            className="flex flex-col items-center cursor-pointer group/storageOption"
-                          >
-                            {/* Storage Box Card */}
-                            <div
-                              className={`px-4 py-2 min-w-[70px] rounded-xl border text-center transition-all duration-200 flex items-center justify-center bg-black/40 ${
-                                isSelected
-                                  ? 'border-white ring-2 ring-white/40 shadow-lg shadow-black/60 scale-105 bg-white/10'
-                                  : 'border-white/15 hover:border-white/40 opacity-75 hover:opacity-100 hover:scale-105'
+                          <span
+                            className={`text-xs sm:text-[13px] mt-2.5 text-center font-normal w-full truncate leading-tight transition-colors ${isSelected
+                                ? 'text-white font-medium'
+                                : 'text-slate-300 group-hover/colorOption:text-white'
                               }`}
-                            >
+                            title={c.name}
+                          >
+                            {c.name}
+                          </span>
+
+                          <span className={`text-[11px] font-normal mt-1 text-center leading-none w-full truncate ${isColorInStock ? 'text-slate-400' : 'text-neutral-500'}`}>
+                            {isColorInStock ? `${colorQty} in stock` : 'Out of stock'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Options: Storage */}
+              {phoneStorageOptions.length > 0 && (
+                <div className="mb-8 sm:mb-9">
+                  <div className="flex items-center gap-2.5 text-xs sm:text-sm font-normal uppercase tracking-wider text-slate-400 mb-4">
+                    <span>Selected Storage:</span>
+                    <span className="text-white font-medium tracking-normal">{selectedStorage}</span>
+                  </div>
+                  <div className="flex flex-wrap items-start gap-6 sm:gap-8 pl-1 sm:pl-2">
+                    {phoneStorageOptions.map((s) => {
+                      const isSelected = selectedStorage === s.storage_name;
+                      let storageQty = 0;
+                      if (
+                        activeColor?.storage_quantities &&
+                        typeof activeColor.storage_quantities[s.storage_name] === 'number'
+                      ) {
+                        storageQty = activeColor.storage_quantities[s.storage_name];
+                      } else if (phoneStorageOptions.length === 1 && typeof activeColor?.quantity === 'number') {
+                        storageQty = activeColor.quantity;
+                      } else {
+                        storageQty = typeof activeColor?.quantity === 'number'
+                          ? activeColor.quantity
+                          : Number(phone.current_stock ?? 0);
+                      }
+                      const isStorageInStock = storageQty > 0;
+
+                      return (
+                        <div
+                          key={s.storage_id || s.storage_name}
+                          onClick={() => setSelectedStorage(s.storage_name)}
+                          className="flex flex-col items-center cursor-pointer group/storageOption w-24 sm:w-28 text-center"
+                        >
+                          <div
+                            className={`w-full max-w-[88px] sm:max-w-[96px] rounded-xl p-[1px] transition-all duration-300 flex items-center justify-center ${isSelected
+                                ? 'bg-gradient-to-r from-red-600/75 via-blue-600/70 to-blue-700/80 shadow-md shadow-black/80 scale-105 ring-1 ring-white/10'
+                                : 'bg-white/15 hover:bg-gradient-to-r hover:from-red-600/50 hover:via-blue-600/50 hover:to-blue-700/60 opacity-80 hover:opacity-100 hover:scale-105'
+                              }`}
+                          >
+                            <div className={`w-full h-full py-2.5 px-3.5 rounded-[11px] text-center flex items-center justify-center ${isSelected ? 'bg-black/90' : 'bg-black'
+                              }`}>
                               <span
-                                className={`text-xs sm:text-sm font-semibold tracking-wide ${
-                                  isSelected
-                                    ? 'text-white'
-                                    : 'text-theme-textSecondary group-hover/storageOption:text-white'
-                                }`}
+                                className={`text-xs sm:text-sm font-normal tracking-wide transition-colors ${isSelected
+                                    ? 'text-white font-medium'
+                                    : 'text-slate-300 group-hover/storageOption:text-white'
+                                  }`}
                               >
                                 {s.storage_name}
                               </span>
                             </div>
-
-                            {/* Available stock quantity according to storage (White text for both) */}
-                            <span className="text-[10px] font-medium mt-1 text-center leading-none text-white/80">
-                              {isStorageInStock ? `${storageQty} in stock` : 'Out of stock'}
-                            </span>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
 
-                {/* Warranty (Clean official line, NO border box, NO package box) */}
-                {phone.warranty && (
-                  <div className="pt-2 text-xs flex items-center gap-2">
-                    <span className="text-[11px] text-theme-textMuted uppercase tracking-wider font-medium">
-                      Warranty:
-                    </span>
-                    <span className="text-xs text-white font-normal">
-                      {phone.warranty}
-                    </span>
+                          <span className={`text-[11px] font-normal mt-1.5 text-center leading-none w-full truncate ${isStorageInStock ? 'text-slate-400' : 'text-neutral-500'}`}>
+                            {isStorageInStock ? `${storageQty} in stock` : 'Out of stock'}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
-              {/* Action Button: Reserve or Notify */}
-              <div className="space-y-3 pt-3 border-t border-theme-border">
-                {/* Button: Reserve or Notify */}
+              {/* Warranty */}
+              {phone.warranty && (
+                <div className="flex items-center gap-2.5 text-xs sm:text-sm font-normal tracking-wide mb-3 sm:mb-4 pt-1 pl-1">
+                  <span className="text-slate-400 uppercase tracking-wider">
+                    Warranty:
+                  </span>
+                  <span className="text-white font-normal pl-1">
+                    {phone.warranty}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons: Reserve or Notify + Trade In on the same line */}
+            <div className="space-y-4 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-stretch">
                 {isVariantSoldOut ? (
                   <button
                     type="button"
@@ -615,14 +768,11 @@ export default function PhoneDetailModal({
                         storage_name: selectedStorage,
                       })
                     }
-                    className="w-full py-2.5 px-3 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white font-medium text-xs transition-all cursor-pointer text-center truncate"
-                    title={
-                      isSoldOut
-                        ? 'This device is sold out. Click to get notified when back in stock.'
-                        : `Notify me when ${selectedColor} (${selectedStorage}) is back in stock`
-                    }
+                    className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-950/80 via-zinc-600/70 to-blue-950/80 hover:from-red-900/80 hover:via-zinc-500 hover:to-blue-900/80 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-black/50 group cursor-pointer"
                   >
-                    Notify When Available
+                    <span className="w-full h-full py-3 px-4 rounded-full bg-black group-hover:bg-neutral-950 text-slate-300 group-hover:text-white font-normal text-xs sm:text-sm transition-colors text-center truncate flex items-center justify-center">
+                      Notify When Available
+                    </span>
                   </button>
                 ) : (
                   <button
@@ -636,43 +786,16 @@ export default function PhoneDetailModal({
                         effectivePrice,
                       })
                     }
-                    className="w-full py-2.5 px-3 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-white font-medium text-xs shadow-sm transition-all cursor-pointer text-center truncate"
-                    title={`Reserve This Phone (${selectedColor} · ${selectedStorage})`}
+                    className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-950/80 via-zinc-600/70 to-blue-950/80 hover:from-red-900/80 hover:via-zinc-500 hover:to-blue-900/80 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-black/50 group cursor-pointer"
+                    title={`Reserve (${selectedColor} · ${selectedStorage})`}
                   >
-                    Reserve ({selectedColor} · {selectedStorage})
+                    <span className="w-full h-full py-3 px-4 rounded-full bg-black group-hover:bg-neutral-950 text-white font-normal text-xs sm:text-sm transition-colors text-center truncate flex items-center justify-center">
+                      <span className="truncate">Reserve ({selectedColor} · {selectedStorage})</span>
+                    </span>
                   </button>
                 )}
 
-                {/* Quick Contact: WhatsApp, Call Shop */}
-                <div className="flex items-center justify-between pt-1">
-                  <span className="text-[11px] text-theme-textMuted uppercase tracking-wider">
-                    Quick Contact:
-                  </span>
-                  <div className="flex items-center gap-2.5">
-                    {/* WhatsApp Circle Button */}
-                    <button
-                      type="button"
-                      onClick={handleWhatsApp}
-                      className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-105"
-                      title="WhatsApp Direct"
-                      aria-label="WhatsApp Direct"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5" />
-                    </button>
-
-                    {/* Call Shop Circle Button */}
-                    <button
-                      type="button"
-                      onClick={handleCall}
-                      className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-105"
-                      title="Call Shop Direct"
-                      aria-label="Call Shop Direct"
-                    >
-                      <PhoneCall className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
+                {/* Trade In Button on the same line with rounded-full, black background, and dark gray stroke */}
                 <button
                   type="button"
                   onClick={() => {
@@ -682,116 +805,117 @@ export default function PhoneDetailModal({
                       window.dispatchEvent(new CustomEvent('sk_laba_open_sell_modal', { detail: { desiredPhone: phone } }));
                     }
                   }}
-                  className="w-full py-2 px-3 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white text-xs font-medium transition-colors text-center cursor-pointer"
+                  className="w-full py-3 px-4 rounded-full bg-black hover:bg-neutral-950 border border-neutral-700 hover:border-neutral-500 text-white text-xs sm:text-sm font-normal transition-all text-center cursor-pointer flex items-center justify-center truncate hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-black/50"
+                  title="Trade-In Your Current Phone for This Device"
                 >
-                  Trade-In Your Current Phone for This Device
+                  <span className="truncate">Trade-In Your Current Phone</span>
                 </button>
-
-                {copiedLink && (
-                  <p className="text-center text-xs text-theme-textSecondary font-normal animate-in fade-in">
-                    Link copied to clipboard
-                  </p>
-                )}
-
-                {/* Available Instalment Plans (Placed directly under the 3 circular contact buttons) */}
-                {Boolean(phone.installment_enabled) && (
-                  <div className="bg-transparent border border-theme-border rounded-lg p-3 mt-3">
-                    <div className="mb-2">
-                      <h2 className="text-[11px] font-medium uppercase tracking-wider text-theme-textMuted">
-                        Available Instalment Plans
-                      </h2>
-                    </div>
-
-                    {loadingInstallments ? (
-                      <div className="text-xs text-theme-textMuted py-1 font-normal">
-                        Loading flexible instalment plans...
-                      </div>
-                    ) : installmentsData?.plans && installmentsData.plans.length > 0 ? (
-                      <div className="grid grid-cols-1 gap-2 mt-1">
-                        {installmentsData.plans.map((plan, idx) => (
-                          <div
-                            key={plan.installment_plan_id || idx}
-                            className="bg-transparent border border-theme-border rounded-lg p-2.5 flex flex-col justify-between"
-                          >
-                            <div>
-                              <div className="flex items-baseline justify-between gap-2 mb-1">
-                                <span className="text-xs font-semibold text-white break-words">
-                                  {plan.plan_name}
-                                </span>
-                                <span className="text-xs font-semibold text-white shrink-0">
-                                  ${plan.monthly_payment}/mo
-                                </span>
-                              </div>
-                              <p className="text-[11px] text-theme-textMuted font-normal">
-                                {plan.number_of_months} Months • Total: ${plan.total_payable}
-                              </p>
-                            </div>
-                            {plan.terms && (
-                              <p className="text-[11px] text-theme-textSecondary mt-1.5 pt-1.5 border-t border-theme-border/50 font-normal leading-relaxed break-words whitespace-normal">
-                                {plan.terms}
-                              </p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-theme-textSecondary font-normal">
-                        Instalment payment options available upon store collection or checkout.
-                      </p>
-                    )}
-                  </div>
-                )}
               </div>
+
+              {/* Quick Contact: WhatsApp, Call Shop */}
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-xs text-slate-300 uppercase tracking-wider font-normal">
+                  Quick Contact:
+                </span>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleWhatsApp}
+                    className="w-9 h-9 rounded-full bg-black hover:bg-neutral-900 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-105"
+                    title="WhatsApp Direct"
+                    aria-label="WhatsApp Direct"
+                  >
+                    <MessageCircle className="w-4 h-4 text-emerald-400" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleCall}
+                    className="w-9 h-9 rounded-full bg-black hover:bg-neutral-900 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-105"
+                    title="Call Shop Direct"
+                    aria-label="Call Shop Direct"
+                  >
+                    <PhoneCall className="w-4 h-4 text-slate-200" />
+                  </button>
+                </div>
+              </div>
+
+              {copiedLink && (
+                <p className="text-center text-xs text-white font-normal animate-in fade-in">
+                  Link copied to clipboard
+                </p>
+              )}
+
+              {/* Available Instalment Plans */}
+              {Boolean(phone.installment_enabled) && (
+                <div className="bg-black rounded-2xl p-4 mt-4">
+                  <div className="mb-2.5">
+                    <h2 className="text-xs font-normal uppercase tracking-wider text-slate-300">
+                      Available Instalment Plans
+                    </h2>
+                  </div>
+
+                  {loadingInstallments ? (
+                    <div className="text-xs text-slate-300 py-1 font-normal">
+                      Loading flexible instalment plans...
+                    </div>
+                  ) : installmentsData?.plans && installmentsData.plans.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-2.5 mt-1">
+                      {installmentsData.plans.map((plan, pIdx) => (
+                        <div
+                          key={pIdx}
+                          className="p-3 rounded-xl bg-neutral-950 flex flex-col justify-between"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs font-normal text-white truncate">
+                              {plan.provider_name || 'Instalment Plan'}
+                            </span>
+                            <span className="text-xs font-normal text-white shrink-0">
+                              ${plan.monthly_payment}/mo
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-300 font-normal mt-0.5">
+                            {plan.number_of_months} Months • Total: ${plan.total_payable}
+                          </p>
+                          {plan.terms && (
+                            <p className="text-[11px] text-slate-400 mt-1.5 pt-1.5 border-t border-white/5 font-normal leading-relaxed break-words whitespace-normal">
+                              {plan.terms}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-300 font-normal">
+                      Instalment payment options available upon store collection or checkout.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-
-          {similarPhones.length > 0 && (
-            <div className="pt-4 border-t border-theme-border">
-              <div className="mb-3">
-                <h2 className="text-xs font-medium uppercase tracking-wider text-theme-textMuted">
-                  {isSoldOut ? 'Similar Available Phones' : 'Similar Phones'}
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {similarPhones.map((simPhone) => {
-                  const sId = simPhone.phone_id || simPhone.id;
-                  let sPhoto = '';
-                  if (Array.isArray(simPhone.photos) && simPhone.photos.length > 0) sPhoto = simPhone.photos[0];
-                  else if (simPhone.main_photo) sPhoto = simPhone.main_photo;
-
-                  return (
-                    <div
-                      key={sId}
-                      onClick={() => onSelectPhone && onSelectPhone(simPhone)}
-                      className="bg-transparent hover:bg-white/[0.03] border border-theme-border hover:border-white/20 rounded-lg p-3 flex flex-col justify-between cursor-pointer transition-colors"
-                    >
-                      <div className="aspect-[4/3] w-full bg-[#080D1A] rounded p-2 mb-2 flex items-center justify-center">
-                        {sPhoto ? (
-                          <img
-                            src={sPhoto}
-                            alt={simPhone.name}
-                            className="max-h-full max-w-full object-contain"
-                          />
-                        ) : (
-                          <span className="text-xs text-theme-textMuted">SK LABA</span>
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="text-xs font-normal text-white truncate">
-                          {simPhone.name}
-                        </h3>
-                        <p className="text-xs font-medium text-white mt-1">
-                          ${Number(simPhone.price || 0).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Similar Phones Section at the bottom */}
+        {similarPhones.length > 0 && (
+          <div className="pt-10 mt-10 pb-12 sm:pb-16 border-t border-white/10">
+            <div className="mb-5 sm:mb-6">
+              <h2 className="text-sm sm:text-base font-normal uppercase tracking-wider text-white">
+                {isSoldOut ? 'Similar Available Phones' : 'Similar Phones'}
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+              {similarPhones.map((simPhone) => (
+                <SimilarPhoneCard
+                  key={simPhone.phone_id || simPhone.id}
+                  simPhone={simPhone}
+                  onSelectPhone={onSelectPhone}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

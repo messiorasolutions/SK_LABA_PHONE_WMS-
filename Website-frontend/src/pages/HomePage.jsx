@@ -200,18 +200,42 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       <TrustBadges />
 
 
-      <section className="relative w-full bg-black overflow-hidden select-none py-10 sm:py-14 md:py-16">
-        <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Trade-in Upgrade Video Section */}
+      <section className="relative w-full bg-gradient-to-b from-theme-bg via-black to-black overflow-hidden select-none py-10 sm:py-14">
+        {/* Section Heading & CTA over / above the video */}
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 text-center space-y-3 sm:space-y-4 -mb-10 sm:-mb-16 md:-mb-24 pointer-events-none">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)] pointer-events-auto">
+            Trade in. Upgrade.
+          </h2>
+
+          <div className="pt-2 sm:pt-3 pointer-events-auto">
+            <button
+              type="button"
+              onClick={handleOpenSell}
+              className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-xl shadow-black/80 group cursor-pointer"
+            >
+              <span className="inline-flex items-center gap-2 px-6 py-2.5 sm:py-3 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs sm:text-sm font-normal transition-colors duration-200">
+                <span>Get your estimate</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Video Banner */}
+        <div className="w-full max-w-[1500px] mx-auto px-2 sm:px-4">
           <div
-            className="relative w-full mx-auto aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-black/80 flex items-center justify-center cursor-pointer group"
+            className="relative w-full aspect-video flex items-center justify-center overflow-hidden cursor-pointer group"
             onClick={handleOpenSell}
             title="Click to Trade-In or Sell Your Phone"
           >
-            {/* Soft top fade only so bottom icons remain completely visible */}
-            <div className="absolute top-0 inset-x-0 h-12 sm:h-16 bg-gradient-to-b from-black/60 to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-transparent to-black/40 z-10 pointer-events-none" />
+            {/* Subtle 4-Side Edge Feathering / Shade: Left, Right, Top, Bottom */}
+            <div className="absolute inset-y-0 left-0 w-8 sm:w-12 md:w-16 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-8 sm:w-12 md:w-16 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-6 sm:h-8 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-6 sm:h-8 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
 
-            {/* Seamlessly cover bottom-right KlingAI watermark while keeping Trade-in icons visible */}
+            {/* Seamlessly cover bottom-right KlingAI watermark without touching the arrows */}
             <div className="absolute bottom-0 right-0 w-[18%] max-w-[240px] h-[11%] min-h-[48px] bg-black z-20 pointer-events-none" />
 
             <video
@@ -221,29 +245,8 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
               loop
               muted
               playsInline
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.01]"
             />
-
-            <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-center">
-              <div className="w-full px-5 sm:px-10 lg:px-14 flex justify-end">
-                <div className="w-fit ml-auto md:w-auto text-left space-y-3 sm:space-y-4 pointer-events-auto translate-y-6 sm:translate-y-10 md:translate-y-14">
-                  <h2 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] sm:whitespace-nowrap">
-                    Trade in. Upgrade.
-                  </h2>
-
-                                    <div className="pt-1.5 sm:pt-2">
-                    <button
-                      type="button"
-                      onClick={handleOpenSell}
-                      className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 hover:border-white/40 text-white text-xs sm:text-sm font-normal backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
-                    >
-                      <span>Get your estimate</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -461,7 +464,6 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
             </div>
           ) : (
             <div className="text-center py-12 px-4 rounded-3xl border border-dashed border-theme-border/80 bg-theme-surface/50 max-w-xl mx-auto space-y-4">
-
               <div className="space-y-1">
                 <h3 className="text-base font-bold text-white">Be the First to Leave a Review!</h3>
                 <p className="text-xs text-theme-textSecondary max-w-sm mx-auto">

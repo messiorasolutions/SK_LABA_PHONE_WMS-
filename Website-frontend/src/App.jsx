@@ -37,7 +37,7 @@ export default function App() {
         dispatch(setActiveTab('Smartphones'));
       } else if (hash === '#contact' || pathname === '/contact') {
         dispatch(setActiveTab('Contact Us'));
-      } else if (hash === '' || hash === '#' || hash === '#home' || hash === '#reviews' || pathname === '/') {
+      } else if (hash === '' || hash === '#' || hash === '#home' || hash === '#reviews' || hash === '#about' || pathname === '/') {
         dispatch(setActiveTab('Home'));
       }
     };

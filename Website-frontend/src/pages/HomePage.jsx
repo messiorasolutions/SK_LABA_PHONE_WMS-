@@ -7,6 +7,7 @@ import { getActiveOffers } from '../services/offerService';
 import { reviewService } from '../services/reviewService';
 import { setActiveTab } from '../actions/heroActions';
 import upgradeVideo from '../assets/images/upgrade_vedio.mp4';
+import aboutImg from '../assets/images/about.jpg';
 
 function ReviewComment({ comment }) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -322,6 +323,55 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
           </div>
         </section>
       )}
+
+      {/* About Us Section */}
+      <section id="about" className="py-16 sm:py-20 bg-black border-b border-white/10 scroll-mt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Left Side: About Image */}
+            <div className="lg:col-span-5 relative group">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/90 bg-neutral-950">
+                <img
+                  src={aboutImg}
+                  alt="About SK LABA PHONE"
+                  className="w-full h-full max-h-[440px] object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
+                />
+              </div>
+            </div>
+
+            {/* Right Side: Heading & Small Description */}
+            <div className="lg:col-span-7 space-y-6">
+              <div>
+                <span className="text-xs font-normal uppercase tracking-wider text-theme-textSecondary mb-2 block">
+                  Our Story
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-normal text-white tracking-tight">
+                  About SK LABA PHONE
+                </h2>
+                <p className="text-xs sm:text-sm text-theme-textSecondary mt-3.5 leading-relaxed font-normal">
+                  Founded on trust and authenticity, SK LABA PHONE connects smart shoppers directly with South Korea&rsquo;s premier smartphone tech. Based in Dongdaemun-gu, Seoul, we hand-inspect every device—eliminating middleman markups so you receive verified original flagships at true wholesale value.
+                </p>
+              </div>
+
+              {/* Quick Metrics Strip */}
+              <div className="grid grid-cols-3 gap-3 pt-6 border-t border-white/10">
+                <div>
+                  <div className="text-lg sm:text-xl font-normal text-white tracking-tight">100%</div>
+                  <div className="text-[11px] text-theme-textMuted font-normal">Original Devices</div>
+                </div>
+                <div>
+                  <div className="text-base sm:text-lg lg:text-xl font-normal text-white tracking-tight">ලාබ ෆෝන් Value</div>
+                  <div className="text-[11px] text-theme-textMuted font-normal">Transparent trade-ins &amp; deals</div>
+                </div>
+                <div>
+                  <div className="text-lg sm:text-xl font-normal text-white tracking-tight">Seoul &bull; LK</div>
+                  <div className="text-[11px] text-theme-textMuted font-normal">Direct Logistics</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Customer Reviews Section */}
       <section id="reviews" className="pt-16 pb-24 sm:pb-32 bg-black border-b border-white/10 scroll-mt-24">

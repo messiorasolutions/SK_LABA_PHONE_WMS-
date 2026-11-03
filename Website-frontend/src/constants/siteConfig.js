@@ -21,7 +21,7 @@ export const NAV_LINKS = [
   { name: 'Reviews', path: '#reviews' },
   { name: 'Accessories', path: '#accessories' },
   { name: 'Deals', path: '#deals' },
-  { name: 'About', path: '#about' },
+  { name: 'About Us', path: '#about' },
   { name: 'Contact Us', path: '#contact' },
 ];
 

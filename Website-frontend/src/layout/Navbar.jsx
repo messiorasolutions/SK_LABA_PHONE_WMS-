@@ -28,6 +28,12 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
           const el = document.getElementById('reviews');
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         }, 100);
+      } else if (hash === '#about') {
+        dispatch(setActiveTab('Home'));
+        setTimeout(() => {
+          const el = document.getElementById('about');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       } else if (hash === '' || hash === '#' || hash === '#home' || pathname === '/') {
         dispatch(setActiveTab('Home'));
       }
@@ -58,6 +64,15 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
       window.location.hash = '#reviews';
       setTimeout(() => {
         const el = document.getElementById('reviews');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 50);
+    } else if (tabName === 'About' || tabName === 'About Us') {
+      dispatch(setActiveTab('Home'));
+      window.location.hash = '#about';
+      setTimeout(() => {
+        const el = document.getElementById('about');
         if (el) {
           el.scrollIntoView({ behavior: 'smooth' });
         }

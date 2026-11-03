@@ -374,7 +374,6 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                         type="text"
                         required
                         maxLength={150}
-                        placeholder="e.g. Apple iPhone 13 Pro or Samsung Galaxy S22"
                         value={formData.brand_and_model}
                         onChange={(e) =>
                           setFormData({ ...formData, brand_and_model: e.target.value })
@@ -468,7 +467,6 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                       <textarea
                         rows={3}
                         maxLength={1000}
-                        placeholder="Include details about box, charger, accessories, or minor issues..."
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         className="w-full flex-1 min-h-[60px] bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none transition-all resize-none shadow-inner leading-relaxed"
@@ -495,7 +493,6 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                           type="text"
                           required
                           maxLength={100}
-                          placeholder="e.g. Kasun Perera"
                           value={formData.customer_name}
                           onChange={(e) =>
                             setFormData({ ...formData, customer_name: e.target.value })
@@ -511,7 +508,6 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                         <input
                           type="tel"
                           required
-                          placeholder="e.g. 077 123 4567"
                           value={formData.phone_number}
                           onChange={(e) =>
                             setFormData({ ...formData, phone_number: e.target.value })

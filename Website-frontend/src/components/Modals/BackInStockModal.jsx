@@ -1,18 +1,14 @@
 import React, { useState } from 'react';
-import { X, AlertCircle, Bell, BellRing, Phone, Mail, User, FileText, CheckCircle2 } from 'lucide-react';
+import { X, AlertCircle, Bell, BellRing, CheckCircle2 } from 'lucide-react';
 import { createBackInStockRequest } from '../../services/backInStockService';
 import { STORE_INFO } from '../../constants/siteConfig';
 
 export default function BackInStockModal({ phone, onClose }) {
-  const variantNote = phone?.color_name || phone?.storage_name
-    ? `Interested in ${[phone?.storage_name, phone?.color_name].filter(Boolean).join(' - ')}`
-    : '';
-
   const [formData, setFormData] = useState({
     customer_name: '',
     phone_number: '',
     email: '',
-    notes: variantNote,
+    notes: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -245,20 +241,14 @@ export default function BackInStockModal({ phone, onClose }) {
                 <label className="block text-xs font-medium text-slate-300 mb-1.5">
                   Your Full Name <span className="text-rose-400">*</span>
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <User className="w-3.5 h-3.5" />
-                  </div>
-                  <input
-                    type="text"
-                    required
-                    maxLength={100}
-                    placeholder="e.g. Kasun Perera"
-                    value={formData.customer_name}
-                    onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                    className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
-                  />
-                </div>
+                <input
+                  type="text"
+                  required
+                  maxLength={100}
+                  value={formData.customer_name}
+                  onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+                  className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
+                />
               </div>
 
               {/* Phone / WhatsApp */}
@@ -266,19 +256,13 @@ export default function BackInStockModal({ phone, onClose }) {
                 <label className="block text-xs font-medium text-slate-300 mb-1.5">
                   Phone / WhatsApp Number <span className="text-rose-400">*</span>
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <Phone className="w-3.5 h-3.5" />
-                  </div>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="e.g. +94 77 123 4567"
-                    value={formData.phone_number}
-                    onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                    className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
-                  />
-                </div>
+                <input
+                  type="tel"
+                  required
+                  value={formData.phone_number}
+                  onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                  className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
+                />
               </div>
 
               {/* Email (Optional) */}
@@ -286,38 +270,26 @@ export default function BackInStockModal({ phone, onClose }) {
                 <label className="block text-xs font-medium text-slate-300 mb-1.5">
                   Email Address <span className="text-slate-500 font-normal">(Optional)</span>
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <Mail className="w-3.5 h-3.5" />
-                  </div>
-                  <input
-                    type="email"
-                    placeholder="e.g. kasun@example.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
-                  />
-                </div>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
+                />
               </div>
 
               {/* Specific Notes (Optional) */}
               <div>
                 <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Preference or Notes <span className="text-slate-500 font-normal">(Optional, max 500 chars)</span>
+                  Preference or Notes <span className="text-slate-500 font-normal">(Optional)</span>
                 </label>
-                <div className="relative">
-                  <div className="absolute top-2.5 left-3 pointer-events-none text-slate-400">
-                    <FileText className="w-3.5 h-3.5" />
-                  </div>
-                  <textarea
-                    rows={3}
-                    maxLength={500}
-                    placeholder="e.g. Interested in 256GB Black Titanium or looking for immediate purchase when stock arrives"
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all resize-none"
-                  />
-                </div>
+                <textarea
+                  rows={3}
+                  maxLength={500}
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all resize-none"
+                />
                 <div className="text-right mt-1">
                   <span className="text-[10px] text-slate-500">
                     {formData.notes.length}/500

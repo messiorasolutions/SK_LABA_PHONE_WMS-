@@ -200,48 +200,48 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       <TrustBadges />
 
 
-      <section className="relative w-full bg-black overflow-hidden select-none mt-12 sm:mt-16 md:mt-20">
-        <div className="absolute top-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
-        <div className="absolute bottom-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
+      <section className="relative w-full bg-black overflow-hidden select-none py-10 sm:py-14 md:py-16">
+        <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div
+            className="relative w-full mx-auto aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-black/80 flex items-center justify-center cursor-pointer group"
+            onClick={handleOpenSell}
+            title="Click to Trade-In or Sell Your Phone"
+          >
+            {/* Soft top fade only so bottom icons remain completely visible */}
+            <div className="absolute top-0 inset-x-0 h-12 sm:h-16 bg-gradient-to-b from-black/60 to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-transparent to-black/40 z-10 pointer-events-none" />
 
-        <div
-          className="relative w-full h-[380px] sm:h-[480px] md:h-[580px] lg:h-[660px] xl:h-[700px] max-h-[720px] flex items-center justify-center overflow-hidden cursor-pointer group"
-          onClick={handleOpenSell}
-          title="Click to Trade-In or Sell Your Phone"
-        >
-          <video
-            ref={tradeInVideoRef}
-            src={upgradeVideo}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.01]"
-          />
+            {/* Seamlessly cover bottom-right KlingAI watermark while keeping Trade-in icons visible */}
+            <div className="absolute bottom-0 right-0 w-[18%] max-w-[240px] h-[11%] min-h-[48px] bg-black z-20 pointer-events-none" />
 
-          <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-start md:justify-center">
-            <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex justify-end">
-              <div className="w-fit ml-auto md:w-auto max-w-[78%] sm:max-w-md lg:max-w-lg text-left space-y-2.5 sm:space-y-4 pt-6 sm:pt-8 md:pt-0 pointer-events-auto bg-black/50 md:bg-transparent backdrop-blur-xs md:backdrop-blur-none p-3.5 sm:p-4 md:p-0 rounded-2xl md:rounded-none">
-                
-                <h2 className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-normal text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] sm:whitespace-nowrap">
-                  Trade in. Upgrade.
-                </h2>
+            <video
+              ref={tradeInVideoRef}
+              src={upgradeVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+            />
 
-                <p className="text-xs sm:text-sm lg:text-base text-slate-200 leading-relaxed font-normal max-w-xs sm:max-w-md drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
-                  Submit your device details and receive an expert valuation quote to trade in toward your next phone.
-                </p>
+            <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-center">
+              <div className="w-full px-5 sm:px-10 lg:px-14 flex justify-end">
+                <div className="w-fit ml-auto md:w-auto text-left space-y-3 sm:space-y-4 pointer-events-auto translate-y-6 sm:translate-y-10 md:translate-y-14">
+                  <h2 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] sm:whitespace-nowrap">
+                    Trade in. Upgrade.
+                  </h2>
 
-                <div className="pt-1.5 sm:pt-2">
-                  <button
-                    type="button"
-                    onClick={handleOpenSell}
-                    className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 hover:border-white/40 text-white text-xs sm:text-sm font-normal backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
-                  >
-                    <span>Get your estimate</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
+                                    <div className="pt-1.5 sm:pt-2">
+                    <button
+                      type="button"
+                      onClick={handleOpenSell}
+                      className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 hover:border-white/40 text-white text-xs sm:text-sm font-normal backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
+                    >
+                      <span>Get your estimate</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  </div>
                 </div>
-
               </div>
             </div>
           </div>

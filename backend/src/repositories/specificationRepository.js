@@ -23,13 +23,17 @@ class SpecificationRepository {
      * @returns {Promise<Object|null>}
      */
     async findById(specification_id) {
-        const query = `
-            SELECT specification_id, specification_name, specification_type, description, is_active, created_at
-            FROM specifications
-            WHERE specification_id = ?
-        `;
-        const [rows] = await pool.execute(query, [specification_id]);
-        return rows.length > 0 ? rows[0] : null;
+        try {
+            const query = `
+                SELECT specification_id, specification_name, specification_type, description, is_active, created_at
+                FROM specifications
+                WHERE specification_id = ?
+            `;
+            const [rows] = await pool.execute(query, [specification_id]);
+            return rows.length > 0 ? rows[0] : null;
+        } catch (err) {
+            return null;
+        }
     }
 
     /**
@@ -38,18 +42,22 @@ class SpecificationRepository {
      * @returns {Promise<Array>}
      */
     async findByIds(ids) {
-        if (!Array.isArray(ids) || ids.length === 0) return [];
-        const cleanIds = ids.map(id => Number(id)).filter(id => !isNaN(id) && id > 0);
-        if (cleanIds.length === 0) return [];
-        const placeholders = cleanIds.map(() => '?').join(',');
-        const query = `
-            SELECT specification_id, specification_name, specification_type, description, is_active, created_at
-            FROM specifications
-            WHERE specification_id IN (${placeholders})
-            ORDER BY specification_type ASC, specification_name ASC
-        `;
-        const [rows] = await pool.execute(query, cleanIds);
-        return rows;
+        try {
+            if (!Array.isArray(ids) || ids.length === 0) return [];
+            const cleanIds = ids.map(id => Number(id)).filter(id => !isNaN(id) && id > 0);
+            if (cleanIds.length === 0) return [];
+            const placeholders = cleanIds.map(() => '?').join(',');
+            const query = `
+                SELECT specification_id, specification_name, specification_type, description, is_active, created_at
+                FROM specifications
+                WHERE specification_id IN (${placeholders})
+                ORDER BY specification_type ASC, specification_name ASC
+            `;
+            const [rows] = await pool.execute(query, cleanIds);
+            return rows;
+        } catch (err) {
+            return [];
+        }
     }
 
     /**
@@ -59,13 +67,17 @@ class SpecificationRepository {
      * @returns {Promise<Object|null>}
      */
     async findByNameAndType(specification_name, specification_type) {
-        const query = `
-            SELECT specification_id, specification_name, specification_type, description, is_active, created_at
-            FROM specifications
-            WHERE LOWER(specification_name) = LOWER(?) AND specification_type = ?
-        `;
-        const [rows] = await pool.execute(query, [specification_name, specification_type]);
-        return rows.length > 0 ? rows[0] : null;
+        try {
+            const query = `
+                SELECT specification_id, specification_name, specification_type, description, is_active, created_at
+                FROM specifications
+                WHERE LOWER(specification_name) = LOWER(?) AND specification_type = ?
+            `;
+            const [rows] = await pool.execute(query, [specification_name, specification_type]);
+            return rows.length > 0 ? rows[0] : null;
+        } catch (err) {
+            return null;
+        }
     }
 
     /**
@@ -74,20 +86,24 @@ class SpecificationRepository {
      * @returns {Promise<Array>}
      */
     async findAll(type) {
-        let query = `
-            SELECT specification_id, specification_name, specification_type, description, is_active, created_at
-            FROM specifications
-        `;
-        const values = [];
+        try {
+            let query = `
+                SELECT specification_id, specification_name, specification_type, description, is_active, created_at
+                FROM specifications
+            `;
+            const values = [];
 
-        if (type) {
-            query += ` WHERE specification_type = ?`;
-            values.push(type);
+            if (type) {
+                query += ` WHERE specification_type = ?`;
+                values.push(type);
+            }
+
+            query += ` ORDER BY specification_id DESC`;
+            const [rows] = await pool.execute(query, values);
+            return rows;
+        } catch (err) {
+            return [];
         }
-
-        query += ` ORDER BY specification_id DESC`;
-        const [rows] = await pool.execute(query, values);
-        return rows;
     }
 
     /**

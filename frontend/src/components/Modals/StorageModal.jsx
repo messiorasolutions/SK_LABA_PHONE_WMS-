@@ -51,9 +51,9 @@ export default function StorageModal({ isOpen, onClose, onSubmit, initial = null
 
   return (
     <>
-      {/* Semi-transparent Backdrop */}
+      {/* Semi-transparent Backdrop without blur */}
       <div
-        className="fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-[1px] transition-opacity"
+        className="fixed inset-0 z-40 bg-slate-900/30 transition-opacity"
         onClick={onClose}
       />
 
@@ -95,7 +95,7 @@ export default function StorageModal({ isOpen, onClose, onSubmit, initial = null
                 onChange={(e) => setStorageName(e.target.value)}
                 placeholder="e.g. 128GB, 256GB NVMe"
                 required
-                className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] transition-colors"
+                className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/10 focus:border-neutral-400 dark:focus:border-rose-900/50 transition-colors"
               />
             </div>
 
@@ -110,7 +110,7 @@ export default function StorageModal({ isOpen, onClose, onSubmit, initial = null
                 placeholder="e.g. 128"
                 min="1"
                 required
-                className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] transition-colors"
+                className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/10 focus:border-neutral-400 dark:focus:border-rose-900/50 transition-colors"
               />
             </div>
 
@@ -123,7 +123,7 @@ export default function StorageModal({ isOpen, onClose, onSubmit, initial = null
                 value={storageType}
                 onChange={(e) => setStorageType(e.target.value)}
                 placeholder="e.g. UFS 3.1, NVMe"
-                className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#2563EB] transition-colors"
+                className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/10 focus:border-neutral-400 dark:focus:border-rose-900/50 transition-colors"
               />
             </div>
 
@@ -133,14 +133,12 @@ export default function StorageModal({ isOpen, onClose, onSubmit, initial = null
                 role="switch"
                 aria-checked={isActive}
                 onClick={() => setIsActive(!isActive)}
-                className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors cursor-pointer ${
-                  isActive ? 'bg-[#2563EB]' : 'bg-slate-300 dark:bg-slate-700'
-                }`}
+                className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors cursor-pointer ${isActive ? 'bg-gradient-to-r from-neutral-900 to-rose-700' : 'bg-slate-300 dark:bg-slate-700'
+                  }`}
               >
                 <span
-                  className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${
-                    isActive ? 'translate-x-5' : 'translate-x-1'
-                  }`}
+                  className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${isActive ? 'translate-x-5' : 'translate-x-1'
+                    }`}
                 />
               </button>
               <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
@@ -161,7 +159,7 @@ export default function StorageModal({ isOpen, onClose, onSubmit, initial = null
             <button
               type="submit"
               disabled={loading}
-              className="w-1/2 py-2.5 px-4 text-xs font-semibold text-white bg-[#2563EB] hover:bg-blue-700 rounded-lg shadow-sm transition-colors cursor-pointer disabled:opacity-50 text-center"
+              className="w-1/2 py-2.5 px-4 text-xs font-semibold text-white bg-gradient-to-r from-black via-neutral-900 to-rose-950 hover:to-rose-900 text-white border border-neutral-800 rounded-lg shadow-sm transition-colors cursor-pointer disabled:opacity-50 text-center"
             >
               {loading ? 'Saving...' : initial ? 'Save Changes' : 'Create Option'}
             </button>

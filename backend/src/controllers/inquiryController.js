@@ -7,17 +7,17 @@ class InquiryController {
 
     /**
      * POST /api/inquiries
-     * Public customer inquiry submission
+     * Public general customer inquiry submission (Home Page)
      */
     async createInquiry(req, res, next) {
         try {
-            const { name, phone_number, message, phone_id } = req.body;
+            const { customer_name, name, phone_number, message } = req.body;
 
             const inquiry = await this.inquiryService.createInquiry({
-                name,
+                customer_name: customer_name || name,
+                name: customer_name || name,
                 phone_number,
-                message,
-                phone_id
+                message
             });
 
             return res.status(201).json({

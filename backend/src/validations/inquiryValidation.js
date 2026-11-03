@@ -16,20 +16,21 @@ function validateInquiryIdParam(req, res, next) {
 }
 
 /**
- * Validates request payload for public inquiry submission
+ * Validates request payload for public general customer inquiry submission
  */
 function validateCreateInquiry(req, res, next) {
     if (!req.body || typeof req.body !== 'object' || Object.keys(req.body).length === 0) {
         return next(new AppError('Request body is missing or empty. Please send JSON data with Content-Type: application/json header.', 400));
     }
 
-    const { name, phone_number, message, phone_id } = req.body;
+    const { customer_name, name, phone_number, message } = req.body;
 
-    // 1. Validate customer name
-    if (name === undefined || name === null || typeof name !== 'string' || name.trim().length === 0) {
+    // 1. Validate customer name (support both customer_name and name)
+    const rawName = customer_name !== undefined ? customer_name : name;
+    if (rawName === undefined || rawName === null || typeof rawName !== 'string' || rawName.trim().length === 0) {
         return next(new AppError('Customer name is required and cannot be empty.', 400));
     }
-    const cleanName = name.trim();
+    const cleanName = rawName.trim();
     if (cleanName.length < 2 || cleanName.length > 150) {
         return next(new AppError('Customer name must be between 2 and 150 characters.', 400));
     }
@@ -53,22 +54,13 @@ function validateCreateInquiry(req, res, next) {
         return next(new AppError('Inquiry message must be between 5 and 3000 characters.', 400));
     }
 
-    // 4. Validate optional phone_id
-    let cleanPhoneId = null;
-    if (phone_id !== undefined && phone_id !== null && String(phone_id).trim() !== '') {
-        const phoneIdStr = String(phone_id).trim();
-        if (!POSITIVE_INT_REGEX.test(phoneIdStr)) {
-            return next(new AppError('Invalid phone_id. Must be a positive integer when provided.', 400));
-        }
-        cleanPhoneId = Number(phoneIdStr);
-    }
-
-    // Sanitize and normalize request body
+    // Sanitize request body - strictly ONLY customer fields are retained.
+    // Client-supplied phone_id, status, staff assignment, or timestamps are stripped to prevent mass-assignment.
     req.body = {
+        customer_name: cleanName,
         name: cleanName,
         phone_number: cleanPhone,
-        message: cleanMessage,
-        phone_id: cleanPhoneId
+        message: cleanMessage
     };
 
     next();

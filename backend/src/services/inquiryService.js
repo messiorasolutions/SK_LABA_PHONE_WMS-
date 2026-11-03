@@ -15,28 +15,22 @@ class InquiryService {
     }
 
     /**
-     * Submit a public customer inquiry
+     * Submit a public general customer inquiry
      * @param {Object} data
-     * @param {string} data.name
+     * @param {string} [data.customer_name]
+     * @param {string} [data.name]
      * @param {string} data.phone_number
      * @param {string} data.message
-     * @param {number|null} [data.phone_id]
-     * @returns {Promise<Object>} Created safe inquiry record
+     * @returns {Promise<Object>} Created safe general inquiry record
      */
-    async createInquiry({ name, phone_number, message, phone_id = null }) {
-        // If phone-specific inquiry, verify that referenced phone exists
-        if (phone_id) {
-            const phone = await this.phoneRepository.findById(phone_id);
-            if (!phone) {
-                throw new AppError('Referenced phone does not exist.', 404);
-            }
-        }
+    async createInquiry({ customer_name, name, phone_number, message }) {
+        const resolvedCustomerName = (customer_name || name || '').trim();
 
+        // General inquiries from Home Page are always created with phone_id = null
         const inquiry = await this.inquiryRepository.create({
-            customer_name: name,
+            customer_name: resolvedCustomerName,
             phone_number,
-            message,
-            phone_id: phone_id || null
+            message
         });
 
         return inquiry;

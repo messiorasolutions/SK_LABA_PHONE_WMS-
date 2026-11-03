@@ -26,6 +26,8 @@ class InquiryRepository {
     _formatInquiry(row) {
         if (!row) return null;
 
+        const hasPhone = Boolean(row.phone_id);
+
         const formatted = {
             inquiry_id: row.inquiry_id,
             customer_name: row.customer_name,
@@ -33,6 +35,7 @@ class InquiryRepository {
             phone_number: row.phone_number,
             message: row.message,
             phone_id: row.phone_id || null,
+            inquiry_type: hasPhone ? 'PHONE_SPECIFIC' : 'GENERAL',
             status: row.status,
             assigned_to_user_id: row.assigned_to_user_id || null,
             assigned_staff: row.assigned_to_user_id ? {
@@ -46,7 +49,7 @@ class InquiryRepository {
                 display_name: row.updated_by_staff_name || null,
                 email: row.updated_by_staff_email || null
             } : null,
-            selected_phone: row.phone_id ? {
+            selected_phone: hasPhone ? {
                 phone_id: row.phone_id,
                 name: row.phone_name || null,
                 price: row.phone_price !== null && row.phone_price !== undefined ? Number(row.phone_price) : null,
@@ -64,16 +67,15 @@ class InquiryRepository {
     }
 
     /**
-     * Insert a new inquiry record
+     * Insert a new general inquiry record (phone_id is always NULL)
      * @param {Object} inquiryData
      * @param {string} inquiryData.customer_name
      * @param {string} inquiryData.phone_number
      * @param {string} inquiryData.message
-     * @param {number|null} [inquiryData.phone_id]
      * @param {Object} [executor]
      * @returns {Promise<Object>} Formatted inquiry record
      */
-    async create({ customer_name, phone_number, message, phone_id = null }, executor = this.pool) {
+    async create({ customer_name, phone_number, message }, executor = this.pool) {
         const query = `
             INSERT INTO inquiries (
                 customer_name,
@@ -81,14 +83,13 @@ class InquiryRepository {
                 message,
                 phone_id,
                 status
-            ) VALUES (?, ?, ?, ?, 'New')
+            ) VALUES (?, ?, ?, NULL, 'New')
         `;
 
         const values = [
             customer_name.trim(),
             phone_number.trim(),
-            message.trim(),
-            phone_id ? Number(phone_id) : null
+            message.trim()
         ];
 
         const [result] = await executor.execute(query, values);

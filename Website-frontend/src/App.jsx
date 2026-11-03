@@ -86,9 +86,12 @@ export default function App() {
     };
   }, [dispatch]);
 
-  const handleNavigateToSmartphones = () => {
+  const handleNavigateToSmartphones = (phone) => {
     dispatch(setActiveTab('Smartphones'));
     window.location.hash = '#smartphones';
+    if (phone) {
+      setSelectedPhoneForDetail(phone);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

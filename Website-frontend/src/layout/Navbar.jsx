@@ -28,6 +28,12 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
           const el = document.getElementById('reviews');
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         }, 100);
+      } else if (hash === '#deals') {
+        dispatch(setActiveTab('Home'));
+        setTimeout(() => {
+          const el = document.getElementById('deals');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       } else if (hash === '#about') {
         dispatch(setActiveTab('Home'));
         setTimeout(() => {
@@ -64,6 +70,15 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
       window.location.hash = '#reviews';
       setTimeout(() => {
         const el = document.getElementById('reviews');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 50);
+    } else if (tabName === 'Deals') {
+      dispatch(setActiveTab('Home'));
+      window.location.hash = '#deals';
+      setTimeout(() => {
+        const el = document.getElementById('deals');
         if (el) {
           el.scrollIntoView({ behavior: 'smooth' });
         }

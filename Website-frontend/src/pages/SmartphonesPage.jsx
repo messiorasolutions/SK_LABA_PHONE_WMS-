@@ -94,20 +94,43 @@ export default function SmartphonesPage({ onNavigateToHome }) {
         setActiveOffers(Array.isArray(offers) ? offers : []);
 
         const enriched = phoneList.map((p) => {
-          const matchingOffer = offers.find(
-            (o) => Array.isArray(o.phone_ids) && o.phone_ids.includes(p.phone_id)
-          );
+          const pIdStr = String(p.phone_id || p.id || '');
+          const pNameLower = (p.name || '').toLowerCase();
+
+          const matchingOffer = offers.find((o) => {
+            if (Array.isArray(o.phone_ids) && o.phone_ids.some((id) => String(id) === pIdStr)) {
+              return true;
+            }
+            if (Array.isArray(o.phones) && o.phones.some((ph) => String(ph.phone_id || ph.id) === pIdStr)) {
+              return true;
+            }
+            const combinedText = ((o.title || '') + ' ' + (o.description || '')).toLowerCase();
+            if (pNameLower && combinedText.includes(pNameLower)) {
+              return true;
+            }
+            return false;
+          });
+
           if (matchingOffer) {
+            const regPrice = Number(p.price || p.regular_price || 0);
+            const offPrice = Number(matchingOffer.offer_price || 0);
+            const savings = regPrice > offPrice ? regPrice - offPrice : Number(matchingOffer.discount_amount || 0);
+            const discountPct = regPrice > 0 && savings > 0
+              ? Math.round((savings / regPrice) * 100)
+              : Number(matchingOffer.discount_percentage || 0);
+
             return {
               ...p,
-              offer_price: matchingOffer.offer_price,
+              offer_price: offPrice,
+              regular_price: regPrice,
               active_offer: {
                 has_active_offer: true,
                 offer_id: matchingOffer.offer_id,
                 offer_title: matchingOffer.title,
-                offer_price: matchingOffer.offer_price,
-                discount_percentage: matchingOffer.discount_percentage,
-                savings: matchingOffer.discount_amount,
+                offer_price: offPrice,
+                regular_price: regPrice,
+                discount_percentage: discountPct,
+                savings: savings,
               },
             };
           }

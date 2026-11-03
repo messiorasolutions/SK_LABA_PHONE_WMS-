@@ -97,14 +97,14 @@ export default function Header({ toggleSidebar }) {
 
         <div className="relative hidden sm:block">
           <div className="group relative flex items-center transition-all duration-200 w-60 sm:w-64 md:w-72 focus-within:w-72 sm:focus-within:w-80 md:focus-within:w-96">
-            <Search className="w-3.5 h-3.5 text-slate-400 group-focus-within:text-[#2563eb] dark:group-focus-within:text-blue-400 absolute left-3.5 pointer-events-none transition-colors duration-150" />
+            <Search className="w-3.5 h-3.5 text-slate-400 group-focus-within:text-rose-600 dark:group-focus-within:text-rose-400 absolute left-3.5 pointer-events-none transition-colors duration-150" />
             <input
               ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Quick search dashboard..."
-              className="w-full pl-9 pr-8 py-2 text-xs bg-slate-100/70 hover:bg-slate-100/90 focus:bg-white dark:bg-slate-800/50 dark:hover:bg-slate-800/80 dark:focus:bg-slate-900 border border-slate-200/90 dark:border-slate-700/80 rounded-full text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all duration-200 shadow-2xs"
+              className="w-full pl-9 pr-8 py-2 text-xs bg-slate-100/70 hover:bg-slate-100/90 focus:bg-white dark:bg-slate-800/50 dark:hover:bg-slate-800/80 dark:focus:bg-slate-900 border border-slate-200/90 dark:border-slate-700/80 rounded-full text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 focus:ring-2 focus:ring-rose-500/10 transition-all duration-200 shadow-2xs"
             />
             {searchQuery && (
               <button
@@ -144,7 +144,7 @@ export default function Header({ toggleSidebar }) {
             type="button"
             className={`flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full transition-all duration-150 cursor-pointer border ${
               dropdownOpen
-                ? 'bg-blue-50/70 dark:bg-blue-950/40 border-blue-500/40 shadow-xs'
+                ? 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-500/30 shadow-xs'
                 : 'hover:bg-slate-100/80 dark:hover:bg-slate-800/60 border-slate-200/80 dark:border-slate-800'
             }`}
             style={{ borderRadius: '9999px' }}
@@ -152,7 +152,7 @@ export default function Header({ toggleSidebar }) {
             {/* Avatar Circle */}
             <div className="relative shrink-0">
               <div
-                className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 via-blue-500 to-indigo-600 text-white font-bold flex items-center justify-center text-xs shadow-xs ring-1 ring-white dark:ring-slate-900"
+                className="w-8 h-8 rounded-full bg-gradient-to-tr from-black via-neutral-900 to-rose-950 text-white font-bold flex items-center justify-center text-xs shadow-xs ring-1 ring-white dark:ring-slate-900 border border-rose-900/50"
                 style={{ borderRadius: '9999px' }}
               >
                 {initial}
@@ -171,7 +171,7 @@ export default function Header({ toggleSidebar }) {
 
             <ChevronDown
               className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ml-0.5 ${
-                dropdownOpen ? 'rotate-180 text-blue-600 dark:text-blue-400' : ''
+                dropdownOpen ? 'rotate-180 text-rose-600 dark:text-rose-400' : ''
               }`}
             />
           </button>

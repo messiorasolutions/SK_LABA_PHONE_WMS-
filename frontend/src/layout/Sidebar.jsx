@@ -101,18 +101,18 @@ export default function Sidebar({ isOpen, onClose }) {
                 className={({ isActive }) =>
                   `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
                     isUsersActive
-                      ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                      ? 'bg-slate-100/90 dark:bg-slate-800/70 text-slate-900 dark:text-white shadow-2xs'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
                   }`
                 }
               >
                 {isUsersActive && (
-                  <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-rose-600 to-neutral-900 rounded-r-full" />
                 )}
                 <Shield
                   className={`w-4 h-4 shrink-0 transition-colors ${
                     isUsersActive
-                      ? 'text-[#2563eb] dark:text-blue-400'
+                      ? 'text-rose-600 dark:text-rose-400'
                       : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                   }`}
                 />
@@ -127,18 +127,18 @@ export default function Sidebar({ isOpen, onClose }) {
                 className={({ isActive }) =>
                   `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
                     isReviewsActive
-                      ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                      ? 'bg-slate-100/90 dark:bg-slate-800/70 text-slate-900 dark:text-white shadow-2xs'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
                   }`
                 }
               >
                 {isReviewsActive && (
-                  <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-rose-600 to-neutral-900 rounded-r-full" />
                 )}
                 <Star
                   className={`w-4 h-4 shrink-0 transition-colors ${
                     isReviewsActive
-                      ? 'text-[#2563eb] dark:text-blue-400'
+                      ? 'text-rose-600 dark:text-rose-400'
                       : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                   }`}
                 />
@@ -153,18 +153,18 @@ export default function Sidebar({ isOpen, onClose }) {
               className={({ isActive }) =>
                 `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
                   isPhoneManagementActive
-                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    ? 'bg-slate-100/90 dark:bg-slate-800/70 text-slate-900 dark:text-white shadow-2xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
                 }`
               }
             >
               {isPhoneManagementActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-rose-600 to-neutral-900 rounded-r-full" />
               )}
               <Smartphone
                 className={`w-4 h-4 shrink-0 transition-colors ${
                   isPhoneManagementActive
-                    ? 'text-[#2563eb] dark:text-blue-400'
+                    ? 'text-rose-600 dark:text-rose-400'
                     : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                 }`}
               />
@@ -178,18 +178,18 @@ export default function Sidebar({ isOpen, onClose }) {
               className={({ isActive }) =>
                 `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
                   isStockActive
-                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    ? 'bg-slate-100/90 dark:bg-slate-800/70 text-slate-900 dark:text-white shadow-2xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
                 }`
               }
             >
               {isStockActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-rose-600 to-neutral-900 rounded-r-full" />
               )}
               <Package
                 className={`w-4 h-4 shrink-0 transition-colors ${
                   isStockActive
-                    ? 'text-[#2563eb] dark:text-blue-400'
+                    ? 'text-rose-600 dark:text-rose-400'
                     : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                 }`}
               />
@@ -203,18 +203,18 @@ export default function Sidebar({ isOpen, onClose }) {
               className={({ isActive }) =>
                 `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
                   isOffersActive
-                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    ? 'bg-slate-100/90 dark:bg-slate-800/70 text-slate-900 dark:text-white shadow-2xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
                 }`
               }
             >
               {isOffersActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-rose-600 to-neutral-900 rounded-r-full" />
               )}
               <Tag
                 className={`w-4 h-4 shrink-0 transition-colors ${
                   isOffersActive
-                    ? 'text-[#2563eb] dark:text-blue-400'
+                    ? 'text-rose-600 dark:text-rose-400'
                     : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                 }`}
               />
@@ -228,18 +228,18 @@ export default function Sidebar({ isOpen, onClose }) {
               className={({ isActive }) =>
                 `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
                   isInstallmentsActive
-                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    ? 'bg-slate-100/90 dark:bg-slate-800/70 text-slate-900 dark:text-white shadow-2xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
                 }`
               }
             >
               {isInstallmentsActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-rose-600 to-neutral-900 rounded-r-full" />
               )}
               <CreditCard
                 className={`w-4 h-4 shrink-0 transition-colors ${
                   isInstallmentsActive
-                    ? 'text-[#2563eb] dark:text-blue-400'
+                    ? 'text-rose-600 dark:text-rose-400'
                     : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                 }`}
               />
@@ -253,18 +253,18 @@ export default function Sidebar({ isOpen, onClose }) {
               className={({ isActive }) =>
                 `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
                   isReservationsActive
-                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    ? 'bg-slate-100/90 dark:bg-slate-800/70 text-slate-900 dark:text-white shadow-2xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
                 }`
               }
             >
               {isReservationsActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-rose-600 to-neutral-900 rounded-r-full" />
               )}
               <CalendarClock
                 className={`w-4 h-4 shrink-0 transition-colors ${
                   isReservationsActive
-                    ? 'text-[#2563eb] dark:text-blue-400'
+                    ? 'text-rose-600 dark:text-rose-400'
                     : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                 }`}
               />
@@ -278,18 +278,18 @@ export default function Sidebar({ isOpen, onClose }) {
               className={({ isActive }) =>
                 `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
                   isInquiriesActive
-                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    ? 'bg-slate-100/90 dark:bg-slate-800/70 text-slate-900 dark:text-white shadow-2xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
                 }`
               }
             >
               {isInquiriesActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-rose-600 to-neutral-900 rounded-r-full" />
               )}
               <MessageSquare
                 className={`w-4 h-4 shrink-0 transition-colors ${
                   isInquiriesActive
-                    ? 'text-[#2563eb] dark:text-blue-400'
+                    ? 'text-rose-600 dark:text-rose-400'
                     : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                 }`}
               />
@@ -302,18 +302,18 @@ export default function Sidebar({ isOpen, onClose }) {
               className={({ isActive }) =>
                 `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
                   isSellRequestsActive
-                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    ? 'bg-slate-100/90 dark:bg-slate-800/70 text-slate-900 dark:text-white shadow-2xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
                 }`
               }
             >
               {isSellRequestsActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-rose-600 to-neutral-900 rounded-r-full" />
               )}
               <ArrowLeftRight
                 className={`w-4 h-4 shrink-0 transition-colors ${
                   isSellRequestsActive
-                    ? 'text-[#2563eb] dark:text-blue-400'
+                    ? 'text-rose-600 dark:text-rose-400'
                     : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                 }`}
               />
@@ -327,18 +327,18 @@ export default function Sidebar({ isOpen, onClose }) {
               className={({ isActive }) =>
                 `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
                   isBackInStockActive
-                    ? 'bg-blue-50/90 dark:bg-blue-950/40 text-[#2563eb] dark:text-blue-400 shadow-sm'
+                    ? 'bg-slate-100/90 dark:bg-slate-800/70 text-slate-900 dark:text-white shadow-2xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
                 }`
               }
             >
               {isBackInStockActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#2563eb] dark:bg-blue-500 rounded-r-full" />
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-rose-600 to-neutral-900 rounded-r-full" />
               )}
               <BellRing
                 className={`w-4 h-4 shrink-0 transition-colors ${
                   isBackInStockActive
-                    ? 'text-[#2563eb] dark:text-blue-400'
+                    ? 'text-rose-600 dark:text-rose-400'
                     : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                 }`}
               />
@@ -351,7 +351,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <div className="flex items-center justify-between gap-2.5 p-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <div className="flex items-center gap-2.5 min-w-0">
               <div
-                className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 via-blue-500 to-indigo-600 text-white font-bold flex items-center justify-center text-xs shadow-xs shrink-0 ring-2 ring-white dark:ring-slate-800"
+                className="w-9 h-9 rounded-full bg-gradient-to-tr from-black via-neutral-900 to-rose-950 text-white font-bold flex items-center justify-center text-xs shadow-xs shrink-0 ring-2 ring-white dark:ring-slate-800 border border-rose-900/50"
                 style={{ borderRadius: '9999px' }}
               >
                 {userInitial}

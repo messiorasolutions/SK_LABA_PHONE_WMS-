@@ -11,7 +11,6 @@ import {
 } from '../actions/phoneActions';
 import { fetchBrands } from '../actions/brandActions';
 import { fetchStorageOptions } from '../actions/storageActions';
-import { fetchSpecifications } from '../actions/specificationActions';
 
 export default function usePhones() {
   const dispatch = useDispatch();
@@ -28,7 +27,6 @@ export default function usePhones() {
 
   const { list: brands = [] } = useSelector((state) => state.brands ?? {});
   const { list: storageOptions = [] } = useSelector((state) => state.storage ?? {});
-  const { list: specifications = [] } = useSelector((state) => state.specifications ?? {});
 
   const submitting = adding || updating || deleting;
 
@@ -81,7 +79,6 @@ export default function usePhones() {
   useEffect(() => {
     dispatch(fetchBrands());
     dispatch(fetchStorageOptions());
-    dispatch(fetchSpecifications());
   }, [dispatch]);
 
   const handleRefresh = useCallback(() => {
@@ -178,7 +175,7 @@ export default function usePhones() {
     phones,
     brands,
     storageOptions,
-    specifications,
+    specifications: [],
     apiLoading,
     submitting,
     error,

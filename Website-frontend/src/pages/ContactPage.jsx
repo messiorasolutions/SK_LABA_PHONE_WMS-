@@ -134,9 +134,9 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* Centered Inquiry Form with Premium Glassmorphism Look */}
+        {/* Centered Inquiry Form with Light Blue Outline */}
         <div className="max-w-[640px] mx-auto">
-          <div className="relative rounded-3xl p-6 sm:p-8 bg-[#090E1D]/90 backdrop-blur-2xl border border-white/[0.12] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9)] ring-1 ring-white/[0.04] overflow-hidden">
+          <div className="relative rounded-3xl p-6 sm:p-8 bg-[#090E1D]/90 backdrop-blur-2xl border border-sky-500/35 hover:border-sky-400/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9)] ring-1 ring-sky-500/15 overflow-hidden transition-colors duration-300">
             {/* Top glass reflection accent line */}
             <div className="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-blue-400/50 via-white/30 to-transparent pointer-events-none" />
             
@@ -214,7 +214,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       disabled={loading}
-                      className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-white/[0.1] hover:border-white/[0.18] focus:border-sky-500/60 text-white text-xs sm:text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 backdrop-blur-md transition-all shadow-inner disabled:opacity-50"
+                      className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-sky-500/35 hover:border-sky-400/60 focus:border-sky-400 text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 backdrop-blur-md transition-all shadow-inner disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -233,7 +233,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       disabled={loading}
-                      className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-white/[0.1] hover:border-white/[0.18] focus:border-sky-500/60 text-white text-xs sm:text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 backdrop-blur-md transition-all shadow-inner disabled:opacity-50 font-sans"
+                      className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-sky-500/35 hover:border-sky-400/60 focus:border-sky-400 text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 backdrop-blur-md transition-all shadow-inner disabled:opacity-50 font-sans"
                     />
                   </div>
                 </div>
@@ -252,7 +252,7 @@ export default function ContactPage() {
                     onChange={handleChange}
                     required
                     disabled={loading}
-                    className="w-full min-h-[88px] px-3.5 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-white/[0.1] hover:border-white/[0.18] focus:border-sky-500/60 text-white text-xs sm:text-sm focus:outline-none focus:ring-4 focus:ring-sky-500/10 backdrop-blur-md transition-all shadow-inner disabled:opacity-50 resize-none leading-relaxed"
+                    className="w-full min-h-[88px] px-3.5 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-sky-500/35 hover:border-sky-400/60 focus:border-sky-400 text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 backdrop-blur-md transition-all shadow-inner disabled:opacity-50 resize-none leading-relaxed"
                   />
                 </div>
               </div>

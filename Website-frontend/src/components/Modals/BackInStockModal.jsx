@@ -90,7 +90,7 @@ export default function BackInStockModal({ phone, onClose }) {
     }
   };
 
-  const whatsappPhone = STORE_INFO.whatsapp || '94700000000';
+  const whatsappPhone = STORE_INFO.whatsapp || '+821058927482';
   const whatsappUrl = `https://wa.me/${whatsappPhone.replace(/\D/g, '')}?text=${encodeURIComponent(
     `Hi SK LABA PHONE, I would like to inquire about stock for ${phone?.name || 'this phone'}.`
   )}`;

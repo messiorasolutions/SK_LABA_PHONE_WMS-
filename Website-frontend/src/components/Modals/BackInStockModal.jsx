@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, AlertCircle, Bell, BellRing, Phone, Mail, User, FileText, CheckCircle2 } from 'lucide-react';
+import { X, AlertCircle, Phone, Mail, User, FileText, CheckCircle2 } from 'lucide-react';
 import { createBackInStockRequest } from '../../services/backInStockService';
 import { STORE_INFO } from '../../constants/siteConfig';
 
@@ -108,14 +108,9 @@ export default function BackInStockModal({ phone, onClose }) {
       <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[480px] md:w-[520px] bg-[#0A0F1E] border-l border-theme-border shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
-              <BellRing className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-white">Back-in-Stock Alert</h2>
-              <p className="text-[11px] text-theme-textMuted">Get notified instantly when stock arrives</p>
-            </div>
+          <div>
+            <h2 className="text-sm font-semibold text-white">Back-in-Stock Alert</h2>
+            <p className="text-[11px] text-theme-textMuted">Get notified instantly when stock arrives</p>
           </div>
 
           <button
@@ -180,7 +175,7 @@ export default function BackInStockModal({ phone, onClose }) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full py-3 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all cursor-pointer"
+                  className="w-full py-2.5 px-6 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/40 text-white text-sm font-medium shadow-sm transition-all cursor-pointer"
                 >
                   Done
                 </button>
@@ -303,7 +298,7 @@ export default function BackInStockModal({ phone, onClose }) {
               {/* Specific Notes (Optional) */}
               <div>
                 <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Preference or Notes <span className="text-slate-500 font-normal">(Optional, max 500 chars)</span>
+                  Preference or Notes <span className="text-slate-500 font-normal">(Optional)</span>
                 </label>
                 <div className="relative">
                   <div className="absolute top-2.5 left-3 pointer-events-none text-slate-400">
@@ -318,11 +313,6 @@ export default function BackInStockModal({ phone, onClose }) {
                     className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all resize-none"
                   />
                 </div>
-                <div className="text-right mt-1">
-                  <span className="text-[10px] text-slate-500">
-                    {formData.notes.length}/500
-                  </span>
-                </div>
               </div>
 
               {/* Submit Button */}
@@ -330,10 +320,16 @@ export default function BackInStockModal({ phone, onClose }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-2.5 px-4 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/40 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium shadow-sm transition-all cursor-pointer text-center flex items-center justify-center gap-2"
                 >
-                  <Bell className="w-4 h-4" />
-                  <span>{loading ? 'Submitting Request...' : 'Notify Me When Available'}</span>
+                  {loading ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Submitting Request...</span>
+                    </>
+                  ) : (
+                    <span>Notify Me When Available</span>
+                  )}
                 </button>
               </div>
 

@@ -249,7 +249,7 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       </section>
 
       {activeOffers.length > 0 && (
-        <section className="py-16 bg-black border-b border-white/10">
+        <section className="pt-16 pb-8 sm:pb-10 bg-black">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
               <div>
@@ -325,7 +325,7 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       )}
 
       {/* About Us Section */}
-      <section id="about" className="py-16 sm:py-20 bg-black border-b border-white/10 scroll-mt-20">
+      <section id="about" className="pt-8 sm:pt-10 pb-16 sm:pb-20 bg-black scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Left Side: About Image */}

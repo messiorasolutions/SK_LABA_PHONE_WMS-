@@ -200,9 +200,9 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       <TrustBadges />
 
 
-      <section className="relative w-full bg-black overflow-hidden select-none">
-        <div className="absolute top-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-b from-[#050914] to-transparent z-10 pointer-events-none" />
-        <div className="absolute bottom-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-t from-[#040812] to-transparent z-10 pointer-events-none" />
+      <section className="relative w-full bg-black overflow-hidden select-none mt-12 sm:mt-16 md:mt-20">
+        <div className="absolute top-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
+        <div className="absolute bottom-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
 
         <div
           className="relative w-full h-[380px] sm:h-[480px] md:h-[580px] lg:h-[660px] xl:h-[700px] max-h-[720px] flex items-center justify-center overflow-hidden cursor-pointer group"

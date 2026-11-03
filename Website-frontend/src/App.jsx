@@ -145,26 +145,28 @@ export default function App() {
       )}
 
       {selectedPhoneForDetail && (
-        <PhoneDetailModal
-          phone={selectedPhoneForDetail}
-          onClose={() => setSelectedPhoneForDetail(null)}
-          onOpenReserve={(p) => {
-            setSelectedPhoneForReserve(p);
-            setSelectedPhoneForDetail(null);
-          }}
-          onOpenInquiry={(p) => {
-            setInquiryModalData({ phone: p });
-            setSelectedPhoneForDetail(null);
-          }}
-          onOpenSell={(p) => {
-            setSellModalData({ desiredPhone: p });
-            setSelectedPhoneForDetail(null);
-          }}
-          onOpenNotifyBackInStock={(p) => {
-            setSelectedPhoneForBackInStock(p);
-            setSelectedPhoneForDetail(null);
-          }}
-        />
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black">
+          <PhoneDetailModal
+            phone={selectedPhoneForDetail}
+            onClose={() => setSelectedPhoneForDetail(null)}
+            onOpenReserve={(p) => {
+              setSelectedPhoneForReserve(p);
+              setSelectedPhoneForDetail(null);
+            }}
+            onOpenInquiry={(p) => {
+              setInquiryModalData({ phone: p });
+              setSelectedPhoneForDetail(null);
+            }}
+            onOpenSell={(p) => {
+              setSellModalData({ desiredPhone: p });
+              setSelectedPhoneForDetail(null);
+            }}
+            onOpenNotifyBackInStock={(p) => {
+              setSelectedPhoneForBackInStock(p);
+              setSelectedPhoneForDetail(null);
+            }}
+          />
+        </div>
       )}
 
       {selectedPhoneForReserve && (

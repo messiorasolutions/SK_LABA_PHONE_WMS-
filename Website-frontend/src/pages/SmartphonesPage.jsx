@@ -293,6 +293,47 @@ export default function SmartphonesPage({ onNavigateToHome }) {
 
   const hasActiveFilters = activeFilterCount > 0 || sortType !== 'newest';
 
+  if (selectedPhoneForDetail) {
+    return (
+      <div className="w-full min-h-screen bg-black">
+        <PhoneDetailModal
+          phone={selectedPhoneForDetail}
+          allPhones={phones}
+          onClose={() => {
+            setSelectedPhoneForDetail(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onOpenReserve={(p) => setSelectedPhoneForReserve(p)}
+          onOpenInquiry={(p) => setSelectedPhoneForInquiry(p)}
+          onOpenNotifyBackInStock={(p) => setSelectedPhoneForBackInStock(p)}
+          onSelectPhone={(simPhone) => {
+            setSelectedPhoneForDetail(simPhone);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+
+        {selectedPhoneForReserve && (
+          <ReservationModal
+            phone={selectedPhoneForReserve}
+            onClose={() => setSelectedPhoneForReserve(null)}
+          />
+        )}
+        {selectedPhoneForInquiry && (
+          <InquiryModal
+            phone={selectedPhoneForInquiry}
+            onClose={() => setSelectedPhoneForInquiry(null)}
+          />
+        )}
+        {selectedPhoneForBackInStock && (
+          <BackInStockModal
+            phone={selectedPhoneForBackInStock}
+            onClose={() => setSelectedPhoneForBackInStock(null)}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full bg-theme-bg min-h-screen py-8 sm:py-12 text-theme-textPrimary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -772,7 +813,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
               <PhoneCard
                 key={phone.phone_id || phone.id}
                 phone={phone}
-                onViewDetails={(p) => setSelectedPhoneForDetail(p)}
+                onViewDetails={(p) => { setSelectedPhoneForDetail(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                 onReserve={(p) => setSelectedPhoneForReserve(p)}
                 onNotifyBackInStock={(p) => setSelectedPhoneForBackInStock(p)}
               />

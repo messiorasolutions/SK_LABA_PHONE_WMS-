@@ -42,7 +42,7 @@
     },
     {
       "name": "Inquiries",
-      "description": "Public customer inquiry submission and dashboard inquiry management APIs"
+      "description": "Public customer general inquiry submission and dashboard inquiry management APIs"
     },
     {
       "name": "Instalment Plans",
@@ -2336,24 +2336,23 @@
         "tags": [
           "Inquiries"
         ],
-        "summary": "Submit Customer Inquiry (Public)",
-        "description": "Public rate-limited endpoint for customer inquiries from the website. Does not require authentication.",
+        "summary": "Submit Customer General Inquiry (Public)",
+        "description": "Public rate-limited endpoint for customer general inquiries from the Home Page. Does not require authentication or phone association.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "example": {
-                "name": "John Doe",
+                "customer_name": "Kasun Perera",
                 "phone_number": "+94771234567",
-                "message": "Is the Apple iPhone 15 Pro 128GB currently in stock?",
-                "phone_id": 1
+                "message": "I would like to get more information about your available iPhones."
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Inquiry submitted successfully",
+            "description": "General inquiry submitted successfully",
             "content": {
               "application/json": {
                 "example": {
@@ -2361,22 +2360,20 @@
                   "message": "Inquiry submitted successfully. Our team will contact you soon.",
                   "data": {
                     "inquiry_id": 1,
-                    "customer_name": "John Doe",
-                    "name": "John Doe",
+                    "customer_name": "Kasun Perera",
+                    "name": "Kasun Perera",
                     "phone_number": "+94771234567",
-                    "message": "Is the Apple iPhone 15 Pro 128GB currently in stock?",
-                    "phone_id": 1,
+                    "message": "I would like to get more information about your available iPhones.",
+                    "phone_id": null,
+                    "inquiry_type": "GENERAL",
                     "status": "New",
-                    "selected_phone": {
-                      "phone_id": 1,
-                      "name": "iPhone 15 Pro",
-                      "price": 345000,
-                      "brand_name": "Apple",
-                      "availability": "IN_STOCK",
-                      "status": "PUBLISHED"
-                    },
-                    "created_at": "2026-10-29T06:00:00.000Z",
-                    "updated_at": "2026-10-29T06:00:00.000Z"
+                    "selected_phone": null,
+                    "assigned_to_user_id": null,
+                    "assigned_staff": null,
+                    "updated_by_user_id": null,
+                    "updated_by_staff": null,
+                    "created_at": "2026-11-03T05:00:00.000Z",
+                    "updated_at": "2026-11-03T05:00:00.000Z"
                   }
                 }
               }
@@ -2384,9 +2381,6 @@
           },
           "400": {
             "description": "Validation error (missing or malformed fields)"
-          },
-          "404": {
-            "description": "Referenced phone does not exist"
           },
           "429": {
             "description": "Too many inquiry submissions from this IP"
@@ -2398,7 +2392,7 @@
           "Inquiries"
         ],
         "summary": "List Inquiries (Admin & Staff)",
-        "description": "Protected endpoint for dashboard users to view paginated inquiries with searching and filtering.",
+        "description": "Protected endpoint for dashboard users to view paginated inquiries with searching and filtering. Supports both new general inquiries (inquiry_type: GENERAL) and historical phone-associated inquiries (inquiry_type: PHONE_SPECIFIC).",
         "parameters": [
           {
             "name": "page",
@@ -2449,7 +2443,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of reservations",
+            "description": "Paginated list of inquiries",
             "content": {
               "application/json": {
                 "example": {
@@ -2457,25 +2451,56 @@
                   "data": [
                     {
                       "inquiry_id": 1,
-                      "customer_name": "John Doe",
+                      "customer_name": "Kasun Perera",
+                      "name": "Kasun Perera",
                       "phone_number": "+94771234567",
-                      "message": "Is the Apple iPhone 15 Pro 128GB currently in stock?",
-                      "phone_id": 1,
+                      "message": "I would like to get more information about your available iPhones.",
+                      "phone_id": null,
+                      "inquiry_type": "GENERAL",
                       "status": "New",
                       "assigned_to_user_id": null,
+                      "assigned_staff": null,
                       "updated_by_user_id": null,
-                      "selected_phone": {
-                        "phone_id": 1,
-                        "name": "iPhone 15 Pro",
-                        "price": 345000,
-                        "brand_name": "Apple"
+                      "updated_by_staff": null,
+                      "selected_phone": null,
+                      "created_at": "2026-11-03T05:00:00.000Z",
+                      "updated_at": "2026-11-03T05:00:00.000Z"
+                    },
+                    {
+                      "inquiry_id": 2,
+                      "customer_name": "Dilshan Silva",
+                      "name": "Dilshan Silva",
+                      "phone_number": "+94719876543",
+                      "message": "Is trade-in available for iPhone 15 Pro?",
+                      "phone_id": 2,
+                      "inquiry_type": "PHONE_SPECIFIC",
+                      "status": "In Progress",
+                      "assigned_to_user_id": 2,
+                      "assigned_staff": {
+                        "user_id": 2,
+                        "display_name": "Staff Handler",
+                        "email": "staff@sklabaphone.com"
                       },
-                      "created_at": "2026-10-29T06:00:00.000Z",
-                      "updated_at": "2026-10-29T06:00:00.000Z"
+                      "updated_by_user_id": 2,
+                      "updated_by_staff": {
+                        "user_id": 2,
+                        "display_name": "Staff Handler",
+                        "email": "staff@sklabaphone.com"
+                      },
+                      "selected_phone": {
+                        "phone_id": 2,
+                        "name": "iPhone 15 Pro Max",
+                        "price": 1199.99,
+                        "brand_name": "Apple Inc.",
+                        "availability": "IN_STOCK",
+                        "status": "PUBLISHED"
+                      },
+                      "created_at": "2026-10-26T12:00:00.000Z",
+                      "updated_at": "2026-10-26T14:00:00.000Z"
                     }
                   ],
                   "pagination": {
-                    "total": 1,
+                    "total": 2,
                     "page": 1,
                     "limit": 10,
                     "totalPages": 1

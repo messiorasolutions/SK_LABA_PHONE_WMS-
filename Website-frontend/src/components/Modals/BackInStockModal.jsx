@@ -298,7 +298,7 @@ export default function BackInStockModal({ phone, onClose }) {
               {/* Specific Notes (Optional) */}
               <div>
                 <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Preference or Notes <span className="text-slate-500 font-normal">(Optional, max 500 chars)</span>
+                  Preference or Notes <span className="text-slate-500 font-normal">(Optional)</span>
                 </label>
                 <div className="relative">
                   <div className="absolute top-2.5 left-3 pointer-events-none text-slate-400">
@@ -312,11 +312,6 @@ export default function BackInStockModal({ phone, onClose }) {
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all resize-none"
                   />
-                </div>
-                <div className="text-right mt-1">
-                  <span className="text-[10px] text-slate-500">
-                    {formData.notes.length}/500
-                  </span>
                 </div>
               </div>
 

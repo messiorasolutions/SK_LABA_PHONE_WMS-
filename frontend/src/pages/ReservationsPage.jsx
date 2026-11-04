@@ -297,7 +297,7 @@ export default function ReservationsPage() {
             Customer Reservations
           </h1>
           <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mt-0.5">
-            Hold requests and preferred in-store pickup reservations (SRS MG-06)
+            Hold requests and preferred in-store pickup reservations
           </p>
         </div>
 

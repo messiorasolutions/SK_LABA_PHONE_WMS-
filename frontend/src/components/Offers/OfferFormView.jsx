@@ -172,9 +172,6 @@ export default function OfferFormView({
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Offers Management</span>
         </button>
-        <span className="text-xs font-normal text-slate-400">
-          SRS MG-03 Promotional Campaign
-        </span>
       </div>
 
       {/* ── Page Header ──────────────────────────────────────────────── */}

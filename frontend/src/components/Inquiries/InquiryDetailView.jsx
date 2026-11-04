@@ -70,9 +70,6 @@ export default function InquiryDetailView({
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Customer Inquiries</span>
         </button>
-        <span className="text-xs font-normal text-slate-400">
-          Inquiry Management (SRS MG-07)
-        </span>
       </div>
 
       {/* ── Page Header ──────────────────────────────────────────────── */}

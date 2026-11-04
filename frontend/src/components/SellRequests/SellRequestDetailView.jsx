@@ -145,9 +145,6 @@ export default function SellRequestDetailView({
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Sell & Trade-In Requests</span>
         </button>
-        <span className="text-xs font-normal text-slate-400">
-          Device Trade-in Assessment (SRS MG-08)
-        </span>
       </div>
 
       {/* ── Page Header ──────────────────────────────────────────────── */}

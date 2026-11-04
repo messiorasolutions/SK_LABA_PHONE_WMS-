@@ -88,9 +88,6 @@ export default function ReservationDetailView({
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Customer Reservations</span>
         </button>
-        <span className="text-xs font-normal text-slate-400">
-          Reservation Management (SRS MG-06)
-        </span>
       </div>
 
       {/* ── Page Header ──────────────────────────────────────────────── */}
@@ -101,7 +98,7 @@ export default function ReservationDetailView({
           </div>
           <div>
             <h1 className="text-xl font-normal text-slate-900 dark:text-white tracking-tight">
-              Reservation #{reservation.reservation_id}
+              Reservation
             </h1>
             <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mt-0.5">
               Received on {formatDateTime(reservation.created_at)} · Customer: {reservation.customer_name}

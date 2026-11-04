@@ -79,9 +79,6 @@ export default function BackInStockDetailView({
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Back-in-Stock Requests</span>
         </button>
-        <span className="text-xs font-normal text-slate-400">
-          Device Notification Management (SRS ST-09)
-        </span>
       </div>
 
       {/* ── Page Header ──────────────────────────────────────────────── */}

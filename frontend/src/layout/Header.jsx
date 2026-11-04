@@ -1,13 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import {
   Menu,
   Sun,
   Moon,
   Search,
-  ChevronDown,
-  LogOut,
-  CheckCircle2,
   X,
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
@@ -15,12 +12,8 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Header({ toggleSidebar }) {
   const { isDark, toggleTheme } = useTheme();
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const location = useLocation();
-
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef(null);
@@ -37,41 +30,13 @@ export default function Header({ toggleSidebar }) {
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, []);
 
-  // Close dropdowns on outside click or escape
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownOpen(false);
-      }
-    }
-    function handleKeyDown(event) {
-      if (event.key === 'Escape') {
-        setDropdownOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
-
-  const handleLogout = async () => {
-    setDropdownOpen(false);
-    if (confirm('Are you sure you want to sign out?')) {
-      await logout();
-      navigate('/login');
-    }
-  };
-
   const displayName = user?.display_name || user?.name || 'Admin';
   const initial = displayName.charAt(0).toUpperCase();
 
   // Get simple breadcrumb title
   const getPageTitle = () => {
     const path = location.pathname;
+    if (path.startsWith('/profile') || path.startsWith('/my-profile')) return 'My Profile';
     if (path.startsWith('/phone-management') || path.startsWith('/phones')) return 'Phone Management';
     if (path.startsWith('/stock-management') || path.startsWith('/stock') || path.startsWith('/storage-management')) return 'Stock Management';
     if (path.startsWith('/offers') || path.startsWith('/offer-management')) return 'Offers Management';
@@ -125,7 +90,7 @@ export default function Header({ toggleSidebar }) {
         </span>
       </div>
 
-      {/* Right Controls: Status, Theme, Notifications & User Pill */}
+      {/* Right Controls: Theme Toggle & Avatar Button */}
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Dark/Light mode toggle */}
         <button
@@ -137,72 +102,35 @@ export default function Header({ toggleSidebar }) {
           {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
         </button>
 
-        {/* User Avatar & Dropdown Pill */}
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            type="button"
-            className={`flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full transition-all duration-150 cursor-pointer border ${
-              dropdownOpen
-                ? 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-500/30 shadow-xs'
-                : 'hover:bg-slate-100/80 dark:hover:bg-slate-800/60 border-slate-200/80 dark:border-slate-800'
-            }`}
-            style={{ borderRadius: '9999px' }}
-          >
-            {/* Avatar Circle */}
-            <div className="relative shrink-0">
-              <div
-                className="w-8 h-8 rounded-full bg-gradient-to-tr from-black via-neutral-900 to-rose-950 text-white font-bold flex items-center justify-center text-xs shadow-xs ring-1 ring-white dark:ring-slate-900 border border-rose-900/50"
-                style={{ borderRadius: '9999px' }}
-              >
-                {initial}
-              </div>
-              <span
-                className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white dark:ring-slate-900"
-                style={{ borderRadius: '9999px' }}
-              />
-            </div>
-
-            <div className="text-left hidden sm:block">
-              <div className="text-xs font-bold text-slate-800 dark:text-slate-100 leading-tight">
-                {displayName}
-              </div>
-            </div>
-
-            <ChevronDown
-              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ml-0.5 ${
-                dropdownOpen ? 'rotate-180 text-rose-600 dark:text-rose-400' : ''
-              }`}
+        {/* Direct Link to My Profile (Avatar only) */}
+        <Link
+          to="/profile"
+          className={`relative shrink-0 p-0.5 rounded-full transition-all cursor-pointer block ${
+            location.pathname === '/profile' || location.pathname === '/my-profile'
+              ? 'ring-2 ring-rose-600 dark:ring-rose-400'
+              : 'hover:ring-2 hover:ring-slate-300 dark:hover:ring-slate-600'
+          }`}
+          title="My Profile"
+        >
+          {user?.avatar_url ? (
+            <img
+              src={user.avatar_url}
+              alt={displayName}
+              className="w-8 h-8 rounded-full object-cover ring-1 ring-white dark:ring-slate-900 border border-slate-200 dark:border-slate-700"
             />
-          </button>
-
-          {/* Simple User Menu Dropdown */}
-          {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl shadow-slate-900/10 dark:shadow-black/50 rounded-2xl z-50 text-xs overflow-hidden animate-popover">
-              <div className="p-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40">
-                <p className="font-bold text-slate-900 dark:text-white truncate">
-                  {displayName}
-                </p>
-                <p className="text-[11px] text-slate-400 font-mono truncate">
-                  {user?.email || 'admin@sklabaphone.com'}
-                </p>
-              </div>
-
-              <div className="p-1.5">
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors text-left font-semibold cursor-pointer"
-                >
-                  <div className="w-6 h-6 rounded-full bg-rose-100/80 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-                    <LogOut className="w-3.5 h-3.5" />
-                  </div>
-                  <span>Sign Out</span>
-                </button>
-              </div>
+          ) : (
+            <div
+              className="w-8 h-8 rounded-full bg-gradient-to-tr from-black via-neutral-900 to-rose-950 text-white font-bold flex items-center justify-center text-xs shadow-xs ring-1 ring-white dark:ring-slate-900 border border-rose-900/50"
+              style={{ borderRadius: '9999px' }}
+            >
+              {initial}
             </div>
           )}
-        </div>
+          <span
+            className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white dark:ring-slate-900"
+            style={{ borderRadius: '9999px' }}
+          />
+        </Link>
       </div>
     </header>
   );

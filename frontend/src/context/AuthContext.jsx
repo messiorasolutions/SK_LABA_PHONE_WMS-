@@ -66,6 +66,10 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateUserLocally = (partialData) => {
+    setUser((prev) => (prev ? { ...prev, ...partialData } : prev));
+  };
+
   const value = {
     user,
     role: user?.role || null,
@@ -76,6 +80,7 @@ export function AuthProvider({ children }) {
     csrfToken,
     login,
     logout,
+    updateUserLocally,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

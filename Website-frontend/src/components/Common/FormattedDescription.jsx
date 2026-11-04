@@ -61,7 +61,7 @@ export default function FormattedDescription({ content, className = '', isDark =
   const lines = String(content).split('\n');
 
   return (
-    <div className={`space-y-1.5 leading-relaxed ${className}`}>
+    <div className={`space-y-1.5 leading-relaxed break-words ${className}`}>
       {lines.map((line, idx) => {
         const trimmed = line.trim();
         if (!trimmed) {

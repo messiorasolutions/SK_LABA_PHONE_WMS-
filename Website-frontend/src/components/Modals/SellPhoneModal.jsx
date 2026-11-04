@@ -386,7 +386,7 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                       <label className="block text-xs font-semibold text-slate-200 mb-1.5">
                         Storage Capacity <span className="text-red-400">*</span>
                       </label>
-                      <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-2">
                         {STORAGE_OPTIONS.map((cap) => {
                           const isSelected = formData.storage_capacity === cap;
                           return (
@@ -425,7 +425,7 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                     </div>
 
                     <div>
-                      <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
                         <label className="block text-xs font-semibold text-slate-200">
                           Battery Health Percentage <span className="text-red-400">*</span>
                         </label>

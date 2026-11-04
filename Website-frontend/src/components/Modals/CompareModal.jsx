@@ -54,7 +54,7 @@ export default function CompareModal({
       {/* Right-Side Slide-Over Drawer */}
       <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[90%] md:w-[75%] lg:w-[65%] bg-[#0A0F1E] border-l border-theme-border shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
           <div>
             <h2 className="text-sm font-medium text-white">Side-by-Side Phone Comparison</h2>
             <p className="text-xs text-theme-textMuted">
@@ -213,11 +213,11 @@ export default function CompareModal({
               </div>
 
               {/* Technical Comparison Matrix Table */}
-              <div className="bg-transparent border border-theme-border rounded-lg overflow-hidden mt-6">
+              <div className="bg-transparent border border-theme-border rounded-lg overflow-x-auto mt-6">
                 <div className="px-3.5 py-2.5 bg-white/[0.02] border-b border-theme-border text-[11px] font-medium uppercase tracking-wider text-theme-textMuted">
                   Detailed Attribute Breakdown
                 </div>
-                <div className="divide-y divide-theme-border/60">
+                <div className="divide-y divide-theme-border/60 min-w-[480px]">
                   {matrix
                     .filter((row) => row.key !== 'photos' && row.key !== 'main_photo')
                     .map((row, idx) => (

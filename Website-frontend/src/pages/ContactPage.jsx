@@ -114,7 +114,7 @@ export default function ContactPage() {
           </div>
 
           {/* Quick Action Badges */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
             <button
               type="button"
               onClick={handleWhatsApp}
@@ -136,7 +136,7 @@ export default function ContactPage() {
 
         {/* Centered Inquiry Form with Light Blue Outline */}
         <div className="max-w-[640px] mx-auto">
-          <div className="relative rounded-3xl p-6 sm:p-8 bg-[#090E1D]/90 backdrop-blur-2xl border border-sky-500/35 hover:border-sky-400/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9)] ring-1 ring-sky-500/15 overflow-hidden transition-colors duration-300">
+          <div className="relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 bg-[#090E1D]/90 backdrop-blur-2xl border border-sky-500/35 hover:border-sky-400/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9)] ring-1 ring-sky-500/15 overflow-hidden transition-colors duration-300">
             {/* Top glass reflection accent line */}
             <div className="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-blue-400/50 via-white/30 to-transparent pointer-events-none" />
             

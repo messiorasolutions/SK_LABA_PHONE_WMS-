@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import {
   ArrowLeft,
   BellRing,
-  Phone as PhoneIcon,
   Mail,
   User,
   Clock,
-  MessageCircle,
   Check,
   RotateCcw,
   RefreshCw,
@@ -80,24 +78,19 @@ export default function BackInStockDetailView({
           <span>Back to Back-in-Stock Requests</span>
         </button>
         <span className="text-xs font-normal text-slate-400">
-          Device Notification Management (SRS ST-09)
+          Device Notification Management
         </span>
       </div>
 
       {/* ── Page Header ──────────────────────────────────────────────── */}
       <div className="border-b border-slate-200 dark:border-slate-800 pb-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 flex items-center justify-center text-rose-600 dark:text-rose-400">
-            <BellRing className="w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-xl font-normal text-slate-900 dark:text-white tracking-tight">
-              Manage Back-in-Stock: {phone.name || phone.model || 'Device'}
-            </h1>
-            <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mt-0.5">
-              {allCustomers.length} total customer notification requests ({pendingCount} pending, {contactedCount} contacted)
-            </p>
-          </div>
+        <div>
+          <h1 className="text-xl font-normal text-slate-900 dark:text-white tracking-tight">
+            Manage Back-in-Stock: {phone.name || phone.model || 'Device'}
+          </h1>
+          <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mt-0.5">
+            {allCustomers.length} total customer notification requests ({pendingCount} pending, {contactedCount} contacted)
+          </p>
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -250,7 +243,6 @@ export default function BackInStockDetailView({
                 ) : (
                   filteredCustomers.map((cust) => {
                     const reqId = cust.request_id || cust.id;
-                    const cleanPhone = (cust.phone_number || '').replace(/\D/g, '');
                     const isUpdating = updatingId === reqId;
                     const isPending = cust.status === 'Pending';
 
@@ -264,41 +256,15 @@ export default function BackInStockDetailView({
                             {cust.customer_name || 'Customer'}
                           </div>
                           <div className="text-[10px] text-slate-400 mt-0.5">
-                            ID: #{reqId}
+                            ID: {reqId}
                           </div>
                         </td>
 
                         <td className="py-3 px-4">
                           <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono text-slate-800 dark:text-slate-200">
-                                {cust.phone_number || '-'}
-                              </span>
-                              {cleanPhone && (
-                                <div className="flex items-center gap-1">
-                                  <a
-                                    href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-                                      `Hi ${cust.customer_name || 'Customer'}, good news from SK LABA PHONE! The ${
-                                        phone.name || phone.model || 'device'
-                                      } you requested is now back in stock.`
-                                    )}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    title="WhatsApp Message"
-                                    className="p-1 rounded-md text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors cursor-pointer"
-                                  >
-                                    <MessageCircle className="w-3.5 h-3.5" />
-                                  </a>
-                                  <a
-                                    href={`tel:${cust.phone_number}`}
-                                    title="Call Customer"
-                                    className="p-1 rounded-md text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                                  >
-                                    <PhoneIcon className="w-3.5 h-3.5" />
-                                  </a>
-                                </div>
-                              )}
-                            </div>
+                            <span className="font-mono text-slate-800 dark:text-slate-200">
+                              {cust.phone_number || '-'}
+                            </span>
                             {cust.email && (
                               <div className="flex items-center gap-1 text-[11px] text-slate-400">
                                 <Mail className="w-3 h-3" />

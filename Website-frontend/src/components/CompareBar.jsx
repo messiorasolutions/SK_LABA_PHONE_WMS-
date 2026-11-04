@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GitCompare, X, ArrowRight, Trash2, Plus, Smartphone, ChevronDown } from 'lucide-react';
+import { GitCompare, X, ArrowRight, Trash2, Plus } from 'lucide-react';
 import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
 
 export default function CompareBar({ phones = [], isOpen = false, onClose, onOpenCompare }) {
@@ -47,17 +47,18 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
   const canCompare = compareIds.length >= 2 && compareIds.length <= 3;
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-4xl animate-in slide-in-from-bottom-4 duration-300">
-      <div className="relative bg-[#0A0F1E]/95 backdrop-blur-xl border border-white/20 rounded-2xl p-3 sm:p-4 shadow-[0_20px_60px_rgba(0,0,0,0.9)] flex flex-wrap items-center justify-between gap-3">
+    <div className="fixed bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 w-[95%] sm:w-11/12 max-w-4xl animate-in slide-in-from-bottom-4 duration-300">
+      <div className="relative bg-[#0A0F1E]/95 backdrop-blur-xl border border-white/20 rounded-2xl p-2.5 sm:p-4 shadow-[0_20px_60px_rgba(0,0,0,0.9)] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3">
         {/* Left: Info badge & 3 Slots */}
-        <div className="flex items-center gap-2.5 sm:gap-4 overflow-x-auto py-1 max-w-full">
-          <div className="flex items-center gap-2 text-white font-semibold text-xs sm:text-sm shrink-0 pr-1">
-            <GitCompare className="w-4 h-4 text-blue-400" />
-            <span>Compare ({compareIds.length}/3)</span>
+        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto py-1 max-w-full [scrollbar-width:none]">
+          <div className="flex items-center gap-1.5 text-white font-semibold text-xs shrink-0 pr-1">
+            <GitCompare className="w-3.5 h-3.5 text-blue-400" />
+            <span className="hidden sm:inline">Compare</span>
+            <span>({compareIds.length}/3)</span>
           </div>
 
           {/* 3 Dedicated Comparison Slots */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {[0, 1, 2].map((slotIdx) => {
               const phone = selectedPhones[slotIdx];
 
@@ -70,26 +71,26 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
                 return (
                   <div
                     key={id}
-                    className="flex items-center gap-2 bg-white/5 border border-white/15 rounded-xl px-2.5 py-1.5 shrink-0 hover:border-white/30 transition-colors"
+                    className="flex items-center gap-1.5 sm:gap-2 bg-white/5 border border-white/15 rounded-xl px-2 py-1 sm:px-2.5 sm:py-1.5 shrink-0 hover:border-white/30 transition-colors"
                   >
                     {photo ? (
                       <img
                         src={photo}
                         alt={phone.name}
-                        className="w-7 h-7 object-contain rounded bg-black/40 p-0.5"
+                        className="w-6 h-6 sm:w-7 sm:h-7 object-contain rounded bg-black/40 p-0.5"
                       />
                     ) : (
-                      <div className="w-7 h-7 bg-white/5 rounded flex items-center justify-center text-[10px] text-white/50">
+                      <div className="w-6 h-6 sm:w-7 sm:h-7 bg-white/5 rounded flex items-center justify-center text-[10px] text-white/50">
                         📱
                       </div>
                     )}
                     <div className="flex flex-col text-left">
-                      <span className="text-xs text-white font-medium max-w-[85px] sm:max-w-[110px] truncate leading-tight">
+                      <span className="text-[11px] sm:text-xs text-white font-medium max-w-[70px] sm:max-w-[100px] truncate leading-tight">
                         {phone.name}
                       </span>
                       {phone.price && (
-                        <span className="text-[10px] text-white/70 font-mono leading-none mt-0.5">
-                          ${Number(phone.price).toFixed(2)}
+                        <span className="text-[9px] sm:text-[10px] text-white/70 font-mono leading-none mt-0.5">
+                          ${Number(phone.price).toFixed(0)}
                         </span>
                       )}
                     </div>
@@ -99,13 +100,13 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
                       className="text-white/40 hover:text-red-400 p-0.5 rounded-full hover:bg-white/10 transition-colors cursor-pointer ml-0.5"
                       title="Remove from comparison"
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </button>
                   </div>
                 );
               }
 
-              // Empty Slot (Allows direct phone selection to compare)
+              // Empty Slot
               return (
                 <div key={`slot-empty-${slotIdx}`} className="relative">
                   <button
@@ -114,11 +115,11 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
                       setActiveSlotIdx(slotIdx);
                       setDropdownOpen((prev) => (activeSlotIdx === slotIdx ? !prev : true));
                     }}
-                    className="flex items-center gap-1.5 bg-white/[0.03] hover:bg-white/[0.08] border border-dashed border-white/20 hover:border-white/40 rounded-xl px-3 py-2 text-xs text-white/60 hover:text-white transition-all cursor-pointer shrink-0"
+                    className="flex items-center gap-1 sm:gap-1.5 bg-white/[0.03] hover:bg-white/[0.08] border border-dashed border-white/20 hover:border-white/40 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs text-white/60 hover:text-white transition-all cursor-pointer shrink-0"
                     title={`Slot ${slotIdx + 1}: Click to select a phone to compare`}
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span className="text-[11px] font-medium">Add Phone</span>
+                    <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                    <span className="text-[10px] sm:text-[11px] font-medium">Add Phone</span>
                   </button>
                 </div>
               );
@@ -130,7 +131,7 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
         {dropdownOpen && (
           <div
             ref={dropdownRef}
-            className="absolute bottom-full left-4 sm:left-40 mb-2 w-72 sm:w-80 max-h-72 bg-[#0A0F1E] border border-white/20 rounded-xl shadow-2xl p-2 z-50 overflow-y-auto animate-in fade-in zoom-in-95 duration-150"
+            className="absolute bottom-full left-0 sm:left-4 md:left-40 mb-2 w-full sm:w-80 max-h-72 bg-[#0A0F1E] border border-white/20 rounded-xl shadow-2xl p-2 z-50 overflow-y-auto animate-in fade-in zoom-in-95 duration-150"
           >
             <div className="flex items-center justify-between px-2 py-1.5 border-b border-white/10 mb-1.5">
               <span className="text-[11px] font-semibold text-white/80 uppercase tracking-wider">
@@ -171,10 +172,10 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
                         <img
                           src={pPhoto}
                           alt={p.name}
-                          className="w-8 h-8 object-contain rounded bg-black/40 p-0.5 shrink-0"
+                          className="w-7 h-7 sm:w-8 sm:h-8 object-contain rounded bg-black/40 p-0.5 shrink-0"
                         />
                       ) : (
-                        <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center text-xs text-white/40 shrink-0">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded bg-white/5 flex items-center justify-center text-xs text-white/40 shrink-0">
                           📱
                         </div>
                       )}
@@ -183,7 +184,7 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
                           {p.name}
                         </p>
                         <p className="text-[10px] text-white/60">
-                          {p.brand_name || 'Smartphone'} • ${Number(p.price || 0).toFixed(2)}
+                          {p.brand_name || 'Smartphone'} • ${Number(p.price || 0).toFixed(0)}
                         </p>
                       </div>
                       <Plus className="w-3.5 h-3.5 text-white/40 group-hover:text-white shrink-0" />
@@ -196,16 +197,16 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
         )}
 
         {/* Right: Actions (Clear, Compare Now, Close) */}
-        <div className="flex items-center gap-2 shrink-0 ml-auto">
+        <div className="flex items-center justify-end gap-2 shrink-0 border-t md:border-t-0 border-white/10 pt-1.5 md:pt-0">
           {compareIds.length > 0 && (
             <button
               type="button"
               onClick={clearCompare}
-              className="px-2.5 py-1.5 rounded-lg text-white/50 hover:text-red-400 hover:bg-white/5 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-white/50 hover:text-red-400 hover:bg-white/5 text-[11px] sm:text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
               title="Clear all compared phones"
             >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Clear</span>
+              <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <span>Clear</span>
             </button>
           )}
 
@@ -213,14 +214,15 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
             type="button"
             disabled={!canCompare}
             onClick={() => onOpenCompare && onOpenCompare(compareIds)}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-medium flex items-center gap-2 transition-all ${canCompare
+            className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 transition-all ${
+              canCompare
                 ? 'bg-white/10 hover:bg-white/15 border border-white/20 text-white shadow-sm hover:scale-[1.02] cursor-pointer'
                 : 'bg-white/5 text-white/30 cursor-not-allowed border border-white/10'
-              }`}
+            }`}
             title={canCompare ? 'View Side-by-Side Comparison' : 'Select at least 2 phones to compare'}
           >
             <span>Compare Now</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
 
           {/* Close Dock Button */}
@@ -228,11 +230,11 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors cursor-pointer ml-1"
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors cursor-pointer"
               title="Close Compare Bar"
               aria-label="Close Compare Bar"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           )}
         </div>

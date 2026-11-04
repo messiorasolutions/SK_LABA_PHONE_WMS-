@@ -434,7 +434,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
           </div>
 
           {/* Right Side: Filters Button & Sort By Button */}
-          <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto relative">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 self-start sm:self-auto flex-wrap relative">
             {/* Filters Button */}
             <button
               type="button"
@@ -784,14 +784,14 @@ export default function SmartphonesPage({ onNavigateToHome }) {
 
         {/* Phones Cards Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2.5 sm:gap-3.5 md:gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
               <div
                 key={n}
                 className="bg-theme-surface/70 border border-theme-border rounded-2xl overflow-hidden animate-pulse flex flex-col"
               >
-                <div className="aspect-[4/3.2] sm:aspect-[4/3] w-full bg-theme-input/40" />
-                <div className="p-4 space-y-3">
+                <div className="aspect-square w-full bg-theme-input/40" />
+                <div className="p-2.5 sm:p-4 space-y-2 sm:space-y-3">
                   <div className="h-3 w-16 bg-theme-input/60 rounded" />
                   <div className="h-4 w-3/4 bg-theme-input/60 rounded" />
                   <div className="pt-2 border-t border-theme-border/40">
@@ -831,7 +831,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2.5 sm:gap-3.5 md:gap-4">
             {filteredPhones.map((phone) => (
               <PhoneCard
                 key={phone.phone_id || phone.id}

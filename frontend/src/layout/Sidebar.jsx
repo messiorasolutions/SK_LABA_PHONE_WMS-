@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import logoImg from '../assets/logo.png';
 import {
   MessageSquare,
@@ -349,13 +349,27 @@ export default function Sidebar({ isOpen, onClose }) {
 
         <div className="p-3 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/50">
           <div className="flex items-center justify-between gap-2.5 p-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div
-                className="w-9 h-9 rounded-full bg-gradient-to-tr from-black via-neutral-900 to-rose-950 text-white font-bold flex items-center justify-center text-xs shadow-xs shrink-0 ring-2 ring-white dark:ring-slate-800 border border-rose-900/50"
-                style={{ borderRadius: '9999px' }}
-              >
-                {userInitial}
-              </div>
+            <Link
+              to="/profile"
+              onClick={onClose}
+              className="flex items-center gap-2.5 min-w-0 flex-1 hover:opacity-80 transition-opacity cursor-pointer"
+              title="My Profile"
+            >
+              {user?.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={displayName}
+                  className="w-9 h-9 rounded-full object-cover shrink-0 ring-2 ring-white dark:ring-slate-800 border border-slate-200 dark:border-slate-700"
+                  style={{ borderRadius: '9999px' }}
+                />
+              ) : (
+                <div
+                  className="w-9 h-9 rounded-full bg-gradient-to-tr from-black via-neutral-900 to-rose-950 text-white font-bold flex items-center justify-center text-xs shadow-xs shrink-0 ring-2 ring-white dark:ring-slate-800 border border-rose-900/50"
+                  style={{ borderRadius: '9999px' }}
+                >
+                  {userInitial}
+                </div>
+              )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-xs text-slate-800 dark:text-slate-100 truncate">
@@ -372,7 +386,7 @@ export default function Sidebar({ isOpen, onClose }) {
                   </span>
                 </div>
               </div>
-            </div>
+            </Link>
 
             <button
               onClick={handleLogout}

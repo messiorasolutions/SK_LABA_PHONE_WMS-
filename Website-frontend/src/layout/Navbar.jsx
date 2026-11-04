@@ -136,11 +136,11 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
             <img
               src={logoImg}
               alt={STORE_INFO.name}
-              className="relative z-10 h-14 sm:h-18 md:h-20 w-auto object-contain transition-transform duration-200 group-hover:scale-105 filter drop-shadow-[0_0_16px_rgba(255,255,255,0.25)] drop-shadow-[0_0_30px_rgba(37,99,235,0.35)]"
+              className="relative z-10 h-11 sm:h-14 md:h-16 lg:h-20 w-auto object-contain transition-transform duration-200 group-hover:scale-105 filter drop-shadow-[0_0_16px_rgba(255,255,255,0.25)] drop-shadow-[0_0_30px_rgba(37,99,235,0.35)]"
             />
           </a>
 
-          <nav className="hidden md:flex items-center gap-8 lg:gap-10">
+          <nav className="hidden md:flex items-center gap-4 lg:gap-8 xl:gap-10">
             {NAV_LINKS.map((link) => {
               const isActive = activeTab === link.name;
 
@@ -169,8 +169,8 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
             })}
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="relative hidden sm:block w-48 md:w-56 lg:w-64">
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
+            <div className="relative hidden sm:block w-40 md:w-44 lg:w-56 xl:w-64">
               <div className="flex items-center bg-theme-input/70 backdrop-blur-md border border-theme-borderMedium rounded-full px-3.5 py-2 text-sm text-theme-textSecondary focus-within:border-theme-accent focus-within:ring-1 focus-within:ring-theme-accent transition-all shadow-inner">
                 <Search className="w-4 h-4 text-theme-textMuted mr-2.5 shrink-0" />
                 <input

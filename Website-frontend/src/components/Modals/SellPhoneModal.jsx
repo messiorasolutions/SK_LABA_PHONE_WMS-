@@ -374,7 +374,6 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                         type="text"
                         required
                         maxLength={150}
-                        placeholder="e.g. Apple iPhone 13 Pro or Samsung Galaxy S22"
                         value={formData.brand_and_model}
                         onChange={(e) =>
                           setFormData({ ...formData, brand_and_model: e.target.value })
@@ -387,7 +386,7 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                       <label className="block text-xs font-semibold text-slate-200 mb-1.5">
                         Storage Capacity <span className="text-red-400">*</span>
                       </label>
-                      <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-2">
                         {STORAGE_OPTIONS.map((cap) => {
                           const isSelected = formData.storage_capacity === cap;
                           return (
@@ -426,7 +425,7 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                     </div>
 
                     <div>
-                      <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
                         <label className="block text-xs font-semibold text-slate-200">
                           Battery Health Percentage <span className="text-red-400">*</span>
                         </label>
@@ -468,7 +467,6 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                       <textarea
                         rows={3}
                         maxLength={1000}
-                        placeholder="Include details about box, charger, accessories, or minor issues..."
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         className="w-full flex-1 min-h-[60px] bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none transition-all resize-none shadow-inner leading-relaxed"
@@ -495,7 +493,6 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                           type="text"
                           required
                           maxLength={100}
-                          placeholder="e.g. Kasun Perera"
                           value={formData.customer_name}
                           onChange={(e) =>
                             setFormData({ ...formData, customer_name: e.target.value })
@@ -511,7 +508,6 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                         <input
                           type="tel"
                           required
-                          placeholder="e.g. 077 123 4567"
                           value={formData.phone_number}
                           onChange={(e) =>
                             setFormData({ ...formData, phone_number: e.target.value })

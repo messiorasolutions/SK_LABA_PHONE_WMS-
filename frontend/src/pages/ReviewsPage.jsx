@@ -164,7 +164,7 @@ export default function ReviewsPage() {
         setSelectedReview((prev) => ({ ...prev, ...updated, status: newStatus }));
       }
 
-      const msg = res?.message || `Review #${reviewId} marked as ${newStatus}.`;
+      const msg = res?.message || `Review ${reviewId} marked as ${newStatus}.`;
       setSuccessBanner(msg);
       setTimeout(() => setSuccessBanner(''), 4000);
     } catch (err) {
@@ -336,7 +336,7 @@ export default function ReviewsPage() {
                   const revId = item.review_id;
                   const st = STATUS_CONFIG[item.status] || STATUS_CONFIG.Pending;
                   const isActing = actionLoadingId === revId;
-                  const modName = item.moderator?.display_name || (item.moderated_by_user_id ? `Admin #${item.moderated_by_user_id}` : '-');
+                  const modName = item.moderator?.display_name || (item.moderated_by_user_id ? `Admin ${item.moderated_by_user_id}` : '-');
 
                   return (
                     <tr
@@ -344,7 +344,7 @@ export default function ReviewsPage() {
                       className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
                     >
                       <td className="py-3.5 px-4 font-mono font-normal text-slate-500 dark:text-slate-400">
-                        #{revId}
+                        {revId}
                       </td>
 
                       <td className="py-3.5 px-4">
@@ -497,7 +497,7 @@ export default function ReviewsPage() {
             >
               <div className="p-5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50/60 dark:bg-slate-950/40">
                 <div>
-                  <span className="text-[11px] font-mono text-slate-400 font-normal">Review #{selectedReview.review_id}</span>
+                  <span className="text-[11px] font-mono text-slate-400 font-normal">Review {selectedReview.review_id}</span>
                   <h2 className="text-base font-normal text-slate-900 dark:text-white leading-tight">Review Details</h2>
                 </div>
                 <button
@@ -577,7 +577,7 @@ export default function ReviewsPage() {
                     <div className="flex justify-between">
                       <span className="text-slate-400">Moderator:</span>
                       <span className="font-normal text-slate-700 dark:text-slate-300">
-                        {selectedReview.moderator?.display_name || (selectedReview.moderated_by_user_id ? `Admin #${selectedReview.moderated_by_user_id}` : 'None (Pending)')}
+                        {selectedReview.moderator?.display_name || (selectedReview.moderated_by_user_id ? `Admin ${selectedReview.moderated_by_user_id}` : 'None (Pending)')}
                       </span>
                     </div>
                     {selectedReview.moderated_at && (

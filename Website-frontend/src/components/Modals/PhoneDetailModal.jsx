@@ -132,7 +132,7 @@ function SimilarPhoneCard({ simPhone, onSelectPhone }) {
                     setSelectedColorIdx(idx);
                   }}
                   onMouseEnter={() => setSelectedColorIdx(idx)}
-                  className={`relative w-7 h-7 sm:w-8 sm:h-8 rounded-lg p-0.5 border overflow-hidden transition-all duration-200 cursor-pointer flex items-center justify-center bg-black/60 ${
+                  className={`relative w-6 h-6 sm:w-7 sm:h-7 rounded-lg p-0.5 border overflow-hidden transition-all duration-200 cursor-pointer flex items-center justify-center bg-black/60 ${
                     isSelected
                       ? 'border-white ring-1 ring-white/50 shadow-md scale-105'
                       : 'border-white/15 hover:border-white/40 opacity-70 hover:opacity-100 hover:scale-105'
@@ -497,9 +497,8 @@ export default function PhoneDetailModal({
         {/* Main Grid: Gallery on left, Purchase Info on right */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
           {/* Photo Gallery Column (Left: lg:col-span-6) */}
-          <div className="lg:col-span-6 space-y-4">
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col sm:flex-row gap-3.5 items-stretch">
+          <div className="lg:col-span-6 lg:col-start-1 lg:row-start-1 space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3.5 items-stretch">
                 {/* Thumbnails */}
                 {photos.length > 1 && (
                   <div className="flex sm:flex-col gap-2.5 shrink-0 overflow-x-auto sm:overflow-y-auto max-h-[480px] p-0.5 [scrollbar-width:none]">
@@ -581,21 +580,10 @@ export default function PhoneDetailModal({
                   )}
                 </div>
               </div>
-
-              {/* Description & Overview Section */}
-              {phone.description && (
-                <div className="bg-black rounded-2xl p-4 sm:p-5 mt-3">
-                  <h2 className="text-xs font-normal uppercase tracking-wider text-slate-300 mb-2.5">
-                    Description &amp; Overview
-                  </h2>
-                  <FormattedDescription content={phone.description} isDark={true} className="text-slate-200 font-normal leading-relaxed text-xs sm:text-sm" />
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Right Column: Title, Pricing, Color, Storage, Purchase, Installments */}
-          <div className="lg:col-span-6 flex flex-col justify-start space-y-5">
+          <div className="lg:col-span-6 lg:col-start-7 lg:row-start-1 lg:row-span-2 flex flex-col justify-start space-y-5">
             <div>
               {/* Title & Price on the same line with same font size and wider spacing */}
               <div className="flex flex-wrap items-baseline gap-x-8 sm:gap-x-10 gap-y-2 mb-4">
@@ -626,7 +614,7 @@ export default function PhoneDetailModal({
                     <span>Selected Color:</span>
                     <span className="text-white font-medium capitalize tracking-normal">{activeColor?.name}</span>
                   </div>
-                  <div className="flex flex-wrap items-start gap-6 sm:gap-8 pl-1 sm:pl-2">
+                  <div className="flex flex-wrap items-start gap-3 sm:gap-6 md:gap-8 pl-1 sm:pl-2">
                     {parsedColors.map((c, idx) => {
                       const isSelected = selectedColorIdx === idx;
                       const firstPhoto = c.photos?.[0] || generalPhotos[idx] || generalPhotos[0] || '';
@@ -637,7 +625,7 @@ export default function PhoneDetailModal({
                         <div
                           key={c.id || idx}
                           onClick={() => handleSelectColor(idx)}
-                          className="flex flex-col items-center cursor-pointer group/colorOption w-24 sm:w-28 text-center"
+                          className="flex flex-col items-center cursor-pointer group/colorOption w-20 sm:w-24 md:w-28 text-center"
                         >
                           <div
                             className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl p-[1px] transition-all duration-300 flex items-center justify-center ${isSelected
@@ -688,7 +676,7 @@ export default function PhoneDetailModal({
                     <span>Selected Storage:</span>
                     <span className="text-white font-medium tracking-normal">{selectedStorage}</span>
                   </div>
-                  <div className="flex flex-wrap items-start gap-6 sm:gap-8 pl-1 sm:pl-2">
+                  <div className="flex flex-wrap items-start gap-3 sm:gap-6 md:gap-8 pl-1 sm:pl-2">
                     {phoneStorageOptions.map((s) => {
                       const isSelected = selectedStorage === s.storage_name;
                       let storageQty = 0;
@@ -710,7 +698,7 @@ export default function PhoneDetailModal({
                         <div
                           key={s.storage_id || s.storage_name}
                           onClick={() => setSelectedStorage(s.storage_name)}
-                          className="flex flex-col items-center cursor-pointer group/storageOption w-24 sm:w-28 text-center"
+                          className="flex flex-col items-center cursor-pointer group/storageOption w-20 sm:w-24 md:w-28 text-center"
                         >
                           <div
                             className={`w-full max-w-[88px] sm:max-w-[96px] rounded-xl p-[1px] transition-all duration-300 flex items-center justify-center ${isSelected
@@ -894,6 +882,16 @@ export default function PhoneDetailModal({
               )}
             </div>
           </div>
+
+          {/* Description & Overview Section */}
+          {phone.description && (
+            <div className="lg:col-span-6 lg:col-start-1 lg:row-start-2 bg-black rounded-2xl p-4 sm:p-5">
+              <h2 className="text-xs font-normal uppercase tracking-wider text-slate-300 mb-2.5">
+                Description &amp; Overview
+              </h2>
+              <FormattedDescription content={phone.description} isDark={true} className="text-slate-200 font-normal leading-relaxed text-xs sm:text-sm" />
+            </div>
+          )}
         </div>
 
         {/* Similar Phones Section at the bottom */}
@@ -905,7 +903,7 @@ export default function PhoneDetailModal({
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4">
               {similarPhones.map((simPhone) => (
                 <SimilarPhoneCard
                   key={simPhone.phone_id || simPhone.id}

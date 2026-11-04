@@ -116,35 +116,35 @@ export default function PhoneCard({
   return (
     <div
       onClick={handleCardClick}
-      className="group relative flex flex-col bg-theme-surface/70 border border-theme-border hover:border-white/20 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/40 hover:-translate-y-1 cursor-pointer"
+      className="group relative flex flex-col bg-theme-surface/70 border border-theme-border hover:border-white/20 rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/40 hover:-translate-y-1 cursor-pointer"
     >
       {/* Top Media Header */}
-      <div className="relative aspect-square w-full bg-[#080D1A] flex items-center justify-center overflow-hidden border-b border-theme-border/40">
+      <div className="relative aspect-square w-full bg-[#080D1A] flex items-center justify-center overflow-hidden border-b border-theme-border/40 p-2 sm:p-3">
         {/* Subtle ambient light on hover */}
         <div className="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
 
-        {/* Top Left: Offer Badge if have offer (Light Gold styling) */}
+        {/* Top Left: Offer Badge if have offer */}
         {hasOffer && (
-          <div className="absolute top-3 left-3 z-20 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-amber-300/40 bg-black/65 backdrop-blur-md text-amber-200 text-[11px] font-semibold tracking-wide shadow-sm">
-            <Tag className="w-3 h-3 shrink-0 text-amber-300" />
-            <span>{discountPercent > 0 ? `${discountPercent}% OFF` : 'Special Offer'}</span>
+          <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-20 inline-flex items-center gap-1 px-1.5 sm:px-2.5 py-0.5 rounded-full border border-amber-300/40 bg-black/75 backdrop-blur-md text-amber-200 text-[9px] sm:text-[11px] font-semibold tracking-wide shadow-sm max-w-[55%] sm:max-w-none truncate">
+            <Tag className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 text-amber-300" />
+            <span className="truncate">{discountPercent > 0 ? `${discountPercent}% OFF` : 'Offer'}</span>
           </div>
         )}
 
         {/* Action icons on Top Right: Favorite & Compare */}
-        <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+        <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-20 flex items-center gap-1 sm:gap-1.5">
           {/* Compare Button */}
           <button
             type="button"
             title={inComparison ? 'Remove from Compare' : 'Add to Compare'}
             onClick={handleCompareClick}
-            className={`p-1.5 rounded-lg border backdrop-blur-md transition-colors cursor-pointer ${
+            className={`p-1 sm:p-1.5 rounded-md sm:rounded-lg border backdrop-blur-md transition-colors cursor-pointer ${
               inComparison
                 ? 'bg-white/20 text-white border-white/40'
                 : 'bg-black/60 border-white/15 text-theme-textSecondary hover:text-white hover:bg-black/80'
             }`}
           >
-            <GitCompare className="w-3.5 h-3.5" />
+            <GitCompare className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           </button>
 
           {/* Favorite Button */}
@@ -152,28 +152,28 @@ export default function PhoneCard({
             type="button"
             title={favorited ? 'Remove from Favourites' : 'Save to Favourites'}
             onClick={handleFavoriteClick}
-            className="p-1.5 rounded-lg border backdrop-blur-md transition-colors cursor-pointer bg-black/60 border-white/15 text-theme-textSecondary hover:bg-black/80"
+            className="p-1 sm:p-1.5 rounded-md sm:rounded-lg border backdrop-blur-md transition-colors cursor-pointer bg-black/60 border-white/15 text-theme-textSecondary hover:bg-black/80"
           >
-            <Heart className={`w-3.5 h-3.5 transition-colors ${favorited ? 'text-rose-400 fill-rose-400/80' : 'text-theme-textSecondary hover:text-rose-400'}`} />
+            <Heart className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-colors ${favorited ? 'text-rose-400 fill-rose-400/80' : 'text-theme-textSecondary hover:text-rose-400'}`} />
           </button>
         </div>
 
-        {/* Phone Photo (Changes dynamically when color swatch is clicked or hovered) */}
+        {/* Phone Photo */}
         {displayedPhoto ? (
           <img
             key={displayedPhoto}
             src={displayedPhoto}
             alt={phone.name}
             loading="lazy"
-            className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
             onError={(e) => {
               e.currentTarget.style.display = 'none';
             }}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center text-theme-textMuted py-8">
-            <Sparkles className="w-10 h-10 stroke-[1.2] mb-1.5 opacity-30" />
-            <span className="text-[11px] tracking-wider uppercase text-theme-textMuted font-medium">
+          <div className="flex flex-col items-center justify-center text-theme-textMuted py-4 sm:py-8">
+            <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 stroke-[1.2] mb-1.5 opacity-30" />
+            <span className="text-[10px] sm:text-[11px] tracking-wider uppercase text-theme-textMuted font-medium">
               SK LABA PHONE
             </span>
           </div>
@@ -181,38 +181,38 @@ export default function PhoneCard({
       </div>
 
       {/* Card Info Content */}
-      <div className="p-4 flex flex-col flex-1 justify-between gap-3">
+      <div className="p-2.5 sm:p-3.5 md:p-4 flex flex-col flex-1 justify-between gap-2 sm:gap-3">
         <div>
           {/* Brand */}
-          <span className="block uppercase tracking-wider text-theme-textSecondary text-[11px] font-semibold mb-1">
+          <span className="block uppercase tracking-wider text-theme-textSecondary text-[10px] sm:text-[11px] font-semibold mb-0.5 sm:mb-1 truncate">
             {phone.brand_name || 'Smartphone'}
           </span>
 
           {/* Phone Title */}
-          <h3 className="text-sm font-semibold text-white group-hover:text-sky-300 transition-colors line-clamp-1 leading-snug">
+          <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-sky-300 transition-colors line-clamp-1 leading-snug">
             {phone.name}
           </h3>
         </div>
 
         {/* Pricing */}
-        <div className="pt-2 border-t border-theme-border/40 flex items-baseline gap-2">
-          <span className="text-base sm:text-lg font-normal text-white tracking-tight">
+        <div className="pt-1.5 sm:pt-2 border-t border-theme-border/40 flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+          <span className="text-sm sm:text-base md:text-lg font-normal text-white tracking-tight">
             ${effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
           {hasOffer && (
-            <span className="text-xs text-theme-textMuted line-through font-normal">
+            <span className="text-[10px] sm:text-xs text-theme-textMuted line-through font-normal">
               ${regularPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           )}
         </div>
 
-        {/* Color images under the phone card (larger thumbnail boxes clearly showing available color images) */}
+        {/* Color thumbnails under the phone card */}
         {parsedColors.length > 0 && (
           <div
-            className="flex items-center justify-center gap-2 pt-1 flex-wrap"
+            className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2 pt-1 flex-wrap"
             onClick={(e) => e.stopPropagation()}
           >
-            {parsedColors.map((color, idx) => {
+            {parsedColors.slice(0, 4).map((color, idx) => {
               const isSelected = selectedColorIdx === idx;
               const colorPhoto =
                 color.photos?.[0] ||
@@ -230,9 +230,9 @@ export default function PhoneCard({
                     setSelectedColorIdx(idx);
                   }}
                   onMouseEnter={() => setSelectedColorIdx(idx)}
-                  className={`group/thumb relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl p-0.5 border overflow-hidden transition-all duration-200 cursor-pointer flex items-center justify-center bg-black/40 ${
+                  className={`group/thumb relative w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg p-0.5 border overflow-hidden transition-all duration-200 cursor-pointer flex items-center justify-center bg-black/40 ${
                     isSelected
-                      ? 'border-white ring-2 ring-white/40 shadow-lg shadow-black/60 scale-105'
+                      ? 'border-white ring-1 sm:ring-2 ring-white/40 shadow-md scale-105'
                       : 'border-white/15 hover:border-white/50 opacity-70 hover:opacity-100 hover:scale-105'
                   }`}
                 >
@@ -240,12 +240,12 @@ export default function PhoneCard({
                     <img
                       src={colorPhoto}
                       alt={color.name || `Color #${idx + 1}`}
-                      className="w-full h-full object-cover object-center rounded-lg"
+                      className="w-full h-full object-cover object-center rounded-[6px]"
                       loading="lazy"
                     />
                   ) : (
                     <span
-                      className="w-full h-full rounded-lg"
+                      className="w-full h-full rounded-[6px]"
                       style={{
                         backgroundColor: color.color_code || '#475569',
                       }}
@@ -254,6 +254,11 @@ export default function PhoneCard({
                 </button>
               );
             })}
+            {parsedColors.length > 4 && (
+              <span className="text-[10px] text-slate-400 font-normal pl-0.5 select-none">
+                +{parsedColors.length - 4}
+              </span>
+            )}
           </div>
         )}
       </div>

@@ -316,7 +316,6 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
     }
   };
 
-
   useEffect(() => {
     const video = tradeInVideoRef.current;
     if (!video) return;
@@ -385,31 +384,29 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
     }
   };
 
-
   return (
     <div className="flex flex-col w-full">
       <HeroSection onNavigateToSmartphones={handleGoToSmartphones} />
 
       <TrustBadges />
 
-
       {/* Trade-in Upgrade Video Section */}
-      <section className="relative w-full bg-gradient-to-b from-theme-bg via-black to-black overflow-hidden select-none py-10 sm:py-14">
+      <section className="relative w-full bg-gradient-to-b from-theme-bg via-black to-black overflow-hidden select-none py-8 sm:py-12 md:py-14">
         {/* Section Heading & CTA over / above the video */}
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 text-center space-y-3 sm:space-y-4 -mb-10 sm:-mb-16 md:-mb-24 pointer-events-none">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)] pointer-events-auto">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 text-center space-y-2.5 sm:space-y-4 mb-2 sm:-mb-10 md:-mb-20 pointer-events-none">
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)] pointer-events-auto">
             Trade in. Upgrade.
           </h2>
 
-          <div className="pt-2 sm:pt-3 pointer-events-auto">
+          <div className="pt-1 sm:pt-3 pointer-events-auto">
             <button
               type="button"
               onClick={handleOpenSell}
               className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-xl shadow-black/80 group cursor-pointer"
             >
-              <span className="inline-flex items-center gap-2 px-6 py-2.5 sm:py-3 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs sm:text-sm font-normal transition-colors duration-200">
+              <span className="inline-flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 md:py-3 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs sm:text-sm font-normal transition-colors duration-200">
                 <span>Get your estimate</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-0.5 transition-transform" />
               </span>
             </button>
           </div>
@@ -418,18 +415,18 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
         {/* Video Banner */}
         <div className="w-full max-w-[1500px] mx-auto px-2 sm:px-4">
           <div
-            className="relative w-full aspect-video flex items-center justify-center overflow-hidden cursor-pointer group"
+            className="relative w-full aspect-video flex items-center justify-center overflow-hidden cursor-pointer group rounded-lg sm:rounded-none"
             onClick={handleOpenSell}
             title="Click to Trade-In or Sell Your Phone"
           >
             {/* Subtle 4-Side Edge Feathering / Shade: Left, Right, Top, Bottom */}
-            <div className="absolute inset-y-0 left-0 w-8 sm:w-12 md:w-16 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-y-0 right-0 w-8 sm:w-12 md:w-16 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-6 sm:h-8 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-x-0 bottom-0 h-6 sm:h-8 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-y-0 left-0 w-6 sm:w-12 md:w-16 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-6 sm:w-12 md:w-16 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-4 sm:h-8 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-4 sm:h-8 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
 
             {/* Seamlessly cover bottom-right KlingAI watermark without touching the arrows */}
-            <div className="absolute bottom-0 right-0 w-[18%] max-w-[240px] h-[11%] min-h-[48px] bg-black z-20 pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-[18%] max-w-[240px] h-[11%] min-h-[36px] sm:min-h-[48px] bg-black z-20 pointer-events-none" />
 
             <video
               ref={tradeInVideoRef}
@@ -445,27 +442,27 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       </section>
 
       {activeOffers.length > 0 && (
-        <section id="deals" className="pt-16 pb-12 sm:pb-16 bg-black scroll-mt-20">
+        <section id="deals" className="pt-12 sm:pt-16 pb-12 sm:pb-16 bg-black scroll-mt-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
               <div>
                 <span className="text-xs font-normal uppercase tracking-wider text-theme-textSecondary mb-1 block">
                   Limited Time Deals
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-normal text-white tracking-tight flex items-center gap-2">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-white tracking-tight flex items-center gap-2">
                   <span>Current Special Offers</span>
-                  <Tag className="w-5 h-5 text-theme-textSecondary" />
+                  <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-theme-textSecondary" />
                 </h2>
               </div>
 
               <button
                 type="button"
                 onClick={handleGoToSmartphones}
-                className="hidden sm:inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
+                className="inline-flex self-start sm:self-auto items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
               >
-                <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                <span className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
                   <span>View in Smartphones Page</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-0.5 transition-transform" />
                 </span>
               </button>
             </div>
@@ -485,27 +482,27 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       )}
 
       {/* About Us Section */}
-      <section id="about" className="pt-12 sm:pt-16 pb-20 sm:pb-24 bg-black scroll-mt-20">
+      <section id="about" className="pt-10 sm:pt-16 pb-16 sm:pb-24 bg-black scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-center">
             {/* Left Side: About Image */}
             <div className="lg:col-span-5 relative group">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/90 bg-neutral-950">
+              <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl shadow-black/90 bg-neutral-950">
                 <img
                   src={aboutImg}
                   alt="About SK LABA PHONE"
-                  className="w-full h-full max-h-[440px] object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
+                  className="w-full h-full max-h-[360px] sm:max-h-[440px] object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
                 />
               </div>
             </div>
 
             {/* Right Side: Heading & Small Description */}
-            <div className="lg:col-span-7 space-y-6">
+            <div className="lg:col-span-7 space-y-5 sm:space-y-6">
               <div>
                 <span className="text-xs font-normal uppercase tracking-wider text-theme-textSecondary mb-2 block">
                   Our Story
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-normal text-white tracking-tight">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-white tracking-tight">
                   About SK LABA PHONE
                 </h2>
                 <p className="text-xs sm:text-sm text-theme-textSecondary mt-3.5 leading-relaxed font-normal">
@@ -514,16 +511,16 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
               </div>
 
               {/* Quick Metrics Strip */}
-              <div className="grid grid-cols-3 gap-3 pt-6 border-t border-white/10">
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-3 pt-5 sm:pt-6 border-t border-white/10">
+                <div className="flex sm:block items-baseline sm:items-start justify-between sm:justify-start gap-2">
                   <div className="text-lg sm:text-xl font-normal text-white tracking-tight">100%</div>
                   <div className="text-[11px] text-theme-textMuted font-normal">Original Devices</div>
                 </div>
-                <div>
+                <div className="flex sm:block items-baseline sm:items-start justify-between sm:justify-start gap-2">
                   <div className="text-base sm:text-lg lg:text-xl font-normal text-white tracking-tight">ලාබ ෆෝන් Value</div>
                   <div className="text-[11px] text-theme-textMuted font-normal">Transparent trade-ins &amp; deals</div>
                 </div>
-                <div>
+                <div className="flex sm:block items-baseline sm:items-start justify-between sm:justify-start gap-2">
                   <div className="text-lg sm:text-xl font-normal text-white tracking-tight">Seoul &bull; LK</div>
                   <div className="text-[11px] text-theme-textMuted font-normal">Direct Logistics</div>
                 </div>
@@ -534,14 +531,14 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       </section>
 
       {/* Customer Reviews Section */}
-      <section id="reviews" className="pt-20 sm:pt-24 pb-24 sm:pb-32 bg-black border-b border-white/10 scroll-mt-24">
+      <section id="reviews" className="pt-16 sm:pt-24 pb-20 sm:pb-32 bg-black border-b border-white/10 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10 sm:mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 sm:gap-6 mb-8 sm:mb-12">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-normal text-white tracking-tight flex items-center gap-2.5">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-white tracking-tight flex items-center gap-2.5">
                 <span>Verified Customer Reviews</span>
               </h2>
-              <p className="text-xs sm:text-sm text-theme-textSecondary mt-2.5 leading-relaxed">
+              <p className="text-xs sm:text-sm text-theme-textSecondary mt-2 sm:mt-2.5 leading-relaxed">
                 Real feedback from clients who purchased certified smartphones and traded devices with us.
               </p>
             </div>
@@ -583,8 +580,8 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
                 onClick={handleOpenReviewModal}
                 className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer shrink-0"
               >
-                <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
-                  <MessageSquareHeart className="w-4 h-4" />
+                <span className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                  <MessageSquareHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>Write a Review</span>
                 </span>
               </button>
@@ -613,18 +610,16 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
                 ref={reviewsCarouselRef}
                 onScroll={handleCarouselScroll}
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                className="no-scrollbar flex gap-4 overflow-x-auto pb-2 pt-1 snap-x snap-mandatory scroll-smooth"
+                className="no-scrollbar flex gap-3.5 sm:gap-4 overflow-x-auto pb-3 pt-1 snap-x snap-mandatory scroll-smooth touch-pan-x"
               >
                 {reviews.map((r) => (
                   <div
                     key={r.review_id}
                     style={{
-                      flex: '0 0 calc(25% - 12px)',
-                      minWidth: '260px',
                       backgroundColor: '#09090d',
                       border: '1px solid rgba(255, 255, 255, 0.05)',
                     }}
-                    className="snap-start rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 shadow-xl shadow-black/80"
+                    className="w-[82vw] sm:w-[calc(50%-12px)] lg:w-[calc(25%-12px)] min-w-[240px] max-w-[340px] shrink-0 snap-start rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 shadow-xl shadow-black/80"
                   >
                     <div>
                       {/* Top Row: Stars (dark yellow) on left, Date on right */}
@@ -659,13 +654,13 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
                         </span>
                       </div>
 
-                      {/* Review quote - full text without 'See more' */}
+                      {/* Review quote */}
                       <p className="text-xs sm:text-sm text-slate-300 font-normal italic leading-relaxed">
                         &ldquo;{r.comment}&rdquo;
                       </p>
                     </div>
 
-                    {/* Customer name at bottom without bright stroke */}
+                    {/* Customer name at bottom */}
                     {r.customer_name && (
                       <div className="pt-3 mt-3 flex items-center gap-2" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.04)' }}>
                         <div
@@ -686,10 +681,10 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
                 ))}
               </div>
 
-              {/* Pagination Dots below the containers (instead of scrollbar) */}
+              {/* Pagination Dots below the containers */}
               {reviews.length > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-6">
-                  {reviews.map((_, idx) => {
+                <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-6 max-w-full px-4">
+                  {reviews.slice(0, 15).map((_, idx) => {
                     const isActive = activeIndex === idx;
                     return (
                       <button
@@ -698,13 +693,13 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
                         onClick={() => scrollToIndex(idx)}
                         aria-label={`Go to review ${idx + 1}`}
                         style={{
-                          width: isActive ? '22px' : '7px',
-                          height: '7px',
+                          width: isActive ? '20px' : '6px',
+                          height: '6px',
                           borderRadius: '9999px',
                           backgroundColor: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.2)',
                           transition: 'all 0.3s ease',
                         }}
-                        className="cursor-pointer hover:opacity-90"
+                        className="cursor-pointer hover:opacity-90 shrink-0"
                       />
                     );
                   })}

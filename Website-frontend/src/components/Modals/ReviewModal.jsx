@@ -81,7 +81,7 @@ export default function ReviewModal({ onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
       <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
 
       {success ? (
@@ -103,7 +103,7 @@ export default function ReviewModal({ onClose, onSuccess }) {
           </div>
         </div>
       ) : (
-        <div className="relative w-full max-w-lg bg-[#0b1329] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200">
+        <div className="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-[#0b1329] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200">
           <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
             <div>
               <h2 className="text-base font-bold text-white">Share Your Experience</h2>
@@ -119,7 +119,7 @@ export default function ReviewModal({ onClose, onSuccess }) {
             </button>
           </div>
 
-          <div className="p-5">
+          <div className="p-4 sm:p-5 overflow-y-auto flex-1">
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">

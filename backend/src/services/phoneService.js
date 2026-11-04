@@ -4,6 +4,7 @@ const storageOptionRepository = require('../repositories/storageOptionRepository
 const specificationRepository = require('../repositories/specificationRepository');
 const offerRepository = require('../repositories/offerRepository');
 const defaultBackInStockRequestRepository = require('../repositories/backInStockRequestRepository');
+const stockHistoryRepository = require('../repositories/stockHistoryRepository');
 const { calculatePhoneAvailability } = require('../utils/phoneAvailability');
 const installmentPlanService = require('./installmentPlanService');
 const AppError = require('../utils/customError');
@@ -208,7 +209,7 @@ class PhoneService {
         let waitingCustomersCount = 0;
         let stockRestorationAlert = null;
 
-        const backInStockRepo = this.backInStockRequestRepository || defaultBackInStockRequestRepository;
+        const backInStockRepo = this.backInStockRequestRepo || defaultBackInStockRequestRepository;
         if (isRestoredFromSoldOut && backInStockRepo && typeof backInStockRepo.countWaitingByPhoneId === 'function') {
             try {
                 waitingCustomersCount = await backInStockRepo.countWaitingByPhoneId(id);
@@ -223,6 +224,25 @@ class PhoneService {
             } catch (err) {
                 // Preserve existing stock update behavior
             }
+        }
+
+        // Record stock history transaction
+        try {
+            await stockHistoryRepository.recordTransaction({
+                phone_id: id,
+                phone_name: updatedPhone.name,
+                type: 'ADD',
+                quantity: addedQty,
+                color_name: data.color_name || (data.storage_name ? 'Selected Variant' : 'All Colors'),
+                storage_name: data.storage_name || 'Standard',
+                reason: data.reason || 'RESTOCK',
+                notes: data.notes || null,
+                performed_by: data.performed_by || 'Admin',
+                previous_stock: prevStock,
+                new_stock: newStock
+            });
+        } catch (logErr) {
+            // Silently ignore logging errors to preserve primary operation
         }
 
         return {
@@ -327,6 +347,26 @@ class PhoneService {
         } else {
             updatedPhone = await (this.phoneRepository || phoneRepository).removeStock(id, removedQty, newAvailability);
         }
+
+        // Record stock history transaction
+        try {
+            await stockHistoryRepository.recordTransaction({
+                phone_id: id,
+                phone_name: updatedPhone.name,
+                type: 'DEDUCT',
+                quantity: removedQty,
+                color_name: data.color_name || (data.storage_name ? 'Selected Variant' : 'All Colors'),
+                storage_name: data.storage_name || 'Standard',
+                reason: data.reason || 'SALE',
+                notes: data.notes || null,
+                performed_by: data.performed_by || 'Admin',
+                previous_stock: prevStock,
+                new_stock: newStock
+            });
+        } catch (logErr) {
+            // Silently ignore logging errors to preserve primary operation
+        }
+
         return {
             ...updatedPhone,
             previous_stock: prevStock,
@@ -335,6 +375,27 @@ class PhoneService {
             reason: data.reason || 'SALE',
             notes: data.notes || null
         };
+    }
+
+    /**
+     * Retrieve stock adjustment history
+     */
+    async getStockHistory(phone_id, filters = {}) {
+        return stockHistoryRepository.findHistory({
+            phone_id,
+            type: filters.type,
+            month: filters.month
+        });
+    }
+
+    /**
+     * Delete stock adjustment history by month
+     */
+    async deleteStockHistoryByMonth(phone_id, month, filters = {}) {
+        return stockHistoryRepository.deleteByMonth(month, {
+            phone_id,
+            type: filters.type
+        });
     }
 
     /**

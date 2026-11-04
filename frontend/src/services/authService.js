@@ -1,6 +1,6 @@
 // ============================================================
 // AUTH SERVICE — SK LABA PHONE WMS (PDF 2)
-// Handles Login, Session Validation, Logout & Password Reset
+// Handles Login, Session Validation, Logout, Reset & Verification
 // ============================================================
 
 import axiosInstance from './axiosInstance';
@@ -63,6 +63,20 @@ export const authService = {
     const response = await axiosInstance.post(API_ENDPOINTS.auth.resetPassword, {
       token,
       newPassword,
+    });
+    return response.data;
+  },
+
+  /**
+   * API 7: Verify Account (POST /api/auth/verify-account)
+   * Verifies temporary credentials and establishes permanent password
+   */
+  verifyAccount: async ({ token, email, temporary_password, new_password }) => {
+    const response = await axiosInstance.post(API_ENDPOINTS.auth.verifyAccount, {
+      token,
+      email,
+      temporary_password,
+      new_password,
     });
     return response.data;
   },

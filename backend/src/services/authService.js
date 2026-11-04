@@ -42,7 +42,11 @@ class AuthService {
             throw new AppError('Invalid email or password.', 401);
         }
 
-        if (!user.is_active) {
+        if (user.status === 'PENDING') {
+            throw new AppError('Your account is pending email verification. Please check your email and verify your account.', 403);
+        }
+
+        if (!user.is_active || user.status === 'INACTIVE') {
             throw new AppError('Account is inactive. Please contact an administrator.', 403);
         }
 
@@ -60,9 +64,11 @@ class AuthService {
 
         return {
             user_id: user.user_id,
+            formatted_user_id: user.formatted_user_id,
             display_name: user.display_name,
             email: user.email,
             role: user.role,
+            status: user.status,
             last_login_at: new Date().toISOString()
         };
     }
@@ -83,17 +89,84 @@ class AuthService {
             throw new AppError('Unauthorized: User no longer exists.', 401);
         }
 
-        if (!user.is_active) {
+        if (!user.is_active || user.status === 'INACTIVE') {
             throw new AppError('Unauthorized: Account is inactive. Please contact an administrator.', 401);
         }
 
         return {
             user_id: user.user_id,
+            formatted_user_id: user.formatted_user_id,
             display_name: user.display_name,
             email: user.email,
             role: user.role,
+            status: user.status,
             last_login_at: user.last_login_at,
             created_at: user.created_at
+        };
+    }
+
+    /**
+     * Verify user account with temporary password and establish new permanent password
+     * @param {Object} data
+     * @param {string} data.token
+     * @param {string} [data.email]
+     * @param {string} data.temporary_password
+     * @param {string} data.new_password
+     * @returns {Promise<Object>}
+     */
+    async verifyAccount({ token, email, temporary_password, new_password }) {
+        if (!token || typeof token !== 'string') {
+            throw new AppError('Verification token is missing or invalid.', 400);
+        }
+        if (!temporary_password || typeof temporary_password !== 'string') {
+            throw new AppError('Temporary password is required.', 400);
+        }
+        if (!new_password || typeof new_password !== 'string' || new_password.length < 8) {
+            throw new AppError('New password must be at least 8 characters long.', 400);
+        }
+        if (new_password.length > 128) {
+            throw new AppError('New password cannot exceed 128 characters.', 400);
+        }
+
+        const rawToken = token.trim();
+        const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+        // Look up user by verification token hash
+        const user = await this.userRepository.findByVerificationTokenHash(tokenHash);
+        if (!user) {
+            throw new AppError('Invalid or expired verification link. Please contact an administrator.', 400);
+        }
+
+        if (user.verification_expires_at) {
+            const now = new Date();
+            const expiresAt = new Date(user.verification_expires_at);
+            if (expiresAt <= now) {
+                throw new AppError('This verification link has expired. Please contact an administrator for a new one.', 400);
+            }
+        }
+
+        if (email && email.trim() && user.email.toLowerCase() !== email.trim().toLowerCase()) {
+            throw new AppError('Account email does not match the verification record.', 400);
+        }
+
+        // Verify temporary password against current password_hash
+        const isTempValid = await PasswordUtil.verifyPassword(user.password_hash, temporary_password);
+        if (!isTempValid) {
+            throw new AppError('The temporary password you entered is incorrect.', 400);
+        }
+
+        // Hash new permanent password using Argon2id
+        const newPasswordHash = await PasswordUtil.hashPassword(new_password);
+
+        // Update password, set status to ACTIVE, clear token
+        await this.userRepository.verifyAndActivateUser(user.user_id, newPasswordHash);
+
+        // Revoke any existing sessions
+        await this.userRepository.revokeUserSessions(user.user_id);
+
+        return {
+            success: true,
+            message: 'Your account verified successfully. Use your credentials to sign in for your account.'
         };
     }
 
@@ -110,33 +183,27 @@ class AuthService {
             const user = await this.userRepository.findByEmail(cleanEmail);
 
             // Only generate and dispatch reset email if user exists and is active
-            if (user && user.is_active) {
-                // Generate cryptographically high-entropy raw token (64 hex characters)
+            if (user && user.is_active && user.status === 'ACTIVE') {
                 const rawToken = crypto.randomBytes(32).toString('hex');
-                // Store only cryptographic SHA-256 hash
                 const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
 
                 const expiryMinutes = Number(process.env.PASSWORD_RESET_TOKEN_EXPIRES_MINUTES) || 15;
                 const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
 
-                // Invalidate any previously issued active tokens for this user
                 await this.resetTokenRepository.invalidateActiveTokensForUser(user.user_id);
 
-                // Insert new reset token
                 await this.resetTokenRepository.create({
                     user_id: user.user_id,
                     token_hash: tokenHash,
                     expires_at: expiresAt
                 });
 
-                // Construct reset URL using strictly configured frontend URL
                 const frontendBaseUrl = process.env.PASSWORD_RESET_BASE_URL
                     || process.env.ADMIN_DASHBOARD_URL
-                    || 'https://admin.sklabaphone.com';
+                    || 'http://localhost:3000';
 
                 const resetUrl = `${frontendBaseUrl.replace(/\/$/, '')}/reset-password?token=${rawToken}`;
 
-                // Send email (safe async call - failures do not leak to client)
                 await this.emailService.sendPasswordResetEmail({
                     to: user.email,
                     resetUrl,
@@ -144,11 +211,9 @@ class AuthService {
                 });
             }
         } catch (error) {
-            // Log sanitized error internally without exposing details to user
             console.error('[AuthService.forgotPassword] Internal error processing forgot password:', error.message);
         }
 
-        // Always return identical generic success message to prevent user enumeration
         return {
             success: true,
             message: GENERIC_FORGOT_PASSWORD_MSG
@@ -170,7 +235,6 @@ class AuthService {
         const rawToken = token.trim();
         const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
 
-        // Look up token record
         const record = await this.resetTokenRepository.findByTokenHash(tokenHash);
 
         if (!record || record.is_consumed) {
@@ -187,29 +251,24 @@ class AuthService {
             throw new AppError(GENERIC_INVALID_TOKEN_MSG, 400);
         }
 
-        // Hash new password using Argon2id
         const newPasswordHash = await PasswordUtil.hashPassword(newPassword);
 
-        // Execute atomic consumption, password update, and session revocation inside transaction
         if (this.pool && typeof this.pool.getConnection === 'function') {
             const connection = await this.pool.getConnection();
             try {
                 await connection.beginTransaction();
 
-                // 1. Atomically consume token
                 const consumed = await this.resetTokenRepository.consumeTokenAtomic(record.reset_token_id, connection);
                 if (!consumed) {
                     await connection.rollback();
                     throw new AppError(GENERIC_INVALID_TOKEN_MSG, 400);
                 }
 
-                // 2. Update password hash
                 await connection.execute(
                     'UPDATE dashboard_users SET password_hash = ? WHERE user_id = ?',
                     [newPasswordHash, record.user_id]
                 );
 
-                // 3. Revoke all active sessions belonging to the user
                 await this.resetTokenRepository.revokeUserSessions(record.user_id, connection);
 
                 await connection.commit();
@@ -220,7 +279,6 @@ class AuthService {
                 connection.release();
             }
         } else {
-            // Fallback for mocked repository environments without pool connection
             const consumed = await this.resetTokenRepository.consumeTokenAtomic(record.reset_token_id);
             if (!consumed) {
                 throw new AppError(GENERIC_INVALID_TOKEN_MSG, 400);

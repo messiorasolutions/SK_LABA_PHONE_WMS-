@@ -25,6 +25,7 @@ import {
   EyeOff,
   Palette,
   CreditCard,
+  RefreshCw,
 } from 'lucide-react';
 import FormattedDescription from '../Common/FormattedDescription';
 import InstallmentPlanService from '../../services/installmentPlanService';
@@ -149,15 +150,27 @@ export default function PhoneModal({
     setLocalStorages(merged);
   }, [storageOptions]);
 
-  // Fetch active installment plans
+  const [loadingPlans, setLoadingPlans] = useState(false);
+
+  // Fetch installment plans
+  const fetchInstallmentPlans = () => {
+    setLoadingPlans(true);
+    InstallmentPlanService.getPlans()
+      .then((res) => {
+        const data = res.data?.data || res.data || [];
+        setAvailablePlans(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        console.warn('Load installment plans error:', err);
+      })
+      .finally(() => {
+        setLoadingPlans(false);
+      });
+  };
+
   useEffect(() => {
     if (isOpen) {
-      InstallmentPlanService.getPlans({ is_active: true })
-        .then((res) => {
-          const data = res.data?.data || res.data || [];
-          setAvailablePlans(Array.isArray(data) ? data : []);
-        })
-        .catch(() => { });
+      fetchInstallmentPlans();
     }
   }, [isOpen]);
 
@@ -1278,40 +1291,113 @@ export default function PhoneModal({
                     </div>
 
                     {/* Select specific installment plans (SRS ST-02) */}
-                    {installmentEnabled && availablePlans.length > 0 && (
-                      <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 space-y-1.5">
-                        <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                          Select Allowed Installment Plans
-                        </span>
-                        <div className="space-y-1 max-h-36 overflow-y-auto">
-                          {availablePlans.map((plan) => {
-                            const isChecked = selectedPlanIds.includes(plan.installment_plan_id);
-                            return (
-                              <label
-                                key={plan.installment_plan_id}
-                                className="flex items-center justify-between text-xs p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-colors"
+                    {installmentEnabled && (
+                      <div className="pt-3 border-t border-slate-200/60 dark:border-slate-700/60 space-y-2.5 animate-in fade-in duration-150">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div>
+                            <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                              Choose Allowed Installment Plans
+                            </span>
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                              Select the plans customers can choose for this model ({selectedPlanIds.length} of {availablePlans.length} enabled)
+                            </span>
+                          </div>
+
+                          {availablePlans.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedPlanIds(availablePlans.map((p) => p.installment_plan_id))}
+                                className="text-[11px] font-medium text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
                               >
-                                <span className="text-slate-700 dark:text-slate-300">
-                                  {plan.plan_name} ({plan.number_of_months} Mos - {Number(plan.interest_rate) === 0 ? '0% Int' : `${plan.interest_rate}%`})
-                                </span>
-                                <input
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setSelectedPlanIds((prev) => [...prev, plan.installment_plan_id]);
+                                Select All
+                              </button>
+                              <span className="text-slate-300 dark:text-slate-600">•</span>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedPlanIds([])}
+                                className="text-[11px] font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
+                              >
+                                Clear All
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {loadingPlans ? (
+                          <div className="flex items-center gap-2 p-3 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin text-rose-600" />
+                            <span>Loading installment plans created by admin...</span>
+                          </div>
+                        ) : availablePlans.length > 0 ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+                            {availablePlans.map((plan) => {
+                              const isChecked = selectedPlanIds.includes(plan.installment_plan_id);
+                              const months = Number(plan.number_of_months || 3);
+                              const rate = Number(plan.interest_rate || 0);
+                              const estMonthly = price && Number(price) > 0 ? ((Number(price) * (1 + rate / 100)) / months).toFixed(2) : null;
+
+                              return (
+                                <div
+                                  key={plan.installment_plan_id}
+                                  onClick={() => {
+                                    if (isChecked) {
+                                      setSelectedPlanIds((prev) => prev.filter((id) => id !== plan.installment_plan_id));
                                     } else {
-                                      setSelectedPlanIds((prev) =>
-                                        prev.filter((id) => id !== plan.installment_plan_id)
-                                      );
+                                      setSelectedPlanIds((prev) => [...prev, plan.installment_plan_id]);
                                     }
                                   }}
-                                  className="w-3.5 h-3.5 rounded text-red-600 focus:ring-rose-500 cursor-pointer"
-                                />
-                              </label>
-                            );
-                          })}
-                        </div>
+                                  className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start justify-between gap-2.5 ${
+                                    isChecked
+                                      ? 'bg-slate-50/90 dark:bg-rose-950/20 border-slate-900 dark:border-rose-800/80 shadow-2xs'
+                                      : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                                  }`}
+                                >
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-xs font-semibold text-slate-900 dark:text-white truncate">
+                                        {plan.plan_name}
+                                      </span>
+                                      <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium shrink-0">
+                                        {months} Mos
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                                      {rate === 0 ? '0% Interest' : `${rate}% Interest`}
+                                      {estMonthly ? ` • ~$${estMonthly}/mo` : ''}
+                                    </p>
+                                  </div>
+                                  <span
+                                    className={`w-4 h-4 rounded flex items-center justify-center shrink-0 text-[10px] mt-0.5 transition-colors ${
+                                      isChecked
+                                        ? 'bg-neutral-900 dark:bg-rose-600 text-white border border-neutral-900 dark:border-rose-600'
+                                        : 'border border-slate-300 dark:border-slate-600'
+                                    }`}
+                                  >
+                                    {isChecked && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/60 rounded-xl text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between gap-2">
+                            <div>
+                              <span className="font-semibold block">No installment plans found</span>
+                              <span className="text-[11px] text-amber-700 dark:text-amber-400">
+                                Create plans in the "Installment Plans" sidebar page first.
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={fetchInstallmentPlans}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium hover:bg-slate-50 cursor-pointer shrink-0"
+                            >
+                              <RefreshCw className="w-3 h-3" />
+                              <span>Refresh</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

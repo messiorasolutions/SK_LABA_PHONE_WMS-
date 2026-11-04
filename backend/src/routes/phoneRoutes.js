@@ -10,6 +10,10 @@ const {
 
 // Stock Management Routes (MUST be defined before /:id)
 router.get('/stock', (req, res, next) => phoneController.getStockList(req, res, next));
+router.get('/stock/history', (req, res, next) => phoneController.getStockHistory(req, res, next));
+router.delete('/stock/history', (req, res, next) => phoneController.deleteStockHistory(req, res, next));
+router.get('/:id/stock/history', (req, res, next) => phoneController.getStockHistory(req, res, next));
+router.delete('/:id/stock/history', (req, res, next) => phoneController.deleteStockHistory(req, res, next));
 router.post('/:id/stock/add', (req, res, next) => phoneController.addStock(req, res, next));
 router.post('/:id/stock/remove', (req, res, next) => phoneController.removeStock(req, res, next));
 

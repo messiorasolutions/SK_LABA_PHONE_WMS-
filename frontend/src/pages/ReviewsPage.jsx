@@ -4,20 +4,13 @@ import {
   Star,
   Search,
   CheckCircle2,
-  XCircle,
   AlertCircle,
   RefreshCw,
   X,
-  User,
-  Calendar,
-  MessageSquare,
   Clock,
-  ShieldCheck,
   ChevronRight,
-  Filter,
   Check,
   Ban,
-  ArrowUpDown
 } from 'lucide-react';
 import { reviewService } from '../services/reviewService';
 
@@ -25,20 +18,20 @@ const STATUS_CONFIG = {
   Pending: {
     label: 'Pending',
     dot: 'bg-amber-500',
-    badge: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200 dark:border-amber-900',
+    badge: 'bg-transparent text-amber-700 dark:text-amber-400 border-amber-300/80 dark:border-amber-900/60',
     text: 'text-amber-600 dark:text-amber-400',
   },
   Approved: {
     label: 'Approved',
-    dot: 'bg-emerald-500',
-    badge: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900',
-    text: 'text-emerald-600 dark:text-emerald-400',
+    dot: 'bg-slate-700 dark:bg-slate-300',
+    badge: 'bg-transparent text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700',
+    text: 'text-slate-800 dark:text-slate-200',
   },
   Rejected: {
     label: 'Rejected',
-    dot: 'bg-rose-500',
-    badge: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border-rose-200 dark:border-rose-900',
-    text: 'text-rose-600 dark:text-rose-400',
+    dot: 'bg-rose-600',
+    badge: 'bg-transparent text-rose-700 dark:text-rose-400 border-rose-300/80 dark:border-rose-900/60',
+    text: 'text-rose-700 dark:text-rose-400',
   },
 };
 
@@ -101,7 +94,6 @@ export default function ReviewsPage() {
   const [selectedReview, setSelectedReview] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-
   const fetchReviews = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     setError('');
@@ -117,10 +109,10 @@ export default function ReviewsPage() {
       if (search.trim()) params.search = search.trim();
 
       const res = await reviewService.getAdminReviews(params);
-      const list = res.data || [];
+      const list = res?.data || [];
       setReviews(list);
 
-      if (res.pagination) {
+      if (res?.pagination) {
         setPagination((prev) => ({
           ...prev,
           totalRecords: res.pagination.totalRecords,
@@ -133,17 +125,15 @@ export default function ReviewsPage() {
         if (fresh) setSelectedReview(fresh);
       }
     } catch (err) {
-      setError(err.message || 'Failed to fetch reviews.');
+      setError(err.response?.data?.message || err.message || 'Failed to fetch reviews.');
     } finally {
       if (showLoading) setLoading(false);
     }
   };
 
-
   useEffect(() => {
     fetchReviews();
   }, [pagination.page, statusFilter, ratingFilter]);
-
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -164,7 +154,7 @@ export default function ReviewsPage() {
 
     try {
       const res = await reviewService.moderateReview(reviewId, newStatus);
-      const updated = res.data;
+      const updated = res?.data || {};
 
       setReviews((prev) =>
         prev.map((r) => (r.review_id === reviewId ? { ...r, ...updated, status: newStatus } : r))
@@ -174,12 +164,11 @@ export default function ReviewsPage() {
         setSelectedReview((prev) => ({ ...prev, ...updated, status: newStatus }));
       }
 
-      const msg = res.message || `Review #${reviewId} marked as ${newStatus}.`;
+      const msg = res?.message || `Review #${reviewId} marked as ${newStatus}.`;
       setSuccessBanner(msg);
       setTimeout(() => setSuccessBanner(''), 4000);
-
     } catch (err) {
-      setError(err.message || `Failed to update status to ${newStatus}.`);
+      setError(err.response?.data?.message || err.message || `Failed to update status to ${newStatus}.`);
     } finally {
       setActionLoadingId(null);
     }
@@ -198,21 +187,22 @@ export default function ReviewsPage() {
     <div className="space-y-5 max-w-7xl mx-auto">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3.5 border-b border-slate-200/80 dark:border-slate-800">
-        <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+        <h1 className="text-xl sm:text-2xl font-normal text-slate-900 dark:text-white tracking-tight leading-none">
           Customer Reviews
         </h1>
 
         <button
           type="button"
           onClick={() => fetchReviews(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold border border-slate-200/90 dark:border-slate-800 rounded-full transition-all shadow-2xs hover:border-slate-300 cursor-pointer self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-normal border border-slate-200/90 dark:border-slate-800 rounded-full transition-all shadow-2xs hover:border-slate-300 cursor-pointer self-start sm:self-auto"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : 'text-slate-400'}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-rose-600' : 'text-slate-400'}`} />
           <span>Refresh</span>
         </button>
       </div>
 
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl">
+      {/* Filter and Search Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-2xs">
         <div className="flex flex-wrap items-center gap-2">
           <select
             value={statusFilter}
@@ -220,7 +210,7 @@ export default function ReviewsPage() {
               setStatusFilter(e.target.value);
               setPagination((p) => ({ ...p, page: 1 }));
             }}
-            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 rounded-full cursor-pointer focus:outline-none focus:border-blue-500"
+            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 rounded-full cursor-pointer focus:outline-none focus:border-neutral-400 dark:focus:border-rose-900/50"
           >
             <option value="">All Statuses</option>
             <option value="Pending">Pending</option>
@@ -234,7 +224,7 @@ export default function ReviewsPage() {
               setRatingFilter(e.target.value);
               setPagination((p) => ({ ...p, page: 1 }));
             }}
-            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 rounded-full cursor-pointer focus:outline-none focus:border-blue-500"
+            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 rounded-full cursor-pointer focus:outline-none focus:border-neutral-400 dark:focus:border-rose-900/50"
           >
             <option value="">All Ratings</option>
             <option value="5">5 Stars</option>
@@ -248,7 +238,7 @@ export default function ReviewsPage() {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="text-xs text-blue-600 dark:text-blue-400 hover:underline px-2 py-1 cursor-pointer font-medium"
+              className="text-xs text-rose-700 dark:text-rose-400 hover:underline px-2.5 py-1 cursor-pointer font-normal"
             >
               Reset Filters
             </button>
@@ -257,18 +247,18 @@ export default function ReviewsPage() {
 
         <form onSubmit={handleSearchSubmit} className="flex gap-2">
           <div className="relative w-full sm:w-64">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
             <input
               type="text"
               placeholder="Search customer, comment..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-blue-500 focus:outline-none pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white rounded-full transition-colors"
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-neutral-400 dark:focus:border-rose-900/50 focus:outline-none pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white rounded-full transition-colors"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-full border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+            className="px-4 py-1.5 bg-gradient-to-r from-black via-neutral-900 to-rose-950 hover:to-rose-900 text-white text-xs font-normal rounded-full border border-neutral-800 transition-colors cursor-pointer"
           >
             Search
           </button>
@@ -276,14 +266,14 @@ export default function ReviewsPage() {
       </div>
 
       {successBanner && (
-        <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-400 text-xs flex items-center justify-between rounded-xl animate-in fade-in duration-200">
+        <div className="p-3.5 bg-neutral-900 text-white dark:bg-rose-950/50 border border-neutral-800 dark:border-rose-900/60 text-xs flex items-center justify-between rounded-2xl animate-in fade-in duration-200">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>{successBanner}</span>
+            <CheckCircle2 className="w-4 h-4 text-rose-400 shrink-0" />
+            <span className="font-normal">{successBanner}</span>
           </div>
           <button
             onClick={() => setSuccessBanner('')}
-            className="text-emerald-700 dark:text-emerald-400 hover:opacity-75"
+            className="text-neutral-400 hover:text-white dark:text-rose-300 dark:hover:text-white cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -291,17 +281,18 @@ export default function ReviewsPage() {
       )}
 
       {error && (
-        <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2 rounded-xl">
+        <div className="p-3.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2 rounded-2xl">
           <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{error}</span>
+          <span className="font-normal">{error}</span>
         </div>
       )}
 
+      {/* Table */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <tr className="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50 text-[11px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 <th className="py-3 px-4 w-16">ID</th>
                 <th className="py-3 px-4">Customer</th>
                 <th className="py-3 px-4">Rating</th>
@@ -316,7 +307,7 @@ export default function ReviewsPage() {
               {loading ? (
                 <tr>
                   <td colSpan="8" className="py-12 text-center text-slate-400">
-                    <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-600" />
+                    <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-rose-600" />
                     <span>Loading customer reviews...</span>
                   </td>
                 </tr>
@@ -324,7 +315,7 @@ export default function ReviewsPage() {
                 <tr>
                   <td colSpan="8" className="py-12 text-center text-slate-400">
                     <Star className="w-8 h-8 mx-auto mb-2 opacity-30 text-slate-400" />
-                    <p className="font-semibold text-slate-600 dark:text-slate-300">No customer reviews found</p>
+                    <p className="font-normal text-slate-600 dark:text-slate-300">No customer reviews found</p>
                     <p className="text-[11px] mt-0.5 text-slate-400">
                       {search || statusFilter || ratingFilter
                         ? 'Try adjusting your search criteria or status filter.'
@@ -333,7 +324,7 @@ export default function ReviewsPage() {
                     {(search || statusFilter || ratingFilter) && (
                       <button
                         onClick={handleResetFilters}
-                        className="mt-3 px-3 py-1 text-xs text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                        className="mt-3 px-3 py-1 text-xs text-rose-700 dark:text-rose-400 hover:underline cursor-pointer font-normal"
                       >
                         Clear Filters
                       </button>
@@ -352,16 +343,19 @@ export default function ReviewsPage() {
                       key={revId}
                       className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
                     >
-                      <td className="py-3.5 px-4 font-mono font-medium text-slate-500 dark:text-slate-400">
+                      <td className="py-3.5 px-4 font-mono font-normal text-slate-500 dark:text-slate-400">
                         #{revId}
                       </td>
 
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-blue-600/10 text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
+                          <div
+                            className="w-7 h-7 rounded-full bg-gradient-to-tr from-black via-neutral-900 to-rose-950 text-white font-normal text-xs flex items-center justify-center shrink-0 ring-1 ring-neutral-800 border border-rose-900/40"
+                            style={{ borderRadius: '9999px' }}
+                          >
                             {(item.customer_name || 'C').charAt(0).toUpperCase()}
                           </div>
-                          <span className="font-semibold text-slate-900 dark:text-white">
+                          <span className="font-normal text-slate-900 dark:text-white">
                             {item.customer_name}
                           </span>
                         </div>
@@ -370,7 +364,7 @@ export default function ReviewsPage() {
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2">
                           <StarRating rating={item.rating} size="w-3.5 h-3.5" />
-                          <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400">
+                          <span className="text-[11px] font-normal text-slate-700 dark:text-slate-300">
                             {item.rating}.0
                           </span>
                         </div>
@@ -378,7 +372,7 @@ export default function ReviewsPage() {
 
                       <td className="py-3.5 px-4 max-w-xs sm:max-w-md">
                         <p
-                          className="line-clamp-2 text-slate-600 dark:text-slate-300 leading-relaxed cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                          className="line-clamp-2 text-slate-600 dark:text-slate-300 leading-relaxed cursor-pointer hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-normal"
                           onClick={() => openDrawer(item)}
                           title="Click to view full review"
                         >
@@ -386,29 +380,29 @@ export default function ReviewsPage() {
                         </p>
                       </td>
 
-                      <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap text-[11px]">
+                      <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap text-[11px] font-normal">
                         {formatDateTime(item.created_at)}
                       </td>
 
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${st.badge}`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-normal border ${st.badge}`}
                         >
                           <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
                           <span>{st.label}</span>
                         </span>
                       </td>
 
-                      <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap text-[11px]">
+                      <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap text-[11px] font-normal">
                         {modName !== '-' ? (
                           <div className="leading-tight">
-                            <span className="font-medium text-slate-700 dark:text-slate-300">{modName}</span>
+                            <span className="font-normal text-slate-700 dark:text-slate-300">{modName}</span>
                             {item.moderated_at && (
-                              <div className="text-[10px] text-slate-400">{formatDateTime(item.moderated_at)}</div>
+                              <div className="text-[10px] text-slate-400 font-normal">{formatDateTime(item.moderated_at)}</div>
                             )}
                           </div>
                         ) : (
-                          <span className="text-slate-400">-</span>
+                          <span className="text-slate-400 font-normal">-</span>
                         )}
                       </td>
 
@@ -419,10 +413,10 @@ export default function ReviewsPage() {
                               type="button"
                               disabled={isActing}
                               onClick={() => handleModerate(revId, 'Approved')}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                              className="px-2.5 py-1 rounded-full bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-normal border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer flex items-center gap-1 disabled:opacity-50"
                               title="Approve and publish to website"
                             >
-                              <Check className="w-3.5 h-3.5" />
+                              <Check className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
                               <span>Approve</span>
                             </button>
                           )}
@@ -432,10 +426,10 @@ export default function ReviewsPage() {
                               type="button"
                               disabled={isActing}
                               onClick={() => handleModerate(revId, 'Rejected')}
-                              className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-xs font-semibold border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                              className="px-2.5 py-1 rounded-full bg-transparent hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-700 dark:text-rose-400 text-xs font-normal border border-rose-300/80 dark:border-rose-900/60 transition-colors cursor-pointer flex items-center gap-1 disabled:opacity-50"
                               title="Reject and hide from website"
                             >
-                              <Ban className="w-3.5 h-3.5" />
+                              <Ban className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                               <span>Reject</span>
                             </button>
                           )}
@@ -443,7 +437,7 @@ export default function ReviewsPage() {
                           <button
                             type="button"
                             onClick={() => openDrawer(item)}
-                            className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                            className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
                             title="View review details"
                           >
                             <ChevronRight className="w-4 h-4" />
@@ -459,7 +453,7 @@ export default function ReviewsPage() {
         </div>
 
         {pagination.totalPages > 1 && (
-          <div className="p-3 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
+          <div className="p-3 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 font-normal">
             <span>
               Showing {reviews.length} of {pagination.totalRecords} reviews
             </span>
@@ -468,18 +462,18 @@ export default function ReviewsPage() {
                 type="button"
                 disabled={pagination.page <= 1}
                 onClick={() => setPagination((p) => ({ ...p, page: p.page - 1 }))}
-                className="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                className="px-3.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer font-normal"
               >
                 Previous
               </button>
-              <span className="font-semibold text-slate-700 dark:text-slate-300">
+              <span className="font-normal text-slate-700 dark:text-slate-300">
                 Page {pagination.page} of {pagination.totalPages}
               </span>
               <button
                 type="button"
                 disabled={pagination.page >= pagination.totalPages}
                 onClick={() => setPagination((p) => ({ ...p, page: p.page + 1 }))}
-                className="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                className="px-3.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer font-normal"
               >
                 Next
               </button>
@@ -488,152 +482,156 @@ export default function ReviewsPage() {
         )}
       </div>
 
+      {/* View Review Drawer Slide-Over */}
       {drawerOpen && selectedReview &&
         createPortal(
           <>
             <div
-              className="fixed inset-0 z-[90] bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+              className="fixed inset-0 z-[90] bg-slate-900/40 transition-opacity animate-in fade-in duration-200"
               onClick={closeDrawer}
             />
 
             <div
               ref={drawerPanelRef}
-              className="fixed top-0 right-0 bottom-0 z-[100] w-full sm:w-[480px] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-200"
+              className="fixed top-0 right-0 bottom-0 z-[100] w-full sm:w-[480px] bg-white dark:bg-slate-900 border-l border-slate-200/80 dark:border-rose-950/30 shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-200"
             >
-              <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-              <div>
-                <span className="text-[11px] font-mono text-slate-400">Review #{selectedReview.review_id}</span>
-                <h2 className="text-base font-bold text-slate-900 dark:text-white">Review Details</h2>
+              <div className="p-5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50/60 dark:bg-slate-950/40">
+                <div>
+                  <span className="text-[11px] font-mono text-slate-400 font-normal">Review #{selectedReview.review_id}</span>
+                  <h2 className="text-base font-normal text-slate-900 dark:text-white leading-tight">Review Details</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeDrawer}
+                  className="p-1.5 rounded-full border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={closeDrawer}
-                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
 
-            <div className="p-5 flex-1 overflow-y-auto space-y-6 text-xs">
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                    Customer Info
-                  </span>
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
-                      STATUS_CONFIG[selectedReview.status]?.badge || STATUS_CONFIG.Pending.badge
-                    }`}
-                  >
+              <div className="p-5 flex-1 overflow-y-auto space-y-5 text-xs">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-normal text-slate-400 uppercase tracking-wider">
+                      Customer Info
+                    </span>
                     <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        STATUS_CONFIG[selectedReview.status]?.dot || STATUS_CONFIG.Pending.dot
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-normal border ${
+                        STATUS_CONFIG[selectedReview.status]?.badge || STATUS_CONFIG.Pending.badge
                       }`}
-                    />
-                    <span>{selectedReview.status}</span>
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-600/10 text-blue-600 dark:text-blue-400 font-bold text-sm flex items-center justify-center">
-                    {(selectedReview.customer_name || 'C').charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-900 dark:text-white">
-                      {selectedReview.customer_name}
-                    </div>
-                    <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-                      <Clock className="w-3 h-3" />
-                      <span>{formatDateTime(selectedReview.created_at)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">
-                  Customer Rating
-                </span>
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                  <StarRating rating={selectedReview.rating} size="w-5 h-5" />
-                  <span className="text-sm font-black text-amber-600 dark:text-amber-400 ml-1">
-                    {selectedReview.rating} out of 5 Stars
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">
-                  Review Comment
-                </span>
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 leading-relaxed italic text-xs whitespace-pre-wrap">
-                  &ldquo;{selectedReview.comment}&rdquo;
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-2">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
-                  Moderation Audit
-                </span>
-                <div className="space-y-1.5 text-[11px]">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Moderator:</span>
-                    <span className="font-medium text-slate-700 dark:text-slate-300">
-                      {selectedReview.moderator?.display_name || (selectedReview.moderated_by_user_id ? `Admin #${selectedReview.moderated_by_user_id}` : 'None (Pending)')}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          STATUS_CONFIG[selectedReview.status]?.dot || STATUS_CONFIG.Pending.dot
+                        }`}
+                      />
+                      <span>{selectedReview.status}</span>
                     </span>
                   </div>
-                  {selectedReview.moderated_at && (
+
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-10 h-10 rounded-full bg-gradient-to-tr from-black via-neutral-900 to-rose-950 text-white font-normal text-sm flex items-center justify-center ring-1 ring-neutral-800 border border-rose-900/40 shrink-0"
+                      style={{ borderRadius: '9999px' }}
+                    >
+                      {(selectedReview.customer_name || 'C').charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="text-sm font-normal text-slate-900 dark:text-white">
+                        {selectedReview.customer_name}
+                      </div>
+                      <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5 font-normal">
+                        <Clock className="w-3 h-3" />
+                        <span>{formatDateTime(selectedReview.created_at)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-normal text-slate-400 uppercase tracking-wider block mb-2">
+                    Customer Rating
+                  </span>
+                  <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800">
+                    <StarRating rating={selectedReview.rating} size="w-4 h-4" />
+                    <span className="text-xs font-normal text-slate-800 dark:text-slate-200">
+                      {selectedReview.rating} out of 5 Stars
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-normal text-slate-400 uppercase tracking-wider block mb-2">
+                    Review Comment
+                  </span>
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 leading-relaxed italic text-xs whitespace-pre-wrap font-normal">
+                    &ldquo;{selectedReview.comment}&rdquo;
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-2">
+                  <span className="text-[11px] font-normal text-slate-400 uppercase tracking-wider block">
+                    Moderation Audit
+                  </span>
+                  <div className="space-y-1.5 text-[11px] font-normal">
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Moderated At:</span>
-                      <span className="font-medium text-slate-700 dark:text-slate-300">
-                        {formatDateTime(selectedReview.moderated_at)}
+                      <span className="text-slate-400">Moderator:</span>
+                      <span className="font-normal text-slate-700 dark:text-slate-300">
+                        {selectedReview.moderator?.display_name || (selectedReview.moderated_by_user_id ? `Admin #${selectedReview.moderated_by_user_id}` : 'None (Pending)')}
                       </span>
                     </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Last Updated:</span>
-                    <span className="font-medium text-slate-700 dark:text-slate-300">
-                      {formatDateTime(selectedReview.updated_at || selectedReview.created_at)}
-                    </span>
+                    {selectedReview.moderated_at && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Moderated At:</span>
+                        <span className="font-normal text-slate-700 dark:text-slate-300">
+                          {formatDateTime(selectedReview.moderated_at)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Last Updated:</span>
+                      <span className="font-normal text-slate-700 dark:text-slate-300">
+                        {formatDateTime(selectedReview.updated_at || selectedReview.created_at)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/50 flex items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={closeDrawer}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-              >
-                Close
-              </button>
+              <div className="p-4 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/50 flex items-center justify-between gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={closeDrawer}
+                  className="px-4 py-2 rounded-full text-xs font-normal text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
 
-              <div className="flex items-center gap-2">
-                {selectedReview.status !== 'Rejected' && (
-                  <button
-                    type="button"
-                    disabled={actionLoadingId === selectedReview.review_id}
-                    onClick={() => handleModerate(selectedReview.review_id, 'Rejected')}
-                    className="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-xs font-bold border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
-                  >
-                    <Ban className="w-3.5 h-3.5" />
-                    <span>Reject</span>
-                  </button>
-                )}
+                <div className="flex items-center gap-2">
+                  {selectedReview.status !== 'Rejected' && (
+                    <button
+                      type="button"
+                      disabled={actionLoadingId === selectedReview.review_id}
+                      onClick={() => handleModerate(selectedReview.review_id, 'Rejected')}
+                      className="px-4 py-2 rounded-full bg-transparent hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-700 dark:text-rose-400 text-xs font-normal border border-rose-300/80 dark:border-rose-900/60 transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      <Ban className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                      <span>Reject</span>
+                    </button>
+                  )}
 
-                {selectedReview.status !== 'Approved' && (
-                  <button
-                    type="button"
-                    disabled={actionLoadingId === selectedReview.review_id}
-                    onClick={() => handleModerate(selectedReview.review_id, 'Approved')}
-                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Approve & Publish</span>
-                  </button>
-                )}
-              </div>
+                  {selectedReview.status !== 'Approved' && (
+                    <button
+                      type="button"
+                      disabled={actionLoadingId === selectedReview.review_id}
+                      onClick={() => handleModerate(selectedReview.review_id, 'Approved')}
+                      className="px-4 py-2 rounded-full bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-normal border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      <Check className="w-3.5 h-3.5 text-slate-700 dark:text-slate-300" />
+                      <span>Approve & Publish</span>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </>,

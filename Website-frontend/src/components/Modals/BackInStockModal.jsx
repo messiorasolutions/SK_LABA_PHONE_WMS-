@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { X, AlertCircle, Bell, BellRing, CheckCircle2 } from 'lucide-react';
-import { X, AlertCircle, Phone, Mail, User, FileText, CheckCircle2 } from 'lucide-react';
 import { createBackInStockRequest } from '../../services/backInStockService';
 import { STORE_INFO } from '../../constants/siteConfig';
 
@@ -290,18 +289,6 @@ export default function BackInStockModal({ phone, onClose }) {
                   <span className="text-[10px] text-slate-500">
                     {formData.notes.length}/500
                   </span>
-                <div className="relative">
-                  <div className="absolute top-2.5 left-3 pointer-events-none text-slate-400">
-                    <FileText className="w-3.5 h-3.5" />
-                  </div>
-                  <textarea
-                    rows={3}
-                    maxLength={500}
-                    placeholder="e.g. Interested in 256GB Black Titanium or looking for immediate purchase when stock arrives"
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all resize-none"
-                  />
                 </div>
               </div>
 

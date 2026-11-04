@@ -103,7 +103,7 @@ export default function BackInStockModal({ phone, onClose }) {
       {/* Right-Side Slide-Over Drawer */}
       <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[480px] md:w-[520px] bg-[#0A0F1E] border-l border-theme-border shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
           <div>
             <h2 className="text-sm font-semibold text-white">Back-in-Stock Alert</h2>
             <p className="text-[11px] text-theme-textMuted">Get notified instantly when stock arrives</p>
@@ -120,7 +120,7 @@ export default function BackInStockModal({ phone, onClose }) {
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto p-6 flex-1 space-y-4">
+        <div className="overflow-y-auto p-4 sm:p-6 flex-1 space-y-4">
           {success ? (
             <div className="py-8 sm:py-10 max-w-lg mx-auto text-center space-y-6 animate-in fade-in duration-300">
               <div className="space-y-1.5">

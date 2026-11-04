@@ -24,8 +24,8 @@ export default function Footer({ onOpenSell }) {
   return (
     <footer className="w-full bg-black border-t border-white/10 text-theme-textSecondary pt-12 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-white/10">
-          <div className="md:col-span-2 space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 pb-10 border-b border-white/10">
+          <div className="sm:col-span-2 md:col-span-2 space-y-3">
             <h3 className="text-xl font-normal text-white tracking-tight flex items-center gap-2">
               <span>{STORE_INFO.name}</span>
               <span className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-700/70 via-blue-800/70 to-blue-950/70 shadow-sm">

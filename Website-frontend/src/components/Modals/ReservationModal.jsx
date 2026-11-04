@@ -400,11 +400,11 @@ export default function ReservationModal({ phone, onClose }) {
       {/* Right-Side Slide-Over Drawer */}
       <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[500px] md:w-[540px] bg-[#0A0F1E] border-l border-white/10 shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
         {/* Header / Selected Device Card */}
-        <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-white/10 bg-[#0A0F1E]/95 backdrop-blur-md sticky top-0 z-20 shrink-0">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-[#0A0F1E]/95 backdrop-blur-md sticky top-0 z-20 shrink-0">
           <div className="flex items-center justify-between gap-3.5 sm:gap-4">
             {/* Phone Summary Info */}
             <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
-              <div className="relative w-[56px] h-[56px] sm:w-[64px] sm:h-[64px] rounded-2xl bg-gradient-to-b from-white/[0.08] to-black/80 border border-white/15 p-1.5 flex items-center justify-center shrink-0 shadow-lg shadow-black/70 group overflow-hidden">
+              <div className="relative w-[48px] h-[48px] sm:w-[56px] sm:h-[56px] md:w-[64px] md:h-[64px] rounded-2xl bg-gradient-to-b from-white/[0.08] to-black/80 border border-white/15 p-1 flex items-center justify-center shrink-0 shadow-lg shadow-black/70 group overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-white/[0.06] pointer-events-none" />
                 {activePhonePhoto ? (
                   <img

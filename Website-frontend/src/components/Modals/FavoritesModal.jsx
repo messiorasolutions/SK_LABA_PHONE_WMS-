@@ -107,7 +107,7 @@ export default function FavoritesModal({
       {/* Right-Side Slide-Over Drawer */}
       <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[540px] md:w-[580px] bg-[#0A0F1E] border-l border-theme-border shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-theme-border bg-theme-surface/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
           <div>
             <h2 className="text-sm font-medium text-white">Your Saved Favourites</h2>
             <p className="text-xs text-theme-textMuted">
@@ -126,7 +126,7 @@ export default function FavoritesModal({
         </div>
 
         {/* Content Body */}
-        <div className="overflow-y-auto p-6 flex-1">
+        <div className="overflow-y-auto p-4 sm:p-6 flex-1">
           {loading ? (
             <div className="py-16 text-center">
               <p className="text-xs text-theme-textSecondary">Loading live pricing & stock status...</p>

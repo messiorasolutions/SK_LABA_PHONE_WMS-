@@ -9,13 +9,23 @@
     --text-secondary: #94a3b8;
   }
 
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     background-color: var(--bg-main);
     color: var(--text-primary);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
+    min-width: 320px;
+  }
+
+  /* Ensure text wrapping everywhere to prevent accidental overflow */
+  p, h1, h2, h3, h4, h5, h6, span, a, button, input, textarea {
+    overflow-wrap: break-word;
   }
 }
 

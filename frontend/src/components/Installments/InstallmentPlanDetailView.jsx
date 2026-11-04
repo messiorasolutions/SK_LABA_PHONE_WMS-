@@ -45,9 +45,6 @@ export default function InstallmentPlanDetailView({
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Installment Plans</span>
         </button>
-        <span className="text-xs font-normal text-slate-400">
-          SRS MG-11 Installment Policy
-        </span>
       </div>
 
       {/* ── Page Header ──────────────────────────────────────────────── */}

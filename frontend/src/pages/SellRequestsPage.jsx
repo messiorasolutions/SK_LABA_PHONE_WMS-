@@ -433,7 +433,7 @@ export default function SellRequestsPage() {
                     item.assigned_staff?.display_name ||
                     item.assigned_staff_name ||
                     item.assigned_to_user_name ||
-                    (item.assigned_to_user_id ? `Staff #${item.assigned_to_user_id}` : 'Unassigned');
+                    (item.assigned_to_user_id ? `Staff ${item.assigned_to_user_id}` : 'Unassigned');
 
                   return (
                     <tr
@@ -441,7 +441,7 @@ export default function SellRequestsPage() {
                       className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors"
                     >
                       <td className="py-3 px-4 font-mono font-normal text-slate-400">
-                        #{reqId}
+                        {reqId}
                       </td>
 
                       <td className="py-3 px-4">

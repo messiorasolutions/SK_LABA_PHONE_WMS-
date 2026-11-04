@@ -379,7 +379,7 @@ export default function BackInStockPage() {
                 <option value="">All Assigned Staff</option>
                 {staffList.map((st) => (
                   <option key={st.user_id} value={st.user_id}>
-                    {st.display_name || st.name || st.email || `Staff #${st.user_id}`}
+                    {st.display_name || st.name || st.email || `Staff ${st.user_id}`}
                   </option>
                 ))}
               </select>
@@ -608,7 +608,7 @@ export default function BackInStockPage() {
                             onClick={() => req.phone_id && openPhoneDetailView(req.phone_id)}
                             className="font-normal text-slate-900 dark:text-white block hover:text-rose-600 dark:hover:text-rose-400 text-left transition-colors cursor-pointer"
                           >
-                            {req.phone?.name || req.phone_name || (req.phone_id ? `Phone #${req.phone_id}` : 'Phone')}
+                            {req.phone?.name || req.phone_name || (req.phone_id ? `Phone ${req.phone_id}` : 'Phone')}
                           </button>
                         </td>
 
@@ -639,7 +639,7 @@ export default function BackInStockPage() {
                             <option value="">Unassigned</option>
                             {staffList.map((st) => (
                               <option key={st.user_id} value={st.user_id}>
-                                {st.display_name || st.name || st.email || `Staff #${st.user_id}`}
+                                {st.display_name || st.name || st.email || `Staff ${st.user_id}`}
                               </option>
                             ))}
                           </select>

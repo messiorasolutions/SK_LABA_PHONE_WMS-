@@ -805,7 +805,7 @@ export default function PhoneManagementPage() {
       {selectedCompareIds.length > 0 && !isCompareModalOpen && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl rounded-2xl px-5 py-3 flex items-center gap-4 animate-in slide-in-from-bottom-4">
           <div className="flex items-center gap-2">
-            <Scale className="w-4 h-4 text-[#2563EB]" />
+            <Scale className="w-4 h-4 text-rose-600 dark:text-rose-400" />
             <span className="text-xs font-bold text-slate-900 dark:text-white">
               Compare ({selectedCompareIds.length}/3)
             </span>
@@ -837,7 +837,7 @@ export default function PhoneManagementPage() {
               type="button"
               onClick={() => setIsCompareModalOpen(true)}
               disabled={selectedCompareIds.length < 2}
-              className="px-3.5 py-1.5 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-40 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 bg-gradient-to-r from-black via-neutral-900 to-rose-950 hover:to-rose-900 disabled:opacity-40 text-white text-xs font-semibold rounded-lg shadow-sm border border-neutral-800 transition-all cursor-pointer"
             >
               Compare Now
             </button>

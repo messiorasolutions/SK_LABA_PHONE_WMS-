@@ -44,9 +44,11 @@ class AuthController {
                             data: {
                                 user: {
                                     user_id: user.user_id,
+                                    formatted_user_id: user.formatted_user_id,
                                     display_name: user.display_name,
                                     email: user.email,
                                     role: user.role,
+                                    status: user.status,
                                     last_login_at: user.last_login_at
                                 },
                                 csrfToken
@@ -55,7 +57,6 @@ class AuthController {
                     });
                 });
             } else {
-                // If session is absent (e.g. unconfigured environment)
                 return res.status(200).json({
                     success: true,
                     message: 'Login successful',
@@ -172,6 +173,25 @@ class AuthController {
         try {
             const { token, newPassword } = req.body;
             const result = await this.authService.resetPassword({ token, newPassword });
+            return res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * POST /api/auth/verify-account
+     * Verify user account with temporary password and establish new permanent password
+     */
+    async verifyAccount(req, res, next) {
+        try {
+            const { token, email, temporary_password, new_password } = req.body;
+            const result = await this.authService.verifyAccount({
+                token,
+                email,
+                temporary_password,
+                new_password
+            });
             return res.status(200).json(result);
         } catch (error) {
             next(error);

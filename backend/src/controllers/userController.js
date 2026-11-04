@@ -11,23 +11,14 @@ class UserController {
      */
     async listUsers(req, res, next) {
         try {
-            const { page, limit, search, role } = req.query;
-            let is_active = req.query.is_active !== undefined ? req.query.is_active : req.query.status;
-
-            if (is_active !== undefined && is_active !== null && is_active !== '') {
-                const lower = String(is_active).trim().toLowerCase();
-                if (['true', '1', 'active'].includes(lower)) {
-                    is_active = true;
-                } else if (['false', '0', 'inactive'].includes(lower)) {
-                    is_active = false;
-                }
-            }
+            const { page, limit, search, role, status, is_active } = req.query;
 
             const result = await this.userService.listUsers({
                 page,
                 limit,
                 search,
                 role,
+                status,
                 is_active
             });
 
@@ -65,19 +56,18 @@ class UserController {
      */
     async createUser(req, res, next) {
         try {
-            const { display_name, email, password, role, is_active } = req.body;
+            const { display_name, email, password, role } = req.body;
 
             const user = await this.userService.createUser({
                 display_name,
                 email,
                 password,
-                role,
-                is_active
+                role
             });
 
             return res.status(201).json({
                 success: true,
-                message: 'User created successfully',
+                message: 'User created successfully. A verification email has been dispatched.',
                 data: user
             });
         } catch (error) {
@@ -98,7 +88,7 @@ class UserController {
 
             return res.status(200).json({
                 success: true,
-                message: 'User updated successfully',
+                message: 'User updated successfully.',
                 data: user
             });
         } catch (error) {
@@ -120,7 +110,9 @@ class UserController {
 
             return res.status(200).json({
                 success: true,
-                message: `User account ${user.is_active ? 'activated' : 'deactivated'} successfully`,
+                message: is_active
+                    ? 'User account activated successfully.'
+                    : 'User account deactivated successfully and notification email dispatched.',
                 data: user
             });
         } catch (error) {

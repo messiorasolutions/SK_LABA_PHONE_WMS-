@@ -39,7 +39,7 @@ function validateListUsers(req, res, next) {
         }
     }
 
-    if (role !== undefined) {
+    if (role !== undefined && role !== '') {
         const cleanRole = String(role).trim().toUpperCase();
         if (cleanRole !== 'ADMIN' && cleanRole !== 'STAFF') {
             return next(new AppError("Role filter must be either 'ADMIN' or 'STAFF'.", 400));
@@ -47,16 +47,20 @@ function validateListUsers(req, res, next) {
         req.query.role = cleanRole;
     }
 
-    // Support both ?is_active=true/false and ?status=active/inactive
-    const activeParam = is_active !== undefined ? is_active : status;
-    if (activeParam !== undefined) {
-        const lower = String(activeParam).trim().toLowerCase();
+    if (status !== undefined && status !== '') {
+        const cleanStatus = String(status).trim().toUpperCase();
+        if (!['ACTIVE', 'PENDING', 'INACTIVE'].includes(cleanStatus)) {
+            return next(new AppError("Status filter must be 'ACTIVE', 'PENDING', or 'INACTIVE'.", 400));
+        }
+        req.query.status = cleanStatus;
+    } else if (is_active !== undefined && is_active !== '') {
+        const lower = String(is_active).trim().toLowerCase();
         if (['true', '1', 'active'].includes(lower)) {
-            req.query.is_active = true;
+            req.query.status = 'ACTIVE';
         } else if (['false', '0', 'inactive'].includes(lower)) {
-            req.query.is_active = false;
-        } else {
-            return next(new AppError("Status filter must be a boolean ('true'/'false') or ('active'/'inactive').", 400));
+            req.query.status = 'INACTIVE';
+        } else if (lower === 'pending') {
+            req.query.status = 'PENDING';
         }
     }
 
@@ -133,12 +137,12 @@ function validateCreateUser(req, res, next) {
  */
 function validateUpdateUser(req, res, next) {
     if (!req.body || typeof req.body !== 'object' || Object.keys(req.body).length === 0) {
-        return next(new AppError('At least one permitted field (display_name, email, role, or is_active) must be provided to update.', 400));
+        return next(new AppError('At least one permitted field (display_name, email, role, password, or is_active) must be provided to update.', 400));
     }
 
-    // Explicitly reject direct password manipulation through profile update
-    if (req.body.password !== undefined || req.body.password_hash !== undefined) {
-        return next(new AppError('Direct password updates are not permitted via this endpoint. Use the password reset workflow.', 400));
+    // Reject direct password_hash manipulation
+    if (req.body.password_hash !== undefined) {
+        return next(new AppError('Direct password_hash manipulation is not permitted.', 400));
     }
 
     // Explicitly reject tampering with identifiers or system fields
@@ -150,10 +154,10 @@ function validateUpdateUser(req, res, next) {
         return next(new AppError('Updating system timestamps is not permitted.', 400));
     }
 
-    const { display_name, email, role, is_active } = req.body;
+    const { display_name, email, role, is_active, password } = req.body;
 
-    if (display_name === undefined && email === undefined && role === undefined && is_active === undefined) {
-        return next(new AppError('At least one permitted field (display_name, email, role, or is_active) must be provided to update.', 400));
+    if (display_name === undefined && email === undefined && role === undefined && is_active === undefined && password === undefined) {
+        return next(new AppError('At least one permitted field (display_name, email, role, password, or is_active) must be provided to update.', 400));
     }
 
     if (display_name !== undefined) {
@@ -175,6 +179,15 @@ function validateUpdateUser(req, res, next) {
         }
         if (!EMAIL_REGEX.test(trimmedEmail)) {
             return next(new AppError('Please provide a valid email address.', 400));
+        }
+    }
+
+    if (password !== undefined && password !== '') {
+        if (typeof password !== 'string' || password.length < 8) {
+            return next(new AppError('Temporary password must be at least 8 characters long.', 400));
+        }
+        if (password.length > 128) {
+            return next(new AppError('Temporary password cannot exceed 128 characters.', 400));
         }
     }
 

@@ -120,6 +120,51 @@ class PhoneController {
      * POST /api/phones/:id/stock/remove
      * Deduct stock quantity
      */
+    /**
+     * GET /api/phones/:id/stock/history or /api/phones/stock/history
+     * Retrieve stock adjustment history records
+     */
+    async getStockHistory(req, res, next) {
+        try {
+            const phone_id = req.params.id || req.query.phone_id;
+            const { type, month } = req.query;
+            const history = await phoneService.getStockHistory(phone_id, { type, month });
+            return res.status(200).json({
+                success: true,
+                count: history.length,
+                data: history
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * DELETE /api/phones/:id/stock/history or /api/phones/stock/history
+     * Delete history for a specific month
+     */
+    async deleteStockHistory(req, res, next) {
+        try {
+            const phone_id = req.params.id || req.query.phone_id || req.body?.phone_id;
+            const month = req.query.month || req.body?.month;
+            const type = req.query.type || req.body?.type;
+            if (!month) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Month parameter is required (format YYYY-MM).'
+                });
+            }
+            const result = await phoneService.deleteStockHistoryByMonth(phone_id, month, { type });
+            return res.status(200).json({
+                success: true,
+                message: `Successfully deleted history records for ${month}.`,
+                deletedCount: result.deletedCount
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async removeStock(req, res, next) {
         try {
             const { id } = req.params;

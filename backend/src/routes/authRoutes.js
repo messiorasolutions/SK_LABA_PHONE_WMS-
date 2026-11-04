@@ -35,4 +35,9 @@ router.post('/reset-password', resetPasswordRateLimiter, validateResetPassword, 
     authController.resetPassword(req, res, next);
 });
 
+// POST /api/auth/verify-account
+router.post('/verify-account', (req, res, next) => {
+    authController.verifyAccount(req, res, next);
+});
+
 module.exports = router;

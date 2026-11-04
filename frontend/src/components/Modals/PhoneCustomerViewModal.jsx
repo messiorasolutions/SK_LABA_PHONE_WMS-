@@ -523,13 +523,14 @@ export default function PhoneCustomerViewModal({
           <div className="lg:col-span-6 flex flex-col justify-start space-y-5">
             <div>
               {/* Title & Price on the same line */}
-              <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2 mb-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 mb-4">
                 <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white leading-snug">
                   {phone.name}
                 </h1>
-                <div className="flex items-baseline gap-3">
-                  <span className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-baseline"><span className="text-rose-600 dark:text-rose-400 font-extrabold mr-0.5">$</span><span>
-                    {effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
+                <div className="flex items-baseline gap-3 ml-auto text-right">
+                  <span className="text-2xl sm:text-3xl font-normal text-slate-900 dark:text-white tracking-tight">
+                    ${effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
                   {hasOffer && (
                     <span className="text-sm sm:text-base text-slate-400 line-through font-normal">
                       ${regularPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

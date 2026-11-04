@@ -15,6 +15,7 @@ import ReviewsPage from '../pages/ReviewsPage';
 import LoginPage from '../pages/auth/LoginPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
+import VerifyAccountPage from '../pages/auth/VerifyAccountPage';
 import { ProtectedRoute, AdminRoute, PublicOnlyRoute } from './Guards';
 import { useAuth } from '../context/AuthContext';
 
@@ -41,6 +42,10 @@ export default function AppRoutes() {
             <ForgotPasswordPage />
           </PublicOnlyRoute>
         }
+      />
+            <Route
+        path="/verify-account"
+        element={<VerifyAccountPage />}
       />
       <Route
         path="/reset-password"

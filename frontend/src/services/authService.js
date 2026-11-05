@@ -80,6 +80,41 @@ export const authService = {
     });
     return response.data;
   },
+
+  /**
+   * API 8: Update Current User Profile (PATCH /api/auth/profile)
+   * Updates display_name and/or email for the authenticated user
+   */
+  updateProfile: async ({ display_name, email }) => {
+    const response = await axiosInstance.patch(API_ENDPOINTS.auth.profile, {
+      display_name,
+      email,
+    });
+    return response.data;
+  },
+
+  /**
+   * API 9: Update or Delete User Avatar (PATCH /api/auth/avatar)
+   * Uploads base64 dataUrl/url or removes avatar when null
+   */
+  updateAvatar: async (avatar_url) => {
+    const response = await axiosInstance.patch(API_ENDPOINTS.auth.avatar, {
+      avatar_url,
+    });
+    return response.data;
+  },
+
+  /**
+   * API 10: Change User Password (POST /api/auth/change-password)
+   * Verifies existing password and updates to new password
+   */
+  changePassword: async ({ current_password, new_password }) => {
+    const response = await axiosInstance.post(API_ENDPOINTS.auth.changePassword, {
+      current_password,
+      new_password,
+    });
+    return response.data;
+  },
 };
 
 export default authService;

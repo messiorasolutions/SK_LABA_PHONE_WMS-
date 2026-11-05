@@ -1,12 +1,10 @@
 import React from 'react';
 import {
   ArrowLeft,
-  CalendarClock,
-  Phone,
   Mail,
   Smartphone,
   Calendar,
-  Send,
+  CalendarClock,
   AlertCircle,
   CheckCircle2,
   RefreshCw,
@@ -89,7 +87,7 @@ export default function ReservationDetailView({
           <span>Back to Customer Reservations</span>
         </button>
         <span className="text-xs font-normal text-slate-400">
-          Reservation Management (SRS MG-06)
+          Reservation Management
         </span>
       </div>
 
@@ -101,7 +99,7 @@ export default function ReservationDetailView({
           </div>
           <div>
             <h1 className="text-xl font-normal text-slate-900 dark:text-white tracking-tight">
-              Reservation #{reservation.reservation_id}
+              Reservation
             </h1>
             <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mt-0.5">
               Received on {formatDateTime(reservation.created_at)} · Customer: {reservation.customer_name}
@@ -161,27 +159,9 @@ export default function ReservationDetailView({
 
               <div>
                 <span className="text-[11px] font-normal text-slate-400 block">Phone Number</span>
-                <div className="flex items-center gap-3 mt-1">
-                  <span className="font-mono text-xs font-normal text-slate-900 dark:text-white">
-                    {reservation.phone_number}
-                  </span>
-                  <a
-                    href={`tel:${reservation.phone_number}`}
-                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-normal hover:bg-slate-100 dark:hover:bg-slate-800"
-                  >
-                    <Phone className="w-3 h-3" />
-                    <span>Call</span>
-                  </a>
-                  <a
-                    href={`https://wa.me/${reservation.phone_number.replace(/\D/g, '')}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-normal hover:bg-slate-100 dark:hover:bg-slate-800"
-                  >
-                    <Send className="w-3 h-3" />
-                    <span>WhatsApp</span>
-                  </a>
-                </div>
+                <span className="font-mono text-xs font-normal text-slate-900 dark:text-white block mt-0.5">
+                  {reservation.phone_number}
+                </span>
               </div>
 
               <div>
@@ -246,7 +226,7 @@ export default function ReservationDetailView({
               </div>
             ) : (
               <div className="text-xs font-normal text-slate-400">
-                Phone ID: #{reservation.phone_id}
+                Phone ID: {reservation.phone_id}
               </div>
             )}
           </div>

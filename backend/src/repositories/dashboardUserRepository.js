@@ -78,7 +78,7 @@ class DashboardUserRepository {
      */
     async findById(userId, executor = this.pool) {
         const query = `
-            SELECT user_id, display_name, email, role, is_active, status, last_login_at, created_at, updated_at
+            SELECT user_id, display_name, email, avatar_url, role, is_active, status, last_login_at, created_at, updated_at
             FROM dashboard_users
             WHERE user_id = ?
         `;
@@ -94,10 +94,26 @@ class DashboardUserRepository {
      */
     async findByIdForUpdate(userId, executor = this.pool) {
         const query = `
-            SELECT user_id, display_name, email, role, is_active, status, last_login_at, created_at, updated_at
+            SELECT user_id, display_name, email, avatar_url, role, is_active, status, last_login_at, created_at, updated_at
             FROM dashboard_users
             WHERE user_id = ?
             FOR UPDATE
+        `;
+        const [rows] = await executor.execute(query, [userId]);
+        return rows.length > 0 ? mapUserRecord(rows[0]) : null;
+    }
+
+    /**
+     * Find user with password hash by user_id for credential verification
+     * @param {number|string} userId
+     * @param {Object} [executor] - Optional connection or pool
+     * @returns {Promise<Object|null>}
+     */
+    async findByIdWithPassword(userId, executor = this.pool) {
+        const query = `
+            SELECT user_id, display_name, email, avatar_url, password_hash, role, is_active, status, last_login_at, created_at, updated_at
+            FROM dashboard_users
+            WHERE user_id = ?
         `;
         const [rows] = await executor.execute(query, [userId]);
         return rows.length > 0 ? mapUserRecord(rows[0]) : null;
@@ -112,7 +128,7 @@ class DashboardUserRepository {
     async findByEmailWithPassword(email, executor = this.pool) {
         const cleanEmail = email.trim().toLowerCase();
         const query = `
-            SELECT user_id, display_name, email, password_hash, role, is_active, status, last_login_at, created_at, updated_at
+            SELECT user_id, display_name, email, avatar_url, password_hash, role, is_active, status, last_login_at, created_at, updated_at
             FROM dashboard_users
             WHERE LOWER(email) = ?
         `;
@@ -129,7 +145,7 @@ class DashboardUserRepository {
     async findByEmail(email, executor = this.pool) {
         const cleanEmail = email.trim().toLowerCase();
         const query = `
-            SELECT user_id, display_name, email, role, is_active, status, last_login_at, created_at, updated_at
+            SELECT user_id, display_name, email, avatar_url, role, is_active, status, last_login_at, created_at, updated_at
             FROM dashboard_users
             WHERE LOWER(email) = ?
         `;
@@ -217,7 +233,7 @@ class DashboardUserRepository {
      */
     async findAll(executor = this.pool) {
         const query = `
-            SELECT user_id, display_name, email, role, is_active, status, last_login_at, created_at, updated_at
+            SELECT user_id, display_name, email, avatar_url, role, is_active, status, last_login_at, created_at, updated_at
             FROM dashboard_users
             ORDER BY created_at DESC
         `;
@@ -326,7 +342,7 @@ class DashboardUserRepository {
 
         // 3. Paginated safe data query
         const dataQuery = `
-            SELECT user_id, display_name, email, role, is_active, status, last_login_at, created_at, updated_at
+            SELECT user_id, display_name, email, avatar_url, role, is_active, status, last_login_at, created_at, updated_at
             FROM dashboard_users
             ${whereClause}
             ORDER BY created_at DESC, user_id DESC
@@ -351,6 +367,7 @@ class DashboardUserRepository {
      * @param {Object} data
      * @param {string} [data.display_name]
      * @param {string} [data.email]
+     * @param {string|null} [data.avatar_url]
      * @param {'ADMIN'|'STAFF'} [data.role]
      * @param {boolean|number} [data.is_active]
      * @param {'ACTIVE'|'PENDING'|'INACTIVE'} [data.status]
@@ -372,6 +389,11 @@ class DashboardUserRepository {
         if (data.email !== undefined) {
             fields.push('email = ?');
             values.push(data.email.trim().toLowerCase());
+        }
+
+        if (data.avatar_url !== undefined) {
+            fields.push('avatar_url = ?');
+            values.push(data.avatar_url ? String(data.avatar_url).trim() : null);
         }
 
         if (data.role !== undefined) {
@@ -417,6 +439,23 @@ class DashboardUserRepository {
 
         await executor.execute(query, values);
         return await this.findById(userId, executor);
+    }
+
+    /**
+     * Update user password hash
+     * @param {number|string} userId
+     * @param {string} passwordHash
+     * @param {Object} [executor]
+     * @returns {Promise<boolean>}
+     */
+    async updatePassword(userId, passwordHash, executor = this.pool) {
+        const query = `
+            UPDATE dashboard_users
+            SET password_hash = ?
+            WHERE user_id = ?
+        `;
+        const [result] = await executor.execute(query, [passwordHash, userId]);
+        return result.affectedRows > 0;
     }
 
     /**

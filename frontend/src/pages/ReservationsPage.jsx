@@ -297,7 +297,7 @@ export default function ReservationsPage() {
             Customer Reservations
           </h1>
           <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mt-0.5">
-            Hold requests and preferred in-store pickup reservations (SRS MG-06)
+            Hold requests and preferred in-store pickup reservations
           </p>
         </div>
 
@@ -431,7 +431,7 @@ export default function ReservationsPage() {
                       className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
                     >
                       <td className="py-3 px-4 font-mono font-normal text-slate-500">
-                        #{resItem.reservation_id}
+                        {resItem.reservation_id}
                       </td>
 
                       <td className="py-3 px-4">

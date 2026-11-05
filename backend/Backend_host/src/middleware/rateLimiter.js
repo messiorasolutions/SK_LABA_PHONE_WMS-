@@ -1,0 +1,133 @@
+const { rateLimit } = require('express-rate-limit');
+
+/**
+ * Rate limiter middleware for login endpoint to mitigate brute-force attacks.
+ */
+const loginRateLimiter = rateLimit({
+    windowMs: Number(process.env.LOGIN_RATE_LIMIT_WINDOW_MS) || (15 * 60 * 1000), // 15 minutes
+    limit: Number(process.env.LOGIN_RATE_LIMIT_MAX) || 5, // 5 attempts per window
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many login attempts from this IP. Please try again after 15 minutes.'
+    },
+    // Bypass in test mode unless explicitly testing rate limiting via header
+    skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
+});
+
+/**
+ * Rate limiter middleware for forgot password endpoint to prevent email spam / enumeration.
+ */
+const forgotPasswordRateLimiter = rateLimit({
+    windowMs: Number(process.env.FORGOT_PASSWORD_RATE_LIMIT_WINDOW_MS) || (15 * 60 * 1000), // 15 minutes
+    limit: Number(process.env.FORGOT_PASSWORD_RATE_LIMIT_MAX) || 5, // 5 attempts per window
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many password reset requests from this IP. Please try again after 15 minutes.'
+    },
+    skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
+});
+
+/**
+ * Rate limiter middleware for reset password attempts.
+ */
+const resetPasswordRateLimiter = rateLimit({
+    windowMs: Number(process.env.RESET_PASSWORD_RATE_LIMIT_WINDOW_MS) || (15 * 60 * 1000), // 15 minutes
+    limit: Number(process.env.RESET_PASSWORD_RATE_LIMIT_MAX) || 10, // 10 attempts per window
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many password reset submissions from this IP. Please try again after 15 minutes.'
+    },
+    skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
+});
+
+/**
+ * Rate limiter middleware for public customer inquiry submissions to prevent spam and abuse.
+ */
+const inquiryRateLimiter = rateLimit({
+    windowMs: Number(process.env.INQUIRY_RATE_LIMIT_WINDOW_MS) || (15 * 60 * 1000), // 15 minutes
+    limit: Number(process.env.INQUIRY_RATE_LIMIT_MAX) || 10, // 10 attempts per window
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many inquiry submissions from this IP. Please try again after 15 minutes.'
+    },
+    skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
+});
+
+/**
+ * Rate limiter middleware for public customer reservation submissions to prevent spam and abuse.
+ */
+const reservationRateLimiter = rateLimit({
+    windowMs: Number(process.env.RESERVATION_RATE_LIMIT_WINDOW_MS) || (15 * 60 * 1000), // 15 minutes
+    limit: Number(process.env.RESERVATION_RATE_LIMIT_MAX) || 10, // 10 attempts per window
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many reservation submissions from this IP. Please try again after 15 minutes.'
+    },
+    skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
+});
+
+/**
+ * Rate limiter middleware for public sell-your-phone submissions to prevent spam and abuse (C-14).
+ */
+const sellRequestRateLimiter = rateLimit({
+    windowMs: Number(process.env.SELL_REQUEST_RATE_LIMIT_WINDOW_MS) || (15 * 60 * 1000), // 15 minutes
+    limit: Number(process.env.SELL_REQUEST_RATE_LIMIT_MAX) || 10, // 10 attempts per window
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many sell phone requests from this IP. Please try again after 15 minutes.'
+    },
+    skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
+});
+
+/**
+ * Rate limiter middleware for public back-in-stock notification requests.
+ */
+const backInStockRateLimiter = rateLimit({
+    windowMs: Number(process.env.BACK_IN_STOCK_RATE_LIMIT_WINDOW_MS) || (15 * 60 * 1000), // 15 minutes
+    limit: Number(process.env.BACK_IN_STOCK_RATE_LIMIT_MAX) || 10, // 10 attempts per window
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many back-in-stock notification requests from this IP. Please try again after 15 minutes.'
+    },
+    skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
+});
+
+/**
+ * Rate limiter middleware for public customer review submissions to prevent spam and abuse.
+ */
+const customerReviewRateLimiter = rateLimit({
+    windowMs: Number(process.env.REVIEW_RATE_LIMIT_WINDOW_MS) || (15 * 60 * 1000), // 15 minutes
+    limit: Number(process.env.REVIEW_RATE_LIMIT_MAX) || 5, // 5 reviews per 15 minutes per IP
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many reviews submitted from this IP. Please try again after 15 minutes.'
+    },
+    skip: (req) => process.env.NODE_ENV === 'test' && !req.headers['x-test-rate-limit']
+});
+
+module.exports = {
+    loginRateLimiter,
+    forgotPasswordRateLimiter,
+    resetPasswordRateLimiter,
+    inquiryRateLimiter,
+    reservationRateLimiter,
+    sellRequestRateLimiter,
+    backInStockRateLimiter,
+    customerReviewRateLimiter
+};

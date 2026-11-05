@@ -153,9 +153,6 @@ export default function DeductStockView({
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Stock Management</span>
         </button>
-        <span className="text-xs font-normal text-slate-400">
-          SRS ST-05 Inventory Reduction
-        </span>
       </div>
 
       {/* ── Page Header ──────────────────────────────────────────────── */}

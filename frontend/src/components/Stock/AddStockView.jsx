@@ -144,9 +144,6 @@ export default function AddStockView({
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Stock Management</span>
         </button>
-        <span className="text-xs font-normal text-slate-400">
-          SRS ST-05 Inventory Adjustment
-        </span>
       </div>
 
       {/* ── Page Header ──────────────────────────────────────────────── */}

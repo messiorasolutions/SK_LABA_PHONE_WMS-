@@ -212,15 +212,6 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
 
             <button
               type="button"
-              className="p-2 rounded-full text-theme-textSecondary hover:text-theme-textPrimary hover:bg-white/5 transition-colors cursor-pointer"
-              title="User Account"
-              aria-label="User Account"
-            >
-              <User className="w-5 h-5" />
-            </button>
-
-            <button
-              type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 text-theme-textSecondary hover:text-theme-textPrimary cursor-pointer"
               aria-label="Toggle Navigation Menu"

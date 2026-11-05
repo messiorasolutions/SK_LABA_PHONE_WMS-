@@ -12,6 +12,7 @@ import SellRequestsPage from '../pages/SellRequestsPage';
 import BackInStockPage from '../pages/BackInStockPage';
 import UsersPage from '../pages/UsersPage';
 import ReviewsPage from '../pages/ReviewsPage';
+import ProfilePage from '../pages/ProfilePage';
 import LoginPage from '../pages/auth/LoginPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
@@ -65,6 +66,28 @@ export default function AppRoutes() {
                 <UsersPage />
               </MainLayout>
             </AdminRoute>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* My Profile Page */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ProfilePage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-profile"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ProfilePage />
+            </MainLayout>
           </ProtectedRoute>
         }
       />

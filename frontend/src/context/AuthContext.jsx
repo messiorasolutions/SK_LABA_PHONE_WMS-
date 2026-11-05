@@ -66,8 +66,26 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateUserLocally = (partialData) => {
+    setUser((prev) => (prev ? { ...prev, ...partialData } : prev));
+  };
+
+  const refreshUser = async () => {
+    try {
+      const meRes = await authService.getMe();
+      if (meRes?.success && meRes?.data?.user) {
+        setUser(meRes.data.user);
+        return meRes.data.user;
+      }
+    } catch (err) {
+      console.warn('Failed to refresh user:', err);
+    }
+    return null;
+  };
+
   const value = {
     user,
+    setUser,
     role: user?.role || null,
     isAdmin: user?.role === 'ADMIN',
     isStaff: user?.role === 'STAFF',
@@ -76,6 +94,8 @@ export function AuthProvider({ children }) {
     csrfToken,
     login,
     logout,
+    refreshUser,
+    updateUserLocally,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

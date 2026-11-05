@@ -207,7 +207,7 @@ export default function InquiriesPage() {
             Customer Inquiries
           </h1>
           <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mt-0.5">
-            Real-time customer questions, general inquiries, and phone support requests (SRS MG-07)
+            Real-time customer questions, general inquiries, and phone support requests
           </p>
         </div>
 
@@ -321,7 +321,7 @@ export default function InquiriesPage() {
                       key={inq.inquiry_id}
                       className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
                     >
-                      <td className="py-3 px-4 font-mono text-slate-500 font-normal">#{inq.inquiry_id}</td>
+                      <td className="py-3 px-4 font-mono text-slate-500 font-normal">{inq.inquiry_id}</td>
 
                       <td className="py-3 px-4 font-normal text-slate-900 dark:text-slate-100">
                         {inq.customer_name || inq.name}

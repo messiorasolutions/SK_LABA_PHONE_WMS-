@@ -1,7 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const { validateLogin, validateForgotPassword, validateResetPassword } = require('../validations/authValidation');
+const {
+    validateLogin,
+    validateForgotPassword,
+    validateResetPassword,
+    validateUpdateProfile,
+    validateChangePassword
+} = require('../validations/authValidation');
 const { authenticate } = require('../middleware/authMiddleware');
 const { loginRateLimiter, forgotPasswordRateLimiter, resetPasswordRateLimiter } = require('../middleware/rateLimiter');
 
@@ -38,6 +44,27 @@ router.post('/reset-password', resetPasswordRateLimiter, validateResetPassword, 
 // POST /api/auth/verify-account
 router.post('/verify-account', (req, res, next) => {
     authController.verifyAccount(req, res, next);
+});
+
+// PATCH & PUT /api/auth/profile - Update current user profile
+router.patch('/profile', authenticate, validateUpdateProfile, (req, res, next) => {
+    authController.updateProfile(req, res, next);
+});
+router.put('/profile', authenticate, validateUpdateProfile, (req, res, next) => {
+    authController.updateProfile(req, res, next);
+});
+
+// PATCH & PUT /api/auth/avatar - Update or remove profile picture
+router.patch('/avatar', authenticate, (req, res, next) => {
+    authController.updateAvatar(req, res, next);
+});
+router.put('/avatar', authenticate, (req, res, next) => {
+    authController.updateAvatar(req, res, next);
+});
+
+// POST /api/auth/change-password - Change current user password
+router.post('/change-password', authenticate, validateChangePassword, (req, res, next) => {
+    authController.changePassword(req, res, next);
 });
 
 module.exports = router;

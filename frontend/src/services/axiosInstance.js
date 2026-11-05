@@ -9,7 +9,9 @@ import axios from 'axios';
 const rawBaseUrl =
   import.meta.env.VITE_API_BASE_URL ||
   import.meta.env.VITE_API_URL ||
-  'http://localhost:5000';
+  (typeof window !== 'undefined' && window.location.hostname.includes('sklabaphone.com')
+    ? 'https://api.sklabaphone.com'
+    : 'http://localhost:5000');
 
 export const API_BASE_URL = rawBaseUrl.replace(/\/+$/, '');
 

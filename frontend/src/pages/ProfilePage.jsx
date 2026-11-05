@@ -55,6 +55,12 @@ export default function ProfilePage() {
   const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
+    if (refreshUser) {
+      refreshUser();
+    }
+  }, []);
+
+  useEffect(() => {
     if (user?.display_name || user?.name) {
       setDisplayName(user.display_name || user.name);
     }
@@ -67,7 +73,7 @@ export default function ProfilePage() {
   const formattedId = user?.formatted_user_id || formatUserId(user?.user_id);
   const avatarUrl = user?.avatar_url || null;
 
-  // ── Profile Photo Upload & Resize (Frontend Only) ─────────────────
+  // ── Profile Photo Upload & Save to Backend ───────────────────────
   const handleAvatarFileSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -90,26 +96,37 @@ export default function ProfilePage() {
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const maxSize = 320;
-        let width = img.width;
-        let height = img.height;
+      img.onload = async () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const maxSize = 320;
+          let width = img.width;
+          let height = img.height;
 
-        const size = Math.min(width, height);
-        const startX = (width - size) / 2;
-        const startY = (height - size) / 2;
+          const size = Math.min(width, height);
+          const startX = (width - size) / 2;
+          const startY = (height - size) / 2;
 
-        canvas.width = maxSize;
-        canvas.height = maxSize;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, startX, startY, size, size, 0, 0, maxSize, maxSize);
+          canvas.width = maxSize;
+          canvas.height = maxSize;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, startX, startY, size, size, 0, 0, maxSize, maxSize);
 
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-        updateUserLocally({ avatar_url: dataUrl });
-        setAvatarUploading(false);
-        setAvatarSuccess('Profile picture updated successfully.');
-        if (fileInputRef.current) fileInputRef.current.value = '';
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+          const res = await authService.updateAvatar(dataUrl);
+          if (res?.success) {
+            updateUserLocally({ avatar_url: dataUrl });
+            setAvatarSuccess(res?.message || 'Profile picture updated successfully.');
+          } else {
+            setAvatarError(res?.message || 'Failed to update profile picture.');
+          }
+        } catch (err) {
+          setAvatarError(err?.response?.data?.message || err?.message || 'Failed to update profile picture.');
+        } finally {
+          setAvatarUploading(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        }
       };
       img.onerror = () => {
         setAvatarError('Failed to process image file.');
@@ -124,14 +141,27 @@ export default function ProfilePage() {
     reader.readAsDataURL(file);
   };
 
-  const handleRemoveAvatar = () => {
-    updateUserLocally({ avatar_url: null });
-    setAvatarSuccess('Profile image deleted successfully.');
+  const handleRemoveAvatar = async () => {
     setAvatarError('');
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    setAvatarSuccess('');
+    setAvatarUploading(true);
+    try {
+      const res = await authService.updateAvatar(null);
+      if (res?.success) {
+        updateUserLocally({ avatar_url: null });
+        setAvatarSuccess('Profile image deleted successfully.');
+      } else {
+        setAvatarError(res?.message || 'Failed to delete profile image.');
+      }
+    } catch (err) {
+      setAvatarError(err?.response?.data?.message || err?.message || 'Failed to delete profile image.');
+    } finally {
+      setAvatarUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
-  // ── Update Profile Handler (Frontend Only) ─────────────────────────
+  // ── Update Profile Handler ─────────────────────────────────────────
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setProfileError('');
@@ -157,14 +187,28 @@ export default function ProfilePage() {
 
     setProfileSaving(true);
     try {
-      updateUserLocally({
+      const res = await authService.updateProfile({
         display_name: trimmedName,
-        name: trimmedName,
         email: trimmedEmail,
       });
-      setProfileSuccess('Profile details (name and email) updated successfully.');
+
+      if (res?.success) {
+        const updated = res.data?.user || {
+          display_name: trimmedName,
+          name: trimmedName,
+          email: trimmedEmail,
+        };
+        updateUserLocally(updated);
+        setProfileSuccess(res?.message || 'Profile details updated successfully.');
+      } else {
+        setProfileError(res?.message || 'Unable to update profile. Please try again.');
+      }
     } catch (err) {
-      setProfileError('Unable to update profile. Please try again.');
+      setProfileError(
+        err?.response?.data?.message ||
+        err?.message ||
+        'Unable to update profile. Please try again.'
+      );
     } finally {
       setProfileSaving(false);
     }
@@ -524,7 +568,7 @@ export default function ProfilePage() {
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 rounded-lg text-xs font-normal text-slate-700 dark:text-slate-300 cursor-not-allowed [appearance:textfield]"
                   />
                   <span className="text-[11px] font-normal text-slate-400 block mt-0.5">
-                    Full administrator privileges
+                    {user?.role === 'ADMIN' ? 'Full administrator privileges' : 'Staff operations privileges'}
                   </span>
                 </div>
 
@@ -545,7 +589,7 @@ export default function ProfilePage() {
                   </label>
                   <div className="px-3 py-2 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 rounded-lg text-xs font-normal text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                    <span>Active Account</span>
+                    <span>{user?.status === 'INACTIVE' ? 'Inactive Account' : user?.status === 'PENDING' ? 'Pending Verification' : 'Active Account'}</span>
                   </div>
                 </div>
               </div>
@@ -575,7 +619,9 @@ export default function ProfilePage() {
               <div className="space-y-2 text-xs font-normal text-slate-600 dark:text-slate-300">
                 <div className="flex items-center justify-between">
                   <span className="text-slate-400">Account Type:</span>
-                  <span className="font-medium text-slate-800 dark:text-slate-200">WMS Administrator</span>
+                  <span className="font-medium text-slate-800 dark:text-slate-200">
+                    {user?.role === 'ADMIN' ? 'WMS Administrator' : 'WMS Staff Member'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-400">Created:</span>

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { STORE_INFO } from '../constants/siteConfig';
 import { createInquiry } from '../services/inquiryService';
+import whatsappIcon from '../assets/images/whatsappicon.avif';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -120,7 +121,7 @@ export default function ContactPage() {
               onClick={handleWhatsApp}
               className="px-3 py-1.5 sm:py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:scale-105"
             >
-              <MessageCircle className="w-4 h-4 text-emerald-400" />
+              <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4 object-contain" />
               <span>WhatsApp Direct</span>
             </button>
 
@@ -178,9 +179,9 @@ export default function ContactPage() {
                       <button
                         type="button"
                         onClick={handleWhatsApp}
-                        className="text-xs font-normal text-emerald-300 hover:text-white cursor-pointer flex items-center gap-1"
+                        className="text-xs font-normal text-emerald-300 hover:text-white cursor-pointer flex items-center gap-1.5"
                       >
-                        <MessageCircle className="w-3.5 h-3.5" />
+                        <img src={whatsappIcon} alt="WhatsApp" className="w-3.5 h-3.5 object-contain" />
                         <span>Chat on WhatsApp now</span>
                       </button>
                     </div>

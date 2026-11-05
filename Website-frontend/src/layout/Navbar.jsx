@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Search, User, Menu, X, Heart } from 'lucide-react';
+import { Search, Menu, X, Heart } from 'lucide-react';
 import logoImg from '../assets/images/logo.png';
 import { setActiveTab, setSearchQuery } from '../actions/heroActions';
 import { NAV_LINKS, STORE_INFO } from '../constants/siteConfig';
@@ -202,15 +202,6 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
                   {favoriteIds.length}
                 </span>
               )}
-            </button>
-
-            <button
-              type="button"
-              className="p-2 rounded-full text-theme-textSecondary hover:text-theme-textPrimary hover:bg-white/5 transition-colors cursor-pointer"
-              title="User Account"
-              aria-label="User Account"
-            >
-              <User className="w-5 h-5" />
             </button>
 
             <button

@@ -197,6 +197,69 @@ class AuthController {
             next(error);
         }
     }
+
+    /**
+     * PATCH /api/auth/profile
+     * Updates current user's profile details (display_name, email)
+     */
+    async updateProfile(req, res, next) {
+        try {
+            if (!req.user || !req.user.user_id) {
+                return next(new AppError('Unauthorized: Authentication required.', 401));
+            }
+
+            const updatedUser = await this.authService.updateProfile(req.user.user_id, req.body);
+            return res.status(200).json({
+                success: true,
+                message: 'Profile details updated successfully.',
+                data: {
+                    user: updatedUser
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * PATCH /api/auth/avatar
+     * Updates or removes avatar image
+     */
+    async updateAvatar(req, res, next) {
+        try {
+            if (!req.user || !req.user.user_id) {
+                return next(new AppError('Unauthorized: Authentication required.', 401));
+            }
+
+            const updatedUser = await this.authService.updateAvatar(req.user.user_id, req.body.avatar_url);
+            return res.status(200).json({
+                success: true,
+                message: req.body.avatar_url ? 'Profile picture updated successfully.' : 'Profile image deleted successfully.',
+                data: {
+                    user: updatedUser
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * POST /api/auth/change-password
+     * Changes current user's password
+     */
+    async changePassword(req, res, next) {
+        try {
+            if (!req.user || !req.user.user_id) {
+                return next(new AppError('Unauthorized: Authentication required.', 401));
+            }
+
+            const result = await this.authService.changePassword(req.user.user_id, req.body);
+            return res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new AuthController();

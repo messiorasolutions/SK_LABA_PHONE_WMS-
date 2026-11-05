@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   X,
   Heart,
-  GitCompare,
   Share2,
   ChevronLeft,
   ChevronRight,
@@ -11,6 +10,7 @@ import {
   PhoneCall,
   ArrowLeft,
 } from 'lucide-react';
+import whatsappIcon from '../../assets/images/whatsappicon.avif';
 import { useFavoritesAndCompare } from '../../hooks/useFavoritesAndCompare';
 import { STORE_INFO } from '../../constants/siteConfig';
 import phoneService from '../../services/phoneService';
@@ -470,21 +470,6 @@ export default function PhoneDetailModal({
 
             <button
               type="button"
-              onClick={() => {
-                const res = toggleCompare(phoneId);
-                if (res && !res.success && res.error) alert(res.error);
-              }}
-              className={`p-2 rounded-full border transition-colors cursor-pointer ${inComparison
-                  ? 'bg-white/20 text-white border-white/40'
-                  : 'border-white/20 bg-black hover:bg-neutral-900 text-slate-300 hover:text-white'
-                }`}
-              title="Compare Phone"
-            >
-              <GitCompare className="w-4 h-4" />
-            </button>
-
-            <button
-              type="button"
               onClick={() => toggleFavorite(phoneId)}
               className="p-2 rounded-full border border-white/20 bg-black hover:bg-neutral-900 text-slate-300 transition-colors cursor-pointer"
               title="Save to Favourites"
@@ -809,11 +794,11 @@ export default function PhoneDetailModal({
                   <button
                     type="button"
                     onClick={handleWhatsApp}
-                    className="w-9 h-9 rounded-full bg-black hover:bg-neutral-900 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-105"
+                    className="w-9 h-9 rounded-full bg-black hover:bg-neutral-900 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-105 overflow-hidden p-1.5"
                     title="WhatsApp Direct"
                     aria-label="WhatsApp Direct"
                   >
-                    <MessageCircle className="w-4 h-4 text-emerald-400" />
+                    <img src={whatsappIcon} alt="WhatsApp" className="w-full h-full object-contain" />
                   </button>
 
                   <button

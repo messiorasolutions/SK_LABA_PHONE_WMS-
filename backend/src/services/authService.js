@@ -6,8 +6,8 @@ const defaultPool = require('../config/db');
 const PasswordUtil = require('../utils/passwordUtil');
 const AppError = require('../utils/customError');
 
-// Constant dummy hash to mitigate timing attacks on nonexistent users
-const DUMMY_HASH = '$argon2id$v=19$m=65536,t=3,p=1$c29tZXNhbHR2YWx1ZQ$qBvP7zC5t0v7w6Y8a2E4mO+F9+WzV91N3N1C9V6r12Y';
+// Constant dummy hash to mitigate timing attacks on nonexistent users (bcrypt)
+const DUMMY_HASH = '$2b$10$e8Ju02Z8j1tVz0nJ0jW2E.o8kH7qfC2oD3YxQp1s1qW5tP6u5p4m.';
 const GENERIC_FORGOT_PASSWORD_MSG = 'If an account matches that email, a password reset link has been sent.';
 const GENERIC_INVALID_TOKEN_MSG = 'Invalid or expired password reset token.';
 
@@ -67,9 +67,11 @@ class AuthService {
             formatted_user_id: user.formatted_user_id,
             display_name: user.display_name,
             email: user.email,
+            avatar_url: user.avatar_url || null,
             role: user.role,
             status: user.status,
-            last_login_at: new Date().toISOString()
+            last_login_at: new Date().toISOString(),
+            created_at: user.created_at
         };
     }
 
@@ -98,10 +100,12 @@ class AuthService {
             formatted_user_id: user.formatted_user_id,
             display_name: user.display_name,
             email: user.email,
+            avatar_url: user.avatar_url || null,
             role: user.role,
             status: user.status,
             last_login_at: user.last_login_at,
-            created_at: user.created_at
+            created_at: user.created_at,
+            updated_at: user.updated_at
         };
     }
 
@@ -292,6 +296,167 @@ class AuthService {
         return {
             success: true,
             message: 'Password has been reset successfully. Please log in with your new password.'
+        };
+    }
+
+    /**
+     * Update current authenticated user's profile details
+     * @param {number|string} userId
+     * @param {Object} data
+     * @param {string} [data.display_name]
+     * @param {string} [data.email]
+     * @returns {Promise<Object>} Safe updated user record
+     */
+    async updateProfile(userId, { display_name, email }) {
+        if (!userId) {
+            throw new AppError('Unauthorized: Authentication required.', 401);
+        }
+
+        const user = await this.userRepository.findById(userId);
+        if (!user) {
+            throw new AppError('User not found.', 404);
+        }
+
+        const updateData = {};
+
+        if (display_name !== undefined) {
+            const trimmedName = String(display_name).trim();
+            if (!trimmedName || trimmedName.length < 2) {
+                throw new AppError('Display name must be at least 2 characters long.', 400);
+            }
+            if (trimmedName.length > 100) {
+                throw new AppError('Display name cannot exceed 100 characters.', 400);
+            }
+            updateData.display_name = trimmedName;
+        }
+
+        if (email !== undefined) {
+            const trimmedEmail = String(email).trim().toLowerCase();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
+                throw new AppError('Please enter a valid email address.', 400);
+            }
+            // Check if changing email and already taken by someone else
+            if (trimmedEmail !== user.email.toLowerCase()) {
+                const existing = await this.userRepository.findByEmail(trimmedEmail);
+                if (existing && Number(existing.user_id) !== Number(userId)) {
+                    throw new AppError('This email address is already in use by another account.', 409);
+                }
+                updateData.email = trimmedEmail;
+            }
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            return user;
+        }
+
+        const updated = await this.userRepository.updateUser(userId, updateData);
+        return {
+            user_id: updated.user_id,
+            formatted_user_id: updated.formatted_user_id,
+            display_name: updated.display_name,
+            email: updated.email,
+            avatar_url: updated.avatar_url || null,
+            role: updated.role,
+            status: updated.status,
+            last_login_at: updated.last_login_at,
+            created_at: updated.created_at,
+            updated_at: updated.updated_at
+        };
+    }
+
+    /**
+     * Update or remove user avatar image
+     * @param {number|string} userId
+     * @param {string|null} avatar_url
+     * @returns {Promise<Object>} Safe updated user record
+     */
+    async updateAvatar(userId, avatar_url) {
+        if (!userId) {
+            throw new AppError('Unauthorized: Authentication required.', 401);
+        }
+
+        const user = await this.userRepository.findById(userId);
+        if (!user) {
+            throw new AppError('User not found.', 404);
+        }
+
+        let safeAvatar = null;
+        if (avatar_url) {
+            const trimmed = String(avatar_url).trim();
+            if (trimmed.startsWith('data:image/') || trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('/')) {
+                safeAvatar = trimmed;
+            } else {
+                throw new AppError('Invalid image format.', 400);
+            }
+        }
+
+        const updated = await this.userRepository.updateUser(userId, { avatar_url: safeAvatar });
+        return {
+            user_id: updated.user_id,
+            formatted_user_id: updated.formatted_user_id,
+            display_name: updated.display_name,
+            email: updated.email,
+            avatar_url: updated.avatar_url || null,
+            role: updated.role,
+            status: updated.status,
+            last_login_at: updated.last_login_at,
+            created_at: updated.created_at,
+            updated_at: updated.updated_at
+        };
+    }
+
+    /**
+     * Change password for the current authenticated user
+     * @param {number|string} userId
+     * @param {Object} data
+     * @param {string} data.current_password
+     * @param {string} data.new_password
+     * @returns {Promise<{ success: boolean, message: string }>}
+     */
+    async changePassword(userId, { current_password, new_password }) {
+        if (!userId) {
+            throw new AppError('Unauthorized: Authentication required.', 401);
+        }
+
+        if (!current_password || typeof current_password !== 'string') {
+            throw new AppError('Current password is required.', 400);
+        }
+
+        if (!new_password || typeof new_password !== 'string' || new_password.length < 8) {
+            throw new AppError('New password must be at least 8 characters long.', 400);
+        }
+
+        if (new_password.length > 128) {
+            throw new AppError('New password cannot exceed 128 characters.', 400);
+        }
+
+        const hasUpper = /[A-Z]/.test(new_password);
+        const hasNumber = /[0-9]/.test(new_password);
+        if (!hasUpper || !hasNumber) {
+            throw new AppError('New password must contain at least one uppercase letter and one number.', 400);
+        }
+
+        if (current_password === new_password) {
+            throw new AppError('New password cannot be the same as your current password.', 400);
+        }
+
+        const user = await this.userRepository.findByIdWithPassword(userId);
+        if (!user) {
+            throw new AppError('User not found.', 404);
+        }
+
+        const isCurrentValid = await PasswordUtil.verifyPassword(user.password_hash, current_password);
+        if (!isCurrentValid) {
+            throw new AppError('The current password you entered is incorrect.', 400);
+        }
+
+        const newHash = await PasswordUtil.hashPassword(new_password);
+        await this.userRepository.updatePassword(userId, newHash);
+
+        return {
+            success: true,
+            message: 'Password changed successfully.'
         };
     }
 }

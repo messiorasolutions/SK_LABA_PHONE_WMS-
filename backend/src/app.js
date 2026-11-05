@@ -22,18 +22,32 @@ const AppError = require('./utils/customError');
 const app = express();
 
 // 1. CORS Configuration with explicit allowed origins & credentials
-const rawAllowedOrigins = process.env.ALLOWED_ORIGINS || 'https://admin.sklabaphone.com,https://sklabaphone.com,http://localhost:5173,http://localhost:3000';
-const allowedOrigins = rawAllowedOrigins
+const defaultOrigins = [
+    'https://admin.sklabaphone.com',
+    'https://sklabaphone.com',
+    'https://www.sklabaphone.com',
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:3000'
+];
+
+const rawAllowedOrigins = process.env.ALLOWED_ORIGINS || '';
+const customOrigins = rawAllowedOrigins
     .split(',')
     .map((origin) => origin.trim().toLowerCase())
     .filter(Boolean);
+
+const allowedOrigins = Array.from(new Set([...defaultOrigins, ...customOrigins]));
 
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
         const lowerOrigin = origin.toLowerCase();
         const isAllowed = allowedOrigins.includes(lowerOrigin)
-            || (process.env.NODE_ENV !== 'production' && (lowerOrigin.includes('localhost') || lowerOrigin.includes('127.0.0.1')));
+            || lowerOrigin.includes('localhost')
+            || lowerOrigin.includes('127.0.0.1')
+            || lowerOrigin.endsWith('.sklabaphone.com');
 
         if (isAllowed) {
             return callback(null, true);

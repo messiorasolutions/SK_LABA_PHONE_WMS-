@@ -4,6 +4,7 @@ import {
   Mail,
   Smartphone,
   Calendar,
+  CalendarClock,
   AlertCircle,
   CheckCircle2,
   RefreshCw,

@@ -31,9 +31,12 @@ function createAuthMiddleware(userRepository = defaultRepository) {
             // Attach safe user profile to request
             req.user = {
                 user_id: user.user_id,
+                formatted_user_id: user.formatted_user_id,
                 display_name: user.display_name,
                 email: user.email,
+                avatar_url: user.avatar_url || null,
                 role: user.role,
+                status: user.status,
                 last_login_at: user.last_login_at,
                 created_at: user.created_at,
                 updated_at: user.updated_at

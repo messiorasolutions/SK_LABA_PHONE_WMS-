@@ -9,7 +9,6 @@ import {
   EyeOff,
   AlertCircle,
   Loader2,
-  ArrowRight,
 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -54,112 +53,113 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xl p-6 sm:p-8 space-y-5 animate-fadeIn">
-        {/* Brand Header */}
-        <div className="space-y-2 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-slate-950 p-2 mx-auto flex items-center justify-center border border-slate-800 shadow-md">
+    <div className="relative min-h-screen w-full flex items-center justify-center p-4 overflow-hidden bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#3a070d] via-[#140205] to-[#020001]">
+      {/* Ambient Red & Black Glow Effects */}
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-red-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-rose-700/15 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Main Glass Card */}
+      <div className="relative w-full max-w-md bg-black/50 backdrop-blur-xl border border-red-500/20 rounded-3xl p-8 sm:p-12 shadow-[0_25px_60px_rgba(0,0,0,0.85)] animate-fadeIn">
+        
+        {/* Prominent Circular Logo Badge */}
+        <div className="text-center mb-6">
+          <div className="w-24 h-24 rounded-full bg-[#120204] border-2 border-red-500/40 shadow-[0_0_25px_rgba(220,38,38,0.3)] p-3.5 mx-auto flex items-center justify-center ring-4 ring-red-500/10 transition-transform duration-300 hover:scale-105">
             <img
               src={logoImg}
               alt="SK LABA PHONE"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain filter drop-shadow"
             />
           </div>
-          <div>
-            <div className="flex items-center justify-center gap-1.5">
-              <span className="font-black text-base bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent tracking-tight">
-                SK
-              </span>
-              <span className="font-bold text-base text-slate-900 dark:text-white tracking-tight">
-                Laaba Phone WMS
-              </span>
-            </div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-0.5">
-              South Korea • Warehouse Portal
-            </p>
-          </div>
+
+          {/* Brand Name directly under logo */}
+          <h2 className="mt-4 text-base sm:text-lg font-bold tracking-tight text-white">
+            SK Laaba Phone
+          </h2>
+
+          {/* Clean Uppercase Sub-heading */}
+          <h1 className="mt-1 text-xl sm:text-2xl font-light tracking-[0.25em] text-white/90 uppercase">
+            Admin Login
+          </h1>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400 text-xs flex items-start gap-2.5 rounded-xl animate-fadeIn">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
+          <div className="mb-6 p-3.5 bg-red-950/60 border border-red-500/40 text-red-200 text-xs flex items-start gap-2.5 rounded-xl backdrop-blur-xs animate-fadeIn">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
             <span className="leading-relaxed">{error}</span>
           </div>
         )}
 
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          <div>
-            <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
-              Work Email
-            </label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-              <input
-                type="email"
-                required
-                autoComplete="email"
-                placeholder="admin@sklabaphone.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-blue-500 focus:outline-none pl-9 pr-3 py-2 text-xs text-slate-900 dark:text-white rounded-xl transition-colors shadow-2xs"
-              />
-            </div>
+        {/* Form Fields matching the reference design */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Email Underline Input */}
+          <div className="relative group">
+            <Mail className="w-5 h-5 text-white/60 absolute left-1 top-3.5 transition-colors group-focus-within:text-red-400" />
+            <input
+              type="email"
+              required
+              autoComplete="email"
+              placeholder="Email ID"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-transparent border-b border-white/30 focus:border-red-500 focus:outline-none pl-9 pr-4 py-3 text-sm text-white placeholder-white/50 transition-all font-normal focus:bg-white/5"
+            />
           </div>
 
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-slate-700 dark:text-slate-300 font-semibold">
-                Password
-              </label>
-              <Link
-                to="/forgot-password"
-                className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline transition-colors"
-              >
-                Forgot password?
-              </Link>
-            </div>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                autoComplete="current-password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-blue-500 focus:outline-none pl-9 pr-9 py-2 text-xs text-slate-900 dark:text-white rounded-xl transition-colors font-mono shadow-2xs"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
+          {/* Password Underline Input */}
+          <div className="relative group">
+            <Lock className="w-5 h-5 text-white/60 absolute left-1 top-3.5 transition-colors group-focus-within:text-red-400" />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              required
+              autoComplete="current-password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-transparent border-b border-white/30 focus:border-red-500 focus:outline-none pl-9 pr-10 py-3 text-sm text-white placeholder-white/50 transition-all font-normal focus:bg-white/5"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-1 top-3.5 text-white/60 hover:text-white cursor-pointer transition-colors"
+              tabIndex={-1}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
 
+          {/* Forgot Password Link */}
+          <div className="flex items-center justify-end text-xs pt-1">
+            <Link
+              to="/forgot-password"
+              className="italic text-white/70 hover:text-white hover:underline transition-colors"
+            >
+              Forgot Password?
+            </Link>
+          </div>
+
+          {/* Solid Bold Brand-Red Login Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#2563eb] hover:bg-blue-700 text-white font-semibold text-xs rounded-xl transition-all disabled:opacity-50 shadow-xs cursor-pointer"
+            className="w-full py-3.5 bg-gradient-to-r from-red-700 to-rose-700 hover:from-red-600 hover:to-rose-600 active:scale-[0.99] text-white font-bold text-xs tracking-[0.25em] uppercase rounded-lg transition-all shadow-[0_4px_25px_rgba(220,38,38,0.4)] disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer border border-red-500/30"
           >
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Authenticating session...</span>
+                <span>AUTHENTICATING...</span>
               </>
             ) : (
-              <>
-                <span>Sign in to Dashboard</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </>
+              <span>LOGIN</span>
             )}
           </button>
         </form>
+
+        {/* Developed by Messiora PVT (LTD) Footer */}
+        <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-center text-[12px] text-white/60 tracking-wider">
+          <span>Developed by <span className="font-semibold text-white/90">Messiora PVT (LTD)</span></span>
+        </div>
       </div>
     </div>
   );

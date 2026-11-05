@@ -27,6 +27,33 @@
   p, h1, h2, h3, h4, h5, h6, span, a, button, input, textarea {
     overflow-wrap: break-word;
   }
+
+  /* Universal Mobile Input Auto-Zoom Prevention */
+  /* Ensure all user-editable form controls have at least 16px font-size on mobile viewports */
+  /* to prevent unwanted automatic browser zoom on focus across iOS Safari, Chrome, and Android */
+  @media screen and (max-width: 768px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="search"],
+    input[type="date"],
+    input[type="time"],
+    input[type="url"],
+    input[type="password"],
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+
+  /* Ensure date and special inputs fit cleanly within containers with zero horizontal overflow */
+  input[type="date"],
+  input[type="time"],
+  input[type="search"] {
+    min-width: 0;
+    box-sizing: border-box;
+  }
 }
 
 /* Custom Scrollbar */

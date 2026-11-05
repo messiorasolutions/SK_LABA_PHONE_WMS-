@@ -186,7 +186,7 @@ export default function InquiryModal({ phone, onClose }) {
                   placeholder="e.g. Kamal Perera"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-theme-input/70 border border-theme-border hover:border-theme-borderMedium focus:border-theme-accent rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-theme-textMuted focus:outline-none transition-all shadow-inner"
+                  className="w-full bg-theme-input/70 border border-theme-border hover:border-theme-borderMedium focus:border-theme-accent rounded-xl px-3.5 py-2 sm:py-2.5 text-base sm:text-xs text-white placeholder-theme-textMuted focus:outline-none transition-all shadow-inner"
                 />
               </div>
 
@@ -202,7 +202,7 @@ export default function InquiryModal({ phone, onClose }) {
                   placeholder="e.g. +94 77 123 4567 or +82 10 1234 5678"
                   value={formData.phone_number}
                   onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                  className="w-full bg-theme-input/70 border border-theme-border hover:border-theme-borderMedium focus:border-theme-accent rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-theme-textMuted focus:outline-none transition-all shadow-inner font-mono"
+                  className="w-full bg-theme-input/70 border border-theme-border hover:border-theme-borderMedium focus:border-theme-accent rounded-xl px-3.5 py-2 sm:py-2.5 text-base sm:text-xs text-white placeholder-theme-textMuted focus:outline-none transition-all shadow-inner font-mono"
                 />
                 <span className="text-[10px] text-theme-textMuted mt-1 block">
                   Must be 7 to 15 digits (spaces, dashes, or + are allowed)
@@ -226,7 +226,7 @@ export default function InquiryModal({ phone, onClose }) {
                   placeholder="Ask about warranty, color options, trade-in, or payment methods..."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="w-full bg-theme-input/70 border border-theme-border hover:border-theme-borderMedium focus:border-theme-accent rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-theme-textMuted focus:outline-none transition-all resize-none shadow-inner leading-relaxed"
+                  className="w-full bg-theme-input/70 border border-theme-border hover:border-theme-borderMedium focus:border-theme-accent rounded-xl px-3.5 py-2 sm:py-2.5 text-base sm:text-xs text-white placeholder-theme-textMuted focus:outline-none transition-all resize-none shadow-inner leading-relaxed"
                 />
               </div>
 

@@ -180,7 +180,7 @@ export default function ReviewModal({ onClose, onSuccess }) {
                   placeholder="e.g. Kasun Perera"
                   value={formData.customer_name}
                   onChange={(e) => setFormData((p) => ({ ...p, customer_name: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/50 transition-all"
+                  className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-base sm:text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/50 transition-all"
                 />
               </div>
 
@@ -200,7 +200,7 @@ export default function ReviewModal({ onClose, onSuccess }) {
                   placeholder="Tell us what you liked about our service, phone condition, delivery speed..."
                   value={formData.comment}
                   onChange={(e) => setFormData((p) => ({ ...p, comment: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/50 transition-all resize-none leading-relaxed"
+                  className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-base sm:text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/50 transition-all resize-none leading-relaxed"
                 />
               </div>
 

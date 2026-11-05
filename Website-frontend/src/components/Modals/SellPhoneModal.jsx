@@ -378,7 +378,7 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                         onChange={(e) =>
                           setFormData({ ...formData, brand_and_model: e.target.value })
                         }
-                        className="w-full bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none transition-all shadow-inner"
+                        className="w-full bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2.5 text-base sm:text-xs md:text-sm text-white placeholder-slate-400 focus:outline-none transition-all shadow-inner"
                       />
                     </div>
 
@@ -414,7 +414,7 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                       <select
                         value={formData.phone_condition}
                         onChange={(e) => setFormData({ ...formData, phone_condition: e.target.value })}
-                        className="w-full bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none transition-all cursor-pointer shadow-inner"
+                        className="w-full bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2.5 text-base sm:text-xs md:text-sm text-white focus:outline-none transition-all cursor-pointer shadow-inner"
                       >
                         {CONDITION_OPTIONS.map((opt) => (
                           <option key={opt.value} value={opt.value} className="bg-[#0A0F1E] text-white">
@@ -455,7 +455,7 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                           placeholder="e.g. 85%"
                           value={formData.battery_health}
                           onChange={handleBatteryChange}
-                          className="w-full bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none transition-all shadow-inner font-mono"
+                          className="w-full bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2.5 text-base sm:text-xs md:text-sm text-white placeholder-slate-400 focus:outline-none transition-all shadow-inner font-mono"
                         />
                       </div>
                     </div>
@@ -469,7 +469,7 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                         maxLength={1000}
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        className="w-full flex-1 min-h-[60px] bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none transition-all resize-none shadow-inner leading-relaxed"
+                        className="w-full flex-1 min-h-[60px] bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2 text-base sm:text-xs md:text-sm text-white placeholder-slate-400 focus:outline-none transition-all resize-none shadow-inner leading-relaxed"
                       />
                     </div>
                   </div>
@@ -497,7 +497,7 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                           onChange={(e) =>
                             setFormData({ ...formData, customer_name: e.target.value })
                           }
-                          className="w-full bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none transition-all shadow-inner"
+                          className="w-full bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2.5 text-base sm:text-xs md:text-sm text-white placeholder-slate-400 focus:outline-none transition-all shadow-inner"
                         />
                       </div>
 
@@ -512,7 +512,7 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                           onChange={(e) =>
                             setFormData({ ...formData, phone_number: e.target.value })
                           }
-                          className="w-full bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none transition-all shadow-inner font-mono"
+                          className="w-full bg-[#080D1A] border border-white/15 hover:border-white/30 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-3.5 py-2.5 text-base sm:text-xs md:text-sm text-white placeholder-slate-400 focus:outline-none transition-all shadow-inner font-mono"
                         />
                       </div>
                     </div>

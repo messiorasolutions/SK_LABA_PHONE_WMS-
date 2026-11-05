@@ -1,13 +1,28 @@
 import axiosInstance from './axiosInstance';
 
+// In-memory cache for storage options
+let storageOptionsPromise = null;
+
 // Create Storage Option
 const createStorageOption = async (storageData) => {
+  storageOptionsPromise = null; // Invalidate cache
   return axiosInstance.post('/api/storage-options', storageData);
 };
 
-// Fetch All Storage Options
-const getStorageOptions = async () => {
-  return axiosInstance.get('/api/storage-options');
+// Fetch All Storage Options (cached & deduplicated)
+const getStorageOptions = async (forceRefresh = false) => {
+  if (forceRefresh || !storageOptionsPromise) {
+    storageOptionsPromise = axiosInstance.get('/api/storage-options').catch((err) => {
+      storageOptionsPromise = null; // Reset so subsequent callers can retry
+      throw err;
+    });
+  }
+  return storageOptionsPromise;
+};
+
+// Invalidate / reset cache manually if needed
+const clearStorageOptionsCache = () => {
+  storageOptionsPromise = null;
 };
 
 // Find Storage Option by ID
@@ -17,11 +32,13 @@ const getStorageOptionById = async (storageId) => {
 
 // Update Storage Option
 const updateStorageOption = async (storageId, storageData) => {
+  storageOptionsPromise = null; // Invalidate cache
   return axiosInstance.put(`/api/storage-options/${storageId}`, storageData);
 };
 
 // Delete Storage Option
 const deleteStorageOption = async (storageId) => {
+  storageOptionsPromise = null; // Invalidate cache
   return axiosInstance.delete(`/api/storage-options/${storageId}`);
 };
 
@@ -32,6 +49,7 @@ export {
   getStorageOptionById,
   updateStorageOption,
   deleteStorageOption,
+  clearStorageOptionsCache,
 };
 
 export default {
@@ -41,4 +59,5 @@ export default {
   getStorageOptionById,
   updateStorageOption,
   deleteStorageOption,
+  clearStorageOptionsCache,
 };

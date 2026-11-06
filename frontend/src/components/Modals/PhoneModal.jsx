@@ -109,6 +109,7 @@ export default function PhoneModal({
   const [lowStockLevel, setLowStockLevel] = useState('');
   const [availability, setAvailability] = useState('IN_STOCK');
   const [status, setStatus] = useState('PUBLISHED');
+  const [isNewArrival, setIsNewArrival] = useState(false);
 
   // Step 2: Storage & Colors
   const [selectedStorageIds, setSelectedStorageIds] = useState([]);
@@ -187,6 +188,7 @@ export default function PhoneModal({
       setLowStockLevel(initial.low_stock_level ?? initial.stock_quantity ?? '');
       setAvailability(initial.availability || 'IN_STOCK');
       setStatus(initial.status || 'PUBLISHED');
+      setIsNewArrival(Boolean(initial.is_new_arrival));
       setWarranty(initial.warranty || '');
       setDescription(initial.description || '');
 
@@ -265,6 +267,7 @@ export default function PhoneModal({
       setLowStockLevel('');
       setAvailability('IN_STOCK');
       setStatus('PUBLISHED');
+      setIsNewArrival(false);
       setWarranty('');
       setDescription('');
       setColors([
@@ -605,6 +608,7 @@ export default function PhoneModal({
       stock_quantity: Number(lowStockLevel) || 0,
       availability,
       status,
+      is_new_arrival: isNewArrival,
       warranty: warranty.trim(),
       description: description.trim(),
       installment_enabled: installmentEnabled,
@@ -854,6 +858,34 @@ export default function PhoneModal({
                         <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
                       </div>
                     </div>
+                  </div>
+
+                  {/* 5. Mark as New Arrival */}
+                  <div className="pt-1">
+                    <label className="relative flex items-center justify-between p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-red-300 dark:hover:border-red-900/60 transition-all cursor-pointer group shadow-2xs">
+                      <div className="flex items-center gap-3 pr-2">
+                        <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 flex items-center justify-center text-red-600 dark:text-red-400 shrink-0">
+                          <Tag className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                            <span>Mark as New Arrival</span>
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 uppercase tracking-wider">
+                              New
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                            Showcase this phone with a &quot;NEW ARRIVAL&quot; badge across the store and include it in New Arrivals filters.
+                          </p>
+                        </div>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={isNewArrival}
+                        onChange={(e) => setIsNewArrival(e.target.checked)}
+                        className="w-4 h-4 text-red-600 bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded focus:ring-red-500 focus:ring-offset-0 cursor-pointer accent-red-600 shrink-0"
+                      />
+                    </label>
                   </div>
                 </div>
               )}

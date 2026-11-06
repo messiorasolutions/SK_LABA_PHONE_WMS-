@@ -336,6 +336,139 @@ class EmailService {
             return false;
         }
     }
+
+    /**
+     * Send congratulatory winner notification email to giveaway winner
+     * @param {Object} options
+     * @param {string} options.to - Recipient email
+     * @param {string} options.winnerName - Winner display name
+     * @param {string} options.giveawayTitle - Title of the giveaway
+     * @returns {Promise<boolean>}
+     */
+    async sendGiveawayWinnerEmail({ to, winnerName, giveawayTitle }) {
+        if (!this.isConfigured || !this.transporter) {
+            console.warn('[EmailService] SMTP is not configured. Giveaway winner email not dispatched.');
+            return false;
+        }
+
+        const sender = process.env.EMAIL_FROM || '"SK LABA PHONE" <no-reply@sklabaphone.com>';
+        const name = winnerName || 'Winner';
+        const subject = `🎉 Congratulations! You won the "${giveawayTitle}" Giveaway! — SK LABA PHONE`;
+
+        const textContent = `Hello ${name},\n\n🎉 CONGRATULATIONS! 🎉\n\nYou have been selected as the official winner of our giveaway: "${giveawayTitle}"!\n\nPlease contact SK LABA PHONE as soon as possible to claim your prize and confirm delivery or store pickup.\n\nShop Contact Details:\n• Phone: +82 10-5892-7482\n• WhatsApp: +82 10-5892-7482\n• Email: contact@sklabaphone.com\n• Address: Dongdaemun-gu, Seoul, South Korea\n• Hours: Mon - Sun: 10:00 AM - 9:00 PM (KST)\n\nThank you for participating with SK LABA PHONE!\n\nBest regards,\nSK LABA PHONE Team`;
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <title>SK LABA PHONE — Giveaway Winner</title>
+            </head>
+            <body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f5; padding: 30px 15px;">
+                    <tr>
+                        <td align="center">
+                            <table width="100%" style="max-width: 580px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e4e4e7; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+                                <!-- Brand Header -->
+                                <tr>
+                                    <td style="background: linear-gradient(135deg, #09090b 0%, #18181b 70%, #dc2626 100%); padding: 26px 30px; border-bottom: 2px solid #ef4444; text-align: left;">
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td>
+                                                    <span style="font-size: 20px; font-weight: 800; letter-spacing: 0.5px; color: #ffffff; display: block;">SK LABA PHONE</span>
+                                                    <span style="font-size: 11px; font-weight: 600; color: #fecaca; text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-top: 2px;">Official Giveaway Winner Announcement 🎁</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                                <!-- Content Body -->
+                                <tr>
+                                    <td style="padding: 32px 30px; color: #27272a; line-height: 1.6; font-size: 14px;">
+                                        <div style="text-align: center; margin-bottom: 24px;">
+                                            <span style="font-size: 40px; display: block; margin-bottom: 8px;">🎉🏆🎁</span>
+                                            <h1 style="margin: 0; font-size: 22px; font-weight: 800; color: #09090b;">Congratulations, ${name}!</h1>
+                                            <p style="margin: 8px 0 0 0; font-size: 14px; color: #dc2626; font-weight: 600;">You are the official winner of our giveaway!</p>
+                                        </div>
+
+                                        <p style="margin: 0 0 16px 0; color: #3f3f46; font-size: 15px;">
+                                            We are thrilled to announce that your entry has been selected for the giveaway:
+                                        </p>
+
+                                        <!-- Giveaway Card -->
+                                        <div style="background: #fef2f2; border: 1.5px dashed #f87171; border-radius: 12px; padding: 18px 20px; margin: 20px 0; text-align: center;">
+                                            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #991b1b; display: block; margin-bottom: 6px;">Giveaway Prize Event</span>
+                                            <strong style="font-size: 17px; color: #7f1d1d; display: block;">${giveawayTitle}</strong>
+                                        </div>
+
+                                        <p style="margin: 20px 0 12px 0; color: #3f3f46; font-size: 14px; font-weight: 600;">
+                                            How to claim your prize:
+                                        </p>
+                                        <p style="margin: 0 0 20px 0; color: #52525b; font-size: 14px;">
+                                            Please contact <strong>SK LABA PHONE</strong> using the contact information below with this email address (<strong>${to}</strong>) and your identity verification to arrange prize delivery or store collection.
+                                        </p>
+
+                                        <!-- Shop Contact Details Card -->
+                                        <div style="background-color: #fafafa; border: 1px solid #e4e4e7; border-left: 4px solid #dc2626; border-radius: 8px; padding: 18px 20px; margin: 24px 0;">
+                                            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #71717a; display: block; margin-bottom: 12px;">Shop Contact Information</span>
+                                            <table width="100%" cellpadding="5" cellspacing="0" style="font-size: 13px;">
+                                                <tr>
+                                                    <td style="color: #71717a; width: 110px;">📞 Phone:</td>
+                                                    <td style="font-weight: 600; color: #09090b;"><a href="tel:+821058927482" style="color: #09090b; text-decoration: none;">+82 10-5892-7482</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="color: #71717a;">💬 WhatsApp:</td>
+                                                    <td style="font-weight: 600; color: #16a34a;"><a href="https://wa.me/821058927482" style="color: #16a34a; text-decoration: none;">+82 10-5892-7482 (Chat on WhatsApp)</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="color: #71717a;">✉️ Email:</td>
+                                                    <td style="font-weight: 600; color: #09090b;"><a href="mailto:contact@sklabaphone.com" style="color: #dc2626; text-decoration: none;">contact@sklabaphone.com</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="color: #71717a;">📍 Address:</td>
+                                                    <td style="font-weight: 600; color: #09090b;">Dongdaemun-gu, Seoul, South Korea</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="color: #71717a;">⏰ Hours:</td>
+                                                    <td style="font-weight: 600; color: #09090b;">Mon - Sun: 10:00 AM - 9:00 PM (KST)</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+
+                                        <p style="font-size: 12px; color: #71717a; text-align: center; margin-top: 24px;">
+                                            Thank you for being a valued part of the SK LABA PHONE community!
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="background-color: #fafafa; padding: 16px 30px; border-top: 1px solid #e4e4e7; text-align: center; font-size: 11px; color: #a1a1aa;">
+                                        © ${new Date().getFullYear()} SK LABA PHONE • Seoul, South Korea • <a href="https://sklabaphone.com" style="color: #a1a1aa;">sklabaphone.com</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+            </html>
+        `;
+
+        try {
+            await this.transporter.sendMail({
+                from: sender,
+                to,
+                subject,
+                text: textContent,
+                html: htmlContent
+            });
+            return true;
+        } catch (error) {
+            console.error(`[EmailService] Failed to send giveaway winner email to ${to}:`, error.message);
+            return false;
+        }
+    }
 }
 
 module.exports = new EmailService();

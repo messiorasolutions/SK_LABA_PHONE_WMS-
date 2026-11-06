@@ -7,7 +7,7 @@ import React from 'react';
  */
 function renderInline(text, isDark = true) {
   if (!text) return null;
-  const regex = /(\*\*.*?\*\*|<b>.*?<\/b>|\*.*?\*|_.*?_|<i>.*?<\/i>)/g;
+  const regex = /(\*\*.*?\*\*|<b>.*?<\/b>|<u>.*?<\/u>|\*.*?\*|_.*?_|<i>.*?<\/i>)/g;
   const parts = text.split(regex);
 
   return parts.map((part, i) => {
@@ -24,6 +24,13 @@ function renderInline(text, isDark = true) {
         <strong key={i} className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
           {part.slice(3, -4)}
         </strong>
+      );
+    }
+    if (part.startsWith('<u>') && part.endsWith('</u>') && part.length >= 7) {
+      return (
+        <span key={i} className="underline underline-offset-2">
+          {part.slice(3, -4)}
+        </span>
       );
     }
     if (part.startsWith('*') && part.endsWith('*') && part.length >= 2) {
@@ -55,10 +62,11 @@ function renderInline(text, isDark = true) {
  * FormattedDescription
  * Renders bold, italic, bullet points, numbered lists, and line breaks exactly as composed in admin dashboard.
  */
-export default function FormattedDescription({ content, className = '', isDark = true }) {
-  if (!content) return null;
+export default function FormattedDescription({ content, description, className = '', isDark = true }) {
+  const text = content ?? description;
+  if (!text) return null;
 
-  const lines = String(content).split('\n');
+  const lines = String(text).split('\n');
 
   return (
     <div className={`space-y-1.5 leading-relaxed break-words ${className}`}>

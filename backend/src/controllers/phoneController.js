@@ -32,7 +32,8 @@ class PhoneController {
                 search,
                 archived,
                 is_archived,
-                include_archived
+                include_archived,
+                is_new_arrival
             } = req.query;
 
             const phones = await phoneService.getAllPhones({
@@ -43,7 +44,8 @@ class PhoneController {
                 search,
                 archived,
                 is_archived,
-                include_archived
+                include_archived,
+                is_new_arrival
             });
 
             return res.status(200).json({

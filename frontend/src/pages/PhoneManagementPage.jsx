@@ -379,8 +379,15 @@ export default function PhoneManagementPage() {
 
                         <td className="px-4 py-3">
                           <div>
-                            <div className="font-medium text-xs text-slate-900 dark:text-slate-100 leading-tight">
-                              {phone.name}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-medium text-xs text-slate-900 dark:text-slate-100 leading-tight">
+                                {phone.name}
+                              </span>
+                              {Boolean(phone.is_new_arrival) && (
+                                <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 uppercase tracking-wider">
+                                  New Arrival
+                                </span>
+                              )}
                             </div>
                             <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
                               {getPhoneSubtitle(phone)}

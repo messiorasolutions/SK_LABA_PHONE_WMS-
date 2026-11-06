@@ -4,10 +4,11 @@ import React from 'react';
  * Parses inline formatting:
  * - **bold** or <b>bold</b>
  * - *italic* or _italic_ or <i>italic</i>
+ * - <u>underlined</u>
  */
 function renderInline(text) {
   if (!text) return null;
-  const regex = /(\*\*.*?\*\*|<b>.*?<\/b>|\*.*?\*|_.*?_|<i>.*?<\/i>)/g;
+  const regex = /(\*\*.*?\*\*|<b>.*?<\/b>|\*.*?\*|_.*?_|<i>.*?<\/i>|<u>.*?<\/u>)/g;
   const parts = text.split(regex);
 
   return parts.map((part, i) => {
@@ -24,6 +25,13 @@ function renderInline(text) {
         <strong key={i} className="font-semibold text-slate-900 dark:text-white">
           {part.slice(3, -4)}
         </strong>
+      );
+    }
+    if (part.startsWith('<u>') && part.endsWith('</u>') && part.length >= 7) {
+      return (
+        <u key={i} className="underline text-slate-900 dark:text-white decoration-slate-400">
+          {part.slice(3, -4)}
+        </u>
       );
     }
     if (part.startsWith('*') && part.endsWith('*') && part.length >= 2) {
@@ -53,12 +61,13 @@ function renderInline(text) {
 
 /**
  * FormattedDescription
- * Renders bold, italic, bullet points, numbered lists, and line breaks exactly as composed in admin dashboard.
+ * Renders bold, italic, underline, bullet points, numbered lists, and line breaks exactly as composed in admin dashboard.
  */
-export default function FormattedDescription({ content, className = '' }) {
-  if (!content) return null;
+export default function FormattedDescription({ content, description, className = '' }) {
+  const text = content ?? description;
+  if (!text) return null;
 
-  const lines = String(content).split('\n');
+  const lines = String(text).split('\n');
 
   return (
     <div className={`space-y-1 text-xs text-slate-700 dark:text-slate-300 leading-relaxed ${className}`}>

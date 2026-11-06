@@ -101,6 +101,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
   const [selectedBrand, setSelectedBrand] = useState('ALL');
   const [selectedCondition, setSelectedCondition] = useState('ALL'); // ALL, NEW, USED
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [newArrivalsOnly, setNewArrivalsOnly] = useState(false);
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const [sortType, setSortType] = useState('newest'); // newest, oldest, price_asc, price_desc
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
@@ -237,6 +238,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
     setSelectedBrand('ALL');
     setSelectedCondition('ALL');
     setInStockOnly(false);
+    setNewArrivalsOnly(false);
     setPriceRange({ min: '', max: '' });
     setSliderMin(0);
     setSliderMax(maxCatalogPrice);
@@ -271,6 +273,11 @@ export default function SmartphonesPage({ onNavigateToHome }) {
           const currentStock = Number(phone.current_stock ?? phone.stock ?? 0);
           const isSoldOut = availability === 'SOLD_OUT' || (availability !== 'COMING_SOON' && currentStock === 0);
           if (isSoldOut) return false;
+        }
+
+        // New Arrivals Only Filter
+        if (newArrivalsOnly) {
+          if (!phone.is_new_arrival) return false;
         }
 
         // Global search query
@@ -321,6 +328,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
   }, [
     phones,
     inStockOnly,
+    newArrivalsOnly,
     globalSearch,
     selectedBrand,
     selectedCondition,
@@ -333,9 +341,10 @@ export default function SmartphonesPage({ onNavigateToHome }) {
     if (selectedBrand !== 'ALL') count++;
     if (selectedCondition !== 'ALL') count++;
     if (inStockOnly) count++;
+    if (newArrivalsOnly) count++;
     if (priceRange.min !== '' || priceRange.max !== '') count++;
     return count;
-  }, [selectedBrand, selectedCondition, inStockOnly, priceRange]);
+  }, [selectedBrand, selectedCondition, inStockOnly, newArrivalsOnly, priceRange]);
 
   const hasActiveFilters = activeFilterCount > 0 || sortType !== 'newest';
 
@@ -565,6 +574,30 @@ export default function SmartphonesPage({ onNavigateToHome }) {
                     <span
                       className={`inline-block h-4 w-4 transform rounded-full transition-transform duration-200 ${
                         inStockOnly ? 'translate-x-6 bg-[#0A0F1E]' : 'translate-x-1 bg-white'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* New arrivals only Toggle Switch */}
+                <div className="flex items-center justify-between py-1 border-b border-white/10 pb-5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-white">New arrivals only</span>
+                    <span className="px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-red-600/20 text-red-400 border border-red-500/30 uppercase tracking-wider">
+                      New
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setNewArrivalsOnly(!newArrivalsOnly)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                      newArrivalsOnly ? 'bg-white' : 'bg-white/20'
+                    }`}
+                    aria-label="Toggle New arrivals only"
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full transition-transform duration-200 ${
+                        newArrivalsOnly ? 'translate-x-6 bg-[#0A0F1E]' : 'translate-x-1 bg-white'
                       }`}
                     />
                   </button>

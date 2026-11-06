@@ -12,6 +12,7 @@ import SellRequestsPage from '../pages/SellRequestsPage';
 import BackInStockPage from '../pages/BackInStockPage';
 import UsersPage from '../pages/UsersPage';
 import ReviewsPage from '../pages/ReviewsPage';
+import GiveawayManagementPage from '../pages/GiveawayManagementPage';
 import ProfilePage from '../pages/ProfilePage';
 import LoginPage from '../pages/auth/LoginPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
@@ -243,6 +244,17 @@ export default function AppRoutes() {
           <ProtectedRoute>
             <MainLayout>
               <BackInStockPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/giveaways"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <GiveawayManagementPage />
             </MainLayout>
           </ProtectedRoute>
         }

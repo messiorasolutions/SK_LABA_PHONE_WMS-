@@ -5,6 +5,7 @@ import Footer from './layout/Footer';
 import HomePage from './pages/HomePage';
 import SmartphonesPage from './pages/SmartphonesPage';
 import ContactPage from './pages/ContactPage';
+import GiveawaysPage from './pages/GiveawaysPage';
 import FavoritesModal from './components/Modals/FavoritesModal';
 import PhoneDetailModal from './components/Modals/PhoneDetailModal';
 import ReservationModal from './components/Modals/ReservationModal';
@@ -35,6 +36,8 @@ export default function App() {
 
       if (hash === '#smartphones' || pathname === '/smartphones') {
         dispatch(setActiveTab('Smartphones'));
+      } else if (hash === '#giveaways' || pathname === '/giveaways') {
+        dispatch(setActiveTab('Giveaways'));
       } else if (hash === '#contact' || pathname === '/contact') {
         dispatch(setActiveTab('Contact Us'));
       } else if (hash === '' || hash === '#' || hash === '#home' || hash === '#reviews' || hash === '#about' || pathname === '/') {
@@ -117,6 +120,8 @@ export default function App() {
       <main className="flex-1">
         {activeTab === 'Smartphones' ? (
           <SmartphonesPage onNavigateToHome={handleNavigateToHome} />
+        ) : activeTab === 'Giveaways' ? (
+          <GiveawaysPage onNavigateToHome={handleNavigateToHome} />
         ) : activeTab === 'Contact Us' || activeTab === 'Contact' ? (
           <ContactPage onNavigateToHome={handleNavigateToHome} />
         ) : (

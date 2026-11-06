@@ -1,6 +1,7 @@
 import React from 'react';
-import { Phone, MessageCircle, MapPin, Clock, Mail, ShieldCheck, MessageSquare } from 'lucide-react';
+import { Phone, MapPin, Clock, Mail, ShieldCheck, MessageSquare } from 'lucide-react';
 import { STORE_INFO } from '../constants/siteConfig';
+import whatsappIcon from '../assets/images/whatsappicon.avif';
 
 export default function Footer({ onOpenSell }) {
   const handleWhatsApp = () => {
@@ -43,7 +44,7 @@ export default function Footer({ onOpenSell }) {
                 onClick={handleWhatsApp}
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-900 border border-white/15 hover:border-white/30 text-white text-xs font-normal transition-all cursor-pointer shadow-sm"
               >
-                <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+                <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4 object-contain" />
                 <span>WhatsApp Shop</span>
               </button>
 

@@ -123,9 +123,81 @@ export default function PhoneCard({
         {/* Subtle ambient light on hover */}
         <div className="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
 
+        {/* Top Left: New Arrival Ribbon Badge (SRS / User Design) */}
+        {Boolean(phone.is_new_arrival) && (
+          <div
+            className="absolute top-0 left-2 sm:left-2.5 z-20 pointer-events-none transition-transform duration-300 group-hover:translate-y-0.5"
+            title="New Arrival"
+          >
+            <svg
+              className="w-[30px] h-[42px] sm:w-[35px] sm:h-[49px] filter drop-shadow-[0_3px_8px_rgba(220,38,38,0.45)]"
+              viewBox="0 0 34 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id={`ribbonGrad_${phoneId}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#EF4444" />
+                  <stop offset="45%" stopColor="#DC2626" />
+                  <stop offset="100%" stopColor="#991B1B" />
+                </linearGradient>
+              </defs>
+              {/* Ribbon Body with scalloped tail */}
+              <path
+                d="M 1 0 H 33 V 40 C 33 42.5 30 43 27 42 C 23 41 21 44.5 17 46.5 C 13 44.5 11 41 7 42 C 4 43 1 42.5 1 40 Z"
+                fill={`url(#ribbonGrad_${phoneId})`}
+                stroke="#FCA5A5"
+                strokeWidth="0.7"
+              />
+              {/* White Inner Circle */}
+              <circle
+                cx="17"
+                cy="21.5"
+                r="13"
+                stroke="white"
+                strokeWidth="1.2"
+                strokeOpacity="0.95"
+                fill="none"
+              />
+              {/* "NEW" */}
+              <text
+                x="17"
+                y="19"
+                textAnchor="middle"
+                fill="#FFFFFF"
+                fontSize="7.5"
+                fontWeight="900"
+                fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+                letterSpacing="0.8"
+              >
+                NEW
+              </text>
+              {/* "ARRIVAL" */}
+              <text
+                x="17"
+                y="27.5"
+                textAnchor="middle"
+                fill="#FFFFFF"
+                fontSize="5"
+                fontWeight="700"
+                fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+                letterSpacing="0.5"
+              >
+                ARRIVAL
+              </text>
+            </svg>
+          </div>
+        )}
+
         {/* Top Left: Offer Badge if have offer */}
         {hasOffer && (
-          <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-20 inline-flex items-center gap-1 px-1.5 sm:px-2.5 py-0.5 rounded-full border border-amber-300/40 bg-black/75 backdrop-blur-md text-amber-200 text-[9px] sm:text-[11px] font-semibold tracking-wide shadow-sm max-w-[55%] sm:max-w-none truncate">
+          <div
+            className={`absolute z-20 inline-flex items-center gap-1 px-1.5 sm:px-2.5 py-0.5 rounded-full border border-amber-300/40 bg-black/75 backdrop-blur-md text-amber-200 text-[9px] sm:text-[11px] font-semibold tracking-wide shadow-sm max-w-[55%] sm:max-w-none truncate ${
+              phone.is_new_arrival
+                ? 'top-2 left-11 sm:top-2.5 sm:left-13'
+                : 'top-2 left-2 sm:top-2.5 sm:left-2.5'
+            }`}
+          >
             <Tag className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 text-amber-300" />
             <span className="truncate">{discountPercent > 0 ? `${discountPercent}% OFF` : 'Offer'}</span>
           </div>

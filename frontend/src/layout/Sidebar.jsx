@@ -13,6 +13,7 @@ import {
   ArrowLeftRight,
   Star,
   BellRing,
+  Gift,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -46,6 +47,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const isSellRequestsActive = location.pathname.startsWith('/sell-requests');
   const isBackInStockActive = location.pathname.startsWith('/back-in-stock') || location.pathname.startsWith('/dashboard/back-in-stock');
   const isReviewsActive = location.pathname.startsWith('/reviews');
+  const isGiveawaysActive = location.pathname.startsWith('/giveaways');
 
   const displayName = user?.display_name || user?.name || 'Admin';
   const userInitial = displayName.charAt(0).toUpperCase();
@@ -343,6 +345,31 @@ export default function Sidebar({ isOpen, onClose }) {
                 }`}
               />
               <span className="truncate">Back-in-Stock Alerts</span>
+            </NavLink>
+
+            {/* 10. Giveaway Management */}
+            <NavLink
+              to="/giveaways"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
+                  isGiveawaysActive
+                    ? 'bg-slate-100/90 dark:bg-slate-800/70 text-slate-900 dark:text-white shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
+                }`
+              }
+            >
+              {isGiveawaysActive && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-rose-600 to-neutral-900 rounded-r-full" />
+              )}
+              <Gift
+                className={`w-4 h-4 shrink-0 transition-colors ${
+                  isGiveawaysActive
+                    ? 'text-rose-600 dark:text-rose-400'
+                    : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                }`}
+              />
+              <span className="truncate">Giveaway Management</span>
             </NavLink>
           </nav>
         </div>

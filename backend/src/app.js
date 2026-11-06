@@ -16,6 +16,7 @@ const sellRequestRoutes = require('./routes/sellRequestRoutes');
 const backInStockRequestRoutes = require('./routes/backInStockRequestRoutes');
 const customerReviewRoutes = require('./routes/customerReviewRoutes');
 const adminReviewRoutes = require('./routes/adminReviewRoutes');
+const giveawayRoutes = require('./routes/giveawayRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const AppError = require('./utils/customError');
 
@@ -28,8 +29,10 @@ const defaultOrigins = [
     'https://www.sklabaphone.com',
     'http://localhost:5173',
     'http://localhost:3000',
+    'http://localhost:3001',
     'http://127.0.0.1:5173',
-    'http://127.0.0.1:3000'
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3001'
 ];
 
 const rawAllowedOrigins = process.env.ALLOWED_ORIGINS || '';
@@ -154,6 +157,7 @@ app.use('/api/sell-phone-requests', sellRequestRoutes);
 app.use('/api/back-in-stock-requests', backInStockRequestRoutes);
 app.use('/api/reviews', customerReviewRoutes);
 app.use('/api/admin/reviews', adminReviewRoutes);
+app.use('/api/giveaways', giveawayRoutes);
 
 // 7. 404 Handler for undefined routes
 app.use((req, res, next) => {

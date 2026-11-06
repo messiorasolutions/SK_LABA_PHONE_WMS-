@@ -94,6 +94,7 @@ CREATE TABLE "phones" (
   "installment_plan_ids" json DEFAULT NULL,
   "status" enum('DRAFT','PUBLISHED','ARCHIVED') NOT NULL DEFAULT 'DRAFT',
   "is_archived" tinyint(1) NOT NULL DEFAULT '0',
+  "is_new_arrival" tinyint(1) NOT NULL DEFAULT '0',
   "photos" json DEFAULT NULL,
   "created_at" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updated_at" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -380,3 +381,27 @@ INSERT INTO `customer_reviews` (`review_id`, `customer_name`, `rating`, `comment
 
 SET FOREIGN_KEY_CHECKS = 1;
 SET SQL_MODE=@OLD_SQL_MODE;
+
+
+-- ============================================================
+-- GIVEAWAY MANAGEMENT TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS giveaways (
+    giveaway_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    short_description VARCHAR(500) NULL,
+    description LONGTEXT NULL,
+    thumbnail_url LONGTEXT NULL,
+    start_date DATETIME NOT NULL,
+    end_date DATETIME NOT NULL,
+    winner_selection_date DATETIME NOT NULL,
+    status ENUM('DRAFT', 'ONGOING', 'COMPLETED', 'CLOSED') NOT NULL DEFAULT 'DRAFT',
+    is_manually_closed BOOLEAN NOT NULL DEFAULT FALSE,
+    winners_announced BOOLEAN NOT NULL DEFAULT FALSE,
+    winners_announced_at DATETIME NULL,
+    winners JSON NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_giveaway_status (status),
+    INDEX idx_giveaway_dates (start_date, end_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

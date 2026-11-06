@@ -21,6 +21,8 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
 
       if (hash === '#smartphones' || pathname === '/smartphones') {
         dispatch(setActiveTab('Smartphones'));
+      } else if (hash === '#giveaways' || pathname === '/giveaways') {
+        dispatch(setActiveTab('Giveaways'));
       } else if (hash === '#contact' || pathname === '/contact') {
         dispatch(setActiveTab('Contact Us'));
       } else if (hash === '#reviews') {
@@ -62,6 +64,9 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
 
     if (tabName === 'Smartphones') {
       window.location.hash = '#smartphones';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (tabName === 'Giveaways') {
+      window.location.hash = '#giveaways';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (tabName === 'Contact Us' || tabName === 'Contact') {
       window.location.hash = '#contact';

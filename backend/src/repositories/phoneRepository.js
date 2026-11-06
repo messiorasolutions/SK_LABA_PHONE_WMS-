@@ -32,6 +32,7 @@ class PhoneRepository {
         formatted.stock = formatted.current_stock;
         formatted.stock_quantity = formatted.current_stock;
         formatted.is_archived = Boolean(formatted.is_archived || formatted.status === 'ARCHIVED');
+        formatted.is_new_arrival = Boolean(formatted.is_new_arrival);
         formatted.availability = calculatePhoneAvailability(
             formatted.current_stock,
             formatted.low_stock_level,
@@ -52,8 +53,8 @@ class PhoneRepository {
                 storage_ids, colour_options, specification_ids,
                 warranty, accessory_ids, description,
                 low_stock_level, current_stock, availability, installment_enabled,
-                installment_plan_ids, status, is_archived, photos
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                installment_plan_ids, status, is_archived, is_new_arrival, photos
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const values = [
@@ -74,6 +75,7 @@ class PhoneRepository {
             data.installment_plan_ids ? JSON.stringify(data.installment_plan_ids) : null,
             data.status || 'DRAFT',
             data.is_archived ? 1 : 0,
+            data.is_new_arrival ? 1 : 0,
             data.photos ? JSON.stringify(data.photos) : null
         ];
 
@@ -172,6 +174,12 @@ class PhoneRepository {
             const keyword = `%${filters.search}%`;
             values.push(keyword, keyword);
         }
+        if (filters.is_new_arrival !== undefined && filters.is_new_arrival !== null && filters.is_new_arrival !== '') {
+            const isNA = filters.is_new_arrival === true || filters.is_new_arrival === 'true' || filters.is_new_arrival === '1' || filters.is_new_arrival === 1;
+            if (isNA) {
+                query += ` AND p.is_new_arrival = 1`;
+            }
+        }
 
         query += ` ORDER BY p.phone_id DESC`;
 
@@ -243,6 +251,12 @@ class PhoneRepository {
             query += ` AND (p.name LIKE ? OR b.brand_name LIKE ?)`;
             const keyword = `%${filters.search}%`;
             values.push(keyword, keyword);
+        }
+        if (filters.is_new_arrival !== undefined && filters.is_new_arrival !== null && filters.is_new_arrival !== '') {
+            const isNA = filters.is_new_arrival === true || filters.is_new_arrival === 'true' || filters.is_new_arrival === '1' || filters.is_new_arrival === 1;
+            if (isNA) {
+                query += ` AND p.is_new_arrival = 1`;
+            }
         }
 
         // Stock status filter
@@ -376,6 +390,7 @@ class PhoneRepository {
                 installment_plan_ids = ?,
                 status = ?,
                 is_archived = ?,
+                is_new_arrival = ?,
                 photos = ?
             WHERE phone_id = ?
         `;
@@ -398,6 +413,7 @@ class PhoneRepository {
             data.installment_plan_ids ? JSON.stringify(data.installment_plan_ids) : null,
             data.status,
             data.is_archived ? 1 : 0,
+            data.is_new_arrival ? 1 : 0,
             data.photos ? JSON.stringify(data.photos) : null,
             phone_id
         ];

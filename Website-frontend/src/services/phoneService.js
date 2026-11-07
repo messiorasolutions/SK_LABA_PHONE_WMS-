@@ -1,18 +1,34 @@
-import axiosInstance from './axiosInstance';
-import { API_ENDPOINTS } from '../constants/apiEndpoints';
+import axiosInstance from './axiosInstance.js';
+import { API_ENDPOINTS } from '../constants/apiEndpoints.js';
+import { createServiceCache } from './cacheHelper.js';
+
+// In-memory cache for phone installments: phoneId -> Promise
+const installmentsCache = new Map();
+
+// In-memory cache for phones catalog (3-minute TTL)
+const phonesCache = createServiceCache({ ttlMs: 3 * 60 * 1000 });
 
 // Create Phone
 const createPhone = async (phoneData) => {
+  phonesCache.clear();
   return axiosInstance.post(API_ENDPOINTS.phones.base, phoneData);
 };
 
 // Fetch All Phones (filters: { brand_id, status, phone_condition, availability, search, price_min, price_max })
-const getPhones = async (filters = {}) => {
+const getPhones = async (filters = {}, options = {}) => {
+  const forceRefresh = typeof options === 'boolean'
+    ? options
+    : Boolean(options?.forceRefresh || filters?.forceRefresh);
+
   const cleanParams = Object.fromEntries(
-    Object.entries(filters).filter(([, v]) => v !== '' && v !== null && v !== undefined)
+    Object.entries(filters).filter(([k, v]) => k !== 'forceRefresh' && v !== '' && v !== null && v !== undefined)
   );
 
-  return axiosInstance.get(API_ENDPOINTS.phones.base, { params: cleanParams });
+  return phonesCache.execute(
+    cleanParams,
+    () => axiosInstance.get(API_ENDPOINTS.phones.base, { params: cleanParams }),
+    forceRefresh
+  );
 };
 
 // Find Phone by ID
@@ -22,11 +38,13 @@ const getPhoneById = async (phoneId) => {
 
 // Update Phone
 const updatePhone = async (phoneId, phoneData) => {
+  phonesCache.clear();
   return axiosInstance.put(API_ENDPOINTS.phones.byId(phoneId), phoneData);
 };
 
 // Delete Phone
 const deletePhone = async (phoneId) => {
+  phonesCache.clear();
   return axiosInstance.delete(API_ENDPOINTS.phones.byId(phoneId));
 };
 
@@ -46,9 +64,43 @@ const getFavorites = async (ids) => {
   });
 };
 
-// Get Installment plans for a phone (C-03)
-const getPhoneInstallments = async (phoneId) => {
-  return axiosInstance.get(API_ENDPOINTS.phones.installments(phoneId));
+// Get Installment plans for a phone (C-03) (cached & deduplicated)
+const getPhoneInstallments = async (phoneId, forceRefresh = false) => {
+  const key = String(phoneId);
+  if (!forceRefresh && installmentsCache.has(key)) {
+    return installmentsCache.get(key);
+  }
+
+  const promise = axiosInstance
+    .get(API_ENDPOINTS.phones.installments(phoneId))
+    .catch((err) => {
+      installmentsCache.delete(key); // Reset on error so caller can retry
+      throw err;
+    });
+
+  installmentsCache.set(key, promise);
+  return promise;
+};
+
+// Invalidate installments cache
+const clearInstallmentsCache = (phoneId) => {
+  if (phoneId !== undefined) {
+    installmentsCache.delete(String(phoneId));
+  } else {
+    installmentsCache.clear();
+  }
+};
+
+// Invalidate phones catalog cache
+const clearPhonesCache = (filters) => {
+  if (filters !== undefined) {
+    const cleanParams = Object.fromEntries(
+      Object.entries(filters).filter(([k, v]) => k !== 'forceRefresh' && v !== '' && v !== null && v !== undefined)
+    );
+    phonesCache.clear(cleanParams);
+  } else {
+    phonesCache.clear();
+  }
 };
 
 // Check active offer for a phone (C-02 & C-03)
@@ -66,7 +118,10 @@ export {
   comparePhones,
   getFavorites,
   getPhoneInstallments,
+  clearInstallmentsCache,
+  clearPhonesCache,
   getPhoneOffer,
+  phonesCache,
 };
 
 export default {
@@ -79,5 +134,8 @@ export default {
   comparePhones,
   getFavorites,
   getPhoneInstallments,
+  clearInstallmentsCache,
+  clearPhonesCache,
   getPhoneOffer,
+  phonesCache,
 };

@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 
 // Detect whether running in production / hosted domain (e.g. sklabaphone.com) or local dev
@@ -12,6 +11,10 @@ const rawBaseUrl = isHostedDomain
   : (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000');
 
 export const API_BASE_URL = (rawBaseUrl || 'https://api.sklabaphone.com').replace(/\/+$/, '');
+export const API_BASE_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env
+    ? (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL)
+    : (typeof process !== 'undefined' ? process.env?.VITE_API_BASE_URL : '')) || '';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -30,7 +33,7 @@ axiosInstance.interceptors.request.use(
       }
     }
 
-    const token = localStorage.getItem('token');
+    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

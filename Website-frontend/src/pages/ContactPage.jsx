@@ -215,7 +215,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       disabled={loading}
-                      className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-sky-500/35 hover:border-sky-400/60 focus:border-sky-400 text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 backdrop-blur-md transition-all shadow-inner disabled:opacity-50"
+                      className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-sky-500/35 hover:border-sky-400/60 focus:border-sky-400 text-white text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 backdrop-blur-md transition-all shadow-inner disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -234,7 +234,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       disabled={loading}
-                      className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-sky-500/35 hover:border-sky-400/60 focus:border-sky-400 text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 backdrop-blur-md transition-all shadow-inner disabled:opacity-50 font-sans"
+                      className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-sky-500/35 hover:border-sky-400/60 focus:border-sky-400 text-white text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 backdrop-blur-md transition-all shadow-inner disabled:opacity-50 font-sans"
                     />
                   </div>
                 </div>
@@ -253,7 +253,7 @@ export default function ContactPage() {
                     onChange={handleChange}
                     required
                     disabled={loading}
-                    className="w-full min-h-[88px] px-3.5 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-sky-500/35 hover:border-sky-400/60 focus:border-sky-400 text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 backdrop-blur-md transition-all shadow-inner disabled:opacity-50 resize-none leading-relaxed"
+                    className="w-full min-h-[88px] px-3.5 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-sky-500/35 hover:border-sky-400/60 focus:border-sky-400 text-white text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 backdrop-blur-md transition-all shadow-inner disabled:opacity-50 resize-none leading-relaxed"
                   />
                 </div>
               </div>

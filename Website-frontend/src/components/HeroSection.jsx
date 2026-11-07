@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShoppingCart, ArrowRight } from 'lucide-react';
 import { useDispatch } from 'react-redux';
+import mainBannerWebp from '../assets/images/main.webp';
 import mainBannerImg from '../assets/images/main.png';
 import { HERO_CONTENT } from '../constants/siteConfig';
 import { setActiveTab } from '../actions/heroActions';
@@ -30,11 +31,18 @@ export default function HeroSection() {
     <section className="relative overflow-hidden bg-theme-bg min-h-[500px] sm:min-h-[580px] lg:min-h-[700px] flex items-center pt-24 sm:pt-28 md:pt-32 pb-10 sm:pb-12 md:pb-16">
       {/* Background Hero Image with Phones, Glowing Ring & Atmosphere */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <img
-          src={mainBannerImg}
-          alt={HERO_CONTENT.headlineAccent}
-          className="w-full h-full object-cover object-[75%_center] sm:object-right lg:object-center opacity-85 sm:opacity-90 lg:opacity-100"
-        />
+        <picture>
+          <source srcSet={mainBannerWebp} type="image/webp" />
+          <img
+            src={mainBannerImg}
+            alt={HERO_CONTENT.headlineAccent}
+            fetchPriority="high"
+            decoding="sync"
+            width={1983}
+            height={793}
+            className="w-full h-full object-cover object-[75%_center] sm:object-right lg:object-center opacity-85 sm:opacity-90 lg:opacity-100"
+          />
+        </picture>
         {/* Soft dark gradient overlays on the left to ensure crisp text contrast */}
         <div className="absolute inset-0 bg-gradient-to-r from-theme-bg via-theme-bg/90 sm:via-theme-bg/85 lg:via-theme-bg/50 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-theme-bg via-transparent to-transparent opacity-75 sm:opacity-60" />

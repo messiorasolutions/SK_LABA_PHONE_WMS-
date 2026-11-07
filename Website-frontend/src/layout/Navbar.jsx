@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Search, Menu, X, Heart } from 'lucide-react';
+import { Search, User, Menu, X, Heart } from 'lucide-react';
+import logoWebp from '../assets/images/logo.webp';
 import logoImg from '../assets/images/logo.png';
 import { setActiveTab, setSearchQuery } from '../actions/heroActions';
 import { NAV_LINKS, STORE_INFO } from '../constants/siteConfig';
@@ -138,11 +139,16 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
           >
             <div className="absolute -inset-3 bg-gradient-to-r from-blue-600/30 via-red-600/20 to-sky-500/20 rounded-full blur-xl opacity-80 group-hover:opacity-100 transition-opacity" />
 
-            <img
-              src={logoImg}
-              alt={STORE_INFO.name}
-              className="relative z-10 h-11 sm:h-14 md:h-16 lg:h-20 w-auto object-contain transition-transform duration-200 group-hover:scale-105 filter drop-shadow-[0_0_16px_rgba(255,255,255,0.25)] drop-shadow-[0_0_30px_rgba(37,99,235,0.35)]"
-            />
+            <picture>
+              <source srcSet={logoWebp} type="image/webp" />
+              <img
+                src={logoImg}
+                alt={STORE_INFO.name}
+                width={500}
+                height={499}
+                className="relative z-10 h-11 sm:h-14 md:h-16 lg:h-20 w-auto object-contain transition-transform duration-200 group-hover:scale-105 filter drop-shadow-[0_0_16px_rgba(255,255,255,0.25)] drop-shadow-[0_0_30px_rgba(37,99,235,0.35)]"
+              />
+            </picture>
           </a>
 
           <nav className="hidden md:flex items-center gap-4 lg:gap-8 xl:gap-10">
@@ -189,7 +195,7 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
                     }
                   }}
                   placeholder="Search smartphones..."
-                  className="bg-transparent border-none outline-none text-xs md:text-sm text-theme-textPrimary placeholder-theme-textMuted w-full"
+                  className="bg-transparent border-none outline-none text-base sm:text-xs md:text-sm text-theme-textPrimary placeholder-theme-textMuted w-full"
                 />
               </div>
             </div>
@@ -234,7 +240,7 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
                 }
               }}
               placeholder="Search smartphones, brands..."
-              className="bg-transparent border-none outline-none text-xs text-theme-textPrimary placeholder-theme-textMuted w-full"
+              className="bg-transparent border-none outline-none text-base text-theme-textPrimary placeholder-theme-textMuted w-full"
             />
           </div>
         </div>

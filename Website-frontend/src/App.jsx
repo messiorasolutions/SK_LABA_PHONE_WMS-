@@ -77,6 +77,11 @@ export default function App() {
     };
     window.addEventListener('sk_laba_open_back_in_stock_modal', handleOpenBackInStock);
 
+    const handleOpenReservation = (e) => {
+      setSelectedPhoneForReserve(e?.detail?.phone || { phone_id: 1, name: 'iPhone 15 Pro Max', effectivePrice: 1199 });
+    };
+    window.addEventListener('sk_laba_open_reservation_modal', handleOpenReservation);
+
     return () => {
       window.removeEventListener('hashchange', syncRoute);
       window.removeEventListener('popstate', syncRoute);
@@ -86,6 +91,7 @@ export default function App() {
       window.removeEventListener('sk_laba_open_sell_modal', handleOpenSell);
       window.removeEventListener('sk_laba_open_review_modal', handleOpenReview);
       window.removeEventListener('sk_laba_open_back_in_stock_modal', handleOpenBackInStock);
+      window.removeEventListener('sk_laba_open_reservation_modal', handleOpenReservation);
     };
   }, [dispatch]);
 

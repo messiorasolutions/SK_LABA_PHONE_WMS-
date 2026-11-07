@@ -34,6 +34,57 @@ import { getActiveOffers } from '../services/offerService';
 import { setSearchQuery, setActiveTab } from '../actions/heroActions';
 import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
 
+// Helper to enrich phone objects with matching active promotional offers
+function applyOffersToPhones(phoneList, offers) {
+  if (!Array.isArray(phoneList)) return [];
+  if (!Array.isArray(offers) || offers.length === 0) return phoneList;
+
+  return phoneList.map((p) => {
+    const pIdStr = String(p.phone_id || p.id || '');
+    const pNameLower = (p.name || '').toLowerCase();
+
+    const matchingOffer = offers.find((o) => {
+      if (Array.isArray(o.phone_ids) && o.phone_ids.some((id) => String(id) === pIdStr)) {
+        return true;
+      }
+      if (Array.isArray(o.phones) && o.phones.some((ph) => String(ph.phone_id || ph.id) === pIdStr)) {
+        return true;
+      }
+      const combinedText = ((o.title || '') + ' ' + (o.description || '')).toLowerCase();
+      if (pNameLower && combinedText.includes(pNameLower)) {
+        return true;
+      }
+      return false;
+    });
+
+    if (matchingOffer) {
+      const regPrice = Number(p.price || p.regular_price || 0);
+      const offPrice = Number(matchingOffer.offer_price || 0);
+      const savings = regPrice > offPrice ? regPrice - offPrice : Number(matchingOffer.discount_amount || 0);
+      const discountPct =
+        regPrice > 0 && savings > 0
+          ? Math.round((savings / regPrice) * 100)
+          : Number(matchingOffer.discount_percentage || 0);
+
+      return {
+        ...p,
+        offer_price: offPrice,
+        regular_price: regPrice,
+        active_offer: {
+          has_active_offer: true,
+          offer_id: matchingOffer.offer_id,
+          offer_title: matchingOffer.title,
+          offer_price: offPrice,
+          regular_price: regPrice,
+          discount_percentage: discountPct,
+          savings: savings,
+        },
+      };
+    }
+    return p;
+  });
+}
+
 export default function SmartphonesPage({ onNavigateToHome }) {
   const dispatch = useDispatch();
   const globalSearch = useSelector((state) => state.hero?.searchQuery || '');
@@ -69,76 +120,22 @@ export default function SmartphonesPage({ onNavigateToHome }) {
   const [favoritesModalOpen, setFavoritesModalOpen] = useState(false);
   const [showCompareBar, setShowCompareBar] = useState(false);
 
-  // Fetch initial data
+  const activeOffersRef = useRef([]);
+
+  // Critical path loading: Phone inventory loads & renders cards immediately
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
+    setError(null);
 
-    Promise.all([
-      phoneService.getPhones(),
-      brandService.getBrands().catch(() => ({ data: [] })),
-      getActiveOffers().catch(() => ({ data: [] })),
-    ])
-      .then(([phoneRes, brandRes, offerRes]) => {
+    // 1. Critical path: GET phones -> Render phone cards immediately
+    phoneService
+      .getPhones()
+      .then((phoneRes) => {
         if (!isMounted) return;
-
-        // Process phones
         const rawPhones = phoneRes.data?.data || phoneRes.data || [];
         const phoneList = Array.isArray(rawPhones) ? rawPhones : [];
-
-        // Process brands
-        const rawBrands = brandRes.data?.data || brandRes.data || [];
-        setBrands(Array.isArray(rawBrands) ? rawBrands : []);
-
-        // Process active offers and attach to phones
-        const offers = offerRes.data?.data || offerRes.data || [];
-        setActiveOffers(Array.isArray(offers) ? offers : []);
-
-        const enriched = phoneList.map((p) => {
-          const pIdStr = String(p.phone_id || p.id || '');
-          const pNameLower = (p.name || '').toLowerCase();
-
-          const matchingOffer = offers.find((o) => {
-            if (Array.isArray(o.phone_ids) && o.phone_ids.some((id) => String(id) === pIdStr)) {
-              return true;
-            }
-            if (Array.isArray(o.phones) && o.phones.some((ph) => String(ph.phone_id || ph.id) === pIdStr)) {
-              return true;
-            }
-            const combinedText = ((o.title || '') + ' ' + (o.description || '')).toLowerCase();
-            if (pNameLower && combinedText.includes(pNameLower)) {
-              return true;
-            }
-            return false;
-          });
-
-          if (matchingOffer) {
-            const regPrice = Number(p.price || p.regular_price || 0);
-            const offPrice = Number(matchingOffer.offer_price || 0);
-            const savings = regPrice > offPrice ? regPrice - offPrice : Number(matchingOffer.discount_amount || 0);
-            const discountPct = regPrice > 0 && savings > 0
-              ? Math.round((savings / regPrice) * 100)
-              : Number(matchingOffer.discount_percentage || 0);
-
-            return {
-              ...p,
-              offer_price: offPrice,
-              regular_price: regPrice,
-              active_offer: {
-                has_active_offer: true,
-                offer_id: matchingOffer.offer_id,
-                offer_title: matchingOffer.title,
-                offer_price: offPrice,
-                regular_price: regPrice,
-                discount_percentage: discountPct,
-                savings: savings,
-              },
-            };
-          }
-          return p;
-        });
-
-        setPhones(enriched);
+        setPhones(applyOffersToPhones(phoneList, activeOffersRef.current));
       })
       .catch((err) => {
         if (!isMounted) return;
@@ -146,6 +143,32 @@ export default function SmartphonesPage({ onNavigateToHome }) {
       })
       .finally(() => {
         if (isMounted) setLoading(false);
+      });
+
+    // 2. Secondary path: Fetch brands in parallel (non-blocking)
+    brandService
+      .getBrands()
+      .then((brandRes) => {
+        if (!isMounted) return;
+        const rawBrands = brandRes.data?.data || brandRes.data || [];
+        setBrands(Array.isArray(rawBrands) ? rawBrands : []);
+      })
+      .catch(() => {
+        if (isMounted) setBrands([]);
+      });
+
+    // 3. Secondary path: Fetch active offers in parallel (non-blocking)
+    getActiveOffers()
+      .then((offerRes) => {
+        if (!isMounted) return;
+        const offers = offerRes.data?.data || offerRes.data || [];
+        const offersList = Array.isArray(offers) ? offers : [];
+        activeOffersRef.current = offersList;
+        setActiveOffers(offersList);
+        setPhones((currentPhones) => applyOffersToPhones(currentPhones, offersList));
+      })
+      .catch(() => {
+        if (isMounted) setActiveOffers([]);
       });
 
     return () => {
@@ -647,7 +670,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
                             type="number"
                             value={sliderMin}
                             onChange={(e) => handleMinSliderChange(e.target.value)}
-                            className="w-full bg-transparent text-white font-medium focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full bg-transparent text-white font-medium focus:outline-none text-base sm:text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             placeholder="0"
                           />
                         </div>
@@ -658,7 +681,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
                             type="number"
                             value={sliderMax}
                             onChange={(e) => handleMaxSliderChange(e.target.value)}
-                            className="w-full bg-transparent text-white font-medium focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full bg-transparent text-white font-medium focus:outline-none text-base sm:text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             placeholder={String(maxCatalogPrice)}
                           />
                         </div>
@@ -691,7 +714,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
                       value={brandSearchQuery}
                       onChange={(e) => setBrandSearchQuery(e.target.value)}
                       placeholder="Search brands..."
-                      className="w-full bg-white/5 border border-white/10 text-white rounded-xl px-3.5 pr-8 py-2 text-xs font-medium placeholder:text-theme-textMuted focus:outline-none focus:border-white/30 transition-all"
+                      className="w-full bg-white/5 border border-white/10 text-white rounded-xl px-3.5 pr-8 py-2 text-base sm:text-xs font-medium placeholder:text-theme-textMuted focus:outline-none focus:border-white/30 transition-all"
                     />
                     {brandSearchQuery && (
                       <button

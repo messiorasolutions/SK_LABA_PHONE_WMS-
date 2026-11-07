@@ -569,7 +569,7 @@ export default function ReservationModal({ phone, onClose }) {
                     maxLength={150}
                     value={formData.customer_name}
                     onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
+                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
                   />
                 </div>
 
@@ -585,7 +585,7 @@ export default function ReservationModal({ phone, onClose }) {
                     maxLength={25}
                     value={formData.phone_number}
                     onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
+                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
                   />
                 </div>
 
@@ -600,7 +600,7 @@ export default function ReservationModal({ phone, onClose }) {
                     maxLength={255}
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
+                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
                   />
                 </div>
 
@@ -621,7 +621,7 @@ export default function ReservationModal({ phone, onClose }) {
                     onChange={(e) =>
                       setFormData({ ...formData, preferred_collection_date: e.target.value })
                     }
-                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all [color-scheme:dark] font-normal"
+                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all [color-scheme:dark] font-normal min-w-0"
                   />
                 </div>
 
@@ -641,7 +641,7 @@ export default function ReservationModal({ phone, onClose }) {
                     maxLength={2000}
                     value={formData.customer_note}
                     onChange={(e) => setFormData({ ...formData, customer_note: e.target.value })}
-                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all resize-none font-normal"
+                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all resize-none font-normal"
                   />
                 </div>
               </div>

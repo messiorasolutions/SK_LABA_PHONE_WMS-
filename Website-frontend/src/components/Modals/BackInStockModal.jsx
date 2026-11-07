@@ -242,7 +242,7 @@ export default function BackInStockModal({ phone, onClose }) {
                   maxLength={100}
                   value={formData.customer_name}
                   onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                  className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
+                  className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl px-3.5 py-2 sm:py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
                 />
               </div>
 
@@ -256,7 +256,7 @@ export default function BackInStockModal({ phone, onClose }) {
                   required
                   value={formData.phone_number}
                   onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                  className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
+                  className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl px-3.5 py-2 sm:py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
                 />
               </div>
 
@@ -269,7 +269,7 @@ export default function BackInStockModal({ phone, onClose }) {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
+                  className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl px-3.5 py-2 sm:py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
                 />
               </div>
 
@@ -283,7 +283,7 @@ export default function BackInStockModal({ phone, onClose }) {
                   maxLength={500}
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all resize-none"
+                  className="w-full bg-white/[0.03] border border-theme-border hover:border-white/20 focus:border-blue-500 rounded-xl px-3.5 py-2 sm:py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none transition-all resize-none"
                 />
                 <div className="text-right mt-1">
                   <span className="text-[10px] text-slate-500">

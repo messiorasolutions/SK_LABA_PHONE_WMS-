@@ -8,6 +8,7 @@ import phoneService from '../services/phoneService';
 import { reviewService } from '../services/reviewService';
 import { setActiveTab } from '../actions/heroActions';
 import upgradeVideo from '../assets/images/upgrade_vedio.mp4';
+import aboutWebp from '../assets/images/about.webp';
 import aboutImg from '../assets/images/about.jpg';
 
 function ReviewComment({ comment }) {
@@ -33,6 +34,16 @@ function ReviewComment({ comment }) {
       </button>
     </span>
   );
+}
+
+// Helper to append optimal web sizing & format to external imagery
+function optimizeImageUrl(url, width = 500) {
+  if (!url || typeof url !== 'string') return '';
+  if (url.includes('images.unsplash.com') && !url.includes('w=')) {
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}w=${width}&auto=format&q=80`;
+  }
+  return url;
 }
 
 function OfferCard({ offer, allPhones, onNavigate }) {
@@ -74,7 +85,12 @@ function OfferCard({ offer, allPhones, onNavigate }) {
 
   // Resolve best photo
   const resolvedPhoto = React.useMemo(() => {
-    if (offer.banner_image && typeof offer.banner_image === 'string' && offer.banner_image.trim()) {
+    if (
+      offer.banner_image &&
+      typeof offer.banner_image === 'string' &&
+      offer.banner_image.trim() &&
+      !offer.banner_image.includes('photo-offer-banner.jpg')
+    ) {
       return offer.banner_image;
     }
     if (matchedPhone) {
@@ -129,10 +145,13 @@ function OfferCard({ offer, allPhones, onNavigate }) {
         {/* Phone Photo */}
         {imgSrc ? (
           <img
-            src={imgSrc}
+            src={optimizeImageUrl(imgSrc, 480)}
             alt={phoneTitle}
-            className="max-h-[82%] max-w-[82%] object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.95)] transition-transform duration-300 group-hover:scale-105 relative z-10"
+            width={260}
+            height={325}
             loading="lazy"
+            decoding="async"
+            className="max-h-[82%] max-w-[82%] object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.95)] transition-transform duration-300 group-hover:scale-105 relative z-10"
             onError={() => {
               if (matchedPhone?.main_photo && imgSrc !== matchedPhone.main_photo) {
                 setImgSrc(matchedPhone.main_photo);
@@ -226,6 +245,8 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
   const dispatch = useDispatch();
   const [activeOffers, setActiveOffers] = useState([]);
   const tradeInVideoRef = useRef(null);
+  const videoContainerRef = useRef(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -316,7 +337,31 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
     }
   };
 
+  // Defer video loading until near viewport
   useEffect(() => {
+    const container = videoContainerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoadVideo(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '250px' }
+    );
+
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  // Control seamless video looping once loaded
+  useEffect(() => {
+    if (!shouldLoadVideo) return;
     const video = tradeInVideoRef.current;
     if (!video) return;
 
@@ -324,6 +369,7 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
 
     const setStart = () => {
       video.currentTime = START_TIME;
+      video.play().catch(() => {});
     };
 
     const handleTimeUpdate = () => {
@@ -335,6 +381,7 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
 
     if (video.readyState >= 1) {
       video.currentTime = START_TIME;
+      video.play().catch(() => {});
     }
 
     video.addEventListener('loadedmetadata', setStart);
@@ -344,25 +391,35 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
       video.removeEventListener('loadedmetadata', setStart);
       video.removeEventListener('timeupdate', handleTimeUpdate);
     };
-  }, []);
+  }, [shouldLoadVideo]);
 
   const [allPhones, setAllPhones] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
 
-    Promise.all([
-      getActiveOffers().catch(() => ({ data: [] })),
-      phoneService.getPhones().catch(() => ({ data: [] })),
-    ]).then(([offerRes, phoneRes]) => {
-      if (!isMounted) return;
-      const rawOffers = offerRes.data?.data || offerRes.data || [];
-      const rawPhones = phoneRes.data?.data || phoneRes.data || [];
-      setActiveOffers(Array.isArray(rawOffers) ? rawOffers : []);
-      setAllPhones(Array.isArray(rawPhones) ? rawPhones : []);
-    }).catch((err) => {
-      console.error('Failed to fetch promotional offers or phones', err);
-    });
+    // Load offers independently
+    getActiveOffers()
+      .then((offerRes) => {
+        if (!isMounted) return;
+        const rawOffers = offerRes.data?.data || offerRes.data || [];
+        setActiveOffers(Array.isArray(rawOffers) ? rawOffers : []);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch promotional offers', err);
+      });
+
+    // Load phones independently
+    phoneService
+      .getPhones()
+      .then((phoneRes) => {
+        if (!isMounted) return;
+        const rawPhones = phoneRes.data?.data || phoneRes.data || [];
+        setAllPhones(Array.isArray(rawPhones) ? rawPhones : []);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch phones', err);
+      });
 
     return () => {
       isMounted = false;
@@ -415,7 +472,8 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
         {/* Video Banner */}
         <div className="w-full max-w-[1500px] mx-auto px-2 sm:px-4">
           <div
-            className="relative w-full aspect-video flex items-center justify-center overflow-hidden cursor-pointer group rounded-lg sm:rounded-none"
+            ref={videoContainerRef}
+            className="relative w-full aspect-video flex items-center justify-center overflow-hidden cursor-pointer group rounded-lg sm:rounded-none bg-neutral-950"
             onClick={handleOpenSell}
             title="Click to Trade-In or Sell Your Phone"
           >
@@ -428,15 +486,20 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
             {/* Seamlessly cover bottom-right KlingAI watermark without touching the arrows */}
             <div className="absolute bottom-0 right-0 w-[18%] max-w-[240px] h-[11%] min-h-[36px] sm:min-h-[48px] bg-black z-20 pointer-events-none" />
 
-            <video
-              ref={tradeInVideoRef}
-              src={upgradeVideo}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.01]"
-            />
+            {shouldLoadVideo ? (
+              <video
+                ref={tradeInVideoRef}
+                src={upgradeVideo}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.01]"
+              />
+            ) : (
+              <div className="w-full h-full bg-neutral-950" />
+            )}
           </div>
         </div>
       </section>
@@ -488,11 +551,18 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
             {/* Left Side: About Image */}
             <div className="lg:col-span-5 relative group">
               <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl shadow-black/90 bg-neutral-950">
-                <img
-                  src={aboutImg}
-                  alt="About SK LABA PHONE"
-                  className="w-full h-full max-h-[360px] sm:max-h-[440px] object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
-                />
+                <picture>
+                  <source srcSet={aboutWebp} type="image/webp" />
+                  <img
+                    src={aboutImg}
+                    alt="About SK LABA PHONE"
+                    loading="lazy"
+                    decoding="async"
+                    width={1920}
+                    height={2200}
+                    className="w-full h-full max-h-[360px] sm:max-h-[440px] object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
+                  />
+                </picture>
               </div>
             </div>
 

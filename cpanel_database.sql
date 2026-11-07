@@ -379,29 +379,31 @@ INSERT INTO `customer_reviews` (`review_id`, `customer_name`, `rating`, `comment
 INSERT INTO `customer_reviews` (`review_id`, `customer_name`, `rating`, `comment`, `status`, `moderated_by_user_id`, `moderated_at`, `created_at`, `updated_at`) VALUES (6, 'pasindu', 4, 'test', 'Approved', 3, '2026-11-03 18:21:12', '2026-11-03 18:19:42', '2026-11-03 18:21:12');
 INSERT INTO `customer_reviews` (`review_id`, `customer_name`, `rating`, `comment`, `status`, `moderated_by_user_id`, `moderated_at`, `created_at`, `updated_at`) VALUES (7, 'sachini', 5, 'recommended', 'Approved', 3, '2026-11-03 19:11:06', '2026-11-03 18:55:59', '2026-11-03 19:11:06');
 
+-- Table structure for `giveaways`
+DROP TABLE IF EXISTS `giveaways`;
+CREATE TABLE `giveaways` (
+  `giveaway_id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `short_description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` longtext COLLATE utf8mb4_unicode_ci,
+  `thumbnail_url` longtext COLLATE utf8mb4_unicode_ci,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `winner_selection_date` datetime NOT NULL,
+  `status` enum('DRAFT','ONGOING','COMPLETED','CLOSED') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'DRAFT',
+  `is_manually_closed` tinyint(1) NOT NULL DEFAULT '0',
+  `winners_announced` tinyint(1) NOT NULL DEFAULT '0',
+  `winners_announced_at` datetime DEFAULT NULL,
+  `winners` json DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`giveaway_id`),
+  KEY `idx_giveaway_status` (`status`),
+  KEY `idx_giveaway_dates` (`start_date`,`end_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table `giveaways` (1 row)
+INSERT INTO `giveaways` (`giveaway_id`, `title`, `short_description`, `description`, `thumbnail_url`, `start_date`, `end_date`, `winner_selection_date`, `status`, `is_manually_closed`, `winners_announced`, `winners_announced_at`, `winners`) VALUES (1, 'Win a Brand New Samsung Galaxy S24 Ultra (512GB)!', 'Celebrate with SK Laba Phone! Enter our official promotional giveaway for your chance to win a flagship Samsung Galaxy S24 Ultra with free delivery direct from South Korea.', 'We are thrilled to give away a **Brand New Samsung Galaxy S24 Ultra (512GB, Titanium Gray)** to one lucky winner!\n\n#### How to Participate:\n• Step 1: Follow SK Laba Phone on Facebook and TikTok\n• Step 2: Like, share, and tag two friends on our official giveaway post\n• Step 3: Check your email on the winner announcement date\n\n#### Official Terms & Prize Delivery:\n1. 100% authentic South Korean stock with full manufacturer warranty\n2. Free insured delivery or store pickup in Seoul\n3. The winner will be notified directly via email with official shop contact details', 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf', '2026-11-01 00:00:00', '2026-11-20 23:59:59', '2026-11-21 12:00:00', 'ONGOING', 0, 0, NULL, NULL);
+
 SET FOREIGN_KEY_CHECKS = 1;
 SET SQL_MODE=@OLD_SQL_MODE;
-
-
--- ============================================================
--- GIVEAWAY MANAGEMENT TABLE
--- ============================================================
-CREATE TABLE IF NOT EXISTS giveaways (
-    giveaway_id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    short_description VARCHAR(500) NULL,
-    description LONGTEXT NULL,
-    thumbnail_url LONGTEXT NULL,
-    start_date DATETIME NOT NULL,
-    end_date DATETIME NOT NULL,
-    winner_selection_date DATETIME NOT NULL,
-    status ENUM('DRAFT', 'ONGOING', 'COMPLETED', 'CLOSED') NOT NULL DEFAULT 'DRAFT',
-    is_manually_closed BOOLEAN NOT NULL DEFAULT FALSE,
-    winners_announced BOOLEAN NOT NULL DEFAULT FALSE,
-    winners_announced_at DATETIME NULL,
-    winners JSON NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_giveaway_status (status),
-    INDEX idx_giveaway_dates (start_date, end_date)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

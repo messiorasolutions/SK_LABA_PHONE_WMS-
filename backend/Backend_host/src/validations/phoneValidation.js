@@ -31,6 +31,7 @@ function validateCreatePhone(req, res, next) {
         installment_plan_ids,
         status,
         is_archived,
+        is_new_arrival,
         photos
     } = req.body;
 
@@ -148,6 +149,19 @@ function validateCreatePhone(req, res, next) {
         }
     }
 
+    if (is_new_arrival !== undefined && is_new_arrival !== null) {
+        if (typeof is_new_arrival !== 'boolean' && is_new_arrival !== 0 && is_new_arrival !== 1 && is_new_arrival !== 'true' && is_new_arrival !== 'false') {
+            return next(new AppError('is_new_arrival must be a boolean.', 400));
+        }
+    }
+
+    // is_new_arrival
+    if (is_new_arrival !== undefined && is_new_arrival !== null) {
+        if (typeof is_new_arrival !== 'boolean' && is_new_arrival !== 0 && is_new_arrival !== 1 && is_new_arrival !== 'true' && is_new_arrival !== 'false') {
+            return next(new AppError('is_new_arrival must be a boolean.', 400));
+        }
+    }
+
     next();
 }
 
@@ -183,6 +197,7 @@ function validateUpdatePhone(req, res, next) {
         installment_plan_ids,
         status,
         is_archived,
+        is_new_arrival,
         photos
     } = req.body;
 
@@ -283,6 +298,12 @@ function validateUpdatePhone(req, res, next) {
     if (is_archived !== undefined && is_archived !== null) {
         if (typeof is_archived !== 'boolean' && is_archived !== 0 && is_archived !== 1 && is_archived !== 'true' && is_archived !== 'false' && is_archived !== 'yes' && is_archived !== 'no') {
             return next(new AppError('is_archived must be a boolean or yes/no.', 400));
+        }
+    }
+
+    if (is_new_arrival !== undefined && is_new_arrival !== null) {
+        if (typeof is_new_arrival !== 'boolean' && is_new_arrival !== 0 && is_new_arrival !== 1 && is_new_arrival !== 'true' && is_new_arrival !== 'false') {
+            return next(new AppError('is_new_arrival must be a boolean.', 400));
         }
     }
 

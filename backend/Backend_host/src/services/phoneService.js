@@ -77,6 +77,7 @@ class PhoneService {
             installment_plan_ids: Array.isArray(data.installment_plan_ids) ? data.installment_plan_ids : null,
             status,
             is_archived: isArchived ? 1 : 0,
+            is_new_arrival: Boolean(data.is_new_arrival === true || data.is_new_arrival === 1 || data.is_new_arrival === 'true') ? 1 : 0,
             photos: Array.isArray(data.photos) ? data.photos : null
         };
 
@@ -530,6 +531,9 @@ class PhoneService {
             installment_plan_ids: data.installment_plan_ids !== undefined ? data.installment_plan_ids : existing.installment_plan_ids,
             status: nextStatus,
             is_archived: nextIsArchived,
+            is_new_arrival: data.is_new_arrival !== undefined
+                ? (Boolean(data.is_new_arrival === true || data.is_new_arrival === 1 || data.is_new_arrival === 'true') ? 1 : 0)
+                : (existing.is_new_arrival ? 1 : 0),
             photos: data.photos !== undefined ? data.photos : existing.photos
         };
 

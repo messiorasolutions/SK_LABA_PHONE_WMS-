@@ -259,10 +259,6 @@ CREATE TABLE IF NOT EXISTS customer_reviews (
     INDEX idx_cr_moderated_by (moderated_by_user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-SET FOREIGN_KEY_CHECKS = 1;
-
-
-
 -- ============================================================
 -- GIVEAWAY MANAGEMENT TABLE
 -- ============================================================
@@ -285,3 +281,5 @@ CREATE TABLE IF NOT EXISTS giveaways (
     INDEX idx_giveaway_status (status),
     INDEX idx_giveaway_dates (start_date, end_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+SET FOREIGN_KEY_CHECKS = 1;

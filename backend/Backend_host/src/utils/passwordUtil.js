@@ -1,11 +1,13 @@
-const argon2 = require('argon2');
+const bcrypt = require('bcryptjs');
 
 /**
- * Utility for hashing and verifying passwords using Argon2id.
+ * Utility for hashing and verifying passwords using bcryptjs.
+ * Pure JavaScript implementation with zero native C++ dependencies,
+ * making it 100% compatible with cPanel / CloudLinux / shared hosting.
  */
 class PasswordUtil {
     /**
-     * Hash a plain text password with Argon2id.
+     * Hash a plain text password with bcryptjs.
      * @param {string} password - The plain text password
      * @returns {Promise<string>} The hashed password
      */
@@ -13,17 +15,13 @@ class PasswordUtil {
         if (!password || typeof password !== 'string') {
             throw new Error('Password must be a non-empty string');
         }
-        return await argon2.hash(password, {
-            type: argon2.argon2id,
-            memoryCost: 2 ** 16, // 64 MB
-            timeCost: 3,         // 3 iterations
-            parallelism: 1
-        });
+        const salt = await bcrypt.genSalt(10);
+        return await bcrypt.hash(password, salt);
     }
 
     /**
-     * Verify a plain text password against an Argon2id hash.
-     * @param {string} hash - The stored Argon2id hash
+     * Verify a plain text password against a stored hash.
+     * @param {string} hash - The stored hash
      * @param {string} password - The candidate plain text password
      * @returns {Promise<boolean>} True if match, false otherwise
      */
@@ -32,7 +30,10 @@ class PasswordUtil {
             return false;
         }
         try {
-            return await argon2.verify(hash, password);
+            if (hash.startsWith('$2a$') || hash.startsWith('$2b$') || hash.startsWith('$2y$')) {
+                return await bcrypt.compare(password, hash);
+            }
+            return false;
         } catch (error) {
             return false;
         }

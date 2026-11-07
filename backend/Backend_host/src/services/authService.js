@@ -6,8 +6,8 @@ const defaultPool = require('../config/db');
 const PasswordUtil = require('../utils/passwordUtil');
 const AppError = require('../utils/customError');
 
-// Constant dummy hash to mitigate timing attacks on nonexistent users
-const DUMMY_HASH = '$argon2id$v=19$m=65536,t=3,p=1$c29tZXNhbHR2YWx1ZQ$qBvP7zC5t0v7w6Y8a2E4mO+F9+WzV91N3N1C9V6r12Y';
+// Constant dummy hash to mitigate timing attacks on nonexistent users (bcrypt)
+const DUMMY_HASH = '$2b$10$e8Ju02Z8j1tVz0nJ0jW2E.o8kH7qfC2oD3YxQp1s1qW5tP6u5p4m.';
 const GENERIC_FORGOT_PASSWORD_MSG = 'If an account matches that email, a password reset link has been sent.';
 const GENERIC_INVALID_TOKEN_MSG = 'Invalid or expired password reset token.';
 

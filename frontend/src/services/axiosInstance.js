@@ -6,7 +6,10 @@
 
 import axios from 'axios';
 
-const isHostedDomain = typeof window !== 'undefined' && window.location.hostname.includes('sklabaphone.com');
+const isHostedDomain =
+  typeof window !== 'undefined' &&
+  (window.location.hostname.includes('sklabaphone.com') ||
+    (!['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.hostname !== ''));
 
 const rawBaseUrl = isHostedDomain
   ? 'https://api.sklabaphone.com'

@@ -6,11 +6,12 @@ import {
   AlertCircle,
   User,
 } from 'lucide-react';
-import { STORE_INFO } from '../constants/siteConfig';
+import { useShopInfo } from '../context/ShopInfoContext';
 import { createInquiry } from '../services/inquiryService';
-import whatsappIcon from '../assets/images/whatsappicon.avif';
+import whatsappIcon from '../assets/icons/whatsappicon.png';
 
 export default function ContactPage() {
+  const { shopInfo, getWhatsAppUrl } = useShopInfo();
   const [formData, setFormData] = useState({
     name: '',
     phone_number: '',
@@ -87,13 +88,10 @@ export default function ContactPage() {
   };
 
   const handleWhatsApp = () => {
-    const cleanNumber = (STORE_INFO.whatsapp || '').replace(/\D/g, '');
-    const text = encodeURIComponent(
-      `Hello SK LABA PHONE! I would like to inquire about your smartphones and services.\nName: ${
-        formData.name || 'Customer'
-      }`
-    );
-    window.open(`https://wa.me/${cleanNumber}?text=${text}`, '_blank');
+    const text = `Hello SK LABA PHONE! I would like to inquire about your smartphones and services.\nName: ${
+      formData.name || 'Customer'
+    }`;
+    window.open(getWhatsAppUrl(text), '_blank');
   };
 
   return (
@@ -119,14 +117,14 @@ export default function ContactPage() {
             <button
               type="button"
               onClick={handleWhatsApp}
-              className="px-3 py-1.5 sm:py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:scale-105"
+              className="px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-white text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:scale-105"
             >
               <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4 object-contain" />
-              <span>WhatsApp Direct</span>
+              <span>WhatsApp</span>
             </button>
 
             <a
-              href={`tel:${STORE_INFO.phone}`}
+              href={`tel:${shopInfo.phone}`}
               className="px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-white text-xs font-normal flex items-center gap-2 transition-all shadow-sm"
             >
               <Phone className="w-4 h-4 text-sky-400" />

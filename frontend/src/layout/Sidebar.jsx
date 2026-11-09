@@ -14,6 +14,7 @@ import {
   Star,
   BellRing,
   Gift,
+  Store,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -48,6 +49,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const isBackInStockActive = location.pathname.startsWith('/back-in-stock') || location.pathname.startsWith('/dashboard/back-in-stock');
   const isReviewsActive = location.pathname.startsWith('/reviews');
   const isGiveawaysActive = location.pathname.startsWith('/giveaways');
+  const isShopInfoActive = location.pathname.startsWith('/shop-information') || location.pathname.startsWith('/shop-info');
 
   const displayName = user?.display_name || user?.name || 'Admin';
   const userInitial = displayName.charAt(0).toUpperCase();
@@ -370,6 +372,31 @@ export default function Sidebar({ isOpen, onClose }) {
                 }`}
               />
               <span className="truncate">Giveaway Management</span>
+            </NavLink>
+
+            {/* 11. Shop Information */}
+            <NavLink
+              to="/shop-information"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
+                  isShopInfoActive
+                    ? 'bg-slate-100/90 dark:bg-slate-800/70 text-slate-900 dark:text-white shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
+                }`
+              }
+            >
+              {isShopInfoActive && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-rose-600 to-neutral-900 rounded-r-full" />
+              )}
+              <Store
+                className={`w-4 h-4 shrink-0 transition-colors ${
+                  isShopInfoActive
+                    ? 'text-rose-600 dark:text-rose-400'
+                    : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                }`}
+              />
+              <span className="truncate">Shop Information</span>
             </NavLink>
           </nav>
         </div>

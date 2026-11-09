@@ -16,24 +16,29 @@ function createSessionMiddleware() {
     if (isTest || process.env.SESSION_STORE === 'memory') {
         store = new session.MemoryStore();
     } else {
-        store = new MySQLStore({
-            clearExpired: true,
-            checkExpirationInterval: 900000, // Check every 15 minutes
-            expiration: Number(process.env.SESSION_MAX_AGE_MS) || (24 * 60 * 60 * 1000), // 24 hours
-            createDatabaseTable: true,
-            schema: {
-                tableName: 'sessions',
-                columnNames: {
-                    session_id: 'session_id',
-                    expires: 'expires',
-                    data: 'data'
+        try {
+            store = new MySQLStore({
+                clearExpired: true,
+                checkExpirationInterval: 900000, // Check every 15 minutes
+                expiration: Number(process.env.SESSION_MAX_AGE_MS) || (24 * 60 * 60 * 1000), // 24 hours
+                createDatabaseTable: false, // Sessions table is pre-created by SQL schema, avoid blocking DDL queries
+                schema: {
+                    tableName: 'sessions',
+                    columnNames: {
+                        session_id: 'session_id',
+                        expires: 'expires',
+                        data: 'data'
+                    }
                 }
-            }
-        }, pool);
+            }, pool);
 
-        store.on('error', (err) => {
-            console.error('Session store error:', err.message);
-        });
+            store.on('error', (err) => {
+                console.error('Session store error (non-fatal):', err.message);
+            });
+        } catch (storeErr) {
+            console.error('MySQLStore initialization error, fallback to MemoryStore:', storeErr.message);
+            store = new session.MemoryStore();
+        }
     }
 
     const cookieName = process.env.SESSION_COOKIE_NAME || 'sk_laba_sid';

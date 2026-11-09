@@ -4,17 +4,14 @@
 // ============================================================
 
 export const STORE_INFO = {
-  name: import.meta.env.VITE_STORE_NAME || 'SK LABA PHONE',
+  name: 'SK LABA PHONE',
   country: 'South Korea',
   tagline: 'ලාබ ෆෝන්',
-  phone: import.meta.env.VITE_STORE_PHONE || '+82 10-5892-7482',
-  whatsapp:
-    import.meta.env.VITE_STORE_WHATSAPP ||
-    import.meta.env.VITE_WHATSAPP_NUMBER ||
-    '+821058927482',
+  phone: '+82 10-5892-7482',
+  whatsapp: '+82 10-5892-7482', // Managed dynamically via Shop Information in Admin Dashboard
   address: 'Dongdaemun-gu, Seoul, South Korea',
   openingHours: 'Mon - Sun: 10:00 AM - 9:00 PM (KST)',
-  email: import.meta.env.VITE_STORE_EMAIL || 'contact@sklabaphone.com',
+  email: 'contact@sklabaphone.com',
 };
 
 export const NAV_LINKS = [

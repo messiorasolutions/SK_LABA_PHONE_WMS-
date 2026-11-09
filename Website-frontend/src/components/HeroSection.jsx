@@ -28,7 +28,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-theme-bg min-h-[500px] sm:min-h-[580px] lg:min-h-[700px] flex items-center pt-24 sm:pt-28 md:pt-32 pb-10 sm:pb-12 md:pb-16">
+    <section className="relative overflow-hidden bg-theme-bg min-h-[580px] sm:min-h-[580px] lg:min-h-[700px] flex items-center pt-24 sm:pt-28 md:pt-32 pb-14 sm:pb-12 md:pb-16">
       {/* Background Hero Image with Phones, Glowing Ring & Atmosphere */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <picture>
@@ -40,7 +40,7 @@ export default function HeroSection() {
             decoding="sync"
             width={1983}
             height={793}
-            className="w-full h-full object-cover object-[75%_center] sm:object-right lg:object-center opacity-85 sm:opacity-90 lg:opacity-100"
+            className="w-full h-full object-cover object-[80%_35%] sm:object-right lg:object-center opacity-85 sm:opacity-90 lg:opacity-100"
           />
         </picture>
         {/* Soft dark gradient overlays on the left to ensure crisp text contrast */}
@@ -59,13 +59,13 @@ export default function HeroSection() {
           </div>
 
           {/* Main Title: "Find Your Next Smartphone" - Clean white, non-bold, official */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-white tracking-tight leading-[1.15] sm:leading-[1.12] mb-6 sm:mb-8">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-white tracking-tight leading-[1.15] sm:leading-[1.12] mb-4 sm:mb-8">
             Find Your Next <br />
             Smartphone
           </h1>
 
-          {/* Action CTA Buttons */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          {/* Action CTA Buttons (Moved down on mobile to let the phone banner show clearly) */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mt-20 sm:mt-6">
             {/* Primary Action Button */}
             <button
               type="button"

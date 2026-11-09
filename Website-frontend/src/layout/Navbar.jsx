@@ -10,9 +10,17 @@ import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
 export default function Navbar({ onOpenFavorites, onOpenSell }) {
   const dispatch = useDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = React.useState(false);
+  const mobileSearchInputRef = React.useRef(null);
   const { favoriteIds } = useFavoritesAndCompare();
 
   const { activeTab, searchQuery } = useSelector((state) => state.hero);
+
+  useEffect(() => {
+    if (mobileSearchOpen && mobileSearchInputRef.current) {
+      mobileSearchInputRef.current.focus();
+    }
+  }, [mobileSearchOpen]);
 
   useEffect(() => {
     const handleHash = () => {
@@ -200,6 +208,26 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
               </div>
             </div>
 
+            {/* Mobile Search Button (Left to the Favorite Icon) */}
+            <button
+              type="button"
+              onClick={() => {
+                setMobileSearchOpen((prev) => !prev);
+                if (!mobileSearchOpen && mobileMenuOpen) {
+                  setMobileMenuOpen(false);
+                }
+              }}
+              className={`sm:hidden p-2 rounded-full transition-colors cursor-pointer ${
+                mobileSearchOpen
+                  ? 'text-white bg-white/10 ring-1 ring-white/20'
+                  : 'text-theme-textSecondary hover:text-white hover:bg-white/5'
+              }`}
+              title="Search smartphones"
+              aria-label="Toggle Search Bar"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+
             <button
               type="button"
               onClick={handleOpenFavorites}
@@ -217,7 +245,11 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
 
             <button
               type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => {
+                const nextState = !mobileMenuOpen;
+                setMobileMenuOpen(nextState);
+                if (nextState) setMobileSearchOpen(false);
+              }}
               className="md:hidden p-2 text-theme-textSecondary hover:text-theme-textPrimary cursor-pointer"
               aria-label="Toggle Navigation Menu"
             >
@@ -226,24 +258,47 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
           </div>
         </div>
 
-        <div className="sm:hidden pb-3">
-          <div className="flex items-center bg-theme-input/80 backdrop-blur-md border border-theme-borderMedium rounded-full px-3.5 py-1.5 text-sm text-theme-textSecondary">
-            <Search className="w-4 h-4 text-theme-textMuted mr-2.5 shrink-0" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                dispatch(setSearchQuery(e.target.value));
-                if (activeTab !== 'Smartphones' && e.target.value.trim().length > 0) {
-                  dispatch(setActiveTab('Smartphones'));
-                  window.location.hash = '#smartphones';
-                }
-              }}
-              placeholder="Search smartphones, brands..."
-              className="bg-transparent border-none outline-none text-base text-theme-textPrimary placeholder-theme-textMuted w-full"
-            />
+        {/* Mobile Search Bar - Displayed when Mobile Search Icon is Clicked */}
+        {mobileSearchOpen && (
+          <div className="sm:hidden pb-3 pt-0.5 animate-fadeIn">
+            <div className="flex items-center bg-theme-input/90 backdrop-blur-md border border-theme-borderMedium focus-within:border-theme-accent focus-within:ring-1 focus-within:ring-theme-accent rounded-full px-3.5 py-2 text-sm text-theme-textSecondary shadow-lg">
+              <Search className="w-4 h-4 text-theme-textMuted mr-2.5 shrink-0" />
+              <input
+                ref={mobileSearchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  dispatch(setSearchQuery(e.target.value));
+                  if (activeTab !== 'Smartphones' && e.target.value.trim().length > 0) {
+                    dispatch(setActiveTab('Smartphones'));
+                    window.location.hash = '#smartphones';
+                  }
+                }}
+                placeholder="Search smartphones, brands..."
+                className="bg-transparent border-none outline-none text-base text-theme-textPrimary placeholder-theme-textMuted w-full"
+              />
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onClick={() => dispatch(setSearchQuery(''))}
+                  className="p-1 text-theme-textMuted hover:text-white cursor-pointer ml-1"
+                  title="Clear search"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setMobileSearchOpen(false)}
+                  className="p-1 text-theme-textMuted hover:text-white cursor-pointer ml-1"
+                  title="Close search"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {mobileMenuOpen && (
           <div className="md:hidden py-4 bg-theme-surface/95 backdrop-blur-lg border border-theme-border rounded-2xl px-3 my-2 space-y-1 shadow-2xl">

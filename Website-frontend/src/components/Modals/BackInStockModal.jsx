@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { X, AlertCircle, Bell, BellRing, CheckCircle2 } from 'lucide-react';
 import { createBackInStockRequest } from '../../services/backInStockService';
-import { STORE_INFO } from '../../constants/siteConfig';
+import { useShopInfo } from '../../context/ShopInfoContext';
 
 export default function BackInStockModal({ phone, onClose }) {
+  const { getWhatsAppUrl } = useShopInfo();
   const [formData, setFormData] = useState({
     customer_name: '',
     phone_number: '',
@@ -86,10 +87,9 @@ export default function BackInStockModal({ phone, onClose }) {
     }
   };
 
-  const whatsappPhone = STORE_INFO.whatsapp || '+821058927482';
-  const whatsappUrl = `https://wa.me/${whatsappPhone.replace(/\D/g, '')}?text=${encodeURIComponent(
+  const whatsappUrl = getWhatsAppUrl(
     `Hi SK LABA PHONE, I would like to inquire about stock for ${phone?.name || 'this phone'}.`
-  )}`;
+  );
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/75 backdrop-blur-sm transition-opacity duration-300">

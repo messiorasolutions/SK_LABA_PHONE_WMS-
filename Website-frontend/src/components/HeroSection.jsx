@@ -36,7 +36,7 @@ export default function HeroSection() {
           <img
             src={mainBannerImg}
             alt={HERO_CONTENT.headlineAccent}
-            fetchPriority="high"
+            fetchpriority="high"
             decoding="sync"
             width={1983}
             height={793}

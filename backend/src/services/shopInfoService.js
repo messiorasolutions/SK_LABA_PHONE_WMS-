@@ -39,9 +39,14 @@ class ShopInfoService {
         }
 
         if (sanitized.whatsapp_number) {
-            const digits = sanitized.whatsapp_number.replace(/\D/g, '');
+            let num = sanitized.whatsapp_number.trim();
+            const digits = num.replace(/\D/g, '');
             if (digits.length < 7 || digits.length > 18) {
-                throw new AppError('WhatsApp number must contain between 7 and 18 digits (e.g. +82 10-5892-7482)', 400);
+                throw new AppError('WhatsApp number must contain between 7 and 18 digits (e.g. +94 77 860 2219)', 400);
+            }
+            // Auto-format local Sri Lankan numbers (07xxxxxxxx -> +94 7x xxx xxxx)
+            if (digits.length === 10 && digits.startsWith('07')) {
+                sanitized.whatsapp_number = `+94 ${digits.slice(1, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
             }
         }
 

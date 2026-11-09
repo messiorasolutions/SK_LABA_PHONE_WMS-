@@ -10,6 +10,24 @@ const ShopInfoContext = createContext({
   getWhatsAppUrl: () => '',
 });
 
+export function cleanWhatsAppNumber(rawNumber) {
+  if (!rawNumber) return '94778602219';
+  let digits = String(rawNumber).replace(/[^0-9]/g, '');
+
+  if (digits.startsWith('00')) {
+    digits = digits.slice(2);
+  }
+
+  // If user entered local Sri Lankan number with leading 0 (e.g. 0778602219 -> 94778602219)
+  if (digits.length === 10 && digits.startsWith('07')) {
+    digits = '94' + digits.slice(1);
+  } else if (digits.length === 9 && digits.startsWith('7')) {
+    digits = '94' + digits;
+  }
+
+  return digits;
+}
+
 export function ShopInfoProvider({ children }) {
   const [shopInfo, setShopInfo] = useState({
     name: STORE_INFO.name || 'SK LABA PHONE',
@@ -61,11 +79,20 @@ export function ShopInfoProvider({ children }) {
     loadInfo();
   }, [loadInfo]);
 
-  const getWhatsAppUrl = useCallback((customText = 'Hello SK LABA PHONE!') => {
-    const rawNumber = shopInfo.whatsapp || STORE_INFO.whatsapp || '+82 10-5892-7482';
-    const cleanNumber = String(rawNumber).replace(/[^0-9]/g, '');
+  const getWhatsAppUrl = useCallback((customText = 'Hello! I found your business through your website and would like to know more about your services. Could you please provide me with some information?') => {
+    const rawNumber = shopInfo.whatsapp || STORE_INFO.whatsapp || '+94 77 860 2219';
+    const cleanNumber = cleanWhatsAppNumber(rawNumber);
     const encodedText = encodeURIComponent(customText);
-    return `https://wa.me/${cleanNumber}${encodedText ? `?text=${encodedText}` : ''}`;
+
+    const isMobile = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      return `https://wa.me/${cleanNumber}${encodedText ? `?text=${encodedText}` : ''}`;
+    }
+
+    // On Desktop, web.whatsapp.com reliably opens the chat and pre-fills the message box,
+    // avoiding the known Windows WhatsApp Desktop app bug where URL query text gets dropped.
+    return `https://web.whatsapp.com/send?phone=${cleanNumber}${encodedText ? `&text=${encodedText}` : ''}`;
   }, [shopInfo.whatsapp]);
 
   return (
@@ -91,9 +118,13 @@ export function useShopInfo() {
       loading: false,
       error: null,
       refreshShopInfo: () => {},
-      getWhatsAppUrl: (text = 'Hello SK LABA PHONE!') => {
-        const clean = String(STORE_INFO.whatsapp || '').replace(/[^0-9]/g, '');
-        return `https://wa.me/${clean}?text=${encodeURIComponent(text)}`;
+      getWhatsAppUrl: (text = 'Hello! I found your business through your website and would like to know more about your services. Could you please provide me with some information?') => {
+        const clean = cleanWhatsAppNumber(STORE_INFO.whatsapp);
+        const encoded = encodeURIComponent(text);
+        const isMobile = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        return isMobile
+          ? `https://wa.me/${clean}?text=${encoded}`
+          : `https://web.whatsapp.com/send?phone=${clean}&text=${encoded}`;
       },
     };
   }

@@ -8,6 +8,7 @@ const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const VALID_RESERVATION_STATUSES = [
     'Pending',
     'Confirmed',
+    'Payment Received',
     'Ready for Collection',
     'Collected',
     'Cancelled',
@@ -178,6 +179,23 @@ function validateCreateReservation(req, res, next) {
         cleanNote = noteStr;
     }
 
+    // 8. Delivery Details (Optional)
+    let cleanDelivery = null;
+    const rawDelivery = req.body.delivery_details;
+    if (rawDelivery && typeof rawDelivery === 'object' && !Array.isArray(rawDelivery)) {
+        cleanDelivery = {
+            address: rawDelivery.address ? String(rawDelivery.address).trim() : null,
+            city: rawDelivery.city ? String(rawDelivery.city).trim() : null,
+            postal_code: rawDelivery.postal_code ? String(rawDelivery.postal_code).trim() : null,
+            delivery_phone: rawDelivery.delivery_phone ? String(rawDelivery.delivery_phone).trim() : null,
+            delivery_notes: rawDelivery.delivery_notes ? String(rawDelivery.delivery_notes).trim() : null
+        };
+        // Only keep if at least one field has data
+        if (!Object.values(cleanDelivery).some(v => v !== null && v !== '')) {
+            cleanDelivery = null;
+        }
+    }
+
     // Mass-assignment protection: explicitly construct the validated payload
     req.body = {
         customer_name: cleanCustomerName,
@@ -185,6 +203,7 @@ function validateCreateReservation(req, res, next) {
         email: cleanEmail,
         phone_id: cleanPhoneId,
         selected_options: cleanOptions,
+        delivery_details: cleanDelivery,
         preferred_collection_date: cleanDate,
         customer_note: cleanNote
     };

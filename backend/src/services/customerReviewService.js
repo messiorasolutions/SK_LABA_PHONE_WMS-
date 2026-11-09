@@ -79,6 +79,7 @@ class CustomerReviewService {
         page = 1,
         limit = 20,
         status = 'ALL',
+        rating = null,
         search = null,
         sortBy = 'created_at',
         sortOrder = 'DESC'
@@ -90,6 +91,7 @@ class CustomerReviewService {
             page: safePage,
             limit: safeLimit,
             status,
+            rating,
             search,
             sortBy,
             sortOrder
@@ -97,6 +99,7 @@ class CustomerReviewService {
 
         const total = await this.customerReviewRepository.countReviews({
             status,
+            rating,
             search
         });
         const totalPages = Math.ceil(total / safeLimit) || 1;

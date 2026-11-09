@@ -141,6 +141,7 @@ class CustomerReviewRepository {
         page = 1,
         limit = 20,
         status = null,
+        rating = null,
         search = null,
         sortBy = 'created_at',
         sortOrder = 'DESC'
@@ -173,6 +174,11 @@ class CustomerReviewRepository {
             values.push(status);
         }
 
+        if (rating !== null && rating !== undefined && rating !== '') {
+            query += ' AND r.rating = ?';
+            values.push(Number(rating));
+        }
+
         if (search && search.trim().length > 0) {
             query += ' AND (r.customer_name LIKE ? OR r.comment LIKE ?)';
             const keyword = `%${search.trim()}%`;
@@ -202,13 +208,18 @@ class CustomerReviewRepository {
      * @param {Object} filters
      * @returns {Promise<number>}
      */
-    async countReviews({ status = null, search = null } = {}) {
+    async countReviews({ status = null, rating = null, search = null } = {}) {
         let query = 'SELECT COUNT(*) AS total FROM customer_reviews r WHERE 1=1';
         const values = [];
 
         if (status && status !== 'ALL') {
             query += ' AND r.status = ?';
             values.push(status);
+        }
+
+        if (rating !== null && rating !== undefined && rating !== '') {
+            query += ' AND r.rating = ?';
+            values.push(Number(rating));
         }
 
         if (search && search.trim().length > 0) {

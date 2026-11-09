@@ -50,6 +50,7 @@ class ReservationRepository {
             email: row.email || null,
             phone_id: row.phone_id,
             selected_options: this._parseJson(row.selected_options),
+            delivery_details: this._parseJson(row.delivery_details),
             preferred_collection_date: this._formatDate(row.preferred_collection_date),
             customer_note: row.customer_note || null,
             status: row.status,
@@ -93,6 +94,7 @@ class ReservationRepository {
             email = null,
             phone_id,
             selected_options = null,
+            delivery_details = null,
             preferred_collection_date,
             customer_note = null
         },
@@ -105,10 +107,11 @@ class ReservationRepository {
                 email,
                 phone_id,
                 selected_options,
+                delivery_details,
                 preferred_collection_date,
                 customer_note,
                 status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending')
         `;
 
         const values = [
@@ -117,6 +120,7 @@ class ReservationRepository {
             email ? email.trim() : null,
             Number(phone_id),
             selected_options ? JSON.stringify(selected_options) : null,
+            delivery_details ? JSON.stringify(delivery_details) : null,
             preferred_collection_date,
             customer_note ? customer_note.trim() : null
         ];
@@ -137,6 +141,7 @@ class ReservationRepository {
                 r.email,
                 r.phone_id,
                 r.selected_options,
+                r.delivery_details,
                 r.preferred_collection_date,
                 r.customer_note,
                 r.status,
@@ -239,6 +244,7 @@ class ReservationRepository {
                 r.email,
                 r.phone_id,
                 r.selected_options,
+                r.delivery_details,
                 r.preferred_collection_date,
                 r.customer_note,
                 r.status,

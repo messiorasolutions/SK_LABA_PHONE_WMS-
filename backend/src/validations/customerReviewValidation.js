@@ -121,7 +121,7 @@ function validateListApprovedReviews(req, res, next) {
  * Validates dashboard reviews query params (GET /api/admin/reviews)
  */
 function validateListAdminReviews(req, res, next) {
-    const { page, limit, status, search, sort_by, sort_order } = req.query;
+    const { page, limit, status, rating, search, sort_by, sort_order } = req.query;
 
     let cleanPage = 1;
     if (page !== undefined && page !== null && page !== '') {
@@ -169,9 +169,18 @@ function validateListAdminReviews(req, res, next) {
         cleanSortOrder = upperOrder;
     }
 
+    let cleanRating = null;
+    if (rating !== undefined && rating !== null && String(rating).trim().length > 0) {
+        const numRating = Number(rating);
+        if (!isNaN(numRating) && numRating >= 1 && numRating <= 5) {
+            cleanRating = numRating;
+        }
+    }
+
     req.query.page = cleanPage;
     req.query.limit = cleanLimit;
     req.query.status = cleanStatus;
+    req.query.rating = cleanRating;
     req.query.search = search && typeof search === 'string' ? search.trim() : null;
     req.query.sort_by = cleanSortBy;
     req.query.sort_order = cleanSortOrder;

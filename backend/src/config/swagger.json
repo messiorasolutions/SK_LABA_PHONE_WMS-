@@ -2700,6 +2700,7 @@
               "enum": [
                 "Pending",
                 "Confirmed",
+                "Payment Received",
                 "Ready for Collection",
                 "Collected",
                 "Cancelled",
@@ -2825,7 +2826,7 @@
           "Reservations"
         ],
         "summary": "Update Reservation Status (Admin & Staff, ST-07)",
-        "description": "Update reservation status. Allowed values: Pending, Confirmed, Ready for Collection, Collected, Cancelled, Expired. Does NOT mutate inventory stock.",
+        "description": "Update reservation status. Allowed values: Pending, Confirmed, Payment Received, Ready for Collection, Collected, Cancelled, Expired. Does NOT mutate inventory stock.",
         "parameters": [
           {
             "name": "id",

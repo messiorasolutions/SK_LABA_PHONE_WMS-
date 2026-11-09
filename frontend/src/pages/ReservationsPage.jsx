@@ -27,6 +27,11 @@ const STATUS_CONFIG = {
     dot: 'bg-sky-500',
     meaning: 'Shop staff confirmed reservation with customer.',
   },
+  'Payment Received': {
+    label: 'Payment Received',
+    dot: 'bg-teal-500',
+    meaning: 'Customer payment has been successfully received.',
+  },
   'Ready for Collection': {
     label: 'Ready for Collection',
     dot: 'bg-indigo-500',
@@ -52,6 +57,7 @@ const STATUS_CONFIG = {
 const ALL_STATUSES = [
   'Pending',
   'Confirmed',
+  'Payment Received',
   'Ready for Collection',
   'Collected',
   'Cancelled',

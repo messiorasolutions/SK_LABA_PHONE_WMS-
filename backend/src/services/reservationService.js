@@ -25,6 +25,7 @@ class ReservationService {
         email = null,
         phone_id,
         selected_options = null,
+        delivery_details = null,
         preferred_collection_date,
         customer_note = null
     }) {
@@ -111,6 +112,7 @@ class ReservationService {
             email,
             phone_id,
             selected_options,
+            delivery_details,
             preferred_collection_date,
             customer_note
         });

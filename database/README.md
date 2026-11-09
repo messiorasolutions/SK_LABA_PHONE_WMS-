@@ -194,7 +194,7 @@ CREATE TABLE reservations (
     selected_options JSON NULL,
     preferred_collection_date DATE NOT NULL,
     customer_note TEXT NULL,
-    status ENUM('Pending', 'Confirmed', 'Ready for Collection', 'Collected', 'Cancelled', 'Expired') NOT NULL DEFAULT 'Pending',
+    status ENUM('Pending', 'Confirmed', 'Payment Received', 'Ready for Collection', 'Collected', 'Cancelled', 'Expired') NOT NULL DEFAULT 'Pending',
     assigned_to_user_id BIGINT UNSIGNED NULL,
     updated_by_user_id BIGINT UNSIGNED NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

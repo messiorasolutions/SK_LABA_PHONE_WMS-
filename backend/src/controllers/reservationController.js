@@ -17,6 +17,7 @@ class ReservationController {
                 email,
                 phone_id,
                 selected_options,
+                delivery_details,
                 preferred_collection_date,
                 customer_note
             } = req.body;
@@ -27,6 +28,7 @@ class ReservationController {
                 email,
                 phone_id,
                 selected_options,
+                delivery_details,
                 preferred_collection_date,
                 customer_note
             });

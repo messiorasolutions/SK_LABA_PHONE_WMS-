@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { X, AlertCircle, HardDrive, Palette, Calendar, Phone, Mail, User, FileText } from 'lucide-react';
+import {
+  X,
+  AlertCircle,
+  HardDrive,
+  Palette,
+  Calendar,
+  Phone,
+  Mail,
+  User,
+  FileText,
+  Truck,
+  MapPin,
+  Building,
+} from 'lucide-react';
 import { createReservation } from '../../services/reservationService';
 import { getStorageOptions } from '../../services/storageService';
 
@@ -10,6 +23,14 @@ export default function ReservationModal({ phone, onClose }) {
     email: '',
     preferred_collection_date: '',
     customer_note: '',
+  });
+
+  const [deliveryData, setDeliveryData] = useState({
+    address: '',
+    city: '',
+    postal_code: '',
+    delivery_phone: '',
+    delivery_notes: '',
   });
 
   // Phone Options State
@@ -359,12 +380,31 @@ export default function ReservationModal({ phone, onClose }) {
         selected_options.colour = selectedColour.trim();
       }
 
+      const hasDeliveryDetails = Boolean(
+        deliveryData.address.trim() ||
+        deliveryData.city.trim() ||
+        deliveryData.postal_code.trim() ||
+        deliveryData.delivery_phone.trim() ||
+        deliveryData.delivery_notes.trim()
+      );
+
       const payload = {
         customer_name: cleanName,
         phone_number: cleanPhone,
         email: cleanEmail || undefined,
         phone_id: Number(phoneId),
         ...(Object.keys(selected_options).length > 0 ? { selected_options } : {}),
+        ...(hasDeliveryDetails
+          ? {
+              delivery_details: {
+                address: deliveryData.address.trim() || null,
+                city: deliveryData.city.trim() || null,
+                postal_code: deliveryData.postal_code.trim() || null,
+                delivery_phone: deliveryData.delivery_phone.trim() || null,
+                delivery_notes: deliveryData.delivery_notes.trim() || null,
+              },
+            }
+          : {}),
         preferred_collection_date: formData.preferred_collection_date,
         customer_note: cleanNote || undefined,
       };
@@ -372,6 +412,7 @@ export default function ReservationModal({ phone, onClose }) {
       const res = await createReservation(payload);
       setSubmittedData({
         ...payload,
+        delivery_details: payload.delivery_details || null,
         storageName: displayedStorages.find((s) => Number(s.storage_id) === Number(selectedStorageId))?.storage_name || availableStorages.find((s) => Number(s.storage_id) === Number(selectedStorageId))?.storage_name,
         reservation_id: res?.data?.data?.reservation_id || res?.data?.reservation_id,
       });
@@ -398,7 +439,7 @@ export default function ReservationModal({ phone, onClose }) {
       />
 
       {/* Right-Side Slide-Over Drawer */}
-      <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[500px] md:w-[540px] bg-[#0A0F1E] border-l border-white/10 shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
+      <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[720px] md:w-[860px] lg:w-[940px] max-w-full bg-[#0A0F1E] border-l border-white/10 shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
         {/* Header / Selected Device Card */}
         <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-[#0A0F1E]/95 backdrop-blur-md sticky top-0 z-20 shrink-0">
           <div className="flex items-center justify-between gap-3.5 sm:gap-4">
@@ -519,6 +560,15 @@ export default function ReservationModal({ phone, onClose }) {
                     <span className="text-slate-400 font-normal">Contact:</span>
                     <span className="text-white font-mono font-normal">{submittedData?.phone_number}</span>
                   </div>
+                  {submittedData?.delivery_details?.address && (
+                    <div className="flex items-center justify-between py-2.5">
+                      <span className="text-slate-400 font-normal">Delivery Address:</span>
+                      <span className="text-white font-normal text-right max-w-[60%] truncate">
+                        {submittedData.delivery_details.address}
+                        {submittedData.delivery_details.city ? `, ${submittedData.delivery_details.city}` : ''}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -555,94 +605,201 @@ export default function ReservationModal({ phone, onClose }) {
                 </div>
               )}
 
-              {/* Form Fields with Compact, Natural Gaps */}
-              <div className="w-full space-y-2.5 sm:space-y-3">
-                {/* Customer Name */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Full Name <span className="text-red-400">*</span></span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={150}
-                    value={formData.customer_name}
-                    onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
-                  />
-                </div>
-
-                {/* Phone Number */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Phone / WhatsApp Number <span className="text-red-400">*</span></span>
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    maxLength={25}
-                    value={formData.phone_number}
-                    onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
-                  />
-                </div>
-
-                {/* Email Address (Optional) */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Email Address <span className="text-theme-textMuted text-[11px] font-normal">(Optional)</span></span>
-                  </label>
-                  <input
-                    type="email"
-                    maxLength={255}
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
-                  />
-                </div>
-
-                {/* Preferred Collection Date */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Preferred Collection Date <span className="text-red-400">*</span></span>
-                    </span>
-                    <span className="text-[10px] text-theme-textMuted font-normal">DD-MM-YYYY</span>
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    min={todayStr}
-                    value={formData.preferred_collection_date}
-                    onChange={(e) =>
-                      setFormData({ ...formData, preferred_collection_date: e.target.value })
-                    }
-                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all [color-scheme:dark] font-normal min-w-0"
-                  />
-                </div>
-
-                {/* Customer Note */}
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-[13px] font-medium text-slate-200 flex items-center gap-1.5">
-                      <FileText className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Note to Shop <span className="text-theme-textMuted text-[11px] font-normal">(Optional)</span></span>
-                    </label>
-                    <span className="text-[10px] text-theme-textMuted font-normal">
-                      {formData.customer_note.length}/2000
+              {/* Responsive 2-Column Layout: Left (Customer & Date), Right (Delivery Details) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                {/* ── Left Column: Customer & Collection Info ── */}
+                <div className="space-y-2.5 sm:space-y-3">
+                  <div className="flex items-center gap-2 pb-1.5 border-b border-white/10">
+                    <User className="w-3.5 h-3.5 text-slate-300" />
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-300">
+                      Customer & Collection
                     </span>
                   </div>
-                  <textarea
-                    rows={2}
-                    maxLength={2000}
-                    value={formData.customer_note}
-                    onChange={(e) => setFormData({ ...formData, customer_note: e.target.value })}
-                    className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all resize-none font-normal"
-                  />
+
+                  {/* Customer Name */}
+                  <div>
+                    <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Full Name <span className="text-red-400">*</span></span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={150}
+                      placeholder="e.g. John Doe"
+                      value={formData.customer_name}
+                      onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+                      className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
+                    />
+                  </div>
+
+                  {/* Phone Number */}
+                  <div>
+                    <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Phone / WhatsApp Number <span className="text-red-400">*</span></span>
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      maxLength={25}
+                      placeholder="e.g. +94 77 123 4567"
+                      value={formData.phone_number}
+                      onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                      className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
+                    />
+                  </div>
+
+                  {/* Email Address (Optional) */}
+                  <div>
+                    <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Email Address <span className="text-theme-textMuted text-[11px] font-normal">(Optional)</span></span>
+                    </label>
+                    <input
+                      type="email"
+                      maxLength={255}
+                      placeholder="e.g. name@example.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
+                    />
+                  </div>
+
+                  {/* Preferred Collection Date */}
+                  <div>
+                    <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Preferred Collection Date <span className="text-red-400">*</span></span>
+                      </span>
+                      <span className="text-[10px] text-theme-textMuted font-normal">DD-MM-YYYY</span>
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      min={todayStr}
+                      value={formData.preferred_collection_date}
+                      onChange={(e) =>
+                        setFormData({ ...formData, preferred_collection_date: e.target.value })
+                      }
+                      className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all [color-scheme:dark] font-normal min-w-0"
+                    />
+                  </div>
+
+                  {/* Customer Note */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[13px] font-medium text-slate-200 flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Note to Shop <span className="text-theme-textMuted text-[11px] font-normal">(Optional)</span></span>
+                      </label>
+                      <span className="text-[10px] text-theme-textMuted font-normal">
+                        {formData.customer_note.length}/2000
+                      </span>
+                    </div>
+                    <textarea
+                      rows={2}
+                      maxLength={2000}
+                      placeholder="Any special requests or instructions..."
+                      value={formData.customer_note}
+                      onChange={(e) => setFormData({ ...formData, customer_note: e.target.value })}
+                      className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all resize-none font-normal"
+                    />
+                  </div>
+                </div>
+
+                {/* ── Right Column: Delivery Details ── */}
+                <div className="space-y-2.5 sm:space-y-3">
+                  <div className="pb-1.5 border-b border-white/10">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-300">
+                      Delivery Details
+                    </span>
+                  </div>
+
+                  {/* Delivery Address */}
+                  <div>
+                    <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Delivery Address <span className="text-theme-textMuted text-[11px] font-normal">(Optional)</span></span>
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={255}
+                      placeholder="House / Building No, Street Name"
+                      value={deliveryData.address}
+                      onChange={(e) => setDeliveryData({ ...deliveryData, address: e.target.value })}
+                      className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
+                    />
+                  </div>
+
+                  {/* City & Postal Code (in 2 sub-cols) */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+                        <Building className="w-3.5 h-3.5 text-slate-400" />
+                        <span>City / Town</span>
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={100}
+                        placeholder="e.g. Colombo, Kandy"
+                        value={deliveryData.city}
+                        onChange={(e) => setDeliveryData({ ...deliveryData, city: e.target.value })}
+                        className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-medium text-slate-200 mb-1">
+                        <span>Postal Code <span className="text-theme-textMuted text-[10px] font-normal">(Optional)</span></span>
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={20}
+                        placeholder="e.g. 00100"
+                        value={deliveryData.postal_code}
+                        onChange={(e) => setDeliveryData({ ...deliveryData, postal_code: e.target.value })}
+                        className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Alternate / Delivery Contact Number */}
+                  <div>
+                    <label className="block text-[13px] font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Alternate / Delivery Contact <span className="text-theme-textMuted text-[11px] font-normal">(Optional)</span></span>
+                    </label>
+                    <input
+                      type="tel"
+                      maxLength={25}
+                      placeholder="Secondary contact phone for courier"
+                      value={deliveryData.delivery_phone}
+                      onChange={(e) => setDeliveryData({ ...deliveryData, delivery_phone: e.target.value })}
+                      className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 sm:py-2 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all font-normal"
+                    />
+                  </div>
+
+                  {/* Delivery Instructions / Landmark */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[13px] font-medium text-slate-200 flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Delivery Instructions <span className="text-theme-textMuted text-[11px] font-normal">(Optional)</span></span>
+                      </label>
+                      <span className="text-[10px] text-theme-textMuted font-normal">
+                        {deliveryData.delivery_notes.length}/500
+                      </span>
+                    </div>
+                    <textarea
+                      rows={2}
+                      maxLength={500}
+                      placeholder="e.g. Nearby landmark, preferred delivery time window..."
+                      value={deliveryData.delivery_notes}
+                      onChange={(e) => setDeliveryData({ ...deliveryData, delivery_notes: e.target.value })}
+                      className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all resize-none font-normal"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

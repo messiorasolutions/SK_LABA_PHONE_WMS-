@@ -149,16 +149,32 @@ app.get('/api/test-db', async (req, res) => {
 // 4. Session & CSRF Security Middlewares
 const { sessionMiddleware } = createSessionMiddleware();
 
-// Optimize: Skip session store lookups for public storefront GET requests to ensure instant page load
+// Optimize: Skip session store lookups ONLY for purely public storefront GET requests to ensure instant page load
+// All authenticated endpoints (/api/auth, /api/users, /api/admin, /api/inquiries, /api/reservations, /api/sell-requests, /api/back-in-stock-requests) MUST run sessionMiddleware
+const PUBLIC_STOREFRONT_PREFIXES = [
+    '/api/phones',
+    '/api/brands',
+    '/api/storage-options',
+    '/api/specifications',
+    '/api/installment-plans',
+    '/api/offers',
+    '/api/giveaways',
+    '/api/shop-info',
+    '/api/reviews',
+    '/health',
+    '/api/test-db',
+    '/api/my-ip',
+    '/api-docs'
+];
+
 app.use((req, res, next) => {
     const p = req.path || '';
-    if (
-        req.method === 'GET' &&
-        !p.startsWith('/api/auth') &&
-        !p.startsWith('/api/users') &&
-        !p.startsWith('/api/admin')
-    ) {
-        return next();
+    if (req.method === 'GET') {
+        const isPublicStorefront = PUBLIC_STOREFRONT_PREFIXES.some(prefix => p === prefix || p.startsWith(prefix + '/'));
+        // Never skip sessions for /api/admin or any moderation/dashboard subpaths
+        if (isPublicStorefront && !p.startsWith('/api/admin')) {
+            return next();
+        }
     }
     return sessionMiddleware(req, res, next);
 });
@@ -221,6 +237,7 @@ app.use('/api/sell-requests', sellRequestRoutes);
 app.use('/api/sell-phone-requests', sellRequestRoutes);
 app.use('/api/back-in-stock-requests', backInStockRequestRoutes);
 app.use('/api/reviews', customerReviewRoutes);
+app.use('/api/customer-reviews', customerReviewRoutes);
 app.use('/api/admin/reviews', adminReviewRoutes);
 app.use('/api/giveaways', giveawayRoutes);
 app.use('/api/shop-info', shopInfoRoutes);

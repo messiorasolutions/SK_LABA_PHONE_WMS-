@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { X, CheckCircle2, AlertCircle, MessageCircle, Send } from 'lucide-react';
 import { createInquiry } from '../../services/inquiryService';
-import { STORE_INFO } from '../../constants/siteConfig';
+import { useShopInfo } from '../../context/ShopInfoContext';
 
 export default function InquiryModal({ phone, onClose }) {
+  const { getWhatsAppUrl } = useShopInfo();
   const [formData, setFormData] = useState({
     name: '',
     phone_number: '',
@@ -71,11 +72,8 @@ export default function InquiryModal({ phone, onClose }) {
   };
 
   const handleWhatsApp = () => {
-    const cleanNumber = (STORE_INFO.whatsapp || '').replace(/\D/g, '');
-    const message = encodeURIComponent(
-      `Hello SK LABA PHONE! I have an inquiry about ${phone ? phone.name : 'smartphones'}.\nName: ${formData.name || 'Customer'}`
-    );
-    window.open(`https://wa.me/${cleanNumber}?text=${message}`, '_blank');
+    const message = `Hello SK LABA PHONE! I have an inquiry about ${phone ? phone.name : 'smartphones'}.\nName: ${formData.name || 'Customer'}`;
+    window.open(getWhatsAppUrl(message), '_blank');
   };
 
   return (

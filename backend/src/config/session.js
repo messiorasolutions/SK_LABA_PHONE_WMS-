@@ -18,8 +18,8 @@ function createSessionMiddleware() {
     } else {
         try {
             store = new MySQLStore({
-                clearExpired: true,
-                checkExpirationInterval: 900000, // Check every 15 minutes
+                clearExpired: false,
+                checkExpirationInterval: 0, // Disabled internal timer to avoid uncaught promise rejections
                 expiration: Number(process.env.SESSION_MAX_AGE_MS) || (24 * 60 * 60 * 1000), // 24 hours
                 createDatabaseTable: false, // Sessions table is pre-created by SQL schema, avoid blocking DDL queries
                 schema: {
@@ -45,13 +45,14 @@ function createSessionMiddleware() {
 
     const cookieOptions = {
         httpOnly: true,
-        secure: isProduction || process.env.COOKIE_SECURE === 'true',
-        sameSite: process.env.COOKIE_SAMESITE || 'lax',
+        secure: isProduction && process.env.COOKIE_SECURE === 'true',
+        sameSite: process.env.COOKIE_SAMESITE || (isProduction ? 'none' : 'lax'),
         maxAge: Number(process.env.SESSION_MAX_AGE_MS) || (24 * 60 * 60 * 1000), // 24 hours
         path: '/'
     };
 
-    if (process.env.COOKIE_DOMAIN) {
+    // In local development, never set domain so the browser cleanly binds the cookie to localhost
+    if (isProduction && process.env.COOKIE_DOMAIN && !process.env.COOKIE_DOMAIN.includes('localhost')) {
         cookieOptions.domain = process.env.COOKIE_DOMAIN;
     }
 

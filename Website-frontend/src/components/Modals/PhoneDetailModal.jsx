@@ -392,8 +392,25 @@ export default function PhoneDetailModal({
 
   const handleWhatsApp = () => {
     const pageUrl = window.location.href;
-    const message = `Hello SK LABA PHONE, I am interested in: ${phone.name} ($${effectivePrice.toLocaleString()}).\nView Link: ${pageUrl}`;
-    window.open(getWhatsAppUrl(message), '_blank');
+    const colorStr = selectedColor && selectedColor !== 'Default' ? selectedColor : (activeColor?.name || '');
+    const storageStr = selectedStorage && selectedStorage !== 'Standard' ? selectedStorage : (phoneStorageOptions[0]?.storage_name || '');
+    const priceStr = `$${effectivePrice.toLocaleString()}`;
+
+    const lines = [
+      `*Hello! I am interested in this phone from your website:*`,
+      ``,
+      `*Model:* ${phone.name}`,
+      storageStr ? `*Storage:* ${storageStr}` : null,
+      colorStr ? `*Color:* ${colorStr}` : null,
+      `*Price:* ${priceStr}`,
+      phone.warranty ? `*Warranty:* ${phone.warranty}` : null,
+      phone.phone_condition ? `*Condition:* ${phone.phone_condition}` : null,
+      `🔗 Link: ${pageUrl}`,
+      ``,
+      `Could you please provide me with more details and availability about this phone? Thank you!`
+    ].filter(Boolean).join('\n');
+
+    window.open(getWhatsAppUrl(lines), '_blank');
   };
 
   const handleCall = () => {

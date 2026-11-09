@@ -14,6 +14,7 @@ import CartModal from './components/Modals/CartModal';
 import SellPhoneModal from './components/Modals/SellPhoneModal';
 import ReviewModal from './components/Modals/ReviewModal';
 import BackInStockModal from './components/Modals/BackInStockModal';
+import QuickChatWidget from './components/QuickChatWidget';
 import { setActiveTab } from './actions/heroActions';
 
 export default function App() {
@@ -219,6 +220,20 @@ export default function App() {
           onClose={() => setSelectedPhoneForBackInStock(null)}
         />
       )}
+
+      {/* Floating Quick Chat Widget (Home & Every Page) */}
+      <QuickChatWidget
+        activePhone={selectedPhoneForDetail}
+        onOpenInquiry={(phone) => setInquiryModalData({ phone: phone || null })}
+        onNavigateToContact={() => {
+          setSelectedPhoneForDetail(null);
+          setFavoritesModalOpen(false);
+          setCartModalOpen(false);
+          dispatch(setActiveTab('Contact Us'));
+          window.location.hash = '#contact';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     </div>
   );
 }

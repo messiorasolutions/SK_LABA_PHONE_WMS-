@@ -243,7 +243,7 @@ CREATE TABLE "reservations" (
   "selected_options" json DEFAULT NULL,
   "preferred_collection_date" date NOT NULL,
   "customer_note" text COLLATE utf8mb4_unicode_ci,
-  "status" enum('Pending','Confirmed','Ready for Collection','Collected','Cancelled','Expired') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending',
+  `status` enum('Pending','Confirmed','Payment Received','Ready for Collection','Collected','Cancelled','Expired') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending',
   "assigned_to_user_id" bigint unsigned DEFAULT NULL,
   "updated_by_user_id" bigint unsigned DEFAULT NULL,
   "created_at" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

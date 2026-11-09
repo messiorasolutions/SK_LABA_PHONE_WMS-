@@ -58,7 +58,9 @@ function createAuthMiddleware(userRepository = defaultRepository) {
                 return next(new AppError('Unauthorized: Authentication required.', 401));
             }
 
-            if (!allowedRoles.includes(req.user.role)) {
+            const userRole = String(req.user.role || '').toUpperCase();
+            const normalizedAllowed = allowedRoles.map((r) => String(r).toUpperCase());
+            if (!normalizedAllowed.includes(userRole)) {
                 return next(new AppError('Access forbidden: Insufficient permissions.', 403));
             }
 

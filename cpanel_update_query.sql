@@ -61,3 +61,39 @@ INSERT INTO `giveaways` (
     NULL
 ) ON DUPLICATE KEY UPDATE `giveaway_id`=`giveaway_id`;
 
+-- 4. Create `shop_information` table
+CREATE TABLE IF NOT EXISTS `shop_information` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `shop_name` VARCHAR(255) NOT NULL DEFAULT 'SK LABA PHONE',
+    `tagline` VARCHAR(255) NULL DEFAULT 'ලාබ ෆෝන්',
+    `address` VARCHAR(500) NOT NULL DEFAULT 'Dongdaemun-gu, Seoul, South Korea',
+    `opening_hours` VARCHAR(255) NOT NULL DEFAULT 'Mon - Sun: 10:00 AM - 9:00 PM (KST)',
+    `email` VARCHAR(255) NOT NULL DEFAULT 'contact@sklabaphone.com',
+    `whatsapp_number` VARCHAR(50) NOT NULL DEFAULT '+82 10-5892-7482',
+    `phone_number` VARCHAR(50) NOT NULL DEFAULT '+82 10-5892-7482',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 5. Seed default shop information (Safe execution)
+INSERT INTO `shop_information` (
+    `id`, 
+    `shop_name`, 
+    `tagline`, 
+    `address`, 
+    `opening_hours`, 
+    `email`, 
+    `whatsapp_number`, 
+    `phone_number`
+) VALUES (
+    1, 
+    'SK LABA PHONE', 
+    'ලාබ ෆෝන්', 
+    'Dongdaemun-gu, Seoul, South Korea', 
+    'Mon - Sun: 10:00 AM - 9:00 PM (KST)', 
+    'contact@sklabaphone.com', 
+    '+82 10-5892-7482', 
+    '+82 10-5892-7482'
+) ON DUPLICATE KEY UPDATE `id`=`id`;
+

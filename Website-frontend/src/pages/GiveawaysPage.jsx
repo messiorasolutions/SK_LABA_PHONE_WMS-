@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { getGiveaways } from '../services/giveawayService';
 import FormattedDescription from '../components/Common/FormattedDescription';
-import { STORE_INFO } from '../constants/siteConfig';
+import { useShopInfo } from '../context/ShopInfoContext';
 
 // Clean countdown timer for giveaway cards and full-page views
 function CountdownDisplay({ endDate, isLarge = false }) {
@@ -153,6 +153,7 @@ function formatDateTime(val) {
 }
 
 export default function GiveawaysPage({ onNavigateToHome }) {
+  const { shopInfo, getWhatsAppUrl } = useShopInfo();
   const [giveaways, setGiveaways] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterTab, setFilterTab] = useState('ALL'); // ALL, ONGOING, COMPLETED
@@ -377,37 +378,37 @@ export default function GiveawaysPage({ onNavigateToHome }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-normal text-theme-textSecondary">
                   <div>
                     Hotline:{' '}
-                    <a href={`tel:${STORE_INFO.phone}`} className="text-white hover:underline">
-                      {STORE_INFO.phone}
+                    <a href={`tel:${shopInfo.phone}`} className="text-white hover:underline">
+                      {shopInfo.phone}
                     </a>
                   </div>
 
                   <div>
                     WhatsApp:{' '}
                     <a
-                      href={`https://wa.me/${String(STORE_INFO.whatsapp).replace(/[^0-9]/g, '')}`}
+                      href={getWhatsAppUrl(`Hello SK LABA PHONE! I have a question about the ${selectedGiveaway.title}`)}
                       target="_blank"
                       rel="noreferrer"
                       className="text-white hover:underline"
                     >
-                      {STORE_INFO.whatsapp}
+                      {shopInfo.whatsapp}
                     </a>
                   </div>
 
                   <div>
                     Email:{' '}
-                    <a href={`mailto:${STORE_INFO.email}`} className="text-white hover:underline">
-                      {STORE_INFO.email}
+                    <a href={`mailto:${shopInfo.email}`} className="text-white hover:underline">
+                      {shopInfo.email}
                     </a>
                   </div>
 
                   <div>
-                    {STORE_INFO.address}
+                    {shopInfo.address}
                   </div>
                 </div>
 
                 <div className="pt-3 border-t border-theme-border/60 text-[11px] text-theme-textMuted">
-                  Store Hours: {STORE_INFO.openingHours}
+                  Store Hours: {shopInfo.openingHours}
                 </div>
               </div>
             </div>

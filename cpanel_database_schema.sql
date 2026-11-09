@@ -282,4 +282,20 @@ CREATE TABLE IF NOT EXISTS giveaways (
     INDEX idx_giveaway_dates (start_date, end_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================================
+-- SHOP INFORMATION TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS shop_information (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    shop_name VARCHAR(255) NOT NULL DEFAULT 'SK LABA PHONE',
+    tagline VARCHAR(255) NULL DEFAULT 'ලාබ ෆෝන්',
+    address VARCHAR(500) NOT NULL DEFAULT 'Dongdaemun-gu, Seoul, South Korea',
+    opening_hours VARCHAR(255) NOT NULL DEFAULT 'Mon - Sun: 10:00 AM - 9:00 PM (KST)',
+    email VARCHAR(255) NOT NULL DEFAULT 'contact@sklabaphone.com',
+    whatsapp_number VARCHAR(50) NOT NULL DEFAULT '+82 10-5892-7482',
+    phone_number VARCHAR(50) NOT NULL DEFAULT '+82 10-5892-7482',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;

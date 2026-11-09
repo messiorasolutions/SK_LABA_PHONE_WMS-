@@ -10,9 +10,9 @@ import {
   PhoneCall,
   ArrowLeft,
 } from 'lucide-react';
-import whatsappIcon from '../../assets/images/whatsappicon.avif';
+import whatsappIcon from '../../assets/icons/whatsappicon.png';
 import { useFavoritesAndCompare } from '../../hooks/useFavoritesAndCompare';
-import { STORE_INFO } from '../../constants/siteConfig';
+import { useShopInfo } from '../../context/ShopInfoContext';
 import phoneService from '../../services/phoneService';
 import storageService from '../../services/storageService';
 import FormattedDescription from '../Common/FormattedDescription';
@@ -176,6 +176,7 @@ export default function PhoneDetailModal({
   onOpenNotifyBackInStock,
   onSelectPhone,
 }) {
+  const { shopInfo, getWhatsAppUrl } = useShopInfo();
   const { isFavorite, isInCompare, toggleFavorite, toggleCompare } = useFavoritesAndCompare();
 
   const phoneId = phone?.phone_id || phone?.id;
@@ -391,15 +392,12 @@ export default function PhoneDetailModal({
 
   const handleWhatsApp = () => {
     const pageUrl = window.location.href;
-    const cleanNumber = (STORE_INFO.whatsapp || '').replace(/\D/g, '');
-    const message = encodeURIComponent(
-      `Hello SK LABA PHONE, I am interested in: ${phone.name} ($${effectivePrice.toLocaleString()}).\nView Link: ${pageUrl}`
-    );
-    window.open(`https://wa.me/${cleanNumber}?text=${message}`, '_blank');
+    const message = `Hello SK LABA PHONE, I am interested in: ${phone.name} ($${effectivePrice.toLocaleString()}).\nView Link: ${pageUrl}`;
+    window.open(getWhatsAppUrl(message), '_blank');
   };
 
   const handleCall = () => {
-    window.location.href = `tel:${STORE_INFO.phone}`;
+    window.location.href = `tel:${shopInfo.phone}`;
   };
 
   const handleShare = () => {
@@ -450,10 +448,6 @@ export default function PhoneDetailModal({
             <div className="flex items-center gap-2">
               <span className="text-xs font-normal uppercase tracking-wider text-slate-300">
                 {phone.brand_name || 'Smartphone'}
-              </span>
-              <span className="text-neutral-500">•</span>
-              <span className="px-2.5 py-0.5 text-[10px] font-normal uppercase rounded border border-white/20 bg-black text-white">
-                {phone.phone_condition || 'NEW'}
               </span>
             </div>
           </div>
@@ -572,8 +566,11 @@ export default function PhoneDetailModal({
             <div>
               {/* Title & Price on the same line with same font size and wider spacing */}
               <div className="flex flex-wrap items-baseline gap-x-8 sm:gap-x-10 gap-y-2 mb-4">
-                <h1 className="text-2xl sm:text-3xl font-normal text-white leading-snug">
-                  {phone.name}
+                <h1 className="text-2xl sm:text-3xl font-normal text-white leading-snug flex flex-wrap items-baseline gap-x-2.5">
+                  <span>{phone.name}</span>
+                  {selectedStorage && !phone.name?.toLowerCase().includes(selectedStorage.toLowerCase()) && (
+                    <span className="text-xl sm:text-2xl text-slate-300 font-normal">{selectedStorage}</span>
+                  )}
                 </h1>
                 <div className="flex items-baseline gap-3">
                   <span className="text-2xl sm:text-3xl font-normal text-white tracking-tight">
@@ -795,8 +792,8 @@ export default function PhoneDetailModal({
                     type="button"
                     onClick={handleWhatsApp}
                     className="w-9 h-9 rounded-full bg-black hover:bg-neutral-900 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-sm hover:scale-105 overflow-hidden p-1.5"
-                    title="WhatsApp Direct"
-                    aria-label="WhatsApp Direct"
+                    title="WhatsApp"
+                    aria-label="WhatsApp"
                   >
                     <img src={whatsappIcon} alt="WhatsApp" className="w-full h-full object-contain" />
                   </button>

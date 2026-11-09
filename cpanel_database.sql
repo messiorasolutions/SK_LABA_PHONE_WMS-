@@ -405,5 +405,25 @@ CREATE TABLE `giveaways` (
 -- Dumping data for table `giveaways` (1 row)
 INSERT INTO `giveaways` (`giveaway_id`, `title`, `short_description`, `description`, `thumbnail_url`, `start_date`, `end_date`, `winner_selection_date`, `status`, `is_manually_closed`, `winners_announced`, `winners_announced_at`, `winners`) VALUES (1, 'Win a Brand New Samsung Galaxy S24 Ultra (512GB)!', 'Celebrate with SK Laba Phone! Enter our official promotional giveaway for your chance to win a flagship Samsung Galaxy S24 Ultra with free delivery direct from South Korea.', 'We are thrilled to give away a **Brand New Samsung Galaxy S24 Ultra (512GB, Titanium Gray)** to one lucky winner!\n\n#### How to Participate:\n• Step 1: Follow SK Laba Phone on Facebook and TikTok\n• Step 2: Like, share, and tag two friends on our official giveaway post\n• Step 3: Check your email on the winner announcement date\n\n#### Official Terms & Prize Delivery:\n1. 100% authentic South Korean stock with full manufacturer warranty\n2. Free insured delivery or store pickup in Seoul\n3. The winner will be notified directly via email with official shop contact details', 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf', '2026-11-01 00:00:00', '2026-11-20 23:59:59', '2026-11-21 12:00:00', 'ONGOING', 0, 0, NULL, NULL);
 
+-- Table structure for `shop_information`
+DROP TABLE IF EXISTS `shop_information`;
+CREATE TABLE `shop_information` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `shop_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'SK LABA PHONE',
+  `tagline` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT 'ලාබ ෆෝන්',
+  `address` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Dongdaemun-gu, Seoul, South Korea',
+  `opening_hours` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Mon - Sun: 10:00 AM - 9:00 PM (KST)',
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'contact@sklabaphone.com',
+  `whatsapp_number` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '+82 10-5892-7482',
+  `phone_number` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '+82 10-5892-7482',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table `shop_information` (1 row)
+INSERT INTO `shop_information` (`id`, `shop_name`, `tagline`, `address`, `opening_hours`, `email`, `whatsapp_number`, `phone_number`)
+VALUES (1, 'SK LABA PHONE', 'ලාබ ෆෝන්', 'Dongdaemun-gu, Seoul, South Korea', 'Mon - Sun: 10:00 AM - 9:00 PM (KST)', 'contact@sklabaphone.com', '+82 10-5892-7482', '+82 10-5892-7482');
+
 SET FOREIGN_KEY_CHECKS = 1;
 SET SQL_MODE=@OLD_SQL_MODE;

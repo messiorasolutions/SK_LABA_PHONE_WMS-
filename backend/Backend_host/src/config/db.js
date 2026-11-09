@@ -30,17 +30,24 @@ function buildSslConfig() {
     return sslConfig;
 }
 
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT) || 11302,
+const poolConfig = {
+    host: process.env.DB_HOST || 'localhost',
+    port: Number(process.env.DB_PORT) || 3306,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     waitForConnections: true,
     connectionLimit: Number(process.env.DB_CONNECTION_LIMIT) || 10,
     queueLimit: 0,
+    connectTimeout: 8000,
     ssl: buildSslConfig()
-});
+};
+
+if (process.env.DB_SOCKET_PATH) {
+    poolConfig.socketPath = process.env.DB_SOCKET_PATH;
+}
+
+const pool = mysql.createPool(poolConfig);
 
 async function testConnection() {
     if (process.env.NODE_ENV === 'test') {

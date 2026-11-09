@@ -1,3 +1,4 @@
-// cPanel Node.js App Entry Point
-require('./src/server');
-
+// ====================================================================
+// CPANEL NODE.JS APP ENTRY POINT (server.js)
+// ====================================================================
+module.exports = require('./app');

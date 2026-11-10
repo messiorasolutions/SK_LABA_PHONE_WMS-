@@ -57,17 +57,17 @@ function resolvePhotoUrl(url) {
   return `${base}/uploads/${clean}`;
 }
 
-const MARKETPLACE_STATUS_BADGES = {
-  PENDING_REVIEW: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-400',
-  UNDER_REVIEW: 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-400',
-  APPROVED: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400',
-  PUBLISHED: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800',
-  RESERVED: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-400',
-  SOLD: 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-400 font-bold',
-  REJECTED: 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-400',
-  CHANGES_REQUESTED: 'bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-400',
-  UNPUBLISHED: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400',
-  CANCELLED: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+const MARKETPLACE_STATUS_CONFIG = {
+  PENDING_REVIEW: { label: 'Pending Review', dot: 'bg-amber-500' },
+  UNDER_REVIEW: { label: 'Under Review', dot: 'bg-sky-500' },
+  APPROVED: { label: 'Approved', dot: 'bg-emerald-500' },
+  PUBLISHED: { label: 'Published Live', dot: 'bg-emerald-500' },
+  RESERVED: { label: 'Reserved', dot: 'bg-indigo-500' },
+  SOLD: { label: 'Sold', dot: 'bg-purple-500' },
+  REJECTED: { label: 'Rejected', dot: 'bg-rose-500' },
+  CHANGES_REQUESTED: { label: 'Changes Requested', dot: 'bg-amber-500' },
+  UNPUBLISHED: { label: 'Unpublished', dot: 'bg-slate-400' },
+  CANCELLED: { label: 'Cancelled', dot: 'bg-slate-400' },
 };
 
 const LEGACY_STATUS_CONFIG = {
@@ -293,70 +293,69 @@ export default function SellRequestsPage() {
   const soldCount = marketplaceListings.filter((l) => l.status === 'SOLD').length;
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto">
-      {/* Page Title & Tab Navigation */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-5 pb-12">
+      {/* ── Page Header & Tab Navigation ─────────────────────────────── */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-            <Store className="w-6 h-6 text-rose-600" />
-            <span>Marketplace & Sell Requests</span>
+          <h1 className="text-xl font-normal text-slate-900 dark:text-white tracking-tight">
+            Marketplace & Sell Requests
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Review customer phone submissions, manage active listings, remove sold phones, and track payouts.
+          <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mt-0.5">
+            Review customer phone submissions, manage active listings, remove sold phones, and track payouts
           </p>
         </div>
 
         {/* Tab Buttons */}
-        <div className="inline-flex p-1 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+        <div className="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
           <button
             type="button"
             onClick={() => setActiveTab('marketplace')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-normal transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'marketplace'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Smartphone className="w-3.5 h-3.5 text-rose-600" />
+            <Smartphone className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             <span>Marketplace Listings</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('orders')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-normal transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'orders'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <ShoppingBag className="w-3.5 h-3.5 text-purple-600" />
+            <ShoppingBag className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             <span>Marketplace Orders</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('legacy')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-normal transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'legacy'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <ArrowLeftRight className="w-3.5 h-3.5 text-slate-500" />
+            <ArrowLeftRight className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             <span>Legacy Trade-Ins</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('settings')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-normal transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'settings'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Sliders className="w-3.5 h-3.5 text-rose-600" />
+            <Sliders className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             <span>Commission & Terms</span>
           </button>
         </div>
@@ -368,79 +367,99 @@ export default function SellRequestsPage() {
       {activeTab === 'marketplace' && (
         <div className="space-y-5">
           {/* Metrics Strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 block">
-                Pending Review
-              </span>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-                {pendingCount}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {/* Pending Review */}
+            <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
+                <Clock className="w-5 h-5 text-slate-600 dark:text-slate-300" />
               </div>
-              <span className="text-[10px] text-slate-400 mt-0.5 block">Awaiting admin review</span>
+              <div>
+                <div className="text-[11px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Pending Review
+                </div>
+                <div className="text-lg font-normal text-slate-900 dark:text-white mt-0.5">
+                  {pendingCount} <span className="text-xs font-normal text-slate-400">awaiting</span>
+                </div>
+              </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 block">
-                Published Live
-              </span>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-                {publishedCount}
+            {/* Published Live */}
+            <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="w-5 h-5 text-slate-600 dark:text-slate-300" />
               </div>
-              <span className="text-[10px] text-slate-400 mt-0.5 block">Active on marketplace</span>
+              <div>
+                <div className="text-[11px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Published Live
+                </div>
+                <div className="text-lg font-normal text-slate-900 dark:text-white mt-0.5">
+                  {publishedCount} <span className="text-xs font-normal text-slate-400">active</span>
+                </div>
+              </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-purple-600 block">
-                Total Sold
-              </span>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-                {soldCount}
+            {/* Total Sold */}
+            <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
+                <ShoppingBag className="w-5 h-5 text-slate-600 dark:text-slate-300" />
               </div>
-              <span className="text-[10px] text-slate-400 mt-0.5 block">Removed from catalogue</span>
+              <div>
+                <div className="text-[11px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Total Sold
+                </div>
+                <div className="text-lg font-normal text-slate-900 dark:text-white mt-0.5">
+                  {soldCount} <span className="text-xs font-normal text-slate-400">completed</span>
+                </div>
+              </div>
             </div>
 
+            {/* Platform Fee */}
             <div
               onClick={() => setActiveTab('settings')}
-              className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:border-rose-400 dark:hover:border-rose-600 transition-all cursor-pointer group"
+              className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex items-center justify-between gap-3.5 hover:border-slate-300 dark:hover:border-slate-700 transition-colors cursor-pointer group"
               title="Click to configure commission percentage and seller terms"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-rose-600 block">
-                  Platform Fee
-                </span>
-                <span className="text-[10px] font-bold text-rose-500 opacity-80 group-hover:opacity-100 transition-opacity">
-                  Edit &rarr;
-                </span>
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
+                  <Percent className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+                </div>
+                <div>
+                  <div className="text-[11px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Platform Fee
+                  </div>
+                  <div className="text-lg font-normal text-slate-900 dark:text-white mt-0.5">
+                    5% <span className="text-xs font-normal text-slate-400">rate</span>
+                  </div>
+                </div>
               </div>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">5%</div>
-              <span className="text-[10px] text-slate-400 mt-0.5 block">Click to edit terms & fee</span>
+              <span className="text-xs font-normal text-rose-600 dark:text-rose-400 group-hover:underline">
+                Edit &rarr;
+              </span>
             </div>
           </div>
 
           {/* Search & Filter Bar */}
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-            <form onSubmit={handleMpSearchSubmit} className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-wrap items-center justify-between gap-2.5">
+            <form onSubmit={handleMpSearchSubmit} className="relative flex-1 min-w-[200px]">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search brand, model, seller name, or phone..."
+                placeholder="Search by brand, model, seller name, or phone..."
                 value={mpSearch}
                 onChange={(e) => setMpSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
+                className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-normal text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-rose-500/30 focus:border-neutral-500"
               />
             </form>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
-                <Filter className="w-3.5 h-3.5 text-slate-400" />
-                <span>Status:</span>
+            <div className="flex items-center gap-2.5">
+              <div className="w-full sm:w-auto min-w-[140px]">
                 <select
                   value={mpStatusFilter}
                   onChange={(e) => {
                     setMpStatusFilter(e.target.value);
                     setMpPagination((p) => ({ ...p, page: 1 }));
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-normal text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
                 >
                   <option value="">All Statuses</option>
                   <option value="PENDING_REVIEW">Pending Review</option>
@@ -455,48 +474,49 @@ export default function SellRequestsPage() {
               <button
                 type="button"
                 onClick={fetchMarketplaceListings}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold cursor-pointer"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-normal text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-2xs cursor-pointer"
+                title="Refresh listings"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${mpLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-3.5 h-3.5 ${mpLoading ? 'animate-spin text-rose-600' : 'text-slate-500'}`} />
                 <span>Refresh</span>
               </button>
             </div>
           </div>
 
           {mpError && (
-            <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+            <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 text-xs font-normal text-rose-700 dark:text-rose-300 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
               <span>{mpError}</span>
             </div>
           )}
 
           {/* Listings Table */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
+                <thead className="bg-slate-50/75 dark:bg-slate-800/50 border-b border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase font-normal text-[11px] tracking-wider">
                   <tr>
-                    <th className="px-4 py-3.5">Device</th>
-                    <th className="px-4 py-3.5">Specs & Condition</th>
-                    <th className="px-4 py-3.5">Seller Contact</th>
-                    <th className="px-4 py-3.5 text-right">Asking Price</th>
-                    <th className="px-4 py-3.5 text-right">Net Payout</th>
-                    <th className="px-4 py-3.5 text-center">Status</th>
-                    <th className="px-4 py-3.5 text-right">Actions</th>
+                    <th className="px-4 py-3">Device</th>
+                    <th className="px-4 py-3">Specs & Condition</th>
+                    <th className="px-4 py-3">Seller Contact</th>
+                    <th className="px-4 py-3 text-right">Asking Price</th>
+                    <th className="px-4 py-3 text-right">Net Payout</th>
+                    <th className="px-4 py-3 text-center">Status</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {mpLoading ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-12 text-slate-400">
-                        <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-rose-500" />
+                      <td colSpan={7} className="text-center py-12 text-slate-400 font-normal">
+                        <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-rose-600" />
                         <span>Loading marketplace listings...</span>
                       </td>
                     </tr>
                   ) : marketplaceListings.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-12 text-slate-400">
-                        <Smartphone className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <td colSpan={7} className="text-center py-12 text-slate-400 font-normal">
+                        <Smartphone className="w-8 h-8 mx-auto mb-2 opacity-40 text-slate-400" />
                         <span>No marketplace listings found.</span>
                       </td>
                     </tr>
@@ -526,6 +546,10 @@ export default function SellRequestsPage() {
                       const comm = Math.round((asking * 5) / 100);
                       const payout = Math.max(0, asking - comm);
                       const isWorking = actionInProgressId === listing.listing_id;
+                      const statusConfig = MARKETPLACE_STATUS_CONFIG[listing.status] || {
+                        label: listing.status?.replace(/_/g, ' ') || 'Unknown',
+                        dot: 'bg-slate-400',
+                      };
 
                       return (
                         <tr
@@ -534,9 +558,9 @@ export default function SellRequestsPage() {
                           className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 cursor-pointer transition-colors"
                         >
                           {/* Device with Thumbnail */}
-                          <td className="px-4 py-3.5">
+                          <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
-                              <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 flex items-center justify-center">
+                              <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 flex items-center justify-center">
                                 {firstPhoto ? (
                                   <img
                                     src={resolvePhotoUrl(firstPhoto)}
@@ -544,14 +568,14 @@ export default function SellRequestsPage() {
                                     className="w-full h-full object-cover"
                                   />
                                 ) : (
-                                  <Smartphone className="w-5 h-5 text-slate-400" />
+                                  <Smartphone className="w-4 h-4 text-slate-400" />
                                 )}
                               </div>
                               <div>
-                                <span className="font-bold text-slate-900 dark:text-white block">
+                                <span className="font-normal text-slate-900 dark:text-white block">
                                   {listing.brand} {listing.model}
                                 </span>
-                                <span className="text-[10px] text-slate-400 font-mono">
+                                <span className="text-[10px] text-slate-400 font-mono font-normal">
                                   {listing.listing_ref || `#${listing.listing_id}`}
                                 </span>
                               </div>
@@ -559,76 +583,71 @@ export default function SellRequestsPage() {
                           </td>
 
                           {/* Specs & Condition */}
-                          <td className="px-4 py-3.5">
+                          <td className="px-4 py-3">
                             <div className="space-y-0.5">
-                              <span className="font-medium text-slate-800 dark:text-slate-200 block">
+                              <span className="font-normal text-slate-800 dark:text-slate-200 block">
                                 {listing.storage} • {listing.color}
                               </span>
-                              <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                                <span className="text-rose-600 dark:text-rose-400 font-semibold">
-                                  {listing.condition_grade?.replace(/_/g, ' ')}
-                                </span>
+                              <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-normal">
+                                <span>{listing.condition_grade?.replace(/_/g, ' ')}</span>
                                 {listing.battery_health && <span>• {listing.battery_health}% Batt</span>}
                               </div>
                             </div>
                           </td>
 
                           {/* Seller */}
-                          <td className="px-4 py-3.5">
-                            <span className="font-medium text-slate-800 dark:text-slate-200 block">
+                          <td className="px-4 py-3">
+                            <span className="font-normal text-slate-800 dark:text-slate-200 block">
                               {listing.seller_name}
                             </span>
-                            <span className="text-[10px] text-slate-400">{listing.seller_phone}</span>
+                            <span className="text-[10px] text-slate-400 font-normal">{listing.seller_phone}</span>
                           </td>
 
                           {/* Asking Price */}
-                          <td className="px-4 py-3.5 text-right font-semibold text-slate-900 dark:text-white">
+                          <td className="px-4 py-3 text-right font-normal text-slate-900 dark:text-white">
                             {formatCurrency(asking)}
                           </td>
 
                           {/* Seller Payout */}
-                          <td className="px-4 py-3.5 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                          <td className="px-4 py-3 text-right font-normal text-emerald-600 dark:text-emerald-400">
                             {formatCurrency(payout)}
                           </td>
 
                           {/* Status */}
-                          <td className="px-4 py-3.5 text-center">
-                            <span
-                              className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
-                                MARKETPLACE_STATUS_BADGES[listing.status] || 'bg-slate-100 text-slate-700'
-                              }`}
-                            >
-                              {listing.status?.replace(/_/g, ' ')}
+                          <td className="px-4 py-3 text-center">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-normal text-slate-900 dark:text-slate-100">
+                              <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot}`} />
+                              <span>{statusConfig.label}</span>
                             </span>
                           </td>
 
                           {/* Actions */}
                           <td
-                            className="px-4 py-3.5 text-right space-x-1"
+                            className="px-4 py-3 text-right space-x-1.5 whitespace-nowrap"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {/* MARK AS SOLD & REMOVE BUTTON */}
-                            {listing.status !== 'SOLD' && (
-                              <button
-                                type="button"
-                                onClick={(e) => handleQuickMarkSold(listing, e)}
-                                disabled={isWorking}
-                                className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-[10px] shadow-xs cursor-pointer transition-colors"
-                                title="Mark as sold and remove listing from public marketplace"
-                              >
-                                Mark Sold
-                              </button>
-                            )}
-
                             {/* APPROVE BUTTON */}
                             {listing.status !== 'PUBLISHED' && listing.status !== 'SOLD' && (
                               <button
                                 type="button"
                                 onClick={() => handleApproveListing(listing.listing_id)}
                                 disabled={isWorking}
-                                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-xs cursor-pointer transition-colors"
+                                className="px-3 py-1 text-xs font-normal rounded-full bg-gradient-to-r from-black via-neutral-900 to-rose-950 hover:to-rose-900 text-white border border-neutral-800 transition-all cursor-pointer shadow-xs disabled:opacity-50"
                               >
                                 Approve
+                              </button>
+                            )}
+
+                            {/* MARK AS SOLD BUTTON */}
+                            {listing.status !== 'SOLD' && (
+                              <button
+                                type="button"
+                                onClick={(e) => handleQuickMarkSold(listing, e)}
+                                disabled={isWorking}
+                                className="px-3 py-1 text-xs font-normal rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer disabled:opacity-50"
+                                title="Mark as sold and remove listing from public marketplace"
+                              >
+                                Mark Sold
                               </button>
                             )}
 
@@ -638,7 +657,7 @@ export default function SellRequestsPage() {
                                 type="button"
                                 onClick={() => handleUnpublishListing(listing.listing_id)}
                                 disabled={isWorking}
-                                className="px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold text-[10px] cursor-pointer"
+                                className="px-3 py-1 text-xs font-normal rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer disabled:opacity-50"
                               >
                                 Unpublish
                               </button>
@@ -648,7 +667,7 @@ export default function SellRequestsPage() {
                             <button
                               type="button"
                               onClick={() => setSelectedMpListing(listing)}
-                              className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-[10px] cursor-pointer"
+                              className="px-3 py-1 text-xs font-normal rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer"
                             >
                               Details
                             </button>
@@ -663,7 +682,7 @@ export default function SellRequestsPage() {
 
             {/* Pagination */}
             {mpPagination.totalPages > 1 && (
-              <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
+              <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-normal text-slate-500">
                 <span>
                   Page {mpPagination.page} of {mpPagination.totalPages} ({mpPagination.totalRecords} listings)
                 </span>
@@ -672,7 +691,7 @@ export default function SellRequestsPage() {
                     type="button"
                     onClick={() => setMpPagination((p) => ({ ...p, page: Math.max(1, p.page - 1) }))}
                     disabled={mpPagination.page <= 1}
-                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40"
+                    className="p-1.5 rounded-full border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -682,7 +701,7 @@ export default function SellRequestsPage() {
                       setMpPagination((p) => ({ ...p, page: Math.min(p.totalPages, p.page + 1) }))
                     }
                     disabled={mpPagination.page >= mpPagination.totalPages}
-                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40"
+                    className="p-1.5 rounded-full border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -703,33 +722,33 @@ export default function SellRequestsPage() {
       {/* ───────────────────────────────────────────────────────────── */}
       {activeTab === 'legacy' && (
         <div className="space-y-4">
-          <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 text-xs text-amber-800 dark:text-amber-300">
+          <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 text-xs font-normal text-amber-800 dark:text-amber-300">
             <strong>Historical Records:</strong> Below are legacy trade-in requests submitted before the Phone Marketplace launch.
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
+                <thead className="bg-slate-50/75 dark:bg-slate-800/50 border-b border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase font-normal text-[11px] tracking-wider">
                   <tr>
-                    <th className="px-4 py-3.5">Ref</th>
-                    <th className="px-4 py-3.5">Phone Model</th>
-                    <th className="px-4 py-3.5">Customer</th>
-                    <th className="px-4 py-3.5">Estimated Value</th>
-                    <th className="px-4 py-3.5 text-center">Status</th>
-                    <th className="px-4 py-3.5 text-right">Action</th>
+                    <th className="px-4 py-3">Ref</th>
+                    <th className="px-4 py-3">Phone Model</th>
+                    <th className="px-4 py-3">Customer</th>
+                    <th className="px-4 py-3">Estimated Value</th>
+                    <th className="px-4 py-3 text-center">Status</th>
+                    <th className="px-4 py-3 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {legacyLoading ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-10 text-slate-400">
+                      <td colSpan={6} className="text-center py-10 text-slate-400 font-normal">
                         Loading legacy records...
                       </td>
                     </tr>
                   ) : legacyRequests.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-10 text-slate-400">
+                      <td colSpan={6} className="text-center py-10 text-slate-400 font-normal">
                         No legacy records found.
                       </td>
                     </tr>
@@ -743,29 +762,29 @@ export default function SellRequestsPage() {
                         <tr
                           key={r.request_id}
                           onClick={() => setSelectedLegacyRequest(r)}
-                          className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 cursor-pointer"
+                          className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors"
                         >
-                          <td className="px-4 py-3.5 font-bold font-mono">
+                          <td className="px-4 py-3 font-normal font-mono text-slate-500">
                             {r.request_ref || `#${r.request_id}`}
                           </td>
-                          <td className="px-4 py-3.5 font-semibold text-slate-900 dark:text-white">
+                          <td className="px-4 py-3 font-normal text-slate-900 dark:text-white">
                             {r.brand_name || r.brand} {r.model_name || r.model}
                           </td>
-                          <td className="px-4 py-3.5">
-                            <span className="block font-medium">{r.customer_name}</span>
-                            <span className="text-[10px] text-slate-400">{r.customer_phone}</span>
+                          <td className="px-4 py-3">
+                            <span className="block font-normal text-slate-900 dark:text-white">{r.customer_name}</span>
+                            <span className="text-[10px] text-slate-400 font-normal">{r.customer_phone}</span>
                           </td>
-                          <td className="px-4 py-3.5">
+                          <td className="px-4 py-3 font-normal text-slate-900 dark:text-white">
                             {r.estimated_value ? formatCurrency(r.estimated_value) : '-'}
                           </td>
-                          <td className="px-4 py-3.5 text-center">
-                            <span className={`font-semibold text-xs ${cfg.text}`}>{cfg.label}</span>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`font-normal text-xs ${cfg.text}`}>{cfg.label}</span>
                           </td>
-                          <td className="px-4 py-3.5 text-right">
+                          <td className="px-4 py-3 text-right">
                             <button
                               type="button"
                               onClick={() => setSelectedLegacyRequest(r)}
-                              className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                              className="px-3 py-1 text-xs font-normal rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer"
                             >
                               Inspect
                             </button>

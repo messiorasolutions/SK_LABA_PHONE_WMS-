@@ -819,15 +819,17 @@ export default function SmartphonesPage({ onNavigateToHome }) {
                 <button
                   type="button"
                   onClick={() => setIsFilterDrawerOpen(false)}
-                  className="w-full py-3 px-4 rounded-xl bg-white hover:bg-slate-200 text-[#0A0F1E] text-xs font-bold transition-all shadow-lg cursor-pointer"
+                  className="w-full relative inline-flex items-center justify-center p-[0.5px] rounded-full bg-gradient-to-r from-red-600/80 via-blue-700/80 to-blue-900/80 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] shadow-lg shadow-black/80 group cursor-pointer"
                 >
-                  View results ({filteredPhones.length})
+                  <span className="w-full inline-flex items-center justify-center py-2.5 px-4 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                    View results ({filteredPhones.length})
+                  </span>
                 </button>
                 {hasActiveFilters && (
                   <button
                     type="button"
                     onClick={resetFilters}
-                    className="w-full mt-2 py-1 text-center text-xs text-theme-textMuted hover:text-red-400 transition-colors cursor-pointer"
+                    className="w-full mt-2.5 py-1 text-center text-xs text-theme-textMuted hover:text-white transition-colors cursor-pointer font-normal"
                   >
                     Clear all filters
                   </button>
@@ -857,32 +859,38 @@ export default function SmartphonesPage({ onNavigateToHome }) {
             ))}
           </div>
         ) : error ? (
-          <div className="py-20 text-center bg-theme-surface border border-theme-border rounded-3xl p-8 max-w-lg mx-auto">
-            <p className="text-base font-semibold text-red-400 mb-2">Error loading phones</p>
-            <p className="text-xs text-theme-textMuted mb-6">{error}</p>
+          <div className="py-20 text-center bg-theme-surface/70 border border-theme-border rounded-2xl p-8 max-w-lg mx-auto shadow-xl">
+            <p className="text-base font-normal text-red-400 mb-2">Error loading phones</p>
+            <p className="text-xs text-theme-textMuted mb-6 font-normal leading-relaxed">{error}</p>
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="px-6 py-2.5 rounded-full bg-theme-accent text-white text-xs font-semibold cursor-pointer"
+              className="relative inline-flex items-center justify-center p-[0.5px] rounded-full bg-gradient-to-r from-red-600/80 via-blue-700/80 to-blue-900/80 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] shadow-lg shadow-black/80 group cursor-pointer"
             >
-              Retry
+              <span className="inline-flex items-center gap-2 py-2 px-6 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                <RotateCcw className="w-3.5 h-3.5 text-slate-300 group-hover:text-white" />
+                <span>Retry</span>
+              </span>
             </button>
           </div>
         ) : filteredPhones.length === 0 ? (
-          <div className="py-20 text-center bg-theme-surface border border-theme-border rounded-3xl p-8 max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-full bg-theme-input flex items-center justify-center mx-auto mb-4 text-theme-textMuted">
-              <Search className="w-8 h-8" />
+          <div className="py-20 text-center bg-theme-surface/70 border border-theme-border rounded-2xl p-8 sm:p-10 max-w-md mx-auto shadow-xl">
+            <div className="w-14 h-14 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto mb-4 text-theme-textSecondary">
+              <Search className="w-6 h-6 text-slate-400" />
             </div>
-            <h3 className="text-base font-bold text-white mb-1">No Smartphones Found</h3>
-            <p className="text-xs text-theme-textSecondary mb-6">
+            <h3 className="text-base sm:text-lg font-normal text-white mb-2">No Smartphones Found</h3>
+            <p className="text-xs text-theme-textSecondary mb-6 font-normal leading-relaxed">
               No phones matched your selected criteria or search term. Try resetting your filters.
             </p>
             <button
               type="button"
               onClick={resetFilters}
-              className="px-6 py-2.5 rounded-full bg-theme-accent hover:bg-theme-accentHover text-white text-xs font-semibold shadow-md transition-all cursor-pointer"
+              className="relative inline-flex items-center justify-center p-[0.5px] rounded-full bg-gradient-to-r from-red-600/80 via-blue-700/80 to-blue-900/80 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] shadow-lg shadow-black/80 group cursor-pointer"
             >
-              Reset All Filters
+              <span className="inline-flex items-center justify-center gap-2 py-2.5 px-6 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                <RotateCcw className="w-3.5 h-3.5 text-slate-300 group-hover:text-white" />
+                <span>Reset All Filters</span>
+              </span>
             </button>
           </div>
         ) : (

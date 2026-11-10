@@ -81,44 +81,42 @@ export default function ReviewModal({ onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-      <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
+    <div className="fixed inset-0 z-50 overflow-hidden bg-black/70 backdrop-blur-sm transition-opacity duration-300">
+      <div className="absolute inset-0 cursor-pointer" onClick={onClose} aria-label="Close drawer" />
 
-      {success ? (
-        <div className="relative w-full max-w-md bg-[#0b1329] border border-white/10 rounded-2xl shadow-2xl p-6 text-center z-10 animate-in fade-in zoom-in-95 duration-200">
+      <div className="absolute top-0 right-0 bottom-0 h-full w-full sm:w-[500px] md:w-[540px] max-w-full bg-[#0A0F1E] border-l border-white/10 shadow-[-24px_0_60px_rgba(0,0,0,0.9)] flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-white/10 bg-[#0A0F1E]/95 backdrop-blur-md sticky top-0 z-20 shrink-0 flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-normal text-white">Share Your Experience</h2>
+            <p className="text-xs text-slate-400 font-normal">Tell others about your experience with SK Laaba Phone</p>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-3.5 right-3.5 p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
-            title="Close"
+            className="w-8 h-8 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors flex items-center justify-center cursor-pointer"
+            title="Close drawer"
           >
             <X className="w-4 h-4" />
           </button>
-
-          <div className="py-2 space-y-2">
-            <h3 className="text-base font-bold text-white">Review Submitted!</h3>
-            <p className="text-xs text-emerald-300 font-medium px-2 leading-relaxed">
-              &ldquo;{successMessage}&rdquo;
-            </p>
-          </div>
         </div>
-      ) : (
-        <div className="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-[#0b1329] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200">
-          <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-bold text-white">Share Your Experience</h2>
-              <p className="text-xs text-slate-400">Tell others about your experience with SK Laaba Phone</p>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Close"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
 
+        {success ? (
+          <div className="p-6 text-center space-y-4 my-auto animate-in fade-in duration-300">
+            <div className="w-14 h-14 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto shadow-lg">
+              <Star className="w-7 h-7 fill-emerald-400" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-normal text-white">Review Submitted!</h3>
+              <p className="text-xs text-emerald-300 font-normal px-2 leading-relaxed">
+                &ldquo;{successMessage}&rdquo;
+              </p>
+              <p className="text-[11px] text-slate-400 pt-2 font-normal">
+                Thank you for your valuable feedback. It helps other customers make better choices!
+              </p>
+            </div>
+          </div>
+        ) : (
           <div className="p-4 sm:p-5 overflow-y-auto flex-1">
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
@@ -204,33 +202,35 @@ export default function ReviewModal({ onClose, onSuccess }) {
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-white/10">
+              <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-white/10">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-full text-xs font-normal text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="relative inline-flex items-center justify-center p-[0.5px] rounded-full bg-gradient-to-r from-red-600/80 via-blue-700/80 to-blue-900/80 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] shadow-lg shadow-black/80 group cursor-pointer disabled:opacity-50"
                 >
-                  {loading ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      <span>Submitting...</span>
-                    </>
-                  ) : (
-                    <span>Submit Review</span>
-                  )}
+                  <span className="inline-flex items-center gap-2 py-2 px-5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                    {loading ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Submitting...</span>
+                      </>
+                    ) : (
+                      <span>Submit Review</span>
+                    )}
+                  </span>
                 </button>
               </div>
             </form>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

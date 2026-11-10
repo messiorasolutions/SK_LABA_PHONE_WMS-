@@ -221,7 +221,7 @@ export default function InquiryModal({ phone, onClose }) {
                   required
                   rows={4}
                   maxLength={3000}
-                  placeholder="Ask about warranty, color options, trade-in, or payment methods..."
+                  placeholder="Ask about warranty, color options, selling your phone, or payment methods..."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   className="w-full bg-theme-input/70 border border-theme-border hover:border-theme-borderMedium focus:border-theme-accent rounded-xl px-3.5 py-2 sm:py-2.5 text-base sm:text-xs text-white placeholder-theme-textMuted focus:outline-none transition-all resize-none shadow-inner leading-relaxed"

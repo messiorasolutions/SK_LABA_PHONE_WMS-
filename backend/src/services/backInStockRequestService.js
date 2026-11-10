@@ -36,6 +36,11 @@ class BackInStockRequestService {
             throw new AppError('The selected phone is archived and not eligible for back-in-stock notification requests.', 400);
         }
 
+        // 2b. Reject Marketplace customer-owned phones
+        if (phone.product_source === 'MARKETPLACE' || phone.marketplace_listing_id) {
+            throw new AppError('Marketplace phones represent unique customer-owned devices and do not support back-in-stock notifications.', 400);
+        }
+
         // 3. Verify phone availability eligibility:
         // Must be currently SOLD_OUT or have zero available stock OR customer is requesting a specific out-of-stock variant
         const rawStock = phone.current_stock !== undefined ? phone.current_stock : phone.stock_quantity;

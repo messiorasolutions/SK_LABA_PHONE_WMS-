@@ -241,10 +241,10 @@ function OfferCard({ offer, allPhones, onNavigate }) {
   );
 }
 
-export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenReview }) {
+export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYourPhone, onOpenSell, onOpenReview }) {
   const dispatch = useDispatch();
   const [activeOffers, setActiveOffers] = useState([]);
-  const tradeInVideoRef = useRef(null);
+  const sellVideoRef = useRef(null);
   const videoContainerRef = useRef(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [reviews, setReviews] = useState([]);
@@ -362,7 +362,7 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
   // Control seamless video looping once loaded
   useEffect(() => {
     if (!shouldLoadVideo) return;
-    const video = tradeInVideoRef.current;
+    const video = sellVideoRef.current;
     if (!video) return;
 
     const START_TIME = 2.75;
@@ -441,28 +441,41 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
     }
   };
 
+  const handleGoToSellYourPhone = () => {
+    if (onNavigateToSellYourPhone) {
+      onNavigateToSellYourPhone();
+    } else {
+      dispatch(setActiveTab('SellYourPhone'));
+      window.location.hash = '#sell-your-phone';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="flex flex-col w-full">
       <HeroSection onNavigateToSmartphones={handleGoToSmartphones} />
 
       <TrustBadges />
 
-      {/* Trade-in Upgrade Video Section */}
+      {/* Sell Your Phone Video Section */}
       <section className="relative w-full bg-gradient-to-b from-theme-bg via-black to-black overflow-hidden select-none py-8 sm:py-12 md:py-14">
         {/* Section Heading & CTA over / above the video */}
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 text-center space-y-2.5 sm:space-y-4 mb-2 sm:-mb-10 md:-mb-20 pointer-events-none">
           <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)] pointer-events-auto">
-            Trade in. Upgrade.
+            Sell Your Phone.
           </h2>
+          <p className="max-w-xl mx-auto text-xs sm:text-sm text-slate-300 font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] pointer-events-auto px-4">
+            Turn your old smartphone into cash. List your phone with SK LABA PHONE and connect with genuine buyers.
+          </p>
 
           <div className="pt-1 sm:pt-3 pointer-events-auto">
             <button
               type="button"
-              onClick={handleOpenSell}
+              onClick={handleGoToSellYourPhone}
               className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-xl shadow-black/80 group cursor-pointer"
             >
               <span className="inline-flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 md:py-3 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs sm:text-sm font-normal transition-colors duration-200">
-                <span>Get your estimate</span>
+                <span>Sell Your Phone</span>
                 <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-0.5 transition-transform" />
               </span>
             </button>
@@ -474,8 +487,8 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
           <div
             ref={videoContainerRef}
             className="relative w-full aspect-video flex items-center justify-center overflow-hidden cursor-pointer group rounded-lg sm:rounded-none bg-neutral-950"
-            onClick={handleOpenSell}
-            title="Click to Trade-In or Sell Your Phone"
+            onClick={handleGoToSellYourPhone}
+            title="Click to Sell Your Phone"
           >
             {/* Subtle 4-Side Edge Feathering / Shade: Left, Right, Top, Bottom */}
             <div className="absolute inset-y-0 left-0 w-6 sm:w-12 md:w-16 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
@@ -488,7 +501,7 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
 
             {shouldLoadVideo ? (
               <video
-                ref={tradeInVideoRef}
+                ref={sellVideoRef}
                 src={upgradeVideo}
                 autoPlay
                 loop
@@ -588,7 +601,7 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
                 </div>
                 <div className="flex sm:block items-baseline sm:items-start justify-between sm:justify-start gap-2">
                   <div className="text-base sm:text-lg lg:text-xl font-normal text-white tracking-tight">ලාබ ෆෝන් Value</div>
-                  <div className="text-[11px] text-theme-textMuted font-normal">Transparent trade-ins &amp; deals</div>
+                  <div className="text-[11px] text-theme-textMuted font-normal">Fair pricing &amp; marketplace deals</div>
                 </div>
                 <div className="flex sm:block items-baseline sm:items-start justify-between sm:justify-start gap-2">
                   <div className="text-lg sm:text-xl font-normal text-white tracking-tight">Seoul &bull; LK</div>
@@ -609,7 +622,7 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
                 <span>Verified Customer Reviews</span>
               </h2>
               <p className="text-xs sm:text-sm text-theme-textSecondary mt-2 sm:mt-2.5 leading-relaxed">
-                Real feedback from clients who purchased certified smartphones and traded devices with us.
+                Real feedback from clients who purchased certified smartphones and sold devices through our marketplace.
               </p>
             </div>
 
@@ -781,7 +794,7 @@ export default function HomePage({ onNavigateToSmartphones, onOpenSell, onOpenRe
               <div className="space-y-1">
                 <h3 className="text-base font-bold text-white">Be the First to Leave a Review!</h3>
                 <p className="text-xs text-theme-textSecondary max-w-sm mx-auto">
-                  Have you purchased a smartphone or used our trade-in service? Share your feedback with our community.
+                  Have you purchased a smartphone or sold a device through our marketplace? Share your feedback with our community.
                 </p>
               </div>
               <button

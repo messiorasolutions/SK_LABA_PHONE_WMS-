@@ -113,15 +113,33 @@ function validateCreateReservation(req, res, next) {
         cleanEmail = emailStr.toLowerCase();
     }
 
-    // 4. Selected Phone ID (Required)
-    if (phone_id === undefined || phone_id === null || String(phone_id).trim() === '') {
-        return next(new AppError('Selected phone ID is required.', 400));
+    // 4. Target Device (Smartphone phone_id OR Marketplace marketplace_listing_id)
+    const { marketplace_listing_id } = req.body;
+    let cleanPhoneId = null;
+    let cleanMarketplaceId = null;
+
+    if (
+        (phone_id === undefined || phone_id === null || String(phone_id).trim() === '') &&
+        (marketplace_listing_id === undefined || marketplace_listing_id === null || String(marketplace_listing_id).trim() === '')
+    ) {
+        return next(new AppError('Selected phone ID or marketplace listing ID is required.', 400));
     }
-    const phoneIdStr = String(phone_id).trim();
-    if (!POSITIVE_INT_REGEX.test(phoneIdStr)) {
-        return next(new AppError('Invalid phone_id. Must be a positive integer.', 400));
+
+    if (phone_id !== undefined && phone_id !== null && String(phone_id).trim() !== '') {
+        const phoneIdStr = String(phone_id).trim();
+        if (!POSITIVE_INT_REGEX.test(phoneIdStr)) {
+            return next(new AppError('Invalid phone_id. Must be a positive integer.', 400));
+        }
+        cleanPhoneId = Number(phoneIdStr);
     }
-    const cleanPhoneId = Number(phoneIdStr);
+
+    if (marketplace_listing_id !== undefined && marketplace_listing_id !== null && String(marketplace_listing_id).trim() !== '') {
+        const mkpIdStr = String(marketplace_listing_id).trim();
+        if (!POSITIVE_INT_REGEX.test(mkpIdStr)) {
+            return next(new AppError('Invalid marketplace_listing_id. Must be a positive integer.', 400));
+        }
+        cleanMarketplaceId = Number(mkpIdStr);
+    }
 
     // 5. Selected Phone Options (Optional / Validated against phone in service layer)
     let cleanOptions = null;
@@ -202,6 +220,7 @@ function validateCreateReservation(req, res, next) {
         phone_number: cleanPhone,
         email: cleanEmail,
         phone_id: cleanPhoneId,
+        marketplace_listing_id: cleanMarketplaceId,
         selected_options: cleanOptions,
         delivery_details: cleanDelivery,
         preferred_collection_date: cleanDate,

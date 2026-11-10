@@ -8,6 +8,7 @@ import ContactPage from './pages/ContactPage';
 import GiveawaysPage from './pages/GiveawaysPage';
 import FavoritesModal from './components/Modals/FavoritesModal';
 import PhoneDetailModal from './components/Modals/PhoneDetailModal';
+import MarketplacePhoneDetailModal from './components/Marketplace/MarketplacePhoneDetailModal';
 import ReservationModal from './components/Modals/ReservationModal';
 import InquiryModal from './components/Modals/InquiryModal';
 import CartModal from './components/Modals/CartModal';
@@ -15,7 +16,12 @@ import SellPhoneModal from './components/Modals/SellPhoneModal';
 import ReviewModal from './components/Modals/ReviewModal';
 import BackInStockModal from './components/Modals/BackInStockModal';
 import QuickChatWidget from './components/QuickChatWidget';
+import ErrorBoundary from './components/Common/ErrorBoundary';
 import { setActiveTab } from './actions/heroActions';
+
+// Code-split heavy pages
+const MarketplacePage = React.lazy(() => import('./pages/MarketplacePage'));
+const SellYourPhonePage = React.lazy(() => import('./pages/SellYourPhonePage'));
 
 export default function App() {
   const dispatch = useDispatch();
@@ -37,11 +43,15 @@ export default function App() {
 
       if (hash === '#smartphones' || pathname === '/smartphones') {
         dispatch(setActiveTab('Smartphones'));
+      } else if (hash === '#marketplace' || pathname === '/marketplace') {
+        dispatch(setActiveTab('Marketplace'));
+      } else if (hash === '#sell-your-phone' || pathname === '/sell-your-phone') {
+        dispatch(setActiveTab('SellYourPhone'));
       } else if (hash === '#giveaways' || pathname === '/giveaways') {
         dispatch(setActiveTab('Giveaways'));
       } else if (hash === '#contact' || pathname === '/contact') {
         dispatch(setActiveTab('Contact Us'));
-      } else if (hash === '' || hash === '#' || hash === '#home' || hash === '#reviews' || hash === '#about' || pathname === '/') {
+      } else if (hash === '' || hash === '#' || hash === '#home' || hash === '#reviews' || hash === '#about' || hash === '#deals' || pathname === '/') {
         dispatch(setActiveTab('Home'));
       }
     };
@@ -66,7 +76,7 @@ export default function App() {
     window.addEventListener('sk_laba_open_inquiry_modal', handleOpenInquiry);
 
     const handleOpenSell = (e) => {
-      setSellModalData({ desiredPhone: e.detail?.desiredPhone || null });
+      setSellModalData({ desiredPhone: e?.detail?.desiredPhone || null });
     };
     window.addEventListener('sk_laba_open_sell_modal', handleOpenSell);
 
@@ -105,6 +115,12 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleNavigateToSellYourPhone = () => {
+    dispatch(setActiveTab('SellYourPhone'));
+    window.location.hash = '#sell-your-phone';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleNavigateToHome = () => {
     dispatch(setActiveTab('Home'));
     window.location.hash = '';
@@ -119,15 +135,25 @@ export default function App() {
       <Navbar onOpenFavorites={() => setFavoritesModalOpen(true)} onOpenCart={() => setCartModalOpen(true)} />
 
       <main className="flex-1">
-        {activeTab === 'Smartphones' ? (
-          <SmartphonesPage onNavigateToHome={handleNavigateToHome} />
-        ) : activeTab === 'Giveaways' ? (
-          <GiveawaysPage onNavigateToHome={handleNavigateToHome} />
-        ) : activeTab === 'Contact Us' || activeTab === 'Contact' ? (
-          <ContactPage onNavigateToHome={handleNavigateToHome} />
-        ) : (
-          <HomePage onNavigateToSmartphones={handleNavigateToSmartphones} onOpenSell={() => setSellModalData({})} onOpenReview={() => setReviewModalOpen(true)} />
-        )}
+        <ErrorBoundary>
+          {activeTab === 'Smartphones' ? (
+            <SmartphonesPage onNavigateToHome={handleNavigateToHome} />
+          ) : activeTab === 'Marketplace' ? (
+            <React.Suspense fallback={<div className="min-h-screen bg-[#070B16] flex items-center justify-center"><div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" /></div>}>
+              <MarketplacePage onNavigateToHome={handleNavigateToHome} onOpenSell={() => setSellModalData({})} />
+            </React.Suspense>
+          ) : activeTab === 'SellYourPhone' ? (
+            <React.Suspense fallback={<div className="min-h-screen bg-[#070B16] flex items-center justify-center"><div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" /></div>}>
+              <SellYourPhonePage onNavigateToHome={handleNavigateToHome} onStartListing={() => setSellModalData({})} />
+            </React.Suspense>
+          ) : activeTab === 'Giveaways' ? (
+            <GiveawaysPage onNavigateToHome={handleNavigateToHome} />
+          ) : activeTab === 'Contact Us' || activeTab === 'Contact' ? (
+            <ContactPage onNavigateToHome={handleNavigateToHome} />
+          ) : (
+            <HomePage onNavigateToSmartphones={handleNavigateToSmartphones} onNavigateToSellYourPhone={handleNavigateToSellYourPhone} onOpenSell={() => setSellModalData({})} onOpenReview={() => setReviewModalOpen(true)} />
+          )}
+        </ErrorBoundary>
       </main>
 
       <Footer onOpenSell={() => setSellModalData({ desiredPhone: null })} />
@@ -161,26 +187,28 @@ export default function App() {
 
       {selectedPhoneForDetail && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black">
-          <PhoneDetailModal
-            phone={selectedPhoneForDetail}
-            onClose={() => setSelectedPhoneForDetail(null)}
-            onOpenReserve={(p) => {
-              setSelectedPhoneForReserve(p);
-              setSelectedPhoneForDetail(null);
-            }}
-            onOpenInquiry={(p) => {
-              setInquiryModalData({ phone: p });
-              setSelectedPhoneForDetail(null);
-            }}
-            onOpenSell={(p) => {
-              setSellModalData({ desiredPhone: p });
-              setSelectedPhoneForDetail(null);
-            }}
-            onOpenNotifyBackInStock={(p) => {
-              setSelectedPhoneForBackInStock(p);
-              setSelectedPhoneForDetail(null);
-            }}
-          />
+          <ErrorBoundary>
+            <PhoneDetailModal
+              phone={selectedPhoneForDetail}
+              onClose={() => setSelectedPhoneForDetail(null)}
+              onOpenReserve={(p) => {
+                setSelectedPhoneForReserve(p);
+                setSelectedPhoneForDetail(null);
+              }}
+              onOpenInquiry={(p) => {
+                setInquiryModalData({ phone: p });
+                setSelectedPhoneForDetail(null);
+              }}
+              onOpenSell={(p) => {
+                setSellModalData({ desiredPhone: p });
+                setSelectedPhoneForDetail(null);
+              }}
+              onOpenNotifyBackInStock={(p) => {
+                setSelectedPhoneForBackInStock(p);
+                setSelectedPhoneForDetail(null);
+              }}
+            />
+          </ErrorBoundary>
         </div>
       )}
 
@@ -199,10 +227,12 @@ export default function App() {
       )}
 
       {sellModalData && (
-        <SellPhoneModal
-          desiredPhone={sellModalData.desiredPhone}
-          onClose={() => setSellModalData(null)}
-        />
+        <ErrorBoundary>
+          <SellPhoneModal
+            desiredPhone={sellModalData.desiredPhone}
+            onClose={() => setSellModalData(null)}
+          />
+        </ErrorBoundary>
       )}
 
       {reviewModalOpen && (

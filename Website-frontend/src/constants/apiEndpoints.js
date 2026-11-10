@@ -40,6 +40,16 @@ export const API_ENDPOINTS = {
     active: '/api/offers/active',
     byId: (id) => `/api/offers/${id}`,
   },
+  marketplace: {
+    base: '/api/marketplace',
+    submit: '/api/marketplace/submit',
+    phones: '/api/marketplace/phones',
+    byId: (id) => `/api/marketplace/phones/${id}`,
+    sellerTerms: '/api/marketplace/terms/seller',
+    buyerTerms: '/api/marketplace/terms/buyer',
+    orders: '/api/marketplace/orders',
+    commission: '/api/marketplace/commission',
+  },
 };
 
 export default API_ENDPOINTS;

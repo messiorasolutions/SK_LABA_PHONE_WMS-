@@ -1,3 +1,6 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
+require('dotenv').config();
 const nodemailer = require('nodemailer');
 
 class EmailService {
@@ -466,6 +469,361 @@ class EmailService {
             return true;
         } catch (error) {
             console.error(`[EmailService] Failed to send giveaway winner email to ${to}:`, error.message);
+            return false;
+        }
+    }
+
+    /**
+     * Send Marketplace Seller Approval Email
+     * Shows: Phone, Listed Price, Commission Rate, Commission Amount, Expected Amount You Will Receive
+     */
+    async sendMarketplaceSellerApprovalEmail({
+        to,
+        sellerName,
+        phoneBrand,
+        phoneModel,
+        storage,
+        listingRef,
+        listedPrice,
+        commissionRate,
+        commissionAmount,
+        expectedPayout
+    }) {
+        if (!to || typeof to !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to.trim())) {
+            console.error('[EmailService] Marketplace approval email skipped: invalid or missing seller email address:', to);
+            return false;
+        }
+
+        if (!this.isConfigured || !this.transporter) {
+            this.initTransporter();
+        }
+
+        if (!this.isConfigured || !this.transporter) {
+            console.warn('[EmailService] SMTP is not configured. Approval email simulated in this environment.');
+            return false;
+        }
+
+        const sender = process.env.EMAIL_FROM || '"SK LABA PHONE" <no-reply@sklabaphone.com>';
+        const recipientName = sellerName || 'Valued Seller';
+        const formattedPrice = Number(listedPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const formattedCommission = Number(commissionAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const formattedPayout = Number(expectedPayout).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        const subject = 'SK LABA PHONE Marketplace — Your Listing Has Been Approved';
+        const textContent = `Hello ${recipientName},
+
+Your phone listing has been approved by SK LABA PHONE.
+Your listing is now available on the SK LABA PHONE Marketplace.
+
+Listing Reference: ${listingRef || 'N/A'}
+Brand: ${phoneBrand || 'N/A'}
+Model: ${phoneModel || 'N/A'}
+Storage: ${storage || 'N/A'}
+Listed Price: Rs. ${formattedPrice}
+Platform Commission: ${commissionRate}%
+Commission Amount: Rs. ${formattedCommission}
+Expected Amount You Will Receive: Rs. ${formattedPayout}
+
+Please Note:
+The amount above represents your expected seller payout once the buyer confirms delivery and verification is completed. Payout is released after delivery confirmation. You have NOT been paid yet.
+
+Thank you for selling with SK LABA PHONE!
+
+Best regards,
+SK LABA PHONE Marketplace Team`;
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="utf-8" /></head>
+            <body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f5; padding: 30px 15px;">
+                    <tr>
+                        <td align="center">
+                            <table width="100%" max-width="580" style="max-width: 580px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e4e4e7; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+                                <tr>
+                                    <td style="background-color: #09090b; padding: 28px 30px; text-align: center;">
+                                        <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.5px;">SK LABA PHONE</h1>
+                                        <p style="color: #a1a1aa; margin: 4px 0 0; font-size: 13px;">Phone Marketplace</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 30px;">
+                                        <div style="background-color: #ecfdf5; border-radius: 10px; padding: 14px 18px; border-left: 4px solid #10b981; margin-bottom: 24px;">
+                                            <p style="margin: 0; font-weight: 600; color: #065f46; font-size: 14px;">Listing Approved & Published</p>
+                                            <p style="margin: 4px 0 0; font-size: 13px; color: #047857;">Your phone listing has been approved. Your listing is now available on the SK LABA PHONE Marketplace.</p>
+                                        </div>
+                                        <p style="font-size: 14px; color: #3f3f46; margin: 0 0 16px;">Hello <strong>${recipientName}</strong>,</p>
+                                        <table width="100%" style="border-collapse: collapse; margin-bottom: 20px;">
+                                            <tr style="border-bottom: 1px solid #f4f4f5;">
+                                                <td style="padding: 10px 0; color: #71717a; font-size: 13px;">Listing Reference:</td>
+                                                <td style="padding: 10px 0; font-weight: 600; text-align: right; font-size: 13px;">${listingRef || 'N/A'}</td>
+                                            </tr>
+                                            <tr style="border-bottom: 1px solid #f4f4f5;">
+                                                <td style="padding: 10px 0; color: #71717a; font-size: 13px;">Brand:</td>
+                                                <td style="padding: 10px 0; font-weight: 600; text-align: right; font-size: 13px;">${phoneBrand || 'N/A'}</td>
+                                            </tr>
+                                            <tr style="border-bottom: 1px solid #f4f4f5;">
+                                                <td style="padding: 10px 0; color: #71717a; font-size: 13px;">Model:</td>
+                                                <td style="padding: 10px 0; font-weight: 600; text-align: right; font-size: 13px;">${phoneModel || 'N/A'}</td>
+                                            </tr>
+                                            <tr style="border-bottom: 1px solid #f4f4f5;">
+                                                <td style="padding: 10px 0; color: #71717a; font-size: 13px;">Storage:</td>
+                                                <td style="padding: 10px 0; font-weight: 600; text-align: right; font-size: 13px;">${storage || 'N/A'}</td>
+                                            </tr>
+                                            <tr style="border-bottom: 1px solid #f4f4f5;">
+                                                <td style="padding: 10px 0; color: #71717a; font-size: 13px;">Listed Price:</td>
+                                                <td style="padding: 10px 0; font-weight: 600; text-align: right; font-size: 13px;">Rs. ${formattedPrice}</td>
+                                            </tr>
+                                            <tr style="border-bottom: 1px solid #f4f4f5;">
+                                                <td style="padding: 10px 0; color: #71717a; font-size: 13px;">Platform Commission:</td>
+                                                <td style="padding: 10px 0; font-weight: 600; text-align: right; font-size: 13px; color: #d97706;">${commissionRate}%</td>
+                                            </tr>
+                                            <tr style="border-bottom: 1px solid #f4f4f5;">
+                                                <td style="padding: 10px 0; color: #71717a; font-size: 13px;">Commission Amount:</td>
+                                                <td style="padding: 10px 0; font-weight: 600; text-align: right; font-size: 13px; color: #d97706;">Rs. ${formattedCommission}</td>
+                                            </tr>
+                                            <tr style="background-color: #f8fafc;">
+                                                <td style="padding: 12px 10px; font-weight: 700; color: #0f172a; font-size: 14px;">Expected Amount You Will Receive:</td>
+                                                <td style="padding: 12px 10px; font-weight: 700; text-align: right; color: #16a34a; font-size: 16px;">Rs. ${formattedPayout}</td>
+                                            </tr>
+                                        </table>
+                                        <p style="font-size: 12px; color: #71717a; line-height: 1.5; margin: 16px 0 0;">
+                                            <em>Note: The amount shown is your expected seller payout once the buyer confirms delivery and verification is completed. Payout is released after delivery confirmation.</em>
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="background-color: #fafafa; padding: 16px 30px; border-top: 1px solid #e4e4e7; text-align: center; font-size: 11px; color: #a1a1aa;">
+                                        &copy; ${new Date().getFullYear()} SK LABA PHONE • <a href="https://sklabaphone.com" style="color: #a1a1aa;">sklabaphone.com</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+            </html>
+        `;
+
+        try {
+            await this.transporter.sendMail({
+                from: sender,
+                to,
+                subject,
+                text: textContent,
+                html: htmlContent
+            });
+            console.log(`[EmailService] Marketplace approval email successfully sent to ${to} (Ref: ${listingRef})`);
+            return true;
+        } catch (error) {
+            console.error('[EmailService] Marketplace approval email failed', {
+                listingRef: listingRef || 'N/A',
+                emailType: 'SELLER_APPROVAL',
+                recipient: to,
+                error: error.message
+            });
+            return false;
+        }
+    }
+
+    /**
+     * Send Marketplace Seller Rejection Email
+     * Shows: Phone, Rejection Reason, Support info
+     */
+    async sendMarketplaceSellerRejectionEmail({
+        to,
+        sellerName,
+        phoneBrand,
+        phoneModel,
+        listingRef,
+        rejectionReason
+    }) {
+        if (!this.isConfigured || !this.transporter) {
+            console.warn('[EmailService] SMTP is not configured. Rejection email simulated in this environment.');
+            return false;
+        }
+
+        const sender = process.env.EMAIL_FROM || '"SK LABA PHONE" <no-reply@sklabaphone.com>';
+        const recipientName = sellerName || 'Valued Seller';
+        const phoneTitle = [phoneBrand, phoneModel].filter(Boolean).join(' ') || 'Phone';
+
+        const subject = 'SK LABA PHONE Marketplace — Submission Update';
+        const textContent = `Hello ${recipientName},
+
+Your SK LABA PHONE Marketplace submission was not approved.
+
+Listing Reference: ${listingRef || 'N/A'}
+Phone: ${phoneTitle}
+Status: REJECTED
+
+Reason for Rejection:
+${rejectionReason || 'Does not meet marketplace submission criteria.'}
+
+Please contact SK LABA PHONE if you require further information or wish to resubmit.
+WhatsApp / Phone: +82 10-5892-7482
+Email: contact@sklabaphone.com
+
+Best regards,
+SK LABA PHONE Marketplace Team`;
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="utf-8" /></head>
+            <body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f5; padding: 30px 15px;">
+                    <tr>
+                        <td align="center">
+                            <table width="100%" max-width="580" style="max-width: 580px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e4e4e7; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+                                <tr>
+                                    <td style="background-color: #09090b; padding: 28px 30px; text-align: center;">
+                                        <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 700;">SK LABA PHONE</h1>
+                                        <p style="color: #a1a1aa; margin: 4px 0 0; font-size: 13px;">Phone Marketplace</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 30px;">
+                                        <div style="background-color: #fef2f2; border-radius: 10px; padding: 14px 18px; border-left: 4px solid #ef4444; margin-bottom: 24px;">
+                                            <p style="margin: 0; font-weight: 600; color: #991b1b; font-size: 14px;">Marketplace Submission Not Approved</p>
+                                        </div>
+                                        <p style="font-size: 14px; color: #3f3f46; margin: 0 0 16px;">Hello <strong>${recipientName}</strong>,</p>
+                                        <p style="font-size: 14px; color: #52525b; line-height: 1.6; margin: 0 0 16px;">
+                                            Your phone submission for <strong>${phoneTitle}</strong> (Ref: ${listingRef || 'N/A'}) was not approved for listing on the Marketplace.
+                                        </p>
+                                        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0;">
+                                            <p style="font-size: 12px; font-weight: 700; color: #64748b; margin: 0 0 6px; text-transform: uppercase;">Reason for Rejection:</p>
+                                            <p style="font-size: 14px; color: #1e293b; margin: 0; line-height: 1.5;">${rejectionReason || 'Does not meet marketplace submission criteria.'}</p>
+                                        </div>
+                                        <p style="font-size: 13px; color: #71717a; line-height: 1.5; margin: 16px 0 0;">
+                                            If you have questions or wish to rectify the issues and resubmit, please reach out to us at <a href="mailto:contact@sklabaphone.com" style="color: #2563eb;">contact@sklabaphone.com</a> or via WhatsApp at <strong>+82 10-5892-7482</strong>.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="background-color: #fafafa; padding: 16px 30px; border-top: 1px solid #e4e4e7; text-align: center; font-size: 11px; color: #a1a1aa;">
+                                        &copy; ${new Date().getFullYear()} SK LABA PHONE • <a href="https://sklabaphone.com" style="color: #a1a1aa;">sklabaphone.com</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+            </html>
+        `;
+
+        try {
+            await this.transporter.sendMail({
+                from: sender,
+                to,
+                subject,
+                text: textContent,
+                html: htmlContent
+            });
+            return true;
+        } catch (error) {
+            console.error(`[EmailService] Failed to send rejection email to ${to}:`, error.message);
+            return false;
+        }
+    }
+
+    /**
+     * Send Marketplace Changes Requested Email
+     * Shows: Phone, Required Changes / Instructions, Support info
+     */
+    async sendMarketplaceChangesRequestedEmail({
+        to,
+        sellerName,
+        phoneBrand,
+        phoneModel,
+        listingRef,
+        changesRequestedReason
+    }) {
+        if (!this.isConfigured || !this.transporter) {
+            console.warn('[EmailService] SMTP is not configured. Changes requested email simulated in this environment.');
+            return false;
+        }
+
+        const sender = process.env.EMAIL_FROM || '"SK LABA PHONE" <no-reply@sklabaphone.com>';
+        const recipientName = sellerName || 'Valued Seller';
+        const phoneTitle = [phoneBrand, phoneModel].filter(Boolean).join(' ') || 'Phone';
+
+        const subject = 'SK LABA PHONE Marketplace — Changes Requested for Your Submission';
+        const textContent = `Hello ${recipientName},
+
+Our review team has requested changes for your Marketplace phone submission.
+
+Listing Reference: ${listingRef || 'N/A'}
+Phone: ${phoneTitle}
+Status: CHANGES REQUESTED
+
+Required Changes / Instructions:
+${changesRequestedReason || 'Please review and update your listing details or photos.'}
+
+Please update your listing or reply to this email with updated information.
+WhatsApp / Phone: +82 10-5892-7482
+
+Best regards,
+SK LABA PHONE Marketplace Team`;
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="utf-8" /></head>
+            <body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f5; padding: 30px 15px;">
+                    <tr>
+                        <td align="center">
+                            <table width="100%" max-width="580" style="max-width: 580px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e4e4e7; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+                                <tr>
+                                    <td style="background-color: #09090b; padding: 28px 30px; text-align: center;">
+                                        <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 700;">SK LABA PHONE</h1>
+                                        <p style="color: #a1a1aa; margin: 4px 0 0; font-size: 13px;">Phone Marketplace</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 30px;">
+                                        <div style="background-color: #fffbeb; border-radius: 10px; padding: 14px 18px; border-left: 4px solid #f59e0b; margin-bottom: 24px;">
+                                            <p style="margin: 0; font-weight: 600; color: #92400e; font-size: 14px;">Action Required: Changes Requested</p>
+                                        </div>
+                                        <p style="font-size: 14px; color: #3f3f46; margin: 0 0 16px;">Hello <strong>${recipientName}</strong>,</p>
+                                        <p style="font-size: 14px; color: #52525b; line-height: 1.6; margin: 0 0 16px;">
+                                            Before we can approve your listing for <strong>${phoneTitle}</strong> (Ref: ${listingRef || 'N/A'}), please provide the requested updates below:
+                                        </p>
+                                        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0;">
+                                            <p style="font-size: 12px; font-weight: 700; color: #64748b; margin: 0 0 6px; text-transform: uppercase;">Required Changes:</p>
+                                            <p style="font-size: 14px; color: #1e293b; margin: 0; line-height: 1.5;">${changesRequestedReason || 'Please review and update your listing details or photos.'}</p>
+                                        </div>
+                                        <p style="font-size: 13px; color: #71717a; line-height: 1.5; margin: 16px 0 0;">
+                                            Need assistance? Reach out to us via WhatsApp at <strong>+82 10-5892-7482</strong> or email <a href="mailto:contact@sklabaphone.com" style="color: #2563eb;">contact@sklabaphone.com</a>.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="background-color: #fafafa; padding: 16px 30px; border-top: 1px solid #e4e4e7; text-align: center; font-size: 11px; color: #a1a1aa;">
+                                        &copy; ${new Date().getFullYear()} SK LABA PHONE • <a href="https://sklabaphone.com" style="color: #a1a1aa;">sklabaphone.com</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+            </html>
+        `;
+
+        try {
+            await this.transporter.sendMail({
+                from: sender,
+                to,
+                subject,
+                text: textContent,
+                html: htmlContent
+            });
+            return true;
+        } catch (error) {
+            console.error(`[EmailService] Failed to send changes requested email to ${to}:`, error.message);
             return false;
         }
     }

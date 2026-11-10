@@ -3,12 +3,11 @@ import axios from 'axios';
 // Detect whether running in production / hosted domain (e.g. sklabaphone.com) or local dev
 const isHostedDomain =
   typeof window !== 'undefined' &&
-  (window.location.hostname.includes('sklabaphone.com') ||
-    (!['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.hostname !== ''));
+  window.location.hostname.includes('sklabaphone.com');
 
-const rawBaseUrl = isHostedDomain
-  ? (import.meta.env.VITE_HOSTED_API_BASE_URL || 'https://api.sklabaphone.com')
-  : (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000');
+const rawBaseUrl = isHostedDomain ? ((typeof import.meta !== 'undefined' && import.meta?.env?.VITE_HOSTED_API_BASE_URL) || 'https://api.sklabaphone.com') : ((typeof import.meta !== 'undefined' && (import.meta?.env?.VITE_API_BASE_URL || import.meta?.env?.VITE_API_URL)) || 'http://localhost:5000');
+
+
 
 export const API_BASE_URL = (rawBaseUrl || 'https://api.sklabaphone.com').replace(/\/+$/, '');
 

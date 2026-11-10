@@ -16,6 +16,7 @@ import { useShopInfo } from '../../context/ShopInfoContext';
 import phoneService from '../../services/phoneService';
 import storageService from '../../services/storageService';
 import FormattedDescription from '../Common/FormattedDescription';
+import { resolveImageUrl } from '../../utils/imageHelper';
 
 function SimilarPhoneCard({ simPhone, onSelectPhone }) {
   const generalPhotos = React.useMemo(() => {
@@ -260,6 +261,7 @@ export default function PhoneDetailModal({
   const photos = activeColor?.photos || [];
 
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   // Reset to initial color and first photo when phone changes
   useEffect(() => {
@@ -291,13 +293,19 @@ export default function PhoneDetailModal({
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose && onClose();
+      if (e.key === 'Escape') {
+        if (isLightboxOpen) {
+          setIsLightboxOpen(false);
+        } else if (onClose) {
+          onClose();
+        }
+      }
       if (e.key === 'ArrowLeft') handlePrevPhoto();
       if (e.key === 'ArrowRight') handleNextPhoto();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [photos.length]);
+  }, [photos.length, isLightboxOpen]);
 
   // Load system storage options as a fallback dictionary
   const [systemStorages, setSystemStorages] = useState([]);
@@ -369,9 +377,16 @@ export default function PhoneDetailModal({
 
   if (!phone) return null;
 
+  const isMarketplace = Boolean(
+    phone.is_marketplace ||
+    phone.source === 'MARKETPLACE' ||
+    phone.product_source === 'MARKETPLACE'
+  );
+
   const availability = (phone.availability || 'IN_STOCK').toUpperCase();
   const currentStock = Number(phone.current_stock ?? phone.stock ?? 0);
-  const isSoldOut = availability === 'SOLD_OUT' || (availability !== 'COMING_SOON' && currentStock === 0);
+  // Marketplace phones do not check inventory stock; single seller listing
+  const isSoldOut = isMarketplace ? false : (availability === 'SOLD_OUT' || (availability !== 'COMING_SOON' && currentStock === 0));
   const activeColorQty = typeof activeColor?.quantity === 'number' ? activeColor.quantity : currentStock;
 
   // Selected variant stock (Color + Storage)
@@ -381,7 +396,7 @@ export default function PhoneDetailModal({
   } else if (phoneStorageOptions.length === 1 && typeof activeColor?.quantity === 'number') {
     variantStock = activeColor.quantity;
   }
-  const isVariantSoldOut = isSoldOut || (availability !== 'COMING_SOON' && variantStock === 0);
+  const isVariantSoldOut = isMarketplace ? false : (isSoldOut || (availability !== 'COMING_SOON' && variantStock === 0));
 
   const regularPrice = Number(phone.price || phone.regular_price || 0);
   const offerPrice = phone.offer_price || phone.active_offer?.offer_price;
@@ -403,7 +418,7 @@ export default function PhoneDetailModal({
       storageStr ? `*Storage:* ${storageStr}` : null,
       colorStr ? `*Color:* ${colorStr}` : null,
       `*Price:* ${priceStr}`,
-      phone.warranty ? `*Warranty:* ${phone.warranty}` : null,
+      (!isMarketplace && phone.warranty) ? `*Warranty:* ${phone.warranty}` : null,
       phone.phone_condition ? `*Condition:* ${phone.phone_condition}` : null,
       `🔗 Link: ${pageUrl}`,
       ``,
@@ -457,7 +472,7 @@ export default function PhoneDetailModal({
               title="Back to Smartphones"
             >
               <ArrowLeft className="w-4 h-4 text-white group-hover:-translate-x-0.5 transition-transform" />
-              <span>Back to Smartphones</span>
+              <span>{isMarketplace ? 'Back to Marketplace' : 'Back to Smartphones'}</span>
             </button>
 
             <span className="text-white/30 hidden sm:inline">/</span>
@@ -557,9 +572,11 @@ export default function PhoneDetailModal({
 
                   {photos[activePhotoIdx] ? (
                     <img
-                      src={photos[activePhotoIdx]}
+                      src={resolveImageUrl(photos[activePhotoIdx])}
                       alt={`${phone.name} - ${activeColor?.name}`}
-                      className="max-h-[78%] max-w-[78%] object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)] transition-all duration-300 group-hover:scale-105"
+                      onClick={() => setIsLightboxOpen(true)}
+                      className="max-h-[78%] max-w-[78%] object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)] transition-all duration-300 group-hover:scale-105 cursor-pointer"
+                      title="Click to enlarge photo"
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center text-slate-400">
@@ -658,9 +675,11 @@ export default function PhoneDetailModal({
                             {c.name}
                           </span>
 
-                          <span className={`text-[11px] font-normal mt-1 text-center leading-none w-full truncate ${isColorInStock ? 'text-slate-400' : 'text-neutral-500'}`}>
-                            {isColorInStock ? `${colorQty} in stock` : 'Out of stock'}
-                          </span>
+                          {!isMarketplace && (
+                            <span className={`text-[11px] font-normal mt-1 text-center leading-none w-full truncate ${isColorInStock ? 'text-slate-400' : 'text-neutral-500'}`}>
+                              {isColorInStock ? `${colorQty} in stock` : 'Out of stock'}
+                            </span>
+                          )}
                         </div>
                       );
                     })}
@@ -718,9 +737,11 @@ export default function PhoneDetailModal({
                             </div>
                           </div>
 
-                          <span className={`text-[11px] font-normal mt-1.5 text-center leading-none w-full truncate ${isStorageInStock ? 'text-slate-400' : 'text-neutral-500'}`}>
-                            {isStorageInStock ? `${storageQty} in stock` : 'Out of stock'}
-                          </span>
+                          {!isMarketplace && (
+                            <span className={`text-[11px] font-normal mt-1.5 text-center leading-none w-full truncate ${isStorageInStock ? 'text-slate-400' : 'text-neutral-500'}`}>
+                              {isStorageInStock ? `${storageQty} in stock` : 'Out of stock'}
+                            </span>
+                          )}
                         </div>
                       );
                     })}
@@ -728,22 +749,12 @@ export default function PhoneDetailModal({
                 </div>
               )}
 
-              {/* Warranty */}
-              {phone.warranty && (
-                <div className="flex items-center gap-2.5 text-xs sm:text-sm font-normal tracking-wide mb-3 sm:mb-4 pt-1 pl-1">
-                  <span className="text-slate-400 uppercase tracking-wider">
-                    Warranty:
-                  </span>
-                  <span className="text-white font-normal pl-1">
-                    {phone.warranty}
-                  </span>
-                </div>
-              )}
+
             </div>
 
-            {/* Action Buttons: Reserve or Notify + Trade In on the same line */}
+            {/* Action Buttons: Reserve or Notify + Sell Phone on the same line */}
             <div className="space-y-4 pt-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-stretch">
+              <div className="w-full">
                 {isVariantSoldOut ? (
                   <button
                     type="button"
@@ -782,21 +793,6 @@ export default function PhoneDetailModal({
                   </button>
                 )}
 
-                {/* Trade In Button on the same line with rounded-full, black background, and dark gray stroke */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (onOpenSell) {
-                      onOpenSell(phone);
-                    } else {
-                      window.dispatchEvent(new CustomEvent('sk_laba_open_sell_modal', { detail: { desiredPhone: phone } }));
-                    }
-                  }}
-                  className="w-full py-3 px-4 rounded-full bg-black hover:bg-neutral-950 border border-neutral-700 hover:border-neutral-500 text-white text-xs sm:text-sm font-normal transition-all text-center cursor-pointer flex items-center justify-center truncate hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-black/50"
-                  title="Trade-In Your Current Phone for This Device"
-                >
-                  <span className="truncate">Trade-In Your Current Phone</span>
-                </button>
               </div>
 
               {/* Quick Contact: WhatsApp, Call Shop */}
@@ -882,13 +878,30 @@ export default function PhoneDetailModal({
             </div>
           </div>
 
-          {/* Description & Overview Section */}
-          {phone.description && (
-            <div className="lg:col-span-6 lg:col-start-1 lg:row-start-2 bg-black rounded-2xl p-4 sm:p-5">
-              <h2 className="text-xs font-normal uppercase tracking-wider text-slate-300 mb-2.5">
-                Description &amp; Overview
-              </h2>
-              <FormattedDescription content={phone.description} isDark={true} className="text-slate-200 font-normal leading-relaxed text-xs sm:text-sm" />
+          {/* Warranty & Description Section (under phone image) */}
+          {((!isMarketplace && phone.warranty) || phone.description || phone.condition_description) && (
+            <div className="lg:col-span-6 lg:col-start-1 lg:row-start-2 bg-neutral-950 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-4">
+              {!isMarketplace && phone.warranty && (
+                <div className="flex items-center gap-2.5 text-xs sm:text-sm font-normal tracking-wide pb-3 border-b border-white/10">
+                  <span className="text-slate-400 uppercase tracking-wider text-xs">
+                    Warranty:
+                  </span>
+                  <span className="text-white font-medium">
+                    {phone.warranty}
+                  </span>
+                </div>
+              )}
+
+              {(phone.description || phone.condition_description) && (
+                <div>
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                    {isMarketplace ? "Seller's Description & Notes" : "Description & Overview"}
+                  </h2>
+                  <div className="text-slate-200 font-normal leading-relaxed text-xs sm:text-sm whitespace-pre-line">
+                    {phone.condition_description || phone.description}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -913,7 +926,103 @@ export default function PhoneDetailModal({
             </div>
           </div>
         )}
-      </div>
+      {/* ENLARGED PHOTO VIEWER */}
+      {isLightboxOpen && photos[activePhotoIdx] && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col justify-between select-none animate-in fade-in duration-200"
+        >
+          {/* Top Bar */}
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/10 bg-black/60 shrink-0 z-20">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-bold text-white">
+                {phone.name}
+              </span>
+              <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 font-bold">
+                {activePhotoIdx + 1} / {photos.length}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsLightboxOpen(false)}
+              className="p-2 rounded-xl bg-white/10 hover:bg-rose-600 text-white transition-colors cursor-pointer"
+              title="Close (Esc)"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Large Image Stage */}
+          <div
+            className="relative flex-1 flex items-center justify-center overflow-auto p-4"
+            onClick={() => setIsLightboxOpen(false)}
+          >
+            <img
+              src={resolveImageUrl(photos[activePhotoIdx])}
+              alt={`${phone.name} enlarged`}
+              onClick={(e) => e.stopPropagation()}
+              className="max-w-[90vw] max-h-[80vh] object-contain drop-shadow-2xl rounded-xl transition-transform duration-200"
+            />
+
+            {/* Prev / Next Buttons */}
+            {photos.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePrevPhoto();
+                  }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/70 hover:bg-black border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-xl hover:scale-105"
+                  title="Previous Photo (Left Arrow)"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNextPhoto();
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/70 hover:bg-black border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-xl hover:scale-105"
+                  title="Next Photo (Right Arrow)"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Bottom Thumbnails */}
+          {photos.length > 1 && (
+            <div className="px-6 py-3 border-t border-white/10 bg-black/60 shrink-0 z-20 flex items-center justify-center gap-2 overflow-x-auto">
+              {photos.map((photoUrl, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActivePhotoIdx(idx);
+                  }}
+                  className={`relative w-16 h-16 rounded-xl overflow-hidden border-2 shrink-0 transition-all cursor-pointer ${
+                    activePhotoIdx === idx
+                      ? 'border-sky-500 scale-105 shadow-md ring-2 ring-sky-500/40'
+                      : 'border-transparent opacity-50 hover:opacity-100'
+                  }`}
+                >
+                  <img
+                    src={resolveImageUrl(photoUrl)}
+                    alt={`Thumb ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 }

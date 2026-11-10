@@ -29,6 +29,8 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
 
       if (hash === '#smartphones' || pathname === '/smartphones') {
         dispatch(setActiveTab('Smartphones'));
+      } else if (hash === '#marketplace' || pathname === '/marketplace') {
+        dispatch(setActiveTab('Marketplace'));
       } else if (hash === '#giveaways' || pathname === '/giveaways') {
         dispatch(setActiveTab('Giveaways'));
       } else if (hash === '#contact' || pathname === '/contact') {
@@ -72,6 +74,9 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
 
     if (tabName === 'Smartphones') {
       window.location.hash = '#smartphones';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (tabName === 'Marketplace') {
+      window.location.hash = '#marketplace';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (tabName === 'Giveaways') {
       window.location.hash = '#giveaways';
@@ -228,6 +233,7 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
               <Search className="w-5 h-5" />
             </button>
 
+
             <button
               type="button"
               onClick={handleOpenFavorites}
@@ -316,17 +322,6 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
                 {link.name}
               </a>
             ))}
-
-            <button
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                handleOpenSellPhone();
-              }}
-              className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-theme-textSecondary hover:bg-white/5 hover:text-theme-textPrimary border-t border-theme-border/60 mt-2 pt-2"
-            >
-              Sell / Trade-In
-            </button>
           </div>
         )}
       </div>

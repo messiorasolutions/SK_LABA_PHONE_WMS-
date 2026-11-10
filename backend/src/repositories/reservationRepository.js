@@ -49,6 +49,8 @@ class ReservationRepository {
             phone_number: row.phone_number,
             email: row.email || null,
             phone_id: row.phone_id,
+            marketplace_listing_id: row.marketplace_listing_id || null,
+            reservation_type: row.reservation_type || (row.marketplace_listing_id ? "MARKETPLACE" : "SMARTPHONE"),
             selected_options: this._parseJson(row.selected_options),
             delivery_details: this._parseJson(row.delivery_details),
             preferred_collection_date: this._formatDate(row.preferred_collection_date),
@@ -149,8 +151,10 @@ class ReservationRepository {
                 r.updated_by_user_id,
                 r.created_at,
                 r.updated_at,
-                p.name AS phone_name,
-                p.price AS phone_price,
+                COALESCE(p.name, CONCAT(ml.brand, " ", ml.model)) AS phone_name,
+                COALESCE(p.price, ml.price) AS phone_price,
+                r.marketplace_listing_id,
+                r.reservation_type,
                 p.availability AS phone_availability,
                 p.status AS phone_status,
                 p.phone_condition AS phone_condition,
@@ -163,6 +167,7 @@ class ReservationRepository {
             FROM reservations r
             LEFT JOIN phones p ON r.phone_id = p.phone_id
             LEFT JOIN brands b ON p.brand_id = b.brand_id
+            LEFT JOIN marketplace_listings ml ON r.marketplace_listing_id = ml.listing_id
             LEFT JOIN dashboard_users u_assigned ON r.assigned_to_user_id = u_assigned.user_id
             LEFT JOIN dashboard_users u_updated ON r.updated_by_user_id = u_updated.user_id
             WHERE r.reservation_id = ?

@@ -236,31 +236,17 @@ export default function MarketplaceListingDetailModal({
     >
       <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/75 dark:bg-slate-900/90 shrink-0">
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
+              <span className="text-[11px] font-normal uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 {listing.listing_ref || `ID #${listing.listing_id}`}
               </span>
-              <span
-                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
-                  listing.status === 'PUBLISHED'
-                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400'
-                    : listing.status === 'SOLD'
-                    ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-400'
-                    : listing.status === 'PENDING_REVIEW' || listing.status === 'UNDER_REVIEW'
-                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-400'
-                    : listing.status === 'REJECTED'
-                    ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-400'
-                    : listing.status === 'CHANGES_REQUESTED'
-                    ? 'bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-400'
-                    : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
-                }`}
-              >
-                {listing.status?.replace(/_/g, ' ')}
+              <span className="text-xs font-normal text-slate-700 dark:text-slate-300">
+                • {listing.status?.replace(/_/g, ' ')}
               </span>
             </div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">
+            <h2 className="text-lg font-normal text-slate-900 dark:text-white mt-0.5">
               {listing.brand} {listing.model}
             </h2>
           </div>
@@ -268,9 +254,9 @@ export default function MarketplaceListingDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -333,22 +319,22 @@ export default function MarketplaceListingDetailModal({
               )}
 
               {/* Financial Box */}
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-2">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500 dark:text-slate-400">Asking Listed Price:</span>
-                  <span className="font-bold text-slate-900 dark:text-white text-sm">
+                  <span className="text-slate-500 dark:text-slate-400 font-normal">Asking Listed Price:</span>
+                  <span className="font-normal text-slate-900 dark:text-white text-sm">
                     {formatCurrency(askingPrice)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500 dark:text-slate-400">Marketplace Fee (5%):</span>
-                  <span className="font-semibold text-rose-600 dark:text-rose-400">
+                  <span className="text-slate-500 dark:text-slate-400 font-normal">Marketplace Fee (5%):</span>
+                  <span className="font-normal text-rose-600 dark:text-rose-400">
                     - {formatCurrency(commission)}
                   </span>
                 </div>
                 <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-900 dark:text-white">Seller Payout:</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                  <span className="font-normal text-slate-900 dark:text-white">Seller Payout:</span>
+                  <span className="font-normal text-emerald-600 dark:text-emerald-400 text-sm">
                     {formatCurrency(sellerPayout)}
                   </span>
                 </div>
@@ -356,101 +342,101 @@ export default function MarketplaceListingDetailModal({
             </div>
 
             {/* Device Details & Seller Info Column */}
-            <div className="md:col-span-7 space-y-5">
+            <div className="md:col-span-7 space-y-4">
               {/* Device Quick Specs */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Storage</span>
-                  <span className="text-xs font-semibold text-slate-900 dark:text-white mt-0.5 block">
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800">
+                  <span className="text-[10px] uppercase font-normal text-slate-400 block">Storage</span>
+                  <span className="text-xs font-normal text-slate-900 dark:text-white mt-0.5 block">
                     {listing.storage}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Color</span>
-                  <span className="text-xs font-semibold text-slate-900 dark:text-white mt-0.5 block">
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800">
+                  <span className="text-[10px] uppercase font-normal text-slate-400 block">Color</span>
+                  <span className="text-xs font-normal text-slate-900 dark:text-white mt-0.5 block">
                     {listing.color}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Condition</span>
-                  <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 mt-0.5 block">
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800">
+                  <span className="text-[10px] uppercase font-normal text-slate-400 block">Condition</span>
+                  <span className="text-xs font-normal text-slate-900 dark:text-white mt-0.5 block">
                     {listing.condition_grade?.replace(/_/g, ' ')}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Battery Health</span>
-                  <span className="text-xs font-semibold text-slate-900 dark:text-white mt-0.5 block">
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800">
+                  <span className="text-[10px] uppercase font-normal text-slate-400 block">Battery Health</span>
+                  <span className="text-xs font-normal text-slate-900 dark:text-white mt-0.5 block">
                     {listing.battery_health ? `${listing.battery_health}%` : 'N/A'}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Original Box</span>
-                  <span className="text-xs font-semibold text-slate-900 dark:text-white mt-0.5 block">
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800">
+                  <span className="text-[10px] uppercase font-normal text-slate-400 block">Original Box</span>
+                  <span className="text-xs font-normal text-slate-900 dark:text-white mt-0.5 block">
                     {listing.original_box ? 'Yes' : 'No'}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Charger</span>
-                  <span className="text-xs font-semibold text-slate-900 dark:text-white mt-0.5 block">
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800">
+                  <span className="text-[10px] uppercase font-normal text-slate-400 block">Charger</span>
+                  <span className="text-xs font-normal text-slate-900 dark:text-white mt-0.5 block">
                     {listing.charger_included ? 'Included' : 'Not Included'}
                   </span>
                 </div>
               </div>
 
               {/* Physical Condition Details */}
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
-                <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
+                <h4 className="text-xs font-normal text-slate-900 dark:text-white uppercase tracking-wider">
                   Device Condition Report
                 </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p className="text-xs font-normal text-slate-600 dark:text-slate-300 leading-relaxed">
                   {listing.condition_description || 'No detailed condition comment provided.'}
                 </p>
                 {listing.display_condition && (
-                  <div className="text-xs text-slate-500 dark:text-slate-400 pt-1">
-                    <strong className="text-slate-700 dark:text-slate-200">Display:</strong> {listing.display_condition}
+                  <div className="text-xs font-normal text-slate-500 dark:text-slate-400 pt-1">
+                    <span className="text-slate-700 dark:text-slate-200 font-normal">Display:</span> {listing.display_condition}
                   </div>
                 )}
                 {listing.camera_condition && (
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
-                    <strong className="text-slate-700 dark:text-slate-200">Camera:</strong> {listing.camera_condition}
+                  <div className="text-xs font-normal text-slate-500 dark:text-slate-400">
+                    <span className="text-slate-700 dark:text-slate-200 font-normal">Camera:</span> {listing.camera_condition}
                   </div>
                 )}
                 {listing.biometrics_status && (
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
-                    <strong className="text-slate-700 dark:text-slate-200">Biometrics:</strong> {listing.biometrics_status}
+                  <div className="text-xs font-normal text-slate-500 dark:text-slate-400">
+                    <span className="text-slate-700 dark:text-slate-200 font-normal">Biometrics:</span> {listing.biometrics_status}
                   </div>
                 )}
               </div>
 
               {/* Seller Contact Details */}
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-3">
-                <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <User className="w-3.5 h-3.5 text-rose-600" />
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3">
+                <h4 className="text-xs font-normal text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                  <User className="w-3.5 h-3.5 text-slate-500" />
                   <span>Seller Information</span>
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Name</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">
+                    <span className="text-[10px] text-slate-400 uppercase font-normal block">Name</span>
+                    <span className="font-normal text-slate-900 dark:text-white">
                       {listing.seller_name || 'N/A'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Phone</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">
+                    <span className="text-[10px] text-slate-400 uppercase font-normal block">Phone</span>
+                    <span className="font-normal text-slate-900 dark:text-white">
                       {listing.seller_phone || 'N/A'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Email</span>
-                    <span className="font-semibold text-slate-900 dark:text-white truncate block">
+                    <span className="text-[10px] text-slate-400 uppercase font-normal block">Email</span>
+                    <span className="font-normal text-slate-900 dark:text-white truncate block">
                       {listing.seller_email || 'N/A'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Submission Date</span>
-                    <span className="text-slate-600 dark:text-slate-300">
+                    <span className="text-[10px] text-slate-400 uppercase font-normal block">Submission Date</span>
+                    <span className="text-slate-600 dark:text-slate-300 font-normal">
                       {listing.created_at ? new Date(listing.created_at).toLocaleDateString() : 'N/A'}
                     </span>
                   </div>
@@ -462,9 +448,9 @@ export default function MarketplaceListingDetailModal({
                       href={whatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-xs font-normal transition-colors"
                     >
-                      <MessageCircle className="w-3.5 h-3.5" />
+                      <MessageCircle className="w-3.5 h-3.5 text-emerald-500" />
                       <span>Contact Seller on WhatsApp</span>
                     </a>
                   </div>
@@ -563,13 +549,7 @@ export default function MarketplaceListingDetailModal({
                   type="button"
                   onClick={handleExecutePrompt}
                   disabled={actionLoading}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-semibold text-white ${
-                    promptAction === 'sold'
-                      ? 'bg-purple-600 hover:bg-purple-700'
-                      : promptAction === 'delete' || promptAction === 'reject'
-                      ? 'bg-rose-600 hover:bg-rose-700'
-                      : 'bg-sky-600 hover:bg-sky-700'
-                  }`}
+                  className="px-4 py-1.5 rounded-full text-xs font-normal text-white bg-gradient-to-r from-black via-neutral-900 to-rose-950 hover:to-rose-900 border border-neutral-800 transition-all cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {actionLoading ? 'Processing...' : 'Confirm Action'}
                 </button>
@@ -579,14 +559,14 @@ export default function MarketplaceListingDetailModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div className="px-6 py-3.5 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/75 dark:bg-slate-900 flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2">
             {listing.status !== 'SOLD' && (
               <button
                 type="button"
                 onClick={() => setPromptAction('sold')}
                 disabled={actionLoading}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-xs font-normal transition-colors cursor-pointer"
                 title="Mark this phone as sold and remove from active marketplace"
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
@@ -599,7 +579,7 @@ export default function MarketplaceListingDetailModal({
                 type="button"
                 onClick={handleDirectUnpublish}
                 disabled={actionLoading}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-xs font-normal transition-colors cursor-pointer"
               >
                 <EyeOff className="w-3.5 h-3.5" />
                 <span>Unpublish</span>
@@ -610,7 +590,7 @@ export default function MarketplaceListingDetailModal({
               type="button"
               onClick={() => setPromptAction('delete')}
               disabled={actionLoading}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-medium transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-normal transition-colors cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Remove Listing</span>
@@ -624,7 +604,7 @@ export default function MarketplaceListingDetailModal({
                   type="button"
                   onClick={() => setPromptAction('changes')}
                   disabled={actionLoading}
-                  className="px-3.5 py-2 rounded-xl border border-sky-300 dark:border-sky-800 text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/30 text-xs font-semibold transition-colors cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-full border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-normal transition-colors cursor-pointer"
                 >
                   Request Changes
                 </button>
@@ -633,7 +613,7 @@ export default function MarketplaceListingDetailModal({
                   type="button"
                   onClick={() => setPromptAction('reject')}
                   disabled={actionLoading}
-                  className="px-3.5 py-2 rounded-xl border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-semibold transition-colors cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-full border border-slate-300 dark:border-slate-700 text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-normal transition-colors cursor-pointer"
                 >
                   Reject
                 </button>
@@ -642,9 +622,9 @@ export default function MarketplaceListingDetailModal({
                   type="button"
                   onClick={handleDirectApprove}
                   disabled={actionLoading}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-black via-neutral-900 to-rose-950 hover:to-rose-900 text-white text-xs font-normal border border-neutral-800 transition-all cursor-pointer shadow-xs disabled:opacity-50"
                 >
-                  <Check className="w-4 h-4" />
+                  <Check className="w-3.5 h-3.5" />
                   <span>Approve & Publish Live</span>
                 </button>
               </>
@@ -653,7 +633,7 @@ export default function MarketplaceListingDetailModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-normal transition-colors cursor-pointer"
             >
               Close
             </button>

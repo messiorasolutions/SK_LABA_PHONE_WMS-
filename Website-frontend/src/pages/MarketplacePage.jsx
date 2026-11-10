@@ -10,6 +10,9 @@ import {
   Check,
   X,
   Search,
+  RotateCcw,
+  Tag,
+  RefreshCw,
 } from 'lucide-react';
 import PhoneCard from '../components/PhoneCard';
 import { resolveImageUrl } from '../utils/imageHelper';
@@ -379,14 +382,31 @@ export default function MarketplacePage({ onNavigateToHome }) {
             <h1 className="text-2xl sm:text-3xl font-normal tracking-normal text-white flex items-center gap-3">
               <span>SK LABA PHONE Marketplace</span>
             </h1>
+            <p className="text-xs text-theme-textSecondary mt-1 max-w-2xl font-normal leading-relaxed">
+              Browse verified pre-owned & customer-listed smartphones, authentic Korean imports, and verified quality devices.
+            </p>
+          </div>
+
+          {/* Quick Action: Sell Your Phone Button */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('sk_laba_open_sell_modal', { detail: {} }))}
+              className="relative inline-flex items-center justify-center p-[0.5px] rounded-full bg-gradient-to-r from-red-600/80 via-blue-700/80 to-blue-900/80 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] shadow-lg shadow-black/80 group cursor-pointer"
+            >
+              <span className="inline-flex items-center gap-2 py-2 px-4 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                <Tag className="w-3.5 h-3.5 text-sky-400" />
+                <span>Sell Your Phone</span>
+              </span>
+            </button>
           </div>
         </div>
 
         {/* Page Toolbar: Results count on Left & Filters and Sort by on Right */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
-            <p className="text-xs text-theme-textSecondary font-medium">
-              Showing <strong className="text-white font-semibold">{filteredPhones.length}</strong> smartphone
+            <p className="text-xs text-theme-textSecondary font-normal">
+              Showing <strong className="text-white font-medium">{filteredPhones.length}</strong> smartphone
               {filteredPhones.length === 1 ? '' : 's'}
               {selectedBrand !== 'ALL' && (
                 <span> in {selectedBrand}</span>
@@ -397,7 +417,7 @@ export default function MarketplacePage({ onNavigateToHome }) {
               <button
                 type="button"
                 onClick={resetFilters}
-                className="text-xs text-theme-accent hover:underline ml-2 cursor-pointer"
+                className="text-xs text-sky-400 hover:underline ml-2 cursor-pointer font-normal"
               >
                 Clear all
               </button>
@@ -410,12 +430,12 @@ export default function MarketplacePage({ onNavigateToHome }) {
             <button
               type="button"
               onClick={() => setIsFilterDrawerOpen(true)}
-              className="px-4 py-2 rounded-full border border-theme-border hover:border-white/30 bg-theme-surface/70 hover:bg-white/[0.06] text-white text-xs font-medium flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+              className="px-4 py-2 rounded-full border border-theme-border hover:border-white/25 bg-theme-surface/70 hover:bg-white/[0.04] text-white text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-sm"
             >
               <SlidersHorizontal className="w-3.5 h-3.5 text-theme-textSecondary" />
               <span>Filters</span>
               {activeFilterCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-white text-[#0A0F1E] text-[10px] font-extrabold flex items-center justify-center">
+                <span className="w-4 h-4 rounded-full bg-white text-[#0A0F1E] text-[10px] font-bold flex items-center justify-center">
                   {activeFilterCount}
                 </span>
               )}
@@ -426,12 +446,12 @@ export default function MarketplacePage({ onNavigateToHome }) {
               <button
                 type="button"
                 onClick={() => setIsSortOpen(!isSortOpen)}
-                className="px-4 py-2 rounded-full border border-theme-border hover:border-white/30 bg-theme-surface/70 hover:bg-white/[0.06] text-white text-xs font-medium flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+                className="px-4 py-2 rounded-full border border-theme-border hover:border-white/25 bg-theme-surface/70 hover:bg-white/[0.04] text-white text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-sm"
               >
                 <ArrowUpDown className="w-3.5 h-3.5 text-theme-textSecondary" />
                 <span>
                   Sort by:{' '}
-                  <span className="text-white font-semibold">
+                  <span className="text-white font-medium">
                     {sortLabels[sortType] || 'Newest First'}
                   </span>
                 </span>
@@ -444,7 +464,7 @@ export default function MarketplacePage({ onNavigateToHome }) {
 
               {/* Custom Sort Dropdown Menu */}
               {isSortOpen && (
-                <div className="absolute right-0 top-full mt-2 w-52 bg-[#0A0F1E] border border-theme-border rounded-xl shadow-2xl p-1.5 z-40 animate-in fade-in zoom-in-95">
+                <div className="absolute right-0 top-full mt-2 w-52 bg-[#0A0F1E] border border-white/10 rounded-xl shadow-2xl p-1.5 z-40 animate-in fade-in zoom-in-95">
                   {Object.entries(sortLabels).map(([key, label]) => {
                     const isSelected = sortType === key;
                     return (
@@ -455,9 +475,9 @@ export default function MarketplacePage({ onNavigateToHome }) {
                           setSortType(key);
                           setIsSortOpen(false);
                         }}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-normal flex items-center justify-between transition-colors cursor-pointer ${
                           isSelected
-                            ? 'bg-white/10 text-white font-semibold'
+                            ? 'bg-white/10 text-white font-medium'
                             : 'text-theme-textSecondary hover:text-white hover:bg-white/[0.04]'
                         }`}
                       >
@@ -486,11 +506,11 @@ export default function MarketplacePage({ onNavigateToHome }) {
             <div className="relative w-full max-w-[460px] sm:max-w-[480px] h-full bg-[#0A0F1E] border-r border-white/10 shadow-[10px_0_50px_rgba(0,0,0,0.8)] flex flex-col z-10 animate-in slide-in-from-left duration-300 ease-out overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 shrink-0 bg-[#0A0F1E]">
-                <h2 className="text-xl font-bold text-white tracking-tight">Filters</h2>
+                <h2 className="text-xl font-normal text-white tracking-tight">Filters</h2>
                 <button
                   type="button"
                   onClick={() => setIsFilterDrawerOpen(false)}
-                  className="w-8 h-8 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 text-theme-textSecondary hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-theme-textSecondary hover:text-white flex items-center justify-center transition-colors cursor-pointer"
                   title="Close filters"
                 >
                   <X className="w-4 h-4" />
@@ -696,15 +716,17 @@ export default function MarketplacePage({ onNavigateToHome }) {
                 <button
                   type="button"
                   onClick={() => setIsFilterDrawerOpen(false)}
-                  className="w-full py-3 px-4 rounded-xl bg-white hover:bg-slate-200 text-[#0A0F1E] text-xs font-bold transition-all shadow-lg cursor-pointer"
+                  className="w-full relative inline-flex items-center justify-center p-[0.5px] rounded-full bg-gradient-to-r from-red-600/80 via-blue-700/80 to-blue-900/80 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] shadow-lg shadow-black/80 group cursor-pointer"
                 >
-                  View results ({filteredPhones.length})
+                  <span className="w-full inline-flex items-center justify-center py-2.5 px-4 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                    View results ({filteredPhones.length})
+                  </span>
                 </button>
                 {hasActiveFilters && (
                   <button
                     type="button"
                     onClick={resetFilters}
-                    className="w-full mt-2 py-1 text-center text-xs text-theme-textMuted hover:text-red-400 transition-colors cursor-pointer"
+                    className="w-full mt-2.5 py-1 text-center text-xs text-theme-textMuted hover:text-white transition-colors cursor-pointer font-normal"
                   >
                     Clear all filters
                   </button>
@@ -734,33 +756,56 @@ export default function MarketplacePage({ onNavigateToHome }) {
             ))}
           </div>
         ) : error ? (
-          <div className="py-20 text-center bg-theme-surface border border-theme-border rounded-3xl p-8 max-w-lg mx-auto">
-            <p className="text-base font-semibold text-red-400 mb-2">Error loading phones</p>
-            <p className="text-xs text-theme-textMuted mb-6">{error}</p>
+          <div className="py-20 text-center bg-theme-surface/70 border border-theme-border rounded-2xl p-8 max-w-lg mx-auto shadow-xl">
+            <p className="text-base font-normal text-red-400 mb-2">Error loading marketplace phones</p>
+            <p className="text-xs text-theme-textMuted mb-6 font-normal leading-relaxed">{error}</p>
             <button
               type="button"
               onClick={fetchListings}
-              className="px-6 py-2.5 rounded-full bg-theme-accent text-white text-xs font-semibold cursor-pointer"
+              className="relative inline-flex items-center justify-center p-[0.5px] rounded-full bg-gradient-to-r from-red-600/80 via-blue-700/80 to-blue-900/80 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] shadow-lg shadow-black/80 group cursor-pointer"
             >
-              Retry
+              <span className="inline-flex items-center gap-2 py-2 px-6 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                <RefreshCw className="w-3.5 h-3.5 text-slate-300 group-hover:text-white" />
+                <span>Retry</span>
+              </span>
             </button>
           </div>
         ) : filteredPhones.length === 0 ? (
-          <div className="py-20 text-center bg-theme-surface border border-theme-border rounded-3xl p-8 max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-full bg-theme-input flex items-center justify-center mx-auto mb-4 text-theme-textMuted">
-              <Search className="w-8 h-8" />
+          <div className="py-20 text-center bg-theme-surface/70 border border-theme-border rounded-2xl p-8 sm:p-10 max-w-md mx-auto shadow-xl">
+            <div className="w-14 h-14 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto mb-4 text-theme-textSecondary">
+              <Search className="w-6 h-6 text-slate-400" />
             </div>
-            <h3 className="text-base font-bold text-white mb-1">No Smartphones Found</h3>
-            <p className="text-xs text-theme-textSecondary mb-6">
-              No phones matched your selected criteria or search term. Try resetting your filters.
+            <h3 className="text-base sm:text-lg font-normal text-white mb-2">
+              {phones.length === 0 ? 'No Marketplace Listings Yet' : 'No Smartphones Found'}
+            </h3>
+            <p className="text-xs text-theme-textSecondary mb-6 font-normal leading-relaxed">
+              {phones.length === 0
+                ? 'Be the first to list your smartphone for sale or check back soon for verified pre-owned devices.'
+                : 'No phones matched your selected criteria or search term. Try resetting your filters.'}
             </p>
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="px-6 py-2.5 rounded-full bg-theme-accent hover:bg-theme-accentHover text-white text-xs font-semibold shadow-md transition-all cursor-pointer"
-            >
-              Reset All Filters
-            </button>
+            {phones.length === 0 ? (
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent('sk_laba_open_sell_modal', { detail: {} }))}
+                className="relative inline-flex items-center justify-center p-[0.5px] rounded-full bg-gradient-to-r from-red-600/80 via-blue-700/80 to-blue-900/80 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] shadow-lg shadow-black/80 group cursor-pointer"
+              >
+                <span className="inline-flex items-center justify-center gap-2 py-2.5 px-6 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                  <Tag className="w-3.5 h-3.5 text-sky-400" />
+                  <span>Sell Your Phone</span>
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="relative inline-flex items-center justify-center p-[0.5px] rounded-full bg-gradient-to-r from-red-600/80 via-blue-700/80 to-blue-900/80 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] shadow-lg shadow-black/80 group cursor-pointer"
+              >
+                <span className="inline-flex items-center justify-center gap-2 py-2.5 px-6 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                  <RotateCcw className="w-3.5 h-3.5 text-slate-300 group-hover:text-white" />
+                  <span>Reset All Filters</span>
+                </span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2.5 sm:gap-3.5 md:gap-4">

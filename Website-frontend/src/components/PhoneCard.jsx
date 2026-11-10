@@ -208,7 +208,7 @@ export default function PhoneCard({
         {/* Marketplace / Condition Badge */}
         {Boolean(phone.is_marketplace) && (
           <div
-            className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-20 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-sky-400/30 bg-black/80 backdrop-blur-md text-sky-300 text-[9px] sm:text-[10px] font-semibold tracking-wide shadow-sm"
+            className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-20 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-white/20 bg-black/80 backdrop-blur-md text-white text-[9px] sm:text-[10px] font-normal tracking-wide shadow-sm"
           >
             <span>{phone.condition_grade ? String(phone.condition_grade).replace(/_/g, ' ') : 'Marketplace'}</span>
           </div>

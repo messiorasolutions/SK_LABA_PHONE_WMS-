@@ -101,6 +101,24 @@ export const API_ENDPOINTS = {
     status: (id) => `/api/back-in-stock-requests/${id}/status`,
     assign: (id) => `/api/back-in-stock-requests/${id}/assign`,
   },
+  marketplace: {
+    listings: '/api/marketplace/admin/listings',
+    listingById: (id) => `/api/marketplace/admin/listings/${id}`,
+    underReview: (id) => `/api/marketplace/admin/listings/${id}/under-review`,
+    approve: (id) => `/api/marketplace/admin/listings/${id}/approve`,
+    reject: (id) => `/api/marketplace/admin/listings/${id}/reject`,
+    requestChanges: (id) => `/api/marketplace/admin/listings/${id}/request-changes`,
+    unpublish: (id) => `/api/marketplace/admin/listings/${id}/unpublish`,
+    markSold: (id) => `/api/marketplace/admin/listings/${id}/sold`,
+    deleteListing: (id) => `/api/marketplace/admin/listings/${id}`,
+    orders: '/api/marketplace/admin/orders',
+    orderById: (id) => `/api/marketplace/admin/orders/${id}`,
+    orderStatus: (id) => `/api/marketplace/admin/orders/${id}/status`,
+    commission: '/api/marketplace/admin/commission',
+    terms: '/api/marketplace/admin/terms',
+    activeSellerTerms: '/api/marketplace/terms/seller',
+    activeBuyerTerms: '/api/marketplace/terms/buyer',
+  },
 };
 
 export default API_ENDPOINTS;

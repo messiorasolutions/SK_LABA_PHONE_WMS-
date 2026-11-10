@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Heart, GitCompare, Tag, Sparkles } from 'lucide-react';
 import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
+import { resolveImageUrl } from '../utils/imageHelper';
 
 export default function PhoneCard({
   phone,
@@ -79,12 +80,13 @@ export default function PhoneCard({
   const activeColor = parsedColors[selectedColorIdx] || parsedColors[0];
 
   // Active displayed photo: prioritizes active color's first photo, then general photo at index, then first general photo, then main_photo
-  const displayedPhoto =
+  const displayedPhoto = resolveImageUrl(
     activeColor?.photos?.[0] ||
     generalPhotos[selectedColorIdx] ||
     generalPhotos[0] ||
     phone.main_photo ||
-    '';
+    ''
+  );
 
   // Format pricing
   const regularPrice = Number(phone.price || phone.regular_price || 0);
@@ -200,6 +202,15 @@ export default function PhoneCard({
           >
             <Tag className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 text-amber-300" />
             <span className="truncate">{discountPercent > 0 ? `${discountPercent}% OFF` : 'Offer'}</span>
+          </div>
+        )}
+
+        {/* Marketplace / Condition Badge */}
+        {Boolean(phone.is_marketplace) && (
+          <div
+            className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-20 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-sky-400/30 bg-black/80 backdrop-blur-md text-sky-300 text-[9px] sm:text-[10px] font-semibold tracking-wide shadow-sm"
+          >
+            <span>{phone.condition_grade ? String(phone.condition_grade).replace(/_/g, ' ') : 'Marketplace'}</span>
           </div>
         )}
 

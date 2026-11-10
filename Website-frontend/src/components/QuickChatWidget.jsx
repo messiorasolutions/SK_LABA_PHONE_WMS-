@@ -200,7 +200,7 @@ export default function QuickChatWidget({ activePhone = null, onOpenInquiry, onN
         pStorage ? `*Storage:* ${pStorage}` : null,
         pColor ? `*Color:* ${pColor}` : null,
         formattedPrice ? `*Price:* ${formattedPrice}` : null,
-        activePhone.warranty ? `*Warranty:* ${activePhone.warranty}` : null,
+        (!activePhone?.is_marketplace && activePhone?.source !== "MARKETPLACE" && activePhone?.product_source !== "MARKETPLACE" && activePhone?.warranty) ? `*Warranty:* ${activePhone.warranty}` : null,
         activePhone.phone_condition ? `*Condition:* ${activePhone.phone_condition}` : null,
         `🔗 Link: ${window.location.href}`,
         ``,

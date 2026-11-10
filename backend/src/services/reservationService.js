@@ -1,3 +1,4 @@
+const defaultMarketplaceListingRepo = require('../repositories/marketplaceListingRepository');
 const defaultReservationRepository = require('../repositories/reservationRepository');
 const defaultPhoneRepository = require('../repositories/phoneRepository');
 const defaultUserRepository = require('../repositories/dashboardUserRepository');
@@ -8,11 +9,13 @@ class ReservationService {
     constructor({
         reservationRepository = defaultReservationRepository,
         phoneRepository = defaultPhoneRepository,
-        userRepository = defaultUserRepository
+        userRepository = defaultUserRepository,
+        marketplaceListingRepository = defaultMarketplaceListingRepo
     } = {}) {
         this.reservationRepository = reservationRepository;
         this.phoneRepository = phoneRepository;
         this.userRepository = userRepository;
+        this.marketplaceListingRepository = marketplaceListingRepository;
     }
 
     /**
@@ -23,13 +26,51 @@ class ReservationService {
         customer_name,
         phone_number,
         email = null,
-        phone_id,
+        phone_id = null,
+        marketplace_listing_id = null,
         selected_options = null,
         delivery_details = null,
         preferred_collection_date,
         customer_note = null
     }) {
-        // 1. Look up phone
+        // Handle Marketplace Listing Reservation
+        if (marketplace_listing_id) {
+            const listing = await this.marketplaceListingRepository.findById(marketplace_listing_id);
+            if (!listing) {
+                throw new AppError('Referenced marketplace listing does not exist.', 404);
+            }
+            if (listing.status !== 'PUBLISHED') {
+                throw new AppError('The selected marketplace phone is not available for reservation.', 400);
+            }
+
+            const reservation = await this.reservationRepository.create({
+                customer_name,
+                phone_number,
+                email,
+                phone_id: null,
+                marketplace_listing_id: Number(marketplace_listing_id),
+                reservation_type: 'MARKETPLACE',
+                selected_options,
+                delivery_details,
+                preferred_collection_date,
+                customer_note
+            });
+
+            try {
+                await this.marketplaceListingRepository.updateStatus(marketplace_listing_id, {
+                    status: 'RESERVED'
+                });
+            } catch (err) {
+                console.error('[ReservationService] Failed to set listing RESERVED:', err.message);
+            }
+
+            return reservation;
+        }
+
+        // 1. Look up phone (Standard Smartphone Inventory)
+        if (!phone_id) {
+            throw new AppError('phone_id or marketplace_listing_id is required.', 400);
+        }
         const phone = await this.phoneRepository.findById(phone_id);
         if (!phone) {
             throw new AppError('Referenced phone does not exist.', 404);

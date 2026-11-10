@@ -210,7 +210,7 @@ class PhoneService {
         let waitingCustomersCount = 0;
         let stockRestorationAlert = null;
 
-        const backInStockRepo = this.backInStockRequestRepo || defaultBackInStockRequestRepository;
+        const backInStockRepo = this.backInStockRequestRepo || this.backInStockRequestRepository || defaultBackInStockRequestRepository;
         if (isRestoredFromSoldOut && backInStockRepo && typeof backInStockRepo.countWaitingByPhoneId === 'function') {
             try {
                 waitingCustomersCount = await backInStockRepo.countWaitingByPhoneId(id);

@@ -7,7 +7,6 @@ import {
   ArrowUpDown,
   X,
   RotateCcw,
-  Sparkles,
   Tag,
   Check,
   ChevronDown,

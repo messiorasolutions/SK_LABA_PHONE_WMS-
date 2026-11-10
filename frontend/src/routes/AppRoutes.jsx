@@ -238,6 +238,26 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/marketplace"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <SellRequestsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/marketplace-listings"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <SellRequestsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/back-in-stock"

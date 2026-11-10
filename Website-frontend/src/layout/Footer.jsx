@@ -79,8 +79,8 @@ export default function Footer({ onOpenSell }) {
                 </a>
               </li>
               <li>
-                <a href="#smartphones" className="hover:text-white transition-colors">
-                  Verified Pre-Owned Phones
+                <a href="#marketplace" className="hover:text-white transition-colors">
+                  Marketplace (Pre-Owned Phones)
                 </a>
               </li>
               <li>

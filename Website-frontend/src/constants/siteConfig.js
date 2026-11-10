@@ -17,6 +17,7 @@ export const STORE_INFO = {
 export const NAV_LINKS = [
   { name: 'Home', path: '#' },
   { name: 'Smartphones', path: '#smartphones' },
+  { name: 'Marketplace', path: '#marketplace' },
   { name: 'Giveaways', path: '#giveaways' },
   { name: 'Reviews', path: '#reviews' },
   { name: 'Deals', path: '#deals' },

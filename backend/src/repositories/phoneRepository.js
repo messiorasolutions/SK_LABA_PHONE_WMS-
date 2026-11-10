@@ -33,6 +33,11 @@ class PhoneRepository {
         formatted.stock_quantity = formatted.current_stock;
         formatted.is_archived = Boolean(formatted.is_archived || formatted.status === 'ARCHIVED');
         formatted.is_new_arrival = Boolean(formatted.is_new_arrival);
+        formatted.product_source = row.product_source || 'INVENTORY';
+        formatted.ownership_type = row.ownership_type || 'PLATFORM_OWNED';
+        formatted.marketplace_listing_id = row.marketplace_listing_id || null;
+        formatted.battery_health = row.battery_health !== undefined && row.battery_health !== null ? Number(row.battery_health) : null;
+        formatted.used_condition_grade = row.used_condition_grade || null;
         formatted.availability = calculatePhoneAvailability(
             formatted.current_stock,
             formatted.low_stock_level,
@@ -140,6 +145,11 @@ class PhoneRepository {
         } else if (!isIncludeAllRequested) {
             // Normal list: hide archived phones
             query += ` AND p.is_archived = 0 AND p.status != 'ARCHIVED'`;
+        }
+
+        // Sellers phones must only appear in marketplace, never in standard smartphone section
+        if (!filters.include_marketplace) {
+            query += ` AND (p.product_source != 'MARKETPLACE' OR p.product_source IS NULL) AND p.marketplace_listing_id IS NULL`;
         }
 
         if (filters.brand_id) {

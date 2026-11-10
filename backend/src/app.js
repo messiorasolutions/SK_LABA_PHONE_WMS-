@@ -28,6 +28,7 @@ const offerRoutes = require('./routes/offerRoutes');
 const inquiryRoutes = require('./routes/inquiryRoutes');
 const reservationRoutes = require('./routes/reservationRoutes');
 const sellRequestRoutes = require('./routes/sellRequestRoutes');
+const marketplaceRoutes = require('./routes/marketplaceRoutes');
 const backInStockRequestRoutes = require('./routes/backInStockRequestRoutes');
 const customerReviewRoutes = require('./routes/customerReviewRoutes');
 const adminReviewRoutes = require('./routes/adminReviewRoutes');
@@ -161,10 +162,16 @@ const PUBLIC_STOREFRONT_PREFIXES = [
     '/api/giveaways',
     '/api/shop-info',
     '/api/reviews',
+    '/api/marketplace/phones',
+    '/api/marketplace/listings',
+    '/api/marketplace/terms',
+    '/api/marketplace/commission',
+    '/api/marketplace/commission',
     '/health',
     '/api/test-db',
     '/api/my-ip',
-    '/api-docs'
+    '/api-docs',
+    '/uploads'
 ];
 
 app.use((req, res, next) => {
@@ -222,6 +229,12 @@ app.get('/api-docs.json', (req, res) => {
     res.json(swaggerSpec);
 });
 
+// 5.1 Static Media / Uploads Serving
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/marketplace', express.static(path.join(__dirname, 'uploads/marketplace')));
+app.use('/marketplace', express.static(path.join(__dirname, '../uploads/marketplace')));
+
 // 6. API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -235,6 +248,7 @@ app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/sell-requests', sellRequestRoutes);
 app.use('/api/sell-phone-requests', sellRequestRoutes);
+app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/back-in-stock-requests', backInStockRequestRoutes);
 app.use('/api/reviews', customerReviewRoutes);
 app.use('/api/customer-reviews', customerReviewRoutes);

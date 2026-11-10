@@ -45,7 +45,7 @@ export default function Sidebar({ isOpen, onClose }) {
     location.pathname.startsWith('/installments');
   const isReservationsActive = location.pathname.startsWith('/reservations');
   const isInquiriesActive = location.pathname.startsWith('/inquiries');
-  const isSellRequestsActive = location.pathname.startsWith('/sell-requests');
+  const isSellRequestsActive = location.pathname.startsWith('/sell-requests') || location.pathname.startsWith('/marketplace');
   const isBackInStockActive = location.pathname.startsWith('/back-in-stock') || location.pathname.startsWith('/dashboard/back-in-stock');
   const isReviewsActive = location.pathname.startsWith('/reviews');
   const isGiveawaysActive = location.pathname.startsWith('/giveaways');
@@ -321,7 +321,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                 }`}
               />
-              <span className="truncate">Sell / Trade-In Requests</span>
+              <span className="truncate">Marketplace & Sell Requests</span>
             </NavLink>
 
             {/* 9. Back-in-Stock Requests (SRS ST-08) */}

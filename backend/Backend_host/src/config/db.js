@@ -1,0 +1,67 @@
+const mysql = require('mysql2/promise');
+const fs = require('fs');
+require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
+
+function buildSslConfig() {
+    if (process.env.DB_SSL === 'false') {
+        return undefined;
+    }
+
+    const sslConfig = {};
+
+    if (process.env.DB_SSL_CA_PATH && fs.existsSync(process.env.DB_SSL_CA_PATH)) {
+        sslConfig.ca = fs.readFileSync(process.env.DB_SSL_CA_PATH, 'utf-8');
+        sslConfig.rejectUnauthorized = true;
+    } else if (process.env.DB_SSL_CA) {
+        sslConfig.ca = process.env.DB_SSL_CA;
+        sslConfig.rejectUnauthorized = true;
+    } else if (process.env.NODE_ENV === 'production') {
+        // Enforce strict TLS certificate verification in production
+        sslConfig.rejectUnauthorized = true;
+    } else {
+        // For local development without downloaded CA certificates:
+        // Controlled via DB_SSL_REJECT_UNAUTHORIZED (defaults to false only in non-production)
+        const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true';
+        sslConfig.rejectUnauthorized = rejectUnauthorized;
+    }
+
+    return sslConfig;
+}
+
+const poolConfig = {
+    host: process.env.DB_HOST || 'localhost',
+    port: Number(process.env.DB_PORT) || 3306,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: Number(process.env.DB_CONNECTION_LIMIT) || 10,
+    queueLimit: 0,
+    connectTimeout: 8000,
+    ssl: buildSslConfig()
+};
+
+if (process.env.DB_SOCKET_PATH) {
+    poolConfig.socketPath = process.env.DB_SOCKET_PATH;
+}
+
+const pool = mysql.createPool(poolConfig);
+
+async function testConnection() {
+    if (process.env.NODE_ENV === 'test') {
+        return;
+    }
+    try {
+        const connection = await pool.getConnection();
+        console.log(' Connected to MySQL database successfully!');
+        connection.release();
+    } catch (error) {
+        console.error(' Database connection failed:', error.message);
+    }
+}
+
+testConnection();
+
+module.exports = pool;

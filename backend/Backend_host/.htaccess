@@ -1,0 +1,35 @@
+# ====================================================================
+# SK LABA PHONE WMS - CPANEL NODE.JS BACKEND .HTACCESS
+# ====================================================================
+
+# 1. Enable Rewrite Engine & Force HTTPS
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Force HTTPS Redirect
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Pass Authorization Header to Node.js (Essential for JWT Bearer Auth tokens)
+    RewriteCond %{HTTP:Authorization} ^(.*)
+    RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+</IfModule>
+
+# 2. Disable directory browsing for security
+Options -Indexes
+
+# 3. Passenger Startup file configuration
+<IfModule mod_passenger.c>
+    PassengerAppType node
+    PassengerStartupFile app.js
+</IfModule>
+
+# 4. Optional Reverse Proxy (Uncomment only if your cPanel server proxies to port 5000 instead of Passenger)
+# <IfModule mod_proxy.c>
+#     RewriteEngine On
+#     RewriteRule ^$ http://127.0.0.1:5000/ [P,L]
+#     RewriteCond %{REQUEST_FILENAME} !-f
+#     RewriteCond %{REQUEST_FILENAME} !-d
+#     RewriteRule ^(.*)$ http://127.0.0.1:5000/$1 [P,L]
+# </IfModule>
+

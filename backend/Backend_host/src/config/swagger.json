@@ -1,0 +1,5107 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "SK LABA PHONE WMS - API Documentation",
+    "version": "1.0.0",
+    "description": "API documentation for frontend developers. Works on localhost and hosted cloud domains."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Auto (Works on Localhost and Hosted URL)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Brands",
+      "description": "Brand APIs"
+    },
+    {
+      "name": "Storage Options",
+      "description": "Storage Option APIs"
+    },
+    {
+      "name": "Specifications",
+      "description": "Technical specifications and accessory option APIs"
+    },
+    {
+      "name": "Phones",
+      "description": "Smartphone inventory and catalog management APIs"
+    },
+    {
+      "name": "Instalment Plans",
+      "description": "Instalment plans management (MG-11, ST-02, C-03)"
+    },
+    {
+      "name": "Offers",
+      "description": "Promotional offers and discounts management (MG-03, C-01, C-02, C-03, C-12)"
+    },
+    {
+      "name": "Users",
+      "description": "User & Role Management APIs (ADMIN only)"
+    },
+    {
+      "name": "Inquiries",
+      "description": "Public customer general inquiry submission and dashboard inquiry management APIs"
+    },
+    {
+      "name": "Instalment Plans",
+      "description": "Instalment plans management (MG-11, ST-02, C-03)"
+    },
+    {
+      "name": "Reservations",
+      "description": "Customer reservation submission and dashboard reservation management APIs (C-09, C-03, ST-07)"
+    },
+    {
+      "name": "Sell Your Phone",
+      "description": "Customer Sell-Your-Phone submission (C-14) and dashboard request management APIs (ST-08)"
+    },
+    {
+      "name": "Back in Stock Requests",
+      "description": "Customer Back-in-Stock notification submissions and dashboard request management APIs"
+    },
+    {
+      "name": "Customer Reviews",
+      "description": "Customer review submission, public approved reviews, and administrative moderation APIs"
+    },
+    {
+      "name": "Phone Marketplace",
+      "description": "Customer Phone Marketplace: Public submissions, Phone card catalogue browsing, Admin review & publishing, Direct delivery orders, and Financial payouts"
+    }
+  ],
+  "paths": {
+    "/api/brands": {
+      "post": {
+        "tags": [
+          "Brands"
+        ],
+        "summary": "Create Brand",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "brand_name": "Apple",
+                "description": "Flagship smartphones and devices",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Brand created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Brand created successfully",
+                  "data": {
+                    "brand_id": 1,
+                    "brand_name": "Apple",
+                    "description": "Flagship smartphones and devices",
+                    "is_active": 1,
+                    "created_at": "2026-10-14T03:31:01.000Z",
+                    "updated_at": "2026-10-14T03:31:01.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Brands"
+        ],
+        "summary": "Get All Brands",
+        "responses": {
+          "200": {
+            "description": "List of all brands",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "data": [
+                    {
+                      "brand_id": 1,
+                      "brand_name": "Apple",
+                      "description": "Flagship smartphones and devices",
+                      "is_active": 1,
+                      "created_at": "2026-10-14T03:31:01.000Z",
+                      "updated_at": "2026-10-14T03:31:01.000Z"
+                    },
+                    {
+                      "brand_id": 2,
+                      "brand_name": "Samsung",
+                      "description": "Galaxy smartphones",
+                      "is_active": 1,
+                      "created_at": "2026-10-14T03:40:00.000Z",
+                      "updated_at": "2026-10-14T03:40:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/brands/{id}": {
+      "get": {
+        "tags": [
+          "Brands"
+        ],
+        "summary": "Get Brand By ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Brand details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "brand_id": 1,
+                    "brand_name": "Apple",
+                    "description": "Flagship smartphones and devices",
+                    "is_active": 1,
+                    "created_at": "2026-10-14T03:31:01.000Z",
+                    "updated_at": "2026-10-14T03:31:01.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Brands"
+        ],
+        "summary": "Update Brand",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "brand_name": "Apple Inc.",
+                "description": "Updated brand description",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Brand updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Brand updated successfully",
+                  "data": {
+                    "brand_id": 1,
+                    "brand_name": "Apple Inc.",
+                    "description": "Updated brand description",
+                    "is_active": 1,
+                    "created_at": "2026-10-14T03:31:01.000Z",
+                    "updated_at": "2026-10-14T04:20:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Brands"
+        ],
+        "summary": "Delete Brand",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Brand deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Brand 'Apple Inc.' deleted successfully",
+                  "data": {
+                    "brand_id": 1,
+                    "brand_name": "Apple Inc."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/storage-options": {
+      "post": {
+        "tags": [
+          "Storage Options"
+        ],
+        "summary": "Create Storage Option",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "storage_name": "128GB",
+                "capacity_gb": 128
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Storage option created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Storage option created successfully",
+                  "data": {
+                    "storage_id": 1,
+                    "storage_name": "128GB",
+                    "capacity_gb": 128,
+                    "created_at": "2026-10-14T04:15:41.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Storage Options"
+        ],
+        "summary": "Get All Storage Options",
+        "responses": {
+          "200": {
+            "description": "List of all storage options",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "data": [
+                    {
+                      "storage_id": 1,
+                      "storage_name": "128GB",
+                      "capacity_gb": 128,
+                      "created_at": "2026-10-14T04:15:41.000Z"
+                    },
+                    {
+                      "storage_id": 2,
+                      "storage_name": "256GB",
+                      "capacity_gb": 256,
+                      "created_at": "2026-10-14T04:15:42.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/storage-options/{id}": {
+      "get": {
+        "tags": [
+          "Storage Options"
+        ],
+        "summary": "Get Storage Option By ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Storage option details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "storage_id": 1,
+                    "storage_name": "128GB",
+                    "capacity_gb": 128,
+                    "created_at": "2026-10-14T04:15:41.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Storage Options"
+        ],
+        "summary": "Update Storage Option",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "storage_name": "512GB",
+                "capacity_gb": 512
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Storage option updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Storage option updated successfully",
+                  "data": {
+                    "storage_id": 1,
+                    "storage_name": "512GB",
+                    "capacity_gb": 512,
+                    "created_at": "2026-10-14T04:15:41.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Storage Options"
+        ],
+        "summary": "Delete Storage Option",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Storage option deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Storage option '128GB' deleted successfully",
+                  "data": {
+                    "storage_id": 1,
+                    "storage_name": "128GB"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/specifications": {
+      "post": {
+        "tags": [
+          "Specifications"
+        ],
+        "summary": "Create Specification",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "specification_name": "Super AMOLED Display 120Hz",
+                "specification_type": "TECHNICAL",
+                "description": "6.7 inch Full HD+ Dynamic AMOLED screen",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Specification created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Specification created successfully",
+                  "data": {
+                    "specification_id": 1,
+                    "specification_name": "Super AMOLED Display 120Hz",
+                    "specification_type": "TECHNICAL",
+                    "description": "6.7 inch Full HD+ Dynamic AMOLED screen",
+                    "is_active": 1,
+                    "created_at": "2026-10-14T05:00:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Specifications"
+        ],
+        "summary": "Get All Specifications",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Optional filter by type: TECHNICAL or ACCESSORY",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "TECHNICAL",
+                "ACCESSORY"
+              ],
+              "example": "TECHNICAL"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of specifications",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "data": [
+                    {
+                      "specification_id": 1,
+                      "specification_name": "Super AMOLED Display 120Hz",
+                      "specification_type": "TECHNICAL",
+                      "description": "6.7 inch Full HD+ screen",
+                      "is_active": 1,
+                      "created_at": "2026-10-14T05:00:00.000Z"
+                    },
+                    {
+                      "specification_id": 2,
+                      "specification_name": "25W Fast Charger Adapter",
+                      "specification_type": "ACCESSORY",
+                      "description": "Original USB-C Power Adapter",
+                      "is_active": 1,
+                      "created_at": "2026-10-14T05:02:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/specifications/{id}": {
+      "get": {
+        "tags": [
+          "Specifications"
+        ],
+        "summary": "Get Specification By ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Specification details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "specification_id": 1,
+                    "specification_name": "Super AMOLED Display 120Hz",
+                    "specification_type": "TECHNICAL",
+                    "description": "6.7 inch Full HD+ screen",
+                    "is_active": 1,
+                    "created_at": "2026-10-14T05:00:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Specifications"
+        ],
+        "summary": "Update Specification",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "specification_name": "Super AMOLED Display 144Hz",
+                "specification_type": "TECHNICAL",
+                "description": "Upgraded 144Hz high refresh rate screen",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Specification updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Specification updated successfully",
+                  "data": {
+                    "specification_id": 1,
+                    "specification_name": "Super AMOLED Display 144Hz",
+                    "specification_type": "TECHNICAL",
+                    "description": "Upgraded 144Hz high refresh rate screen",
+                    "is_active": 1,
+                    "created_at": "2026-10-14T05:00:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Specifications"
+        ],
+        "summary": "Delete Specification",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Specification deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Specification 'Super AMOLED Display 144Hz' deleted successfully",
+                  "data": {
+                    "specification_id": 1,
+                    "specification_name": "Super AMOLED Display 144Hz",
+                    "specification_type": "TECHNICAL"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones": {
+      "post": {
+        "tags": [
+          "Phones"
+        ],
+        "summary": "Create Phone",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "name": "iPhone 15 Pro Max",
+                "brand_id": 1,
+                "phone_condition": "NEW",
+                "price": 1199.99,
+                "storage_ids": [
+                  1,
+                  2
+                ],
+                "colour_options": [
+                  "Natural Titanium",
+                  "Blue Titanium",
+                  "Black Titanium"
+                ],
+                "specification_ids": [
+                  1
+                ],
+                "warranty": "1 Year Apple Warranty",
+                "accessory_ids": [
+                  2
+                ],
+                "description": "A17 Pro chip, Titanium design, 48MP main camera.",
+                "low_stock_level": 25,
+                "availability": "IN_STOCK",
+                "installment_enabled": true,
+                "installment_plan_ids": [
+                  1,
+                  2
+                ],
+                "status": "PUBLISHED",
+                "photos": [
+                  "https://images.unsplash.com/photo-1695048133142-1a20484d2569"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Phone created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Phone created successfully",
+                  "data": {
+                    "phone_id": 1,
+                    "name": "iPhone 15 Pro Max",
+                    "brand_id": 1,
+                    "brand_name": "Apple",
+                    "phone_condition": "NEW",
+                    "price": "1199.99",
+                    "storage_ids": [
+                      1,
+                      2
+                    ],
+                    "colour_options": [
+                      "Natural Titanium",
+                      "Blue Titanium",
+                      "Black Titanium"
+                    ],
+                    "specification_ids": [
+                      1
+                    ],
+                    "warranty": "1 Year Apple Warranty",
+                    "accessory_ids": [
+                      2
+                    ],
+                    "description": "A17 Pro chip, Titanium design, 48MP main camera.",
+                    "low_stock_level": 25,
+                    "availability": "IN_STOCK",
+                    "installment_enabled": 1,
+                    "installment_plan_ids": [
+                      1,
+                      2
+                    ],
+                    "status": "PUBLISHED",
+                    "photos": [
+                      "https://images.unsplash.com/photo-1695048133142-1a20484d2569"
+                    ],
+                    "created_at": "2026-10-14T05:30:00.000Z",
+                    "updated_at": "2026-10-14T05:30:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Phones"
+        ],
+        "summary": "Get All Phones",
+        "parameters": [
+          {
+            "name": "brand_id",
+            "in": "query",
+            "required": false,
+            "description": "Filter by Brand ID",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Filter by status: DRAFT, PUBLISHED, ARCHIVED",
+            "schema": {
+              "type": "string",
+              "example": "PUBLISHED"
+            }
+          },
+          {
+            "name": "phone_condition",
+            "in": "query",
+            "required": false,
+            "description": "Filter by condition: NEW, USED",
+            "schema": {
+              "type": "string",
+              "example": "NEW"
+            }
+          },
+          {
+            "name": "availability",
+            "in": "query",
+            "required": false,
+            "description": "Filter by availability: IN_STOCK, LOW_STOCK, SOLD_OUT, COMING_SOON",
+            "schema": {
+              "type": "string",
+              "example": "IN_STOCK"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Search keyword in phone name or brand name",
+            "schema": {
+              "type": "string",
+              "example": "iPhone"
+            }
+          },
+          {
+            "name": "archived",
+            "in": "query",
+            "description": "Filter by archived status: yes / true / 1 for archived only; no / false for normal only; all for both",
+            "schema": {
+              "type": "string",
+              "example": "yes"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of phones",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 1,
+                  "data": [
+                    {
+                      "phone_id": 1,
+                      "name": "iPhone 15 Pro Max",
+                      "brand_id": 1,
+                      "brand_name": "Apple",
+                      "phone_condition": "NEW",
+                      "price": "1199.99",
+                      "storage_ids": [
+                        1,
+                        2
+                      ],
+                      "colour_options": [
+                        "Natural Titanium",
+                        "Blue Titanium"
+                      ],
+                      "low_stock_level": 25,
+                      "availability": "IN_STOCK",
+                      "status": "PUBLISHED",
+                      "created_at": "2026-10-14T05:30:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}": {
+      "get": {
+        "tags": [
+          "Phones"
+        ],
+        "summary": "Get Phone By ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "phone_id": 1,
+                    "name": "iPhone 15 Pro Max",
+                    "brand_id": 1,
+                    "brand_name": "Apple",
+                    "phone_condition": "NEW",
+                    "price": "1199.99",
+                    "storage_ids": [
+                      1,
+                      2
+                    ],
+                    "colour_options": [
+                      "Natural Titanium",
+                      "Blue Titanium"
+                    ],
+                    "specification_ids": [
+                      1
+                    ],
+                    "warranty": "1 Year Apple Warranty",
+                    "accessory_ids": [
+                      2
+                    ],
+                    "description": "A17 Pro chip, Titanium design.",
+                    "low_stock_level": 25,
+                    "availability": "IN_STOCK",
+                    "installment_enabled": 1,
+                    "status": "PUBLISHED",
+                    "photos": [
+                      "https://images.unsplash.com/photo-1695048133142-1a20484d2569"
+                    ],
+                    "created_at": "2026-10-14T05:30:00.000Z",
+                    "updated_at": "2026-10-14T05:30:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Phones"
+        ],
+        "summary": "Update Phone",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "price": 1099.99,
+                "low_stock_level": 18,
+                "availability": "IN_STOCK"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Phone updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Phone updated successfully",
+                  "data": {
+                    "phone_id": 1,
+                    "name": "iPhone 15 Pro Max",
+                    "brand_id": 1,
+                    "price": "1099.99",
+                    "low_stock_level": 18,
+                    "availability": "IN_STOCK",
+                    "updated_at": "2026-10-14T05:40:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Phones"
+        ],
+        "summary": "Delete Phone",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Phone 'iPhone 15 Pro Max' deleted successfully",
+                  "data": {
+                    "phone_id": 1,
+                    "name": "iPhone 15 Pro Max"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/archived": {
+      "get": {
+        "tags": [
+          "Phones"
+        ],
+        "summary": "Get All Archived Phones",
+        "description": "Retrieve all phones currently moved to the archive list",
+        "responses": {
+          "200": {
+            "description": "Archived phones list",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 1,
+                  "data": [
+                    {
+                      "phone_id": 2,
+                      "name": "iPhone 15 Pro Max",
+                      "brand_id": 1,
+                      "price": "1199.99",
+                      "low_stock_level": 25,
+                      "status": "ARCHIVED",
+                      "is_archived": true
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/archive": {
+      "patch": {
+        "tags": [
+          "Phones"
+        ],
+        "summary": "Archive Phone",
+        "description": "Move a phone to archive (is_archived=true, status=ARCHIVED). It will no longer show in the normal list.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone archived successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Phone 'iPhone 15 Pro Max' has been archived successfully",
+                  "data": {
+                    "phone_id": 2,
+                    "name": "iPhone 15 Pro Max",
+                    "status": "ARCHIVED",
+                    "is_archived": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/restore": {
+      "patch": {
+        "tags": [
+          "Phones"
+        ],
+        "summary": "Restore Phone",
+        "description": "Restore an archived phone back to active status (is_archived=false, status=DRAFT or PUBLISHED). It becomes visible in normal list.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "example": {
+                "status": "PUBLISHED"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Phone restored successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Phone 'iPhone 15 Pro Max' has been restored successfully",
+                  "data": {
+                    "phone_id": 2,
+                    "name": "iPhone 15 Pro Max",
+                    "status": "PUBLISHED",
+                    "is_archived": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/stock": {
+      "get": {
+        "tags": [
+          "Stock Management"
+        ],
+        "summary": "Get Stock Overview for All Phones",
+        "description": "Retrieve all phones with their current stock, low stock threshold, and availability status. Supports search and filters.",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Search by phone name or brand name",
+            "schema": {
+              "type": "string",
+              "example": "iPhone"
+            }
+          },
+          {
+            "name": "brand_id",
+            "in": "query",
+            "required": false,
+            "description": "Filter by brand ID",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "availability",
+            "in": "query",
+            "required": false,
+            "description": "Filter by availability: IN_STOCK, LOW_STOCK, SOLD_OUT, COMING_SOON",
+            "schema": {
+              "type": "string",
+              "example": "IN_STOCK"
+            }
+          },
+          {
+            "name": "stock_status",
+            "in": "query",
+            "required": false,
+            "description": "Filter by stock status: low (at/below low stock level), out (sold out/zero), in_stock",
+            "schema": {
+              "type": "string",
+              "example": "low"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stock list retrieved successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 1,
+                  "data": [
+                    {
+                      "phone_id": 2,
+                      "name": "iPhone 15 Pro Max",
+                      "brand_id": 1,
+                      "brand_name": "Apple Inc.",
+                      "phone_condition": "NEW",
+                      "price": "1199.99",
+                      "current_stock": 25,
+                      "low_stock_level": 25,
+                      "availability": "LOW_STOCK",
+                      "status": "PUBLISHED"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/stock/add": {
+      "post": {
+        "tags": [
+          "Stock Management"
+        ],
+        "summary": "Add Stock Quantity",
+        "description": "Add quantity to a phone. Automatically updates availability to IN_STOCK or LOW_STOCK.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "quantity": 15,
+                "reason": "RESTOCK",
+                "notes": "Batch #104 delivery"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stock added successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Added 15 units to 'iPhone 15 Pro Max'. Current stock is now 30.",
+                  "data": {
+                    "phone_id": 2,
+                    "name": "iPhone 15 Pro Max",
+                    "previous_stock": 15,
+                    "added_quantity": 15,
+                    "current_stock": 30,
+                    "low_stock_level": 25,
+                    "availability": "IN_STOCK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/stock/remove": {
+      "post": {
+        "tags": [
+          "Stock Management"
+        ],
+        "summary": "Deduct Stock Quantity",
+        "description": "Deduct quantity from a phone. Validates that current stock is sufficient. Auto-marks SOLD_OUT when stock reaches 0.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "quantity": 5,
+                "reason": "SALE",
+                "notes": "Order #8839"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stock deducted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Deducted 5 units from 'iPhone 15 Pro Max'. Current stock is now 25.",
+                  "data": {
+                    "phone_id": 2,
+                    "name": "iPhone 15 Pro Max",
+                    "previous_stock": 30,
+                    "removed_quantity": 5,
+                    "current_stock": 25,
+                    "low_stock_level": 25,
+                    "availability": "LOW_STOCK"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/stock/sold-out": {
+      "patch": {
+        "tags": [
+          "Stock Management"
+        ],
+        "summary": "Mark Phone as Sold Out",
+        "description": "Instantly mark a phone as SOLD_OUT with optional stock reset.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "example": {
+                "reset_quantity": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Phone marked as SOLD_OUT",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Phone 'iPhone 15 Pro Max' marked as SOLD_OUT.",
+                  "data": {
+                    "phone_id": 2,
+                    "name": "iPhone 15 Pro Max",
+                    "current_stock": 0,
+                    "low_stock_level": 25,
+                    "availability": "SOLD_OUT"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/installment-plans": {
+      "get": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Get All Instalment Plans",
+        "description": "Retrieve all installment plans. Pass ?is_active=true to get active plans for staff dropdowns.",
+        "parameters": [
+          {
+            "name": "is_active",
+            "in": "query",
+            "required": false,
+            "description": "Filter by active status (true/false)",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Search keyword in plan name or terms",
+            "schema": {
+              "type": "string",
+              "example": "Commercial Bank"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of installment plans",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "data": [
+                    {
+                      "installment_plan_id": 1,
+                      "plan_name": "Koko 3 Months 0% Interest",
+                      "number_of_months": 3,
+                      "interest_rate": 0,
+                      "additional_fee": 0,
+                      "terms": "Pay in 3 equal monthly installments with debit card.",
+                      "is_active": true
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Create Instalment Plan",
+        "description": "Create a new installment financing plan (Manager function MG-11).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "plan_name": "Commercial Bank 12 Months",
+                "number_of_months": 12,
+                "interest_rate": 5,
+                "additional_fee": 15,
+                "terms": "Valid for Commercial Bank credit cardholders.",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Instalment plan created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Instalment plan created successfully",
+                  "data": {
+                    "installment_plan_id": 2,
+                    "plan_name": "Commercial Bank 12 Months",
+                    "number_of_months": 12,
+                    "interest_rate": 5,
+                    "additional_fee": 15,
+                    "is_active": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/installment-plans/{id}": {
+      "get": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Get Instalment Plan By ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instalment plan details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "installment_plan_id": 1,
+                    "plan_name": "Koko 3 Months 0% Interest",
+                    "number_of_months": 3,
+                    "interest_rate": 0,
+                    "additional_fee": 0,
+                    "is_active": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Update Instalment Plan",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "plan_name": "Koko 3 Months 0% Interest (All Cards)",
+                "interest_rate": 0,
+                "additional_fee": 0
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Instalment plan updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Instalment plan updated successfully",
+                  "data": {
+                    "installment_plan_id": 1,
+                    "plan_name": "Koko 3 Months 0% Interest (All Cards)",
+                    "number_of_months": 3,
+                    "interest_rate": 0,
+                    "additional_fee": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Delete Instalment Plan",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instalment plan deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Instalment plan 'Koko 3 Months 0% Interest' deleted successfully",
+                  "data": {
+                    "installment_plan_id": 1,
+                    "plan_name": "Koko 3 Months 0% Interest"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/installment-plans/{id}/toggle-status": {
+      "patch": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Toggle Plan Active Status",
+        "description": "Toggle plan between Active and Inactive (MG-11).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan status toggled",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Instalment plan status changed to Active",
+                  "data": {
+                    "installment_plan_id": 1,
+                    "plan_name": "Koko 3 Months 0% Interest",
+                    "is_active": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/installments": {
+      "get": {
+        "tags": [
+          "Instalment Plans"
+        ],
+        "summary": "Calculate Phone Monthly Instalments",
+        "description": "Calculates the monthly payment breakdown for a phone based on active installment plans (Customer Requirement C-03).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone monthly installments calculation",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "phone_id": 2,
+                    "phone_name": "iPhone 15 Pro Max",
+                    "phone_price": 1199.99,
+                    "installment_enabled": true,
+                    "plans_count": 2,
+                    "plans": [
+                      {
+                        "installment_plan_id": 1,
+                        "plan_name": "Koko 3 Months 0% Interest",
+                        "number_of_months": 3,
+                        "interest_rate": 0,
+                        "interest_amount": 0,
+                        "additional_fee": 0,
+                        "total_payable": 1199.99,
+                        "monthly_payment": 400
+                      },
+                      {
+                        "installment_plan_id": 2,
+                        "plan_name": "Commercial Bank 12 Months",
+                        "number_of_months": 12,
+                        "interest_rate": 5,
+                        "interest_amount": 60,
+                        "additional_fee": 15,
+                        "total_payable": 1274.99,
+                        "monthly_payment": 106.25
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/offers": {
+      "get": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Get All Offers",
+        "description": "Retrieve all promotional offers with optional filters (?stage=active|upcoming|ended|draft, ?search=...) for Managers and Staff (MG-03, AL-04).",
+        "parameters": [
+          {
+            "name": "stage",
+            "in": "query",
+            "required": false,
+            "description": "Filter by lifecycle stage: active, upcoming, ended, draft, all",
+            "schema": {
+              "type": "string",
+              "example": "active"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Search keyword in offer title or description",
+            "schema": {
+              "type": "string",
+              "example": "Avurudu"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of offers",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 1,
+                  "data": [
+                    {
+                      "offer_id": 1,
+                      "title": "Avurudu Mega Savings",
+                      "description": "Special promotional price on iPhone 15 Pro Max",
+                      "banner_image": "https://images.unsplash.com/photo-offer-banner.jpg",
+                      "phone_ids": [
+                        2
+                      ],
+                      "regular_price": 1199.99,
+                      "offer_price": 1049.99,
+                      "discount_amount": 150,
+                      "discount_percentage": 12.5,
+                      "stage": "ACTIVE",
+                      "is_active": true,
+                      "seconds_remaining": 1500000,
+                      "phones": [
+                        {
+                          "phone_id": 2,
+                          "name": "iPhone 15 Pro Max",
+                          "brand_name": "Apple Inc.",
+                          "price": 1199.99
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Create Promotional Offer",
+        "description": "Create and schedule an offer (Manager function MG-03).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "title": "Avurudu Mega Savings",
+                "description": "Special promotional price on iPhone 15 Pro Max",
+                "banner_image": "https://images.unsplash.com/photo-offer-banner.jpg",
+                "phone_ids": [
+                  2
+                ],
+                "regular_price": 1199.99,
+                "offer_price": 1049.99,
+                "start_date_time": "2026-10-25T00:00:00",
+                "end_date_time": "2026-11-15T23:59:59",
+                "status": "PUBLISHED"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Offer created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Offer created successfully",
+                  "data": {
+                    "offer_id": 1,
+                    "title": "Avurudu Mega Savings",
+                    "regular_price": 1199.99,
+                    "offer_price": 1049.99,
+                    "discount_amount": 150,
+                    "stage": "ACTIVE"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/offers/active": {
+      "get": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Get All Active Offers (Storefront)",
+        "description": "Retrieve only currently running active offers for Home page (C-01) and Offers page (C-12).",
+        "responses": {
+          "200": {
+            "description": "Active offers list",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 1,
+                  "data": [
+                    {
+                      "offer_id": 1,
+                      "title": "Avurudu Mega Savings",
+                      "banner_image": "https://images.unsplash.com/photo-offer-banner.jpg",
+                      "regular_price": 1199.99,
+                      "offer_price": 1049.99,
+                      "discount_amount": 150,
+                      "seconds_remaining": 1500000,
+                      "phones": [
+                        {
+                          "phone_id": 2,
+                          "name": "iPhone 15 Pro Max",
+                          "brand_name": "Apple Inc."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/offers/{id}": {
+      "get": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Get Offer By ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "offer_id": 1,
+                    "title": "Avurudu Mega Savings",
+                    "regular_price": 1199.99,
+                    "offer_price": 1049.99,
+                    "stage": "ACTIVE"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Update Offer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "title": "Avurudu Mega Savings (Limited Stock)",
+                "offer_price": 1029.99
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Offer updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Offer updated successfully",
+                  "data": {
+                    "offer_id": 1,
+                    "title": "Avurudu Mega Savings (Limited Stock)",
+                    "regular_price": 1199.99,
+                    "offer_price": 1029.99,
+                    "discount_amount": 170
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Delete Offer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer deleted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Offer 'Avurudu Mega Savings' deleted successfully",
+                  "data": {
+                    "offer_id": 1,
+                    "title": "Avurudu Mega Savings"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/{id}/offer": {
+      "get": {
+        "tags": [
+          "Offers"
+        ],
+        "summary": "Get Phone Active Offer (Storefront Badge)",
+        "description": "Check if a specific phone model has an active running offer (C-02, C-03).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone active offer check",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "phone_id": 2,
+                    "phone_name": "iPhone 15 Pro Max",
+                    "regular_price": 1199.99,
+                    "has_active_offer": true,
+                    "offer": {
+                      "offer_id": 1,
+                      "title": "Avurudu Mega Savings",
+                      "offer_price": 1029.99,
+                      "savings": 170,
+                      "discount_percentage": 14.2,
+                      "seconds_remaining": 1500000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phones/compare": {
+      "get": {
+        "tags": [
+          "Customer Phones (C-05)"
+        ],
+        "summary": "Compare 2 or 3 phones side-by-side (SRS C-05)",
+        "description": "Returns side-by-side comparison for 2 or 3 phones including photo, price, offer price, savings, warranty, stock status, colors, storages, specs, accessories, and monthly installment calculations. Saved in customer browser.",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2,3"
+            },
+            "description": "Comma-separated IDs of 2 or 3 phones to compare (e.g. 2,3 or 2,3,4)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Side-by-side comparison matrix and enriched phones",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Successfully retrieved side-by-side comparison for 2 phones.",
+                  "data": {
+                    "count": 2,
+                    "phones": [],
+                    "comparison_matrix": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid selection (less than 2 or more than 3 phones)"
+          },
+          "404": {
+            "description": "One or more selected phones not found"
+          }
+        }
+      }
+    },
+    "/api/phones/favorites": {
+      "get": {
+        "tags": [
+          "Customer Favorites (C-06)"
+        ],
+        "summary": "Retrieve live phone details for saved favorites (SRS C-06)",
+        "description": "Returns live phone card details, active offers, pricing, warranty, and availability labels for IDs stored in the customer browser. Also returns unavailable_ids for deleted/archived phones.",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2,3,4"
+            },
+            "description": "Comma-separated phone IDs saved in customer browser localStorage (e.g. 2,3,4)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live phone cards and unavailable IDs list",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "data": [
+                    {
+                      "phone_id": 2,
+                      "name": "iPhone 15 Pro Max",
+                      "brand_name": "Apple Inc.",
+                      "main_photo": "https://images.unsplash.com/...",
+                      "phone_condition": "NEW",
+                      "regular_price": 1199.99,
+                      "effective_price": 1029.99,
+                      "availability": "LOW_STOCK",
+                      "availability_label": "Only 25 left",
+                      "current_stock": 25,
+                      "active_offer": {
+                        "has_active_offer": true,
+                        "offer_title": "Avurudu Mega Savings",
+                        "offer_price": 1029.99,
+                        "discount_percentage": 14.2,
+                        "savings": 170
+                      },
+                      "is_available": true
+                    }
+                  ],
+                  "unavailable_ids": [
+                    99
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List Users (ADMIN only)",
+        "description": "Retrieve paginated users with optional search and role/status filters",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ADMIN",
+                "STAFF"
+              ]
+            }
+          },
+          {
+            "name": "is_active",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated user list retrieved"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create Staff/Admin Account (ADMIN only)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "display_name": "Warehouse Associate",
+                "email": "associate@sklabaphone.com",
+                "password": "SecurePassword123!",
+                "role": "STAFF",
+                "is_active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Email conflict"
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User Details (ADMIN only)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update User Profile/Role (ADMIN only)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "display_name": "Updated Name",
+                "role": "ADMIN"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully"
+          },
+          "400": {
+            "description": "Validation error / cannot demote last admin"
+          },
+          "409": {
+            "description": "Email conflict"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/status": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Activate or Deactivate User Account (ADMIN only)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "is_active": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User status updated successfully"
+          },
+          "400": {
+            "description": "Validation error / cannot deactivate self or last admin"
+          }
+        }
+      }
+    },
+    "/api/inquiries": {
+      "post": {
+        "tags": [
+          "Inquiries"
+        ],
+        "summary": "Submit Customer General Inquiry (Public)",
+        "description": "Public rate-limited endpoint for customer general inquiries from the Home Page. Does not require authentication or phone association.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "customer_name": "Kasun Perera",
+                "phone_number": "+94771234567",
+                "message": "I would like to get more information about your available iPhones."
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "General inquiry submitted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Inquiry submitted successfully. Our team will contact you soon.",
+                  "data": {
+                    "inquiry_id": 1,
+                    "customer_name": "Kasun Perera",
+                    "name": "Kasun Perera",
+                    "phone_number": "+94771234567",
+                    "message": "I would like to get more information about your available iPhones.",
+                    "phone_id": null,
+                    "inquiry_type": "GENERAL",
+                    "status": "New",
+                    "selected_phone": null,
+                    "assigned_to_user_id": null,
+                    "assigned_staff": null,
+                    "updated_by_user_id": null,
+                    "updated_by_staff": null,
+                    "created_at": "2026-11-03T05:00:00.000Z",
+                    "updated_at": "2026-11-03T05:00:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (missing or malformed fields)"
+          },
+          "429": {
+            "description": "Too many inquiry submissions from this IP"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Inquiries"
+        ],
+        "summary": "List Inquiries (Admin & Staff)",
+        "description": "Protected endpoint for dashboard users to view paginated inquiries with searching and filtering. Supports both new general inquiries (inquiry_type: GENERAL) and historical phone-associated inquiries (inquiry_type: PHONE_SPECIFIC).",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by customer name or phone number",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status: New, In Progress, Contacted, Closed",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "New",
+                "In Progress",
+                "Contacted",
+                "Closed"
+              ]
+            }
+          },
+          {
+            "name": "assigned_to_user_id",
+            "in": "query",
+            "description": "Filter by assigned staff user ID",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of inquiries",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "inquiry_id": 1,
+                      "customer_name": "Kasun Perera",
+                      "name": "Kasun Perera",
+                      "phone_number": "+94771234567",
+                      "message": "I would like to get more information about your available iPhones.",
+                      "phone_id": null,
+                      "inquiry_type": "GENERAL",
+                      "status": "New",
+                      "assigned_to_user_id": null,
+                      "assigned_staff": null,
+                      "updated_by_user_id": null,
+                      "updated_by_staff": null,
+                      "selected_phone": null,
+                      "created_at": "2026-11-03T05:00:00.000Z",
+                      "updated_at": "2026-11-03T05:00:00.000Z"
+                    },
+                    {
+                      "inquiry_id": 2,
+                      "customer_name": "Dilshan Silva",
+                      "name": "Dilshan Silva",
+                      "phone_number": "+94719876543",
+                      "message": "Is trade-in available for iPhone 15 Pro?",
+                      "phone_id": 2,
+                      "inquiry_type": "PHONE_SPECIFIC",
+                      "status": "In Progress",
+                      "assigned_to_user_id": 2,
+                      "assigned_staff": {
+                        "user_id": 2,
+                        "display_name": "Staff Handler",
+                        "email": "staff@sklabaphone.com"
+                      },
+                      "updated_by_user_id": 2,
+                      "updated_by_staff": {
+                        "user_id": 2,
+                        "display_name": "Staff Handler",
+                        "email": "staff@sklabaphone.com"
+                      },
+                      "selected_phone": {
+                        "phone_id": 2,
+                        "name": "iPhone 15 Pro Max",
+                        "price": 1199.99,
+                        "brand_name": "Apple Inc.",
+                        "availability": "IN_STOCK",
+                        "status": "PUBLISHED"
+                      },
+                      "created_at": "2026-10-26T12:00:00.000Z",
+                      "updated_at": "2026-10-26T14:00:00.000Z"
+                    }
+                  ],
+                  "pagination": {
+                    "total": 2,
+                    "page": 1,
+                    "limit": 10,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: Session login required"
+          },
+          "403": {
+            "description": "Forbidden: Requires ADMIN or STAFF role"
+          }
+        }
+      }
+    },
+    "/api/inquiries/{id}": {
+      "get": {
+        "tags": [
+          "Inquiries"
+        ],
+        "summary": "Get Inquiry Details (Admin & Staff)",
+        "description": "Retrieve complete details of an individual inquiry by ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inquiry details retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Inquiry not found"
+          }
+        }
+      }
+    },
+    "/api/inquiries/{id}/status": {
+      "patch": {
+        "tags": [
+          "Inquiries"
+        ],
+        "summary": "Update Inquiry Status (Admin & Staff)",
+        "description": "Update inquiry status and staff attribution. Logged-in staff identity is automatically recorded.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "status": "In Progress",
+                "assigned_to_user_id": 2
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inquiry status updated successfully"
+          },
+          "400": {
+            "description": "Invalid status value or inactive assigned staff"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden / Missing CSRF token"
+          },
+          "404": {
+            "description": "Inquiry or assigned staff not found"
+          }
+        }
+      }
+    },
+    "/api/reservations": {
+      "post": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Submit Customer Reservation Request (Public, C-09, C-03)",
+        "description": "Public rate-limited endpoint for customer reservations. Validates phone availability (rejects sold-out) and options. Does NOT mutate inventory stock.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "customer_name": "Kasun Perera",
+                "phone_number": "+94771234567",
+                "email": "kasun@example.com",
+                "phone_id": 1,
+                "selected_options": {
+                  "storage_id": 1,
+                  "colour": "Deep Purple"
+                },
+                "preferred_collection_date": "2026-11-05",
+                "customer_note": "Please hold until 5 PM"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reservation request received successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Your request is received. The shop will confirm.",
+                  "data": {
+                    "reservation_id": 1,
+                    "customer_name": "Kasun Perera",
+                    "phone_number": "+94771234567",
+                    "email": "kasun@example.com",
+                    "phone_id": 1,
+                    "selected_options": {
+                      "storage_id": 1,
+                      "colour": "Deep Purple"
+                    },
+                    "preferred_collection_date": "2026-11-05",
+                    "customer_note": "Please hold until 5 PM",
+                    "status": "Pending",
+                    "created_at": "2026-10-29T06:00:00.000Z",
+                    "updated_at": "2026-10-29T06:00:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (missing fields, invalid options, past date, or phone sold out)"
+          },
+          "404": {
+            "description": "Referenced phone does not exist"
+          },
+          "429": {
+            "description": "Too many reservation submissions from this IP"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "List Reservations (Admin & Staff, ST-07)",
+        "description": "Protected endpoint for dashboard users to view paginated reservations with searching and filtering.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by customer name, phone number, or email",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by exact status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Pending",
+                "Confirmed",
+                "Payment Received",
+                "Ready for Collection",
+                "Collected",
+                "Cancelled",
+                "Expired"
+              ]
+            }
+          },
+          {
+            "name": "phone_id",
+            "in": "query",
+            "description": "Filter by phone ID",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "assigned_to_user_id",
+            "in": "query",
+            "description": "Filter by assigned staff user ID",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "description": "Filter from preferred collection date (YYYY-MM-DD)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to_date",
+            "in": "query",
+            "description": "Filter to preferred collection date (YYYY-MM-DD)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of reservations",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "inquiry_id": 1,
+                      "customer_name": "John Doe",
+                      "phone_number": "+94771234567",
+                      "message": "Is the Apple iPhone 15 Pro 128GB currently in stock?",
+                      "phone_id": 1,
+                      "status": "New",
+                      "assigned_to_user_id": null,
+                      "updated_by_user_id": null,
+                      "selected_phone": {
+                        "phone_id": 1,
+                        "name": "iPhone 15 Pro",
+                        "price": 345000,
+                        "brand_name": "Apple"
+                      },
+                      "created_at": "2026-10-29T06:00:00.000Z",
+                      "updated_at": "2026-10-29T06:00:00.000Z"
+                    }
+                  ],
+                  "pagination": {
+                    "total": 1,
+                    "page": 1,
+                    "limit": 10,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: Session login required"
+          },
+          "403": {
+            "description": "Forbidden: Requires ADMIN or STAFF role"
+          }
+        }
+      }
+    },
+    "/api/reservations/{id}": {
+      "get": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Get Reservation Details (Admin & Staff, ST-07)",
+        "description": "Retrieve complete details of an individual reservation by ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reservation details retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Reservation not found"
+          }
+        }
+      }
+    },
+    "/api/reservations/{id}/status": {
+      "patch": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Update Reservation Status (Admin & Staff, ST-07)",
+        "description": "Update reservation status. Allowed values: Pending, Confirmed, Payment Received, Ready for Collection, Collected, Cancelled, Expired. Does NOT mutate inventory stock.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "status": "Confirmed",
+                "assigned_to_user_id": 2
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reservation status updated successfully"
+          },
+          "400": {
+            "description": "Invalid status value or inactive assigned staff"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden / Missing CSRF token"
+          },
+          "404": {
+            "description": "Reservation or assigned staff not found"
+          }
+        }
+      }
+    },
+    "/api/reservations/{id}/assign": {
+      "patch": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Assign Reservation to Staff (Admin & Staff)",
+        "description": "Assign or reassign a reservation to a dashboard staff member.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "assigned_to_user_id": 2
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reservation assigned successfully"
+          },
+          "400": {
+            "description": "Invalid user ID or inactive staff member"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden / Missing CSRF token"
+          },
+          "404": {
+            "description": "Reservation or staff member not found"
+          }
+        }
+      }
+    },
+    "/api/sell-requests": {
+      "post": {
+        "tags": [
+          "Sell Your Phone"
+        ],
+        "summary": "Submit Customer Sell-Your-Phone Request (Public, C-14)",
+        "description": "Public rate-limited endpoint for customer sell-your-phone submissions. Supports multipart/form-data with up to 5 photos (validates magic bytes, max 5MB/photo) or JSON payload.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "customer_name",
+                  "phone_number",
+                  "brand_and_model",
+                  "storage_capacity",
+                  "phone_condition",
+                  "battery_health"
+                ],
+                "properties": {
+                  "customer_name": {
+                    "type": "string",
+                    "example": "Nimal Fernando"
+                  },
+                  "phone_number": {
+                    "type": "string",
+                    "example": "+94771234567"
+                  },
+                  "brand_and_model": {
+                    "type": "string",
+                    "example": "Apple iPhone 12 Pro"
+                  },
+                  "brand": {
+                    "type": "string",
+                    "example": "Apple"
+                  },
+                  "model": {
+                    "type": "string",
+                    "example": "iPhone 12 Pro"
+                  },
+                  "storage_capacity": {
+                    "type": "string",
+                    "example": "128GB"
+                  },
+                  "phone_condition": {
+                    "type": "string",
+                    "example": "Good"
+                  },
+                  "battery_health": {
+                    "type": "string",
+                    "example": "86%"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Minor scratches, fully working with box"
+                  },
+                  "desired_phone_id": {
+                    "type": "integer",
+                    "example": 101
+                  },
+                  "photos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "description": "Up to 5 phone photos (JPG, PNG, WEBP, max 5MB each)"
+                  }
+                }
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "customer_name",
+                  "phone_number",
+                  "brand_and_model",
+                  "storage_capacity",
+                  "phone_condition",
+                  "battery_health"
+                ],
+                "properties": {
+                  "customer_name": {
+                    "type": "string",
+                    "example": "Nimal Fernando"
+                  },
+                  "phone_number": {
+                    "type": "string",
+                    "example": "+94771234567"
+                  },
+                  "brand_and_model": {
+                    "type": "string",
+                    "example": "Apple iPhone 12 Pro"
+                  },
+                  "brand": {
+                    "type": "string",
+                    "example": "Apple"
+                  },
+                  "model": {
+                    "type": "string",
+                    "example": "iPhone 12 Pro"
+                  },
+                  "storage_capacity": {
+                    "type": "string",
+                    "example": "128GB"
+                  },
+                  "phone_condition": {
+                    "type": "string",
+                    "example": "Good"
+                  },
+                  "battery_health": {
+                    "type": "string",
+                    "example": "86%"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Minor scratches, fully working with box"
+                  },
+                  "desired_phone_id": {
+                    "type": "integer",
+                    "example": 101
+                  },
+                  "photos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "/uploads/sell-requests/photo1.jpg",
+                      "/uploads/sell-requests/photo2.jpg"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sell request submitted successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Your sell request has been received. Our team will review the details and contact you with a valuation quote.",
+                  "data": {
+                    "request_id": 1,
+                    "customer_name": "Nimal Fernando",
+                    "phone_number": "+94771234567",
+                    "brand_and_model": "Apple iPhone 12 Pro",
+                    "brand": "Apple",
+                    "model": "iPhone 12 Pro",
+                    "storage_capacity": "128GB",
+                    "phone_condition": "Good",
+                    "battery_health": "86%",
+                    "description": "Minor scratches, fully working with box",
+                    "photos": [
+                      "/uploads/sell-requests/sell_1730000000_abc123.jpg"
+                    ],
+                    "desired_phone_id": 101,
+                    "status": "New",
+                    "created_at": "2026-10-29T10:00:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error or invalid photo upload"
+          },
+          "404": {
+            "description": "Desired phone not found"
+          },
+          "429": {
+            "description": "Too many requests from this IP"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Sell Your Phone"
+        ],
+        "summary": "List Sell Requests (Admin & Staff, ST-08)",
+        "description": "Retrieve a paginated list of sell-your-phone requests with search and filters.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search by customer name, phone number, or brand/model"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "New",
+                "Quote Given",
+                "Accepted",
+                "Declined",
+                "Closed"
+              ]
+            }
+          },
+          {
+            "name": "assigned_to_user_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "desired_phone_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to_date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of sell requests with pagination"
+          },
+          "400": {
+            "description": "Invalid query parameters"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/sell-requests/{id}": {
+      "get": {
+        "tags": [
+          "Sell Your Phone"
+        ],
+        "summary": "Get Sell Request Details (Admin & Staff, ST-08)",
+        "description": "Retrieve complete details of an individual sell-your-phone request by ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete sell request details"
+          },
+          "400": {
+            "description": "Invalid ID parameter"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Sell request not found"
+          }
+        }
+      }
+    },
+    "/api/sell-requests/{id}/status": {
+      "patch": {
+        "tags": [
+          "Sell Your Phone"
+        ],
+        "summary": "Update Sell Request Status (Admin & Staff, ST-08)",
+        "description": "Update sell request status. Allowed SRS statuses: New, Quote Given, Accepted, Declined, Closed. CSRF token required.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "New",
+                      "Quote Given",
+                      "Accepted",
+                      "Declined",
+                      "Closed"
+                    ],
+                    "example": "Quote Given"
+                  },
+                  "assigned_to_user_id": {
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status updated successfully"
+          },
+          "400": {
+            "description": "Invalid status or inactive staff member"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden / Missing CSRF token"
+          },
+          "404": {
+            "description": "Sell request or staff member not found"
+          }
+        }
+      }
+    },
+    "/api/sell-requests/{id}/assign": {
+      "patch": {
+        "tags": [
+          "Sell Your Phone"
+        ],
+        "summary": "Assign Sell Request to Staff (Admin & Staff)",
+        "description": "Assign or reassign a sell request to a staff member. CSRF token required.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "assigned_to_user_id"
+                ],
+                "properties": {
+                  "assigned_to_user_id": {
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assigned successfully"
+          },
+          "400": {
+            "description": "Invalid user ID or inactive staff member"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden / Missing CSRF token"
+          },
+          "404": {
+            "description": "Sell request or staff member not found"
+          }
+        }
+      }
+    },
+    "/api/back-in-stock-requests": {
+      "post": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "Submit customer back-in-stock notification request",
+        "description": "Public endpoint allowing customers to request notification when a currently sold out phone is back in stock. Rate limited by IP. No login required.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "phone_id",
+                  "customer_name",
+                  "phone_number"
+                ],
+                "properties": {
+                  "phone_id": {
+                    "type": "integer",
+                    "example": 101,
+                    "description": "ID of the sold-out phone"
+                  },
+                  "customer_name": {
+                    "type": "string",
+                    "example": "Kasun Perera",
+                    "description": "Customer full name (2-150 chars)"
+                  },
+                  "phone_number": {
+                    "type": "string",
+                    "example": "+94771234567",
+                    "description": "Phone or WhatsApp contact number (7-15 digits)"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "kasun@example.com",
+                    "description": "Optional email address"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "example": "Looking for 256GB Black",
+                    "description": "Optional customer notes"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Back-in-stock notification request received successfully"
+          },
+          "400": {
+            "description": "Validation Error: Missing required fields, invalid format, or phone is currently in stock or archived"
+          },
+          "404": {
+            "description": "Referenced phone not found"
+          },
+          "429": {
+            "description": "Too many requests from this IP. Rate limit exceeded."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "List back-in-stock requests",
+        "description": "Protected dashboard endpoint to list requests with pagination, searching, and filtering. Supports ?grouped=true for grouped view.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Pending",
+                "Contacted"
+              ]
+            }
+          },
+          {
+            "name": "phone_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "assigned_to_user_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "grouped",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of back-in-stock requests"
+          },
+          "401": {
+            "description": "Unauthorized: Session login required"
+          },
+          "403": {
+            "description": "Forbidden: Requires ADMIN or STAFF role"
+          }
+        }
+      }
+    },
+    "/api/back-in-stock-requests/grouped": {
+      "get": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "List back-in-stock requests grouped by phone",
+        "description": "Protected dashboard endpoint to list phones with waiting customer counts and request statistics.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of phones with waiting counts"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/back-in-stock-requests/phones/{phoneId}": {
+      "get": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "Retrieve waiting customers for a specific phone",
+        "description": "Protected dashboard endpoint to retrieve waiting customer contact details for a selected phone.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "phoneId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone details with waiting customer contact list"
+          },
+          "400": {
+            "description": "Invalid phone ID"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Phone not found"
+          }
+        }
+      }
+    },
+    "/api/back-in-stock-requests/{id}": {
+      "get": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "Retrieve complete request details by ID",
+        "description": "Protected dashboard endpoint to view individual request information including customer contact details and phone details.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request details retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid request ID"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Request not found"
+          }
+        }
+      }
+    },
+    "/api/back-in-stock-requests/{id}/status": {
+      "patch": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "Mark an individual request as Contacted",
+        "description": "Protected dashboard endpoint to update request status to Contacted. Derives staff attribution from session. Requires CSRF protection.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Contacted"
+                    ],
+                    "default": "Contacted"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "example": "Contacted customer on WhatsApp"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request marked as Contacted successfully"
+          },
+          "400": {
+            "description": "Invalid status value or ID parameter"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden or Invalid CSRF token"
+          },
+          "404": {
+            "description": "Request not found"
+          }
+        }
+      }
+    },
+    "/api/back-in-stock-requests/{id}/assign": {
+      "patch": {
+        "tags": [
+          "Back in Stock Requests"
+        ],
+        "summary": "Assign request to a staff member",
+        "description": "Protected dashboard endpoint to assign a back-in-stock request to an active staff member. Requires CSRF protection.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "assigned_to_user_id"
+                ],
+                "properties": {
+                  "assigned_to_user_id": {
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request assigned successfully"
+          },
+          "400": {
+            "description": "Invalid user ID or user is inactive"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden or Invalid CSRF token"
+          },
+          "404": {
+            "description": "Request or user not found"
+          }
+        }
+      }
+    },
+    "/api/reviews": {
+      "post": {
+        "tags": [
+          "Customer Reviews"
+        ],
+        "summary": "Submit customer review",
+        "description": "Public endpoint allowing customers to submit reviews about their experience with SK LABA PHONE. Rate-limited by IP. Automatically saved with status Pending for administrative moderation.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "customer_name",
+                  "rating",
+                  "comment"
+                ],
+                "properties": {
+                  "customer_name": {
+                    "type": "string",
+                    "example": "Kasun Perera",
+                    "description": "Customer full name (2-150 chars)"
+                  },
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5,
+                    "example": 5,
+                    "description": "Whole-number star rating from 1 to 5"
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Excellent phone condition and super fast delivery. Highly recommended!",
+                    "description": "Review comment / text (3-2000 chars)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review submitted successfully and awaiting moderation",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Thank you for sharing your experience! Your review has been submitted successfully and will appear on our website after approval.",
+                  "data": {
+                    "review_id": 15,
+                    "customer_name": "Kasun Perera",
+                    "rating": 5,
+                    "comment": "Excellent phone condition and super fast delivery. Highly recommended!",
+                    "status": "Pending",
+                    "created_at": "2026-10-30T07:10:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error: missing required fields or invalid rating (must be integer 1-5)"
+          },
+          "429": {
+            "description": "Rate limit exceeded: too many submissions from this IP"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Customer Reviews"
+        ],
+        "summary": "List approved customer reviews for public website",
+        "description": "Public read-only endpoint returning strictly Approved reviews. Pending and Rejected reviews are always hidden.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default 1)",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (default 20, max 50)",
+            "schema": {
+              "type": "integer",
+              "example": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of approved customer reviews",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "data": [
+                    {
+                      "review_id": 2,
+                      "customer_name": "Nuwan Perera",
+                      "rating": 5,
+                      "comment": "Genuine brand new iPhone with complete warranty. Great service!",
+                      "created_at": "2026-10-28T14:30:00.000Z"
+                    },
+                    {
+                      "review_id": 1,
+                      "customer_name": "Dilshan Silva",
+                      "rating": 4,
+                      "comment": "Good customer service and fair pricing.",
+                      "created_at": "2026-10-25T10:30:00.000Z"
+                    }
+                  ],
+                  "pagination": {
+                    "total": 2,
+                    "page": 1,
+                    "limit": 20,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid pagination query parameters"
+          }
+        }
+      }
+    },
+    "/api/admin/reviews": {
+      "get": {
+        "tags": [
+          "Customer Reviews"
+        ],
+        "summary": "List customer reviews for dashboard moderation",
+        "description": "Protected ADMIN endpoint to list, search, and filter customer reviews across Pending, Approved, and Rejected statuses with pagination.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "example": 20
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status: Pending, Approved, Rejected, or ALL (default ALL)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Pending",
+                "Approved",
+                "Rejected",
+                "ALL"
+              ],
+              "example": "Pending"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search customer name or comment keyword",
+            "schema": {
+              "type": "string",
+              "example": "Kasun"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "created_at",
+                "rating",
+                "review_id",
+                "status"
+              ],
+              "example": "created_at"
+            }
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "example": "DESC"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of reviews with moderator details",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "review_id": 15,
+                      "customer_name": "Kasun Perera",
+                      "rating": 5,
+                      "comment": "Great phone and fast delivery.",
+                      "status": "Pending",
+                      "moderated_by_user_id": null,
+                      "moderated_at": null,
+                      "moderator": null,
+                      "created_at": "2026-10-30T07:10:00.000Z",
+                      "updated_at": "2026-10-30T07:10:00.000Z"
+                    }
+                  ],
+                  "pagination": {
+                    "total": 1,
+                    "page": 1,
+                    "limit": 20,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden: Insufficient permissions (ADMIN only)"
+          }
+        }
+      }
+    },
+    "/api/admin/reviews/{id}": {
+      "get": {
+        "tags": [
+          "Customer Reviews"
+        ],
+        "summary": "Get review details by ID",
+        "description": "Protected ADMIN endpoint to retrieve full details of an individual review with moderation metadata.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 15
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review details retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden (ADMIN only)"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        }
+      }
+    },
+    "/api/admin/reviews/{id}/status": {
+      "patch": {
+        "tags": [
+          "Customer Reviews"
+        ],
+        "summary": "Moderate customer review (Approve or Reject)",
+        "description": "Protected ADMIN endpoint to approve or reject a customer review. Requires CSRF token. Derives moderator attribution from session.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 15
+            }
+          },
+          {
+            "name": "x-csrf-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "CSRF token"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Approved",
+                      "Rejected"
+                    ],
+                    "example": "Approved"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Review status updated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Review successfully approved.",
+                  "data": {
+                    "review_id": 15,
+                    "customer_name": "Kasun Perera",
+                    "rating": 5,
+                    "comment": "Great phone and fast delivery.",
+                    "status": "Approved",
+                    "moderated_by_user_id": 1,
+                    "moderated_at": "2026-10-30T07:25:00.000Z",
+                    "moderator": {
+                      "user_id": 1,
+                      "display_name": "Admin User",
+                      "email": "admin@sklabaphone.com"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid status value (must be Approved or Rejected)"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden: Insufficient permissions or missing CSRF token"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        }
+      }
+    },
+    "/api/marketplace/submit": {
+      "post": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Submit a phone to sell on the Marketplace (Public)",
+        "description": "Public customer Sell Your Phone submission without requiring a dashboard login. Supports multipart/form-data with photo upload.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "seller_name",
+                  "seller_email",
+                  "seller_phone",
+                  "brand",
+                  "model",
+                  "storage",
+                  "color",
+                  "condition_description",
+                  "price",
+                  "seller_terms_accepted",
+                  "photos"
+                ],
+                "properties": {
+                  "seller_name": {
+                    "type": "string",
+                    "example": "Kamal Perera"
+                  },
+                  "seller_email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "kamal@example.com"
+                  },
+                  "seller_phone": {
+                    "type": "string",
+                    "example": "0771234567"
+                  },
+                  "brand": {
+                    "type": "string",
+                    "example": "Apple"
+                  },
+                  "model": {
+                    "type": "string",
+                    "example": "iPhone 15 Pro"
+                  },
+                  "storage": {
+                    "type": "string",
+                    "example": "256GB"
+                  },
+                  "color": {
+                    "type": "string",
+                    "example": "Natural Titanium"
+                  },
+                  "condition_grade": {
+                    "type": "string",
+                    "enum": [
+                      "BRAND_NEW",
+                      "LIKE_NEW",
+                      "EXCELLENT",
+                      "VERY_GOOD",
+                      "GOOD",
+                      "FAIR"
+                    ],
+                    "example": "VERY_GOOD"
+                  },
+                  "condition_description": {
+                    "type": "string",
+                    "example": "Minor scratches on bezel. Screen flawless."
+                  },
+                  "physical_condition": {
+                    "type": "string",
+                    "example": "No dents"
+                  },
+                  "display_condition": {
+                    "type": "string",
+                    "example": "No cracks, 100% original OLED"
+                  },
+                  "camera_condition": {
+                    "type": "string",
+                    "example": "All lenses and zoom working"
+                  },
+                  "biometrics_status": {
+                    "type": "string",
+                    "example": "Face ID Working"
+                  },
+                  "battery_health": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "example": 91
+                  },
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 245000
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Personal phone upgraded to 16 Pro."
+                  },
+                  "original_box": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "charger_included": {
+                    "type": "boolean",
+                    "example": false
+                  },
+                  "warranty_info": {
+                    "type": "string",
+                    "example": "3 months remaining"
+                  },
+                  "seller_terms_accepted": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "photos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Phone listing submitted successfully for Admin review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "listing_id": {
+                          "type": "integer",
+                          "example": 12
+                        },
+                        "listing_ref": {
+                          "type": "string",
+                          "example": "MKP-LST-000012"
+                        },
+                        "brand": {
+                          "type": "string",
+                          "example": "Apple"
+                        },
+                        "model": {
+                          "type": "string",
+                          "example": "iPhone 15 Pro"
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "PENDING_REVIEW"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/api/marketplace/phones": {
+      "get": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Browse published Marketplace phones (Public)",
+        "description": "Returns published Marketplace phone listings formatted to match canonical Smartphone product cards. Masks private seller details.",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by brand"
+          },
+          {
+            "name": "condition_grade",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by condition grade"
+          },
+          {
+            "name": "min_price",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Published Marketplace phones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "listing_ref": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "brand": {
+                            "type": "string"
+                          },
+                          "model": {
+                            "type": "string"
+                          },
+                          "storage": {
+                            "type": "string"
+                          },
+                          "color": {
+                            "type": "string"
+                          },
+                          "price": {
+                            "type": "number"
+                          },
+                          "regular_price": {
+                            "type": "number"
+                          },
+                          "effective_price": {
+                            "type": "number"
+                          },
+                          "primaryImage": {
+                            "type": "string"
+                          },
+                          "additionalImages": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "availability": {
+                            "type": "string",
+                            "example": "IN_STOCK"
+                          },
+                          "condition": {
+                            "type": "string",
+                            "example": "USED"
+                          },
+                          "condition_grade": {
+                            "type": "string",
+                            "example": "VERY_GOOD"
+                          },
+                          "battery_health": {
+                            "type": "integer",
+                            "example": 91
+                          },
+                          "source": {
+                            "type": "string",
+                            "example": "MARKETPLACE"
+                          },
+                          "ownership_type": {
+                            "type": "string",
+                            "example": "SELLER_OWNED"
+                          },
+                          "whatsapp_contact_url": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/marketplace/phones/{id}": {
+      "get": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Get published Marketplace phone details (Public)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Marketplace phone details"
+          },
+          "404": {
+            "description": "Not found or not published"
+          }
+        }
+      }
+    },
+    "/api/marketplace/orders": {
+      "post": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Place Marketplace phone purchase order (Public / Authenticated)",
+        "description": "Creates a purchase order for a published phone. Captures frozen financial snapshot and requires Buyer Terms acceptance.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "listing_id",
+                  "buyer_name",
+                  "buyer_phone",
+                  "buyer_email",
+                  "buyer_address",
+                  "buyer_terms_accepted"
+                ],
+                "properties": {
+                  "listing_id": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "buyer_name": {
+                    "type": "string",
+                    "example": "Nimal Silva"
+                  },
+                  "buyer_phone": {
+                    "type": "string",
+                    "example": "0779876543"
+                  },
+                  "buyer_email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "nimal@gmail.com"
+                  },
+                  "buyer_address": {
+                    "type": "string",
+                    "example": "No 15, Station Road, Colombo"
+                  },
+                  "buyer_terms_accepted": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order created in PENDING_PAYMENT"
+          },
+          "400": {
+            "description": "Validation error or listing no longer available"
+          }
+        }
+      }
+    },
+    "/api/marketplace/terms/seller": {
+      "get": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Get active Marketplace Seller Terms & Conditions (Public)",
+        "responses": {
+          "200": {
+            "description": "Active seller terms"
+          }
+        }
+      }
+    },
+    "/api/marketplace/terms/buyer": {
+      "get": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Get active Marketplace Buyer Terms & Conditions (Public)",
+        "responses": {
+          "200": {
+            "description": "Active buyer terms"
+          }
+        }
+      }
+    },
+    "/api/marketplace/admin/listings": {
+      "get": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "List all marketplace listings (Admin & Staff)",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING_REVIEW",
+                "UNDER_REVIEW",
+                "CHANGES_REQUESTED",
+                "APPROVED",
+                "REJECTED",
+                "PUBLISHED",
+                "RESERVED",
+                "SOLD",
+                "CANCELLED",
+                "EXPIRED",
+                "UNPUBLISHED"
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listings list"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/marketplace/admin/listings/{id}": {
+      "get": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Get full listing details with seller contact and audit trail (Admin & Staff)",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing details"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/marketplace/admin/listings/{id}/approve": {
+      "patch": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Approve listing and publish to Smartphone catalogue (Admin & Staff)",
+        "description": "Approves listing, normalizes catalogue fields into phones table, and automatically triggers Seller Approval Email with commission breakdown.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "admin_notes": {
+                    "type": "string",
+                    "example": "Verified hardware and IMEI"
+                  },
+                  "autoPublish": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Listing approved and published"
+          }
+        }
+      }
+    },
+    "/api/marketplace/admin/listings/{id}/reject": {
+      "patch": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Reject marketplace listing (Admin & Staff)",
+        "description": "Rejection reason is required. Dispatches automated Seller Rejection Email.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "rejection_reason"
+                ],
+                "properties": {
+                  "rejection_reason": {
+                    "type": "string",
+                    "example": "Display photos do not clearly show condition."
+                  },
+                  "admin_notes": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Listing rejected"
+          }
+        }
+      }
+    },
+    "/api/marketplace/admin/listings/{id}/request-changes": {
+      "patch": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Request changes from seller (Admin & Staff)",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "changes_requested_reason"
+                ],
+                "properties": {
+                  "changes_requested_reason": {
+                    "type": "string",
+                    "example": "Please provide battery health screenshot."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Changes requested notification sent"
+          }
+        }
+      }
+    },
+    "/api/marketplace/admin/orders": {
+      "get": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "List all marketplace orders (Admin & Staff)",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING_PAYMENT",
+                "PAYMENT_RECEIVED",
+                "SELLER_NOTIFIED",
+                "AWAITING_PHONE_DELIVERY",
+                "DELIVERY_CONFIRMED",
+                "PHONE_VERIFIED",
+                "SELLER_PAID",
+                "COMPLETED",
+                "CANCELLED",
+                "VERIFICATION_FAILED"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Orders list"
+          }
+        }
+      }
+    },
+    "/api/marketplace/admin/orders/{id}/confirm-payment": {
+      "patch": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Confirm full buyer payment received (Admin & Staff)",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment confirmed"
+          }
+        }
+      }
+    },
+    "/api/marketplace/admin/orders/{id}/confirm-delivery": {
+      "patch": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Mark delivery confirmed after buyer WhatsApp communication (Admin & Staff)",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "confirmation_note": {
+                    "type": "string",
+                    "example": "Buyer confirmed delivery through WhatsApp."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Delivery confirmed"
+          }
+        }
+      }
+    },
+    "/api/marketplace/admin/orders/{id}/verify-phone": {
+      "patch": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Mark device verified after delivery (Admin & Staff)",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone verified"
+          }
+        }
+      }
+    },
+    "/api/marketplace/admin/orders/{id}/release-payout": {
+      "patch": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Release seller payout based on immutable order financial snapshot (Admin & Staff)",
+        "description": "Payout is allowed ONLY after PHONE_VERIFIED status. The payout amount is locked from the order snapshot.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Seller paid"
+          }
+        }
+      }
+    },
+    "/api/marketplace/admin/orders/{id}/complete": {
+      "patch": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Complete marketplace order and mark phone as SOLD (Admin & Staff)",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order completed"
+          }
+        }
+      }
+    },
+    "/api/marketplace/admin/commission": {
+      "get": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Get active marketplace commission percentage (Admin Only)",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Commission rate"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Phone Marketplace"
+        ],
+        "summary": "Update marketplace commission percentage (Admin Only)",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "commission_percentage"
+                ],
+                "properties": {
+                  "commission_percentage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "example": 5
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Commission updated"
+          }
+        }
+      }
+    }
+  }
+}

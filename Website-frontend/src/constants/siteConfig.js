@@ -21,7 +21,6 @@ export const NAV_LINKS = [
   { name: 'Giveaways', path: '#giveaways' },
   { name: 'Reviews', path: '#reviews' },
   { name: 'Deals', path: '#deals' },
-  { name: 'About Us', path: '#about' },
   { name: 'Contact Us', path: '#contact' },
 ];
 
@@ -32,7 +31,7 @@ export const HERO_CONTENT = {
   description:
     'Discover flagship performance, everyday essentials, and the latest mobile technology direct from South Korea.',
   primaryBtnText: 'Shop Smartphones',
-  secondaryBtnText: 'Explore Deals',
+  secondaryBtnText: 'Marketplace',
 };
 
 export const TRUST_FEATURES = [

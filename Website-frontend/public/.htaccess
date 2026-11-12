@@ -1,6 +1,18 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # 1. Namecheap Force HTTPS & Redirect www to non-www (301 Permanent Redirect)
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP_HOST} ^sklabaphone\.com$ [OR]
+  RewriteCond %{HTTP_HOST} ^www\.sklabaphone\.com$
+  RewriteRule .* https://sklabaphone.com%{REQUEST_URI} [R=301,L]
+
+  RewriteCond %{HTTPS} =on
+  RewriteCond %{HTTP_HOST} ^www\.sklabaphone\.com$
+  RewriteRule .* https://sklabaphone.com%{REQUEST_URI} [R=301,L]
+
+  # 2. SPA Single Page Application Routing
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d

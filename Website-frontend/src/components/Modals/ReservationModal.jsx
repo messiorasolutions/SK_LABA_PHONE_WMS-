@@ -800,6 +800,21 @@ export default function ReservationModal({ phone, onClose }) {
                       className="w-full bg-black/40 border border-white/15 hover:border-white/30 focus:border-white/50 focus:bg-black/60 rounded-lg px-3.5 py-1.5 text-base sm:text-[13px] text-white placeholder-neutral-500 focus:outline-none transition-all resize-none font-normal"
                     />
                   </div>
+
+                  {/* Delivery Charges Information */}
+                  <div className="rounded-xl bg-sky-950/30 border border-sky-500/25 p-3 sm:p-3.5 space-y-1.5 backdrop-blur-sm">
+                    <div className="flex items-center gap-2 text-sky-400 font-medium text-xs">
+                      <Truck className="w-4 h-4 shrink-0 text-sky-400" />
+                      <span className="tracking-wide">Delivery Charges</span>
+                    </div>
+                    <p className="text-xs text-slate-300 leading-relaxed font-normal">
+                      Payment will be completed after contacting the customer through WhatsApp.
+                    </p>
+                    <p className="text-xs text-emerald-400 leading-relaxed font-normal flex items-start gap-1.5">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                      <span>Free delivery within South Korea. Shipping costs to Sri Lanka depend on the price of the phone.</span>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

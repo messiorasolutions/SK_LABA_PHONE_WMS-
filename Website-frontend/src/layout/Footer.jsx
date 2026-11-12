@@ -2,6 +2,9 @@ import React from 'react';
 import { Phone, MapPin, Clock, Mail, ShieldCheck, MessageSquare } from 'lucide-react';
 import { useShopInfo } from '../context/ShopInfoContext';
 import whatsappIcon from '../assets/icons/whatsappicon.png';
+import facebookIcon from '../assets/facebook.png';
+import tiktokIcon from '../assets/tiktok.png';
+import logoImg from '../assets/logo-removebg-preview.png';
 
 export default function Footer({ onOpenSell }) {
   const { shopInfo, getWhatsAppUrl } = useShopInfo();
@@ -28,14 +31,21 @@ export default function Footer({ onOpenSell }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 pb-10 border-b border-white/10">
           <div className="sm:col-span-2 md:col-span-2 space-y-3">
-            <h3 className="text-xl font-normal text-white tracking-tight flex items-center gap-2">
-              <span>{shopInfo.name}</span>
-              <span className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-700/70 via-blue-800/70 to-blue-950/70 shadow-sm">
-                <span className="text-[10px] font-normal px-2 py-[1px] rounded-full bg-black text-slate-300 leading-tight">
-                  {shopInfo.tagline}
+            <div className="flex items-center gap-3">
+              <img
+                src={logoImg}
+                alt={shopInfo.name}
+                className="h-10 w-auto sm:h-12 object-contain"
+              />
+              <h3 className="text-xl font-normal text-white tracking-tight flex items-center gap-2">
+                <span>{shopInfo.name}</span>
+                <span className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-700/70 via-blue-800/70 to-blue-950/70 shadow-sm">
+                  <span className="text-[10px] font-normal px-2 py-[1px] rounded-full bg-black text-slate-300 leading-tight">
+                    {shopInfo.tagline}
+                  </span>
                 </span>
-              </span>
-            </h3>
+              </h3>
+            </div>
             <p className="text-xs text-theme-textMuted max-w-sm leading-relaxed font-normal">
               Leading provider of authentic flagship smartphones, verified pre-owned devices, and mobile accessories direct from South Korea to your doorstep.
             </p>
@@ -64,6 +74,29 @@ export default function Footer({ onOpenSell }) {
               >
                 <Phone className="w-3.5 h-3.5 text-slate-300" />
                 <span>Call {shopInfo.phone}</span>
+              </a>
+            </div>
+
+            {/* Social Media Links under WhatsApp */}
+            <div className="flex flex-wrap items-center gap-2.5 pt-1">
+              <a
+                href="https://www.facebook.com/share/1F1UeLv34p/?mibextid=wwXIfr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-900 border border-white/15 hover:border-white/30 text-white text-xs font-normal transition-all cursor-pointer shadow-sm group"
+              >
+                <img src={facebookIcon} alt="Facebook" className="w-4 h-4 object-contain group-hover:scale-110 transition-transform" />
+                <span>Facebook</span>
+              </a>
+
+              <a
+                href="https://www.tiktok.com/@sk16858?_r=1&_t=ZS-9BI1cPiClvt"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-900 border border-white/15 hover:border-white/30 text-white text-xs font-normal transition-all cursor-pointer shadow-sm group"
+              >
+                <img src={tiktokIcon} alt="TikTok" className="w-4 h-4 object-contain group-hover:scale-110 transition-transform" />
+                <span>TikTok</span>
               </a>
             </div>
           </div>

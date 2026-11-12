@@ -2,9 +2,13 @@
 # SK LABA PHONE WMS - CPANEL NODE.JS BACKEND .HTACCESS
 # ====================================================================
 
-# 1. Enable Rewrite Engine
+# 1. Enable Rewrite Engine & Force HTTPS
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Force HTTPS Redirect
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     # Pass Authorization Header to Node.js (Essential for JWT Bearer Auth tokens)
     RewriteCond %{HTTP:Authorization} ^(.*)

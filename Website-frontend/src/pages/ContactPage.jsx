@@ -9,6 +9,8 @@ import {
 import { useShopInfo } from '../context/ShopInfoContext';
 import { createInquiry } from '../services/inquiryService';
 import whatsappIcon from '../assets/icons/whatsappicon.png';
+import facebookIcon from '../assets/facebook.png';
+import tiktokIcon from '../assets/tiktok.png';
 
 export default function ContactPage() {
   const { shopInfo, getWhatsAppUrl } = useShopInfo();
@@ -122,6 +124,26 @@ export default function ContactPage() {
               <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4 object-contain" />
               <span>WhatsApp</span>
             </button>
+
+            <a
+              href="https://www.facebook.com/share/1F1UeLv34p/?mibextid=wwXIfr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-white text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:scale-105 group"
+            >
+              <img src={facebookIcon} alt="Facebook" className="w-4 h-4 object-contain group-hover:scale-110 transition-transform" />
+              <span>Facebook</span>
+            </a>
+
+            <a
+              href="https://www.tiktok.com/@sk16858?_r=1&_t=ZS-9BI1cPiClvt"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-white text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:scale-105 group"
+            >
+              <img src={tiktokIcon} alt="TikTok" className="w-4 h-4 object-contain group-hover:scale-110 transition-transform" />
+              <span>TikTok</span>
+            </a>
 
             <a
               href={`tel:${shopInfo.phone}`}

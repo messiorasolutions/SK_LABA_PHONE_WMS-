@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, ArrowRight } from 'lucide-react';
+import { ShoppingCart, ArrowRight, Store } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import mainBannerWebp from '../assets/images/main.webp';
 import mainBannerImg from '../assets/images/main.png';
@@ -19,12 +19,10 @@ export default function HeroSection() {
     }
   };
 
-  const handleExploreDeals = () => {
-    dispatch(setActiveTab('Smartphones'));
-    const el = document.getElementById('smartphones');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+  const handleMarketplace = () => {
+    dispatch(setActiveTab('Marketplace'));
+    window.location.hash = '#marketplace';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -79,13 +77,14 @@ export default function HeroSection() {
               </span>
             </button>
 
-            {/* Secondary Action Button */}
+            {/* Secondary Action Button - Marketplace */}
             <button
               type="button"
-              onClick={handleExploreDeals}
-              className="inline-flex items-center justify-center px-5 sm:px-6 py-3 sm:py-3.5 rounded-full bg-black/60 hover:bg-black border border-white/15 hover:border-white/30 text-white font-normal text-xs sm:text-sm md:text-base backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              onClick={handleMarketplace}
+              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full bg-black/60 hover:bg-black border border-white/15 hover:border-white/30 text-white font-normal text-xs sm:text-sm md:text-base backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer group"
             >
-              {HERO_CONTENT.secondaryBtnText}
+              <Store className="w-4 h-4 text-sky-400 shrink-0 group-hover:scale-110 transition-transform" />
+              <span>{HERO_CONTENT.secondaryBtnText}</span>
             </button>
           </div>
         </div>

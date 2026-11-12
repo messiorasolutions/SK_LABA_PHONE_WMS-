@@ -7,7 +7,7 @@ import { getActiveOffers } from '../services/offerService';
 import phoneService from '../services/phoneService';
 import { reviewService } from '../services/reviewService';
 import { setActiveTab } from '../actions/heroActions';
-import upgradeVideo from '../assets/images/upgrade_vedio.mp4';
+import SellYourPhoneSection from '../components/SellYourPhoneSection';
 import aboutWebp from '../assets/images/about.webp';
 import aboutImg from '../assets/images/about.jpg';
 
@@ -244,9 +244,6 @@ function OfferCard({ offer, allPhones, onNavigate }) {
 export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYourPhone, onOpenSell, onOpenReview }) {
   const dispatch = useDispatch();
   const [activeOffers, setActiveOffers] = useState([]);
-  const sellVideoRef = useRef(null);
-  const videoContainerRef = useRef(null);
-  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -337,62 +334,6 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
     }
   };
 
-  // Defer video loading until near viewport
-  useEffect(() => {
-    const container = videoContainerRef.current;
-    if (!container) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setShouldLoadVideo(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '250px' }
-    );
-
-    observer.observe(container);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  // Control seamless video looping once loaded
-  useEffect(() => {
-    if (!shouldLoadVideo) return;
-    const video = sellVideoRef.current;
-    if (!video) return;
-
-    const START_TIME = 2.75;
-
-    const setStart = () => {
-      video.currentTime = START_TIME;
-      video.play().catch(() => {});
-    };
-
-    const handleTimeUpdate = () => {
-      if (video.currentTime >= (video.duration - 0.15) || video.ended) {
-        video.currentTime = START_TIME;
-        video.play().catch(() => {});
-      }
-    };
-
-    if (video.readyState >= 1) {
-      video.currentTime = START_TIME;
-      video.play().catch(() => {});
-    }
-
-    video.addEventListener('loadedmetadata', setStart);
-    video.addEventListener('timeupdate', handleTimeUpdate);
-
-    return () => {
-      video.removeEventListener('loadedmetadata', setStart);
-      video.removeEventListener('timeupdate', handleTimeUpdate);
-    };
-  }, [shouldLoadVideo]);
-
   const [allPhones, setAllPhones] = useState([]);
 
   useEffect(() => {
@@ -458,64 +399,7 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
       <TrustBadges />
 
       {/* Sell Your Phone Video Section */}
-      <section className="relative w-full bg-gradient-to-b from-theme-bg via-black to-black overflow-hidden select-none py-8 sm:py-12 md:py-14">
-        {/* Section Heading & CTA over / above the video */}
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 text-center space-y-2.5 sm:space-y-4 mb-2 sm:-mb-10 md:-mb-20 pointer-events-none">
-          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)] pointer-events-auto">
-            Sell Your Phone.
-          </h2>
-          <p className="max-w-xl mx-auto text-xs sm:text-sm text-slate-300 font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] pointer-events-auto px-4">
-            Turn your old smartphone into cash. List your phone with SK LABA PHONE and connect with genuine buyers.
-          </p>
-
-          <div className="pt-1 sm:pt-3 pointer-events-auto">
-            <button
-              type="button"
-              onClick={handleGoToSellYourPhone}
-              className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-xl shadow-black/80 group cursor-pointer"
-            >
-              <span className="inline-flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 md:py-3 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs sm:text-sm font-normal transition-colors duration-200">
-                <span>Sell Your Phone</span>
-                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-0.5 transition-transform" />
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Video Banner */}
-        <div className="w-full max-w-[1500px] mx-auto px-2 sm:px-4">
-          <div
-            ref={videoContainerRef}
-            className="relative w-full aspect-video flex items-center justify-center overflow-hidden cursor-pointer group rounded-lg sm:rounded-none bg-neutral-950"
-            onClick={handleGoToSellYourPhone}
-            title="Click to Sell Your Phone"
-          >
-            {/* Subtle 4-Side Edge Feathering / Shade: Left, Right, Top, Bottom */}
-            <div className="absolute inset-y-0 left-0 w-6 sm:w-12 md:w-16 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-y-0 right-0 w-6 sm:w-12 md:w-16 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-4 sm:h-8 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-x-0 bottom-0 h-4 sm:h-8 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
-
-            {/* Seamlessly cover bottom-right KlingAI watermark without touching the arrows */}
-            <div className="absolute bottom-0 right-0 w-[18%] max-w-[240px] h-[11%] min-h-[36px] sm:min-h-[48px] bg-black z-20 pointer-events-none" />
-
-            {shouldLoadVideo ? (
-              <video
-                ref={sellVideoRef}
-                src={upgradeVideo}
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="auto"
-                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.01]"
-              />
-            ) : (
-              <div className="w-full h-full bg-neutral-950" />
-            )}
-          </div>
-        </div>
-      </section>
+      <SellYourPhoneSection onNavigateToSellYourPhone={handleGoToSellYourPhone} />
 
       {activeOffers.length > 0 && (
         <section id="deals" className="pt-12 sm:pt-16 pb-12 sm:pb-16 bg-black scroll-mt-20">

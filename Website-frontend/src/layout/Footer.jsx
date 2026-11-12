@@ -2,9 +2,13 @@ import React from 'react';
 import { Phone, MapPin, Clock, Mail, ShieldCheck, MessageSquare } from 'lucide-react';
 import { useShopInfo } from '../context/ShopInfoContext';
 import whatsappIcon from '../assets/icons/whatsappicon.png';
-import facebookIcon from '../assets/facebook.png';
-import tiktokIcon from '../assets/tiktok.png';
+import { FacebookIcon, TikTokIcon } from '../components/Common/SocialIcons';
 import logoImg from '../assets/logo-removebg-preview.png';
+
+const FOOTER_BTN_CLASS =
+  "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-900 border border-white/15 hover:border-white/30 text-white text-xs font-normal transition-all cursor-pointer shadow-sm group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+
+const FOOTER_ICON_CLASS = "w-3.5 h-3.5 text-slate-300 group-hover:text-white transition-colors shrink-0";
 
 export default function Footer({ onOpenSell }) {
   const { shopInfo, getWhatsAppUrl } = useShopInfo();
@@ -53,26 +57,29 @@ export default function Footer({ onOpenSell }) {
               <button
                 type="button"
                 onClick={handleWhatsApp}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-900 border border-white/15 hover:border-white/30 text-white text-xs font-normal transition-all cursor-pointer shadow-sm"
+                className={FOOTER_BTN_CLASS}
+                aria-label="Contact SK LABA PHONE on WhatsApp"
               >
-                <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4 object-contain" />
+                <img src={whatsappIcon} alt="" aria-hidden="true" className="w-3.5 h-3.5 object-contain shrink-0" />
                 <span>WhatsApp</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleOpenGeneralInquiry}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-900 border border-white/15 hover:border-white/30 text-white text-xs font-normal transition-all cursor-pointer shadow-sm"
+                className={FOOTER_BTN_CLASS}
+                aria-label="Send general inquiry"
               >
-                <MessageSquare className="w-3.5 h-3.5 text-slate-300" />
+                <MessageSquare className={FOOTER_ICON_CLASS} aria-hidden="true" />
                 <span>Send Inquiry</span>
               </button>
 
               <a
                 href={`tel:${shopInfo.phone}`}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-900 border border-white/15 hover:border-white/30 text-white text-xs font-normal transition-all shadow-sm"
+                className={FOOTER_BTN_CLASS}
+                aria-label={`Call ${shopInfo.phone}`}
               >
-                <Phone className="w-3.5 h-3.5 text-slate-300" />
+                <Phone className={FOOTER_ICON_CLASS} aria-hidden="true" />
                 <span>Call {shopInfo.phone}</span>
               </a>
             </div>
@@ -83,9 +90,10 @@ export default function Footer({ onOpenSell }) {
                 href="https://www.facebook.com/share/1F1UeLv34p/?mibextid=wwXIfr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-900 border border-white/15 hover:border-white/30 text-white text-xs font-normal transition-all cursor-pointer shadow-sm group"
+                className={FOOTER_BTN_CLASS}
+                aria-label="Visit SK LABA PHONE on Facebook"
               >
-                <img src={facebookIcon} alt="Facebook" className="w-4 h-4 object-contain group-hover:scale-110 transition-transform" />
+                <FacebookIcon className={FOOTER_ICON_CLASS} />
                 <span>Facebook</span>
               </a>
 
@@ -93,9 +101,10 @@ export default function Footer({ onOpenSell }) {
                 href="https://www.tiktok.com/@sk16858?_r=1&_t=ZS-9BI1cPiClvt"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-900 border border-white/15 hover:border-white/30 text-white text-xs font-normal transition-all cursor-pointer shadow-sm group"
+                className={FOOTER_BTN_CLASS}
+                aria-label="Visit SK LABA PHONE on TikTok"
               >
-                <img src={tiktokIcon} alt="TikTok" className="w-4 h-4 object-contain group-hover:scale-110 transition-transform" />
+                <TikTokIcon className={FOOTER_ICON_CLASS} />
                 <span>TikTok</span>
               </a>
             </div>

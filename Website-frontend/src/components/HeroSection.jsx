@@ -81,10 +81,11 @@ export default function HeroSection() {
             <button
               type="button"
               onClick={handleMarketplace}
-              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full bg-black/60 hover:bg-black border border-white/15 hover:border-white/30 text-white font-normal text-xs sm:text-sm md:text-base backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer group"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full bg-black/60 hover:bg-black border border-white/15 hover:border-white/30 text-white font-normal text-xs sm:text-sm md:text-base backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer group"
             >
-              <Store className="w-4 h-4 text-sky-400 shrink-0 group-hover:scale-110 transition-transform" />
+              <Store className="w-4 h-4 text-white shrink-0" />
               <span>{HERO_CONTENT.secondaryBtnText}</span>
+              <ArrowRight className="w-4 h-4 shrink-0 ml-0.5 text-white group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         </div>

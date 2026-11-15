@@ -10,7 +10,7 @@ import { useShopInfo } from '../context/ShopInfoContext';
 import { createInquiry } from '../services/inquiryService';
 import whatsappIcon from '../assets/icons/whatsappicon.png';
 import facebookIcon from '../assets/facebook.png';
-import tiktokIcon from '../assets/tiktok.png';
+import { TikTokIcon } from '../components/Common/SocialIcons';
 
 export default function ContactPage() {
   const { shopInfo, getWhatsAppUrl } = useShopInfo();
@@ -141,7 +141,7 @@ export default function ContactPage() {
               rel="noopener noreferrer"
               className="px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-white text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:scale-105 group"
             >
-              <img src={tiktokIcon} alt="TikTok" className="w-4 h-4 object-contain group-hover:scale-110 transition-transform" />
+              <TikTokIcon className="w-4 h-4 text-white shrink-0 group-hover:scale-110 transition-transform" />
               <span>TikTok</span>
             </a>
 

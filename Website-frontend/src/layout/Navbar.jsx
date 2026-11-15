@@ -136,18 +136,17 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
 
   return (
     <header
-      className={`w-full z-50 transition-colors duration-200 ${
-        isHome
+      className={`w-full z-50 transition-colors duration-200 ${isHome
           ? 'absolute top-0 left-0 right-0 bg-transparent'
           : 'sticky top-0 bg-theme-bg'
-      }`}
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 sm:h-24">
           <a
             href="#"
             onClick={(e) => handleTabClick('Home', e)}
-            className="relative flex items-center shrink-0 group py-1.5"
+            className="relative flex items-center shrink-0 group py-1.5 translate-y-2 sm:translate-y-3"
           >
             <div className="absolute -inset-3 bg-gradient-to-r from-blue-600/30 via-red-600/20 to-sky-500/20 rounded-full blur-xl opacity-80 group-hover:opacity-100 transition-opacity" />
 
@@ -156,7 +155,7 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
               alt={STORE_INFO.name}
               width={500}
               height={499}
-              className="relative z-10 h-11 sm:h-14 md:h-16 lg:h-20 w-auto object-contain rounded-lg transition-transform duration-200 group-hover:scale-105 filter drop-shadow-[0_0_16px_rgba(255,255,255,0.25)] drop-shadow-[0_0_30px_rgba(37,99,235,0.35)]"
+              className="relative z-10 h-10 sm:h-12 md:h-14 lg:h-15 w-auto object-contain rounded-lg transition-transform duration-200 group-hover:scale-105 filter drop-shadow-[0_0_16px_rgba(255,255,255,0.25)] drop-shadow-[0_0_30px_rgba(37,99,235,0.35)]"
             />
           </a>
 
@@ -218,11 +217,10 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
                   setMobileMenuOpen(false);
                 }
               }}
-              className={`sm:hidden p-2 rounded-full transition-colors cursor-pointer ${
-                mobileSearchOpen
+              className={`sm:hidden p-2 rounded-full transition-colors cursor-pointer ${mobileSearchOpen
                   ? 'text-white bg-white/10 ring-1 ring-white/20'
                   : 'text-theme-textSecondary hover:text-white hover:bg-white/5'
-              }`}
+                }`}
               title="Search smartphones"
               aria-label="Toggle Search Bar"
             >
@@ -309,11 +307,10 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
                 key={link.name}
                 href={link.path || '#'}
                 onClick={(e) => handleTabClick(link.name, e)}
-                className={`block px-3 py-2 rounded-lg text-sm font-medium ${
-                  activeTab === link.name
+                className={`block px-3 py-2 rounded-lg text-sm font-medium ${activeTab === link.name
                     ? 'bg-theme-accent/20 text-theme-textPrimary font-semibold'
                     : 'text-theme-textSecondary hover:bg-white/5 hover:text-theme-textPrimary'
-                }`}
+                  }`}
               >
                 {link.name}
               </a>

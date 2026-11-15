@@ -578,7 +578,18 @@ export default function PhoneModal({
   };
 
   const handleSubmit = async (e) => {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // STRICT GUARD: A phone can ONLY be saved when explicitly confirmed on Step 3
+    if (currentStep !== 3) {
+      return;
+    }
+    if (loading) {
+      return;
+    }
 
     if (!validateStep1()) {
       setCurrentStep(1);
@@ -719,7 +730,20 @@ export default function PhoneModal({
 
         {/* Form Container Card */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs overflow-hidden">
-          <form onSubmit={handleSubmit}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (currentStep === 3) {
+                handleSubmit(e);
+              }
+            }}
+            onKeyDown={(e) => {
+              // Prevent accidental form submission when pressing Enter in single-line text inputs
+              if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+              }
+            }}
+          >
             <div className="p-6 sm:p-8 space-y-6">
 
               {/* ══════════════════════════════════════════════════════════ */}
@@ -1460,8 +1484,13 @@ export default function PhoneModal({
 
               {currentStep < 3 ? (
                 <button
+                  key={`step-next-btn-${currentStep}`}
                   type="button"
-                  onClick={handleNext}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleNext();
+                  }}
                   className="inline-flex items-center gap-1.5 py-2.5 px-6 text-xs font-medium text-white bg-gradient-to-r from-black via-neutral-900 to-rose-950 hover:from-neutral-900 hover:to-rose-900 border border-neutral-800 hover:border-rose-900/60 rounded-xl shadow-xs transition-all cursor-pointer"
                 >
                   <span>{currentStep === 1 ? 'Next: Storage & Colors' : 'Next: Specs & Options'}</span>
@@ -1469,8 +1498,14 @@ export default function PhoneModal({
                 </button>
               ) : (
                 <button
-                  type="submit"
+                  key="step-save-btn"
+                  type="button"
                   disabled={loading}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSubmit(e);
+                  }}
                   className="py-2.5 px-7 text-xs font-medium text-white bg-gradient-to-r from-black via-neutral-900 to-rose-950 hover:from-neutral-900 hover:to-rose-900 border border-neutral-800 hover:border-rose-900/60 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {loading ? (

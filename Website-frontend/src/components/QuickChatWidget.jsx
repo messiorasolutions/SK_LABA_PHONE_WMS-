@@ -286,12 +286,12 @@ export default function QuickChatWidget({ activePhone = null, onOpenInquiry, onN
             <button
               type="button"
               onClick={handleWhatsAppClick}
-              className="w-full group flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0D1627] hover:bg-[#121A2C] border border-[#161F30] hover:border-[#25D366]/50 transition-all duration-150 text-left cursor-pointer"
+              className="w-full group flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0D1627] hover:bg-[#121A2C] border border-[#161F30] hover:border-white/30 transition-all duration-150 text-left cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-lg bg-[#25D366] flex items-center justify-center p-1.5 shrink-0 group-hover:scale-105 transition-transform shadow-[0_2px_10px_rgba(37,211,102,0.35)]">
-                <WhatsAppSvg className="w-5 h-5 fill-white" />
+              <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center p-1.5 shrink-0 text-white group-hover:bg-white/20 group-hover:scale-105 transition-all shadow-sm">
+                <WhatsAppSvg className="w-4 h-4 fill-white" />
               </div>
-              <span className="text-xs sm:text-sm font-medium text-white group-hover:text-[#25D366] transition-colors">
+              <span className="text-xs sm:text-sm font-medium text-white group-hover:text-slate-200 transition-colors">
                 Chat on WhatsApp
               </span>
             </button>
@@ -300,12 +300,12 @@ export default function QuickChatWidget({ activePhone = null, onOpenInquiry, onN
             <button
               type="button"
               onClick={handleContactFormClick}
-              className="w-full group flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0D1627] hover:bg-[#121A2C] border border-[#161F30] hover:border-blue-500/40 transition-all duration-150 text-left cursor-pointer"
+              className="w-full group flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0D1627] hover:bg-[#121A2C] border border-[#161F30] hover:border-white/30 transition-all duration-150 text-left cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 text-blue-400 group-hover:scale-105 transition-transform">
-                <MessageSquareText className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center shrink-0 text-white group-hover:bg-white/20 group-hover:scale-105 transition-all shadow-sm">
+                <MessageSquareText className="w-4 h-4 text-white" />
               </div>
-              <span className="text-xs sm:text-sm font-medium text-white group-hover:text-blue-300 transition-colors">
+              <span className="text-xs sm:text-sm font-medium text-white group-hover:text-slate-200 transition-colors">
                 Contact Us Form
               </span>
             </button>
@@ -314,12 +314,12 @@ export default function QuickChatWidget({ activePhone = null, onOpenInquiry, onN
             <button
               type="button"
               onClick={handleCallClick}
-              className="w-full group flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0D1627] hover:bg-[#121A2C] border border-[#161F30] hover:border-amber-500/40 transition-all duration-150 text-left cursor-pointer"
+              className="w-full group flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0D1627] hover:bg-[#121A2C] border border-[#161F30] hover:border-white/30 transition-all duration-150 text-left cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 text-amber-400 group-hover:scale-105 transition-transform">
-                <PhoneCall className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center shrink-0 text-white group-hover:bg-white/20 group-hover:scale-105 transition-all shadow-sm">
+                <PhoneCall className="w-4 h-4 text-white" />
               </div>
-              <span className="text-xs sm:text-sm font-medium text-white group-hover:text-amber-300 transition-colors">
+              <span className="text-xs sm:text-sm font-medium text-white group-hover:text-slate-200 transition-colors">
                 Direct Phone Call
               </span>
             </button>

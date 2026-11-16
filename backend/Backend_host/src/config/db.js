@@ -38,8 +38,12 @@ const poolConfig = {
     database: process.env.DB_NAME,
     waitForConnections: true,
     connectionLimit: Number(process.env.DB_CONNECTION_LIMIT) || 10,
+    maxIdle: 5, // Keep up to 5 idle connections warm to eliminate pool cold-start latency
+    idleTimeout: 60000, // 60 seconds before releasing surplus idle connections
     queueLimit: 0,
-    connectTimeout: 8000,
+    connectTimeout: 10000,
+    enableKeepAlive: true, // Prevents cloud firewalls & proxies from dropping idle TCP connections
+    keepAliveInitialDelay: 10000,
     ssl: buildSslConfig()
 };
 

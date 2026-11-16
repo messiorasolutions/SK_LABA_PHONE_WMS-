@@ -2,7 +2,8 @@ import React from 'react';
 import { Phone, MapPin, Clock, Mail, ShieldCheck, MessageSquare } from 'lucide-react';
 import { useShopInfo } from '../context/ShopInfoContext';
 import whatsappIcon from '../assets/icons/whatsappicon.png';
-import { FacebookIcon, TikTokIcon } from '../components/Common/SocialIcons';
+import facebookIcon from '../assets/icons/facebook.png';
+import tiktokIcon from '../assets/icons/tiktok.png';
 import logoImg from '../assets/logo-removebg-preview.png';
 
 const FOOTER_BTN_CLASS =
@@ -93,7 +94,7 @@ export default function Footer({ onOpenSell }) {
                 className={FOOTER_BTN_CLASS}
                 aria-label="Visit SK LABA PHONE on Facebook"
               >
-                <FacebookIcon className={FOOTER_ICON_CLASS} />
+                <img src={facebookIcon} alt="" aria-hidden="true" className="w-3.5 h-3.5 object-contain shrink-0 group-hover:scale-110 transition-transform" />
                 <span>Facebook</span>
               </a>
 
@@ -104,7 +105,7 @@ export default function Footer({ onOpenSell }) {
                 className={FOOTER_BTN_CLASS}
                 aria-label="Visit SK LABA PHONE on TikTok"
               >
-                <TikTokIcon className={FOOTER_ICON_CLASS} />
+                <img src={tiktokIcon} alt="" aria-hidden="true" className="w-3.5 h-3.5 object-contain shrink-0 group-hover:scale-110 transition-transform" />
                 <span>TikTok</span>
               </a>
             </div>

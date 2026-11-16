@@ -59,6 +59,11 @@ export const markSoldOut = async (phoneId, resetQuantity = true) => {
   return axiosInstance.patch(`/api/phones/${phoneId}/stock/sold-out`, { reset_quantity: resetQuantity });
 };
 
+// Toggle In-Stock / Out-of-Stock
+export const togglePhoneStock = async (phoneId, inStock) => {
+  return axiosInstance.patch(`/api/phones/${phoneId}/stock-toggle`, { in_stock: Boolean(inStock) });
+};
+
 // Phone Comparison (SRS C-05)
 export const comparePhones = async (ids) => {
   const rawIds = Array.isArray(ids) ? ids.join(',') : ids;
@@ -78,5 +83,6 @@ export default {
   addStock,
   removeStock,
   markSoldOut,
+  togglePhoneStock,
   comparePhones,
 };

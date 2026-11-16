@@ -17,8 +17,10 @@ import phoneService from '../../services/phoneService';
 import storageService from '../../services/storageService';
 import FormattedDescription from '../Common/FormattedDescription';
 import { resolveImageUrl } from '../../utils/imageHelper';
+import { useCurrencyConverter } from '../../hooks/useCurrencyConverter';
 
 function SimilarPhoneCard({ simPhone, onSelectPhone }) {
+  const { formatKrw } = useCurrencyConverter();
   const generalPhotos = React.useMemo(() => {
     if (Array.isArray(simPhone?.photos) && simPhone.photos.length > 0) return simPhone.photos;
     if (Array.isArray(simPhone?.photo_urls) && simPhone.photo_urls.length > 0) return simPhone.photo_urls;
@@ -106,7 +108,7 @@ function SimilarPhoneCard({ simPhone, onSelectPhone }) {
           {simPhone.name}
         </h3>
         <p className="text-xs font-normal text-slate-300">
-          ${Number(simPhone.price || 0).toLocaleString()}
+          {formatKrw(simPhone.price)}
         </p>
 
         {/* Small phone color thumbnail boxes just like in reference image */}
@@ -168,7 +170,7 @@ function SimilarPhoneCard({ simPhone, onSelectPhone }) {
 }
 
 export default function PhoneDetailModal({
-  phone,
+  phone: initialPhone,
   allPhones = [],
   onClose,
   onOpenReserve,
@@ -177,8 +179,26 @@ export default function PhoneDetailModal({
   onOpenNotifyBackInStock,
   onSelectPhone,
 }) {
+  const [phone, setPhone] = useState(initialPhone);
+
+  useEffect(() => {
+    setPhone(initialPhone);
+    const pid = initialPhone?.phone_id || initialPhone?.id;
+    if (pid && !initialPhone?.description) {
+      phoneService
+        .getPhoneById(pid)
+        .then((res) => {
+          const full = res.data?.data || res.data;
+          if (full) {
+            setPhone((prev) => ({ ...prev, ...full }));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [initialPhone?.phone_id, initialPhone?.id]);
   const { shopInfo, getWhatsAppUrl } = useShopInfo();
   const { isFavorite, isInCompare, toggleFavorite, toggleCompare } = useFavoritesAndCompare();
+  const { convertKrwToLkr, formatKrw, formatLkr } = useCurrencyConverter();
 
   const phoneId = phone?.phone_id || phone?.id;
   const favorited = isFavorite(phoneId);
@@ -409,7 +429,7 @@ export default function PhoneDetailModal({
     const pageUrl = window.location.href;
     const colorStr = selectedColor && selectedColor !== 'Default' ? selectedColor : (activeColor?.name || '');
     const storageStr = selectedStorage && selectedStorage !== 'Standard' ? selectedStorage : (phoneStorageOptions[0]?.storage_name || '');
-    const priceStr = `$${effectivePrice.toLocaleString()}`;
+    const priceStr = `${formatKrw(effectivePrice)} (≈ ${formatLkr(convertKrwToLkr(effectivePrice))})`;
 
     const lines = [
       `*Hello! I am interested in this phone from your website:*`,
@@ -599,24 +619,39 @@ export default function PhoneDetailModal({
           <div className="lg:col-span-6 lg:col-start-7 lg:row-start-1 lg:row-span-2 flex flex-col justify-start space-y-5">
             <div>
               {/* Title & Price on the same line with same font size and wider spacing */}
-              <div className="flex flex-wrap items-baseline gap-x-8 sm:gap-x-10 gap-y-2 mb-4">
+              <div className="flex flex-wrap items-baseline gap-x-8 sm:gap-x-10 gap-y-2 mb-2">
                 <h1 className="text-2xl sm:text-3xl font-normal text-white leading-snug flex flex-wrap items-baseline gap-x-2.5">
                   <span>{phone.name}</span>
                   {selectedStorage && !phone.name?.toLowerCase().includes(selectedStorage.toLowerCase()) && (
                     <span className="text-xl sm:text-2xl text-slate-300 font-normal">{selectedStorage}</span>
                   )}
                 </h1>
-                <div className="flex items-baseline gap-3">
-                  <span className="text-2xl sm:text-3xl font-normal text-white tracking-tight">
-                    ${effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                  {hasOffer && (
-                    <span className="text-sm sm:text-base text-slate-400 line-through font-normal">
-                      ${regularPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <div className="flex flex-col">
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-2xl sm:text-3xl font-normal text-white tracking-tight">
+                      {formatKrw(effectivePrice)}
                     </span>
+                    {hasOffer && (
+                      <span className="text-sm sm:text-base text-slate-400 line-through font-normal">
+                        {formatKrw(regularPrice)}
+                      </span>
+                    )}
+                  </div>
+                  {effectivePrice > 0 && (
+                    <div className="text-sm sm:text-base text-emerald-400 font-medium tracking-tight mt-0.5">
+                      ≈ {formatLkr(convertKrwToLkr(effectivePrice))}
+                    </div>
                   )}
                 </div>
               </div>
+
+              {/* Stock Status under title in clean white letters (no highlighted color) */}
+              {!isMarketplace && (
+                <div className="text-sm font-normal text-white mb-4 tracking-wide">
+                  {isVariantSoldOut ? 'Out of Stock' : 'In Stock'}
+                </div>
+              )}
+
               {hasOffer && (
                 <p className="text-xs text-slate-300 -mt-2 mb-4 font-normal">
                   Promotional offer active. Save ${savings.toFixed(2)} with SK LABA.
@@ -677,7 +712,7 @@ export default function PhoneDetailModal({
 
                           {!isMarketplace && (
                             <span className={`text-[11px] font-normal mt-1 text-center leading-none w-full truncate ${isColorInStock ? 'text-slate-400' : 'text-neutral-500'}`}>
-                              {isColorInStock ? `${colorQty} in stock` : 'Out of stock'}
+                              {isColorInStock ? 'In stock' : 'Out of stock'}
                             </span>
                           )}
                         </div>
@@ -739,7 +774,7 @@ export default function PhoneDetailModal({
 
                           {!isMarketplace && (
                             <span className={`text-[11px] font-normal mt-1.5 text-center leading-none w-full truncate ${isStorageInStock ? 'text-slate-400' : 'text-neutral-500'}`}>
-                              {isStorageInStock ? `${storageQty} in stock` : 'Out of stock'}
+                              {isStorageInStock ? 'In stock' : 'Out of stock'}
                             </span>
                           )}
                         </div>
@@ -854,11 +889,11 @@ export default function PhoneDetailModal({
                               {plan.provider_name || 'Instalment Plan'}
                             </span>
                             <span className="text-xs font-normal text-white shrink-0">
-                              ${plan.monthly_payment}/mo
+                              ₩{Number(plan.monthly_payment || 0).toLocaleString()}/mo
                             </span>
                           </div>
                           <p className="text-[11px] text-slate-300 font-normal mt-0.5">
-                            {plan.number_of_months} Months • Total: ${plan.total_payable}
+                            {plan.number_of_months} Months • Total: ₩{Number(plan.total_payable || 0).toLocaleString()}
                           </p>
                           {plan.terms && (
                             <p className="text-[11px] text-slate-400 mt-1.5 pt-1.5 border-t border-white/5 font-normal leading-relaxed break-words whitespace-normal">

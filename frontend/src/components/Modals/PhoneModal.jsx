@@ -30,6 +30,7 @@ import {
 import FormattedDescription from '../Common/FormattedDescription';
 import InstallmentPlanService from '../../services/installmentPlanService';
 import StorageService from '../../services/storageService';
+import { useCurrencyConverter } from '../../hooks/useCurrencyConverter';
 
 const STORAGE_PRESETS = [
   { name: '64GB', capacity_gb: 64 },
@@ -100,6 +101,7 @@ export default function PhoneModal({
   specifications = [],
 }) {
   const [currentStep, setCurrentStep] = useState(1);
+  const { rate: krwToLkrRate, loading: rateLoading, convertKrwToLkr, formatLkr } = useCurrencyConverter();
 
   // Step 1: Basic Information
   const [name, setName] = useState('');
@@ -125,6 +127,7 @@ export default function PhoneModal({
   const [description, setDescription] = useState('');
   const [descPreview, setDescPreview] = useState(false);
   const descRef = useRef(null);
+  const step3EnteredAtRef = useRef(0);
   const [installmentEnabled, setInstallmentEnabled] = useState(false);
   const [availablePlans, setAvailablePlans] = useState([]);
   const [selectedPlanIds, setSelectedPlanIds] = useState([]);
@@ -507,7 +510,7 @@ export default function PhoneModal({
       return false;
     }
     if (!price || Number(price) <= 0) {
-      setSubmitError('A valid price greater than $0 is required.');
+      setSubmitError('A valid price greater than ₩0 is required.');
       return false;
     }
     setSubmitError('');
@@ -558,6 +561,7 @@ export default function PhoneModal({
     if (targetStep === 3) {
       if (!validateStep1()) return;
       if (!validateStep2()) return;
+      step3EnteredAtRef.current = Date.now();
       setCurrentStep(3);
     }
   };
@@ -566,7 +570,10 @@ export default function PhoneModal({
     if (currentStep === 1) {
       if (validateStep1()) setCurrentStep(2);
     } else if (currentStep === 2) {
-      if (validateStep2()) setCurrentStep(3);
+      if (validateStep2()) {
+        step3EnteredAtRef.current = Date.now();
+        setCurrentStep(3);
+      }
     }
   };
 
@@ -578,7 +585,22 @@ export default function PhoneModal({
   };
 
   const handleSubmit = async (e) => {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // STRICT GUARD: A phone can ONLY be saved when explicitly confirmed on Step 3
+    if (currentStep !== 3) {
+      return;
+    }
+    // Lock out accidental click-throughs from Step 2's Next button
+    if (Date.now() - step3EnteredAtRef.current < 600) {
+      return;
+    }
+    if (loading) {
+      return;
+    }
 
     if (!validateStep1()) {
       setCurrentStep(1);
@@ -599,14 +621,19 @@ export default function PhoneModal({
 
     const allPhotos = colors.flatMap((c) => c.photos || []).filter(Boolean);
 
+    const isPhoneInStock = availability === 'IN_STOCK' || Number(lowStockLevel) > 0;
+    const finalAvailability = isPhoneInStock ? 'IN_STOCK' : (availability === 'COMING_SOON' ? 'COMING_SOON' : 'SOLD_OUT');
+
     const payload = {
       name: name.trim(),
       brand_id: Number(brandId),
       phone_condition: phoneCondition,
       price: Number(price),
-      low_stock_level: Number(lowStockLevel) || 0,
-      stock_quantity: Number(lowStockLevel) || 0,
-      availability,
+      low_stock_level: 5,
+      current_stock: isPhoneInStock ? 10 : 0,
+      stock_quantity: isPhoneInStock ? 10 : 0,
+      in_stock: isPhoneInStock,
+      availability: finalAvailability,
       status,
       is_new_arrival: isNewArrival,
       warranty: warranty.trim(),
@@ -719,7 +746,19 @@ export default function PhoneModal({
 
         {/* Form Container Card */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs overflow-hidden">
-          <form onSubmit={handleSubmit}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              // Prevent any implicit form submissions — saving requires deliberate button click
+            }}
+            onKeyDown={(e) => {
+              // Prevent accidental form submission when pressing Enter in single-line text inputs
+              if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+              }
+            }}
+          >
             <div className="p-6 sm:p-8 space-y-6">
 
               {/* ══════════════════════════════════════════════════════════ */}
@@ -788,35 +827,54 @@ export default function PhoneModal({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                        Price ($) <span className="text-red-500">*</span>
+                        Price (₩ KRW) <span className="text-red-500">*</span>
                       </label>
                       <div className="relative flex items-center">
-                        <span className="absolute left-3 text-slate-400 text-xs pointer-events-none">$</span>
+                        <span className="absolute left-3 text-slate-400 text-xs pointer-events-none">₩</span>
                         <input
                           type="number"
-                          step="0.01"
+                          step="1"
                           min="0"
                           value={price}
                           onChange={(e) => setPrice(e.target.value)}
-                          placeholder="1199.99"
+                          placeholder="50000"
                           required
                           className="w-full pl-7 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/10 focus:border-neutral-400 dark:focus:border-rose-900/50"
                         />
                       </div>
+                      {price && Number(price) > 0 ? (
+                        <div className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                          <span>≈ {formatLkr(convertKrwToLkr(price))}</span>
+                          <span className="text-[10px] text-slate-400 font-normal">
+                            (1 KRW ≈ {Number(krwToLkrRate).toFixed(3)} LKR)
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="mt-1 text-[10px] text-slate-400">
+                          Enter amount in South Korean Won (₩)
+                        </div>
+                      )}
                     </div>
 
                     <div>
                       <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                        Low Stock Threshold
+                        Stock Status
                       </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={lowStockLevel}
-                        onChange={(e) => setLowStockLevel(e.target.value)}
-                        placeholder="e.g. 5"
-                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/10 focus:border-neutral-400 dark:focus:border-rose-900/50"
-                      />
+                      <label className="flex items-center gap-2.5 h-[38px] px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={availability === 'IN_STOCK' || Number(lowStockLevel) > 0}
+                          onChange={(e) => {
+                            const inStock = e.target.checked;
+                            setAvailability(inStock ? 'IN_STOCK' : 'SOLD_OUT');
+                            setLowStockLevel(inStock ? '10' : '0');
+                          }}
+                          className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-slate-300 dark:border-slate-600 cursor-pointer"
+                        />
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                          {availability === 'IN_STOCK' || Number(lowStockLevel) > 0 ? 'In Stock (Available)' : 'Out of Stock (Sold Out)'}
+                        </span>
+                      </label>
                     </div>
                   </div>
 
@@ -1367,7 +1425,7 @@ export default function PhoneModal({
                               const isChecked = selectedPlanIds.includes(plan.installment_plan_id);
                               const months = Number(plan.number_of_months || 3);
                               const rate = Number(plan.interest_rate || 0);
-                              const estMonthly = price && Number(price) > 0 ? ((Number(price) * (1 + rate / 100)) / months).toFixed(2) : null;
+                              const estMonthly = price && Number(price) > 0 ? Math.round((Number(price) * (1 + rate / 100)) / months) : null;
 
                               return (
                                 <div
@@ -1396,7 +1454,7 @@ export default function PhoneModal({
                                     </div>
                                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                                       {rate === 0 ? '0% Interest' : `${rate}% Interest`}
-                                      {estMonthly ? ` • ~$${estMonthly}/mo` : ''}
+                                      {estMonthly ? ` • ~₩${estMonthly.toLocaleString()}/mo` : ''}
                                     </p>
                                   </div>
                                   <span
@@ -1460,8 +1518,13 @@ export default function PhoneModal({
 
               {currentStep < 3 ? (
                 <button
+                  key={`step-next-btn-${currentStep}`}
                   type="button"
-                  onClick={handleNext}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleNext();
+                  }}
                   className="inline-flex items-center gap-1.5 py-2.5 px-6 text-xs font-medium text-white bg-gradient-to-r from-black via-neutral-900 to-rose-950 hover:from-neutral-900 hover:to-rose-900 border border-neutral-800 hover:border-rose-900/60 rounded-xl shadow-xs transition-all cursor-pointer"
                 >
                   <span>{currentStep === 1 ? 'Next: Storage & Colors' : 'Next: Specs & Options'}</span>
@@ -1469,8 +1532,14 @@ export default function PhoneModal({
                 </button>
               ) : (
                 <button
-                  type="submit"
+                  key="step-save-btn"
+                  type="button"
                   disabled={loading}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSubmit(e);
+                  }}
                   className="py-2.5 px-7 text-xs font-medium text-white bg-gradient-to-r from-black via-neutral-900 to-rose-950 hover:from-neutral-900 hover:to-rose-900 border border-neutral-800 hover:border-rose-900/60 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {loading ? (

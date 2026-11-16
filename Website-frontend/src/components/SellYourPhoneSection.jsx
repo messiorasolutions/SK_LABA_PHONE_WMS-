@@ -39,26 +39,42 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
   }, []);
 
   // Performance: Defer video loading until near viewport via IntersectionObserver
+  // Ensures critical storefront API requests complete unhindered before video stream is requested
   useEffect(() => {
+    let isMounted = true;
     const el = containerRef.current;
     if (!el || typeof IntersectionObserver === 'undefined') {
-      setShouldLoadVideo(true);
-      return;
+      const timer = setTimeout(() => {
+        if (isMounted) setShouldLoadVideo(true);
+      }, 1500);
+      return () => {
+        isMounted = false;
+        clearTimeout(timer);
+      };
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setShouldLoadVideo(true);
+          if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+            window.requestIdleCallback(() => {
+              if (isMounted) setShouldLoadVideo(true);
+            }, { timeout: 2000 });
+          } else {
+            setTimeout(() => {
+              if (isMounted) setShouldLoadVideo(true);
+            }, 300);
+          }
           observer.disconnect();
         }
       },
-      { rootMargin: '300px' }
+      { rootMargin: '200px' }
     );
 
     observer.observe(el);
 
     return () => {
+      isMounted = false;
       observer.disconnect();
     };
   }, []);

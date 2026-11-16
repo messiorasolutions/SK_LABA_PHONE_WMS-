@@ -23,6 +23,7 @@ class PhoneController {
      * Retrieve phones (defaults to non-archived; supports archived=yes / status=ARCHIVED / include_archived=true)
      */
     async getAllPhones(req, res, next) {
+        const reqStart = Date.now();
         try {
             const {
                 brand_id,
@@ -33,7 +34,9 @@ class PhoneController {
                 archived,
                 is_archived,
                 include_archived,
-                is_new_arrival
+                is_new_arrival,
+                view,
+                card_view
             } = req.query;
 
             const phones = await phoneService.getAllPhones({
@@ -45,8 +48,15 @@ class PhoneController {
                 archived,
                 is_archived,
                 include_archived,
-                is_new_arrival
+                is_new_arrival,
+                view,
+                card_view
             });
+
+            if (process.env.NODE_ENV !== 'production' || process.env.DEBUG_PERF === 'true') {
+                const totalDuration = Date.now() - reqStart;
+                console.log(`[PERF] GET /api/phones — count: ${phones.length}, duration: ${totalDuration}ms`);
+            }
 
             return res.status(200).json({
                 success: true,
@@ -54,6 +64,16 @@ class PhoneController {
                 data: phones
             });
         } catch (error) {
+            console.error('PhoneController.getAllPhones error:', error.message);
+            if (process.env.NODE_ENV === 'production') {
+                return res.status(500).json({
+                    success: false,
+                    error: {
+                        code: 'PHONE_CATALOGUE_UNAVAILABLE',
+                        message: 'Unable to load phones at the moment.'
+                    }
+                });
+            }
             next(error);
         }
     }
@@ -192,6 +212,27 @@ class PhoneController {
             return res.status(200).json({
                 success: true,
                 message: `Phone '${result.name}' marked as SOLD_OUT.`,
+                data: result
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * PATCH/POST /api/phones/:id/stock-toggle
+     * Toggle phone in-stock / out-of-stock directly
+     */
+    async toggleStock(req, res, next) {
+        try {
+            const { id } = req.params;
+            const inStock = req.body?.in_stock !== undefined
+                ? Boolean(req.body.in_stock)
+                : Boolean(req.body?.has_stock ?? req.body?.stock ?? true);
+            const result = await phoneService.toggleStock(id, inStock);
+            return res.status(200).json({
+                success: true,
+                message: inStock ? `Phone '${result.name}' marked as IN_STOCK` : `Phone '${result.name}' marked as OUT_OF_STOCK`,
                 data: result
             });
         } catch (error) {

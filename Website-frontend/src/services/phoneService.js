@@ -5,8 +5,8 @@ import { createServiceCache } from './cacheHelper.js';
 // In-memory cache for phone installments: phoneId -> Promise
 const installmentsCache = new Map();
 
-// In-memory cache for phones catalog (3-minute TTL)
-const phonesCache = createServiceCache({ ttlMs: 3 * 60 * 1000 });
+// In-memory cache for phones catalog (2-minute TTL for fast navigation & deduplication)
+const phonesCache = createServiceCache({ ttlMs: 2 * 60 * 1000 });
 
 // Create Phone
 const createPhone = async (phoneData) => {
@@ -14,14 +14,14 @@ const createPhone = async (phoneData) => {
   return axiosInstance.post(API_ENDPOINTS.phones.base, phoneData);
 };
 
-// Fetch All Phones (filters: { brand_id, status, phone_condition, availability, search, price_min, price_max })
+// Fetch All Phones (requests lightweight card projection for fast loading)
 const getPhones = async (filters = {}, options = {}) => {
   const forceRefresh = typeof options === 'boolean'
     ? options
     : Boolean(options?.forceRefresh || filters?.forceRefresh);
 
   const cleanParams = Object.fromEntries(
-    Object.entries(filters).filter(([k, v]) => k !== 'forceRefresh' && v !== '' && v !== null && v !== undefined)
+    Object.entries({ view: 'card', ...filters }).filter(([k, v]) => k !== 'forceRefresh' && v !== '' && v !== null && v !== undefined)
   );
 
   return phonesCache.execute(

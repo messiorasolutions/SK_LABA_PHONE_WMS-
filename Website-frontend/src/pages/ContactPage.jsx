@@ -9,8 +9,8 @@ import {
 import { useShopInfo } from '../context/ShopInfoContext';
 import { createInquiry } from '../services/inquiryService';
 import whatsappIcon from '../assets/icons/whatsappicon.png';
-import facebookIcon from '../assets/facebook.png';
-import tiktokIcon from '../assets/tiktok.png';
+import facebookIcon from '../assets/icons/facebook.png';
+import tiktokIcon from '../assets/icons/tiktok.png';
 
 export default function ContactPage() {
   const { shopInfo, getWhatsAppUrl } = useShopInfo();

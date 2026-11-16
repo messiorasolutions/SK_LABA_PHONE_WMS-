@@ -116,36 +116,18 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Stock Management (SRS ST-05) */}
+      {/* Stock Management — Redirected to Phone Management */}
       <Route
         path="/stock-management"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <StockManagementPage />
-            </MainLayout>
-          </ProtectedRoute>
-        }
+        element={<Navigate to="/phone-management" replace />}
       />
       <Route
         path="/stock"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <StockManagementPage />
-            </MainLayout>
-          </ProtectedRoute>
-        }
+        element={<Navigate to="/phone-management" replace />}
       />
       <Route
         path="/storage-management"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <StockManagementPage />
-            </MainLayout>
-          </ProtectedRoute>
-        }
+        element={<Navigate to="/phone-management?tab=storage" replace />}
       />
 
       {/* Offers Management (SRS MG-03) */}

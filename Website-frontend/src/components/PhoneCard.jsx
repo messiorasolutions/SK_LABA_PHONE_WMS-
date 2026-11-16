@@ -2,14 +2,18 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Heart, GitCompare, Tag, Sparkles } from 'lucide-react';
 import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
 import { resolveImageUrl } from '../utils/imageHelper';
+import { useCurrencyConverter } from '../hooks/useCurrencyConverter';
 
 export default function PhoneCard({
   phone,
+  priority = false,
   onViewDetails,
   onReserve,
   onNotifyBackInStock,
 }) {
   const { isFavorite, isInCompare, toggleFavorite, toggleCompare } = useFavoritesAndCompare();
+  const { convertKrwToLkr, formatKrw, formatLkr } = useCurrencyConverter();
+  const [imageFailed, setImageFailed] = useState(false);
 
   const phoneId = phone.phone_id || phone.id;
   const favorited = isFavorite(phoneId);
@@ -95,6 +99,10 @@ export default function PhoneCard({
   const effectivePrice = hasOffer ? Number(offerPrice) : regularPrice;
   const savings = hasOffer ? regularPrice - effectivePrice : 0;
   const discountPercent = hasOffer ? Math.round((savings / regularPrice) * 100) : 0;
+
+  const availability = (phone.availability || 'IN_STOCK').toUpperCase();
+  const currentStock = Number(phone.current_stock ?? phone.stock ?? 0);
+  const isSoldOut = !phone.is_marketplace && (availability === 'SOLD_OUT' || (availability !== 'COMING_SOON' && currentStock === 0));
 
   const handleFavoriteClick = (e) => {
     e.stopPropagation();
@@ -241,17 +249,17 @@ export default function PhoneCard({
           </button>
         </div>
 
-        {/* Phone Photo */}
-        {displayedPhoto ? (
+        {/* Phone Photo with progressive loading, async decoding, & zero layout shift */}
+        {displayedPhoto && !imageFailed ? (
           <img
             key={displayedPhoto}
             src={displayedPhoto}
             alt={phone.name}
-            loading="lazy"
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'auto'}
+            decoding="async"
             className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
+            onError={() => setImageFailed(true)}
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-theme-textMuted py-4 sm:py-8">
@@ -278,14 +286,21 @@ export default function PhoneCard({
         </div>
 
         {/* Pricing */}
-        <div className="pt-1.5 sm:pt-2 border-t border-theme-border/40 flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
-          <span className="text-sm sm:text-base md:text-lg font-normal text-white tracking-tight">
-            ${effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </span>
-          {hasOffer && (
-            <span className="text-[10px] sm:text-xs text-theme-textMuted line-through font-normal">
-              ${regularPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        <div className="pt-1.5 sm:pt-2 border-t border-theme-border/40">
+          <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+            <span className="text-sm sm:text-base md:text-lg font-normal text-white tracking-tight">
+              {formatKrw(effectivePrice)}
             </span>
+            {hasOffer && (
+              <span className="text-[10px] sm:text-xs text-theme-textMuted line-through font-normal">
+                {formatKrw(regularPrice)}
+              </span>
+            )}
+          </div>
+          {effectivePrice > 0 && (
+            <div className="text-[11px] text-emerald-400 font-medium tracking-tight">
+              ≈ {formatLkr(convertKrwToLkr(effectivePrice))}
+            </div>
           )}
         </div>
 
@@ -325,6 +340,7 @@ export default function PhoneCard({
                       alt={color.name || `Color #${idx + 1}`}
                       className="w-full h-full object-cover object-center rounded-[6px]"
                       loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <span

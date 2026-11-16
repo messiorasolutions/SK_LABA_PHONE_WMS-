@@ -79,7 +79,11 @@ CREATE TABLE phones (
     CONSTRAINT chk_photos_json CHECK (photos IS NULL OR JSON_VALID(photos)),
     INDEX idx_phones_brand (brand_id),
     INDEX idx_phones_status (status),
-    INDEX idx_phones_price (price)
+    INDEX idx_phones_price (price),
+    INDEX idx_phones_storefront (is_archived, status, product_source, phone_id),
+    INDEX idx_phones_availability (availability),
+    INDEX idx_phones_condition (phone_condition),
+    INDEX idx_phones_new_arrival (is_new_arrival)
 ) ENGINE=InnoDB;
 
 

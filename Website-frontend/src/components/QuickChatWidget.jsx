@@ -14,31 +14,39 @@ function WhatsAppSvg({ className = 'w-5 h-5 fill-current' }) {
   );
 }
 
-const STORAGE_KEY = 'sk_laba_quick_chat_position_v1';
+const STORAGE_KEY = 'sk_laba_quick_chat_position_v2';
 const BUTTON_SIZE = 56;
 const PADDING = 16;
+const MIN_Y = 100; // Stay strictly below the navbar and logo
 
 const getDefaultPosition = () => {
   if (typeof window === 'undefined') return { x: 100, y: 100 };
   const w = window.innerWidth;
   const h = window.innerHeight;
   return {
-    x: Math.max(PADDING, w - BUTTON_SIZE - 24),
-    y: Math.max(PADDING, h - BUTTON_SIZE - 24),
+    x: Math.max(PADDING, w - BUTTON_SIZE - 20),
+    y: Math.max(MIN_Y, h - BUTTON_SIZE - 24),
   };
 };
 
 const getInitialPosition = () => {
   try {
+    // On mobile viewports, keep docked at bottom right to avoid blocking UI/logo
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      return getDefaultPosition();
+    }
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
       if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
         const w = window.innerWidth;
         const h = window.innerHeight;
+        if (parsed.y < MIN_Y || parsed.x < 30) {
+          return getDefaultPosition();
+        }
         return {
           x: Math.min(Math.max(PADDING, parsed.x), Math.max(PADDING, w - BUTTON_SIZE - PADDING)),
-          y: Math.min(Math.max(PADDING, parsed.y), Math.max(PADDING, h - BUTTON_SIZE - PADDING)),
+          y: Math.min(Math.max(MIN_Y, parsed.y), Math.max(MIN_Y, h - BUTTON_SIZE - PADDING)),
         };
       }
     }
@@ -77,7 +85,7 @@ export default function QuickChatWidget({ activePhone = null, onOpenInquiry, onN
         const h = window.innerHeight;
         return {
           x: Math.min(Math.max(PADDING, prev.x), Math.max(PADDING, w - BUTTON_SIZE - PADDING)),
-          y: Math.min(Math.max(PADDING, prev.y), Math.max(PADDING, h - BUTTON_SIZE - PADDING)),
+          y: Math.min(Math.max(MIN_Y, prev.y), Math.max(MIN_Y, h - BUTTON_SIZE - PADDING)),
         };
       });
     }
@@ -134,7 +142,7 @@ export default function QuickChatWidget({ activePhone = null, onOpenInquiry, onN
         const w = window.innerWidth;
         const h = window.innerHeight;
         const newX = Math.min(Math.max(PADDING, dragRef.current.startPosX + dx), w - BUTTON_SIZE - PADDING);
-        const newY = Math.min(Math.max(PADDING, dragRef.current.startPosY + dy), h - BUTTON_SIZE - PADDING);
+        const newY = Math.min(Math.max(MIN_Y, dragRef.current.startPosY + dy), h - BUTTON_SIZE - PADDING);
 
         const newPos = { x: newX, y: newY };
         dragRef.current.currentPos = newPos;
@@ -286,12 +294,12 @@ export default function QuickChatWidget({ activePhone = null, onOpenInquiry, onN
             <button
               type="button"
               onClick={handleWhatsAppClick}
-              className="w-full group flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0D1627] hover:bg-[#121A2C] border border-[#161F30] hover:border-[#25D366]/50 transition-all duration-150 text-left cursor-pointer"
+              className="w-full group flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0D1627] hover:bg-[#121A2C] border border-[#161F30] hover:border-white/30 transition-all duration-150 text-left cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-lg bg-[#25D366] flex items-center justify-center p-1.5 shrink-0 group-hover:scale-105 transition-transform shadow-[0_2px_10px_rgba(37,211,102,0.35)]">
-                <WhatsAppSvg className="w-5 h-5 fill-white" />
+              <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center p-1.5 shrink-0 text-white group-hover:bg-white/20 group-hover:scale-105 transition-all shadow-sm">
+                <WhatsAppSvg className="w-4 h-4 fill-white" />
               </div>
-              <span className="text-xs sm:text-sm font-medium text-white group-hover:text-[#25D366] transition-colors">
+              <span className="text-xs sm:text-sm font-medium text-white group-hover:text-slate-200 transition-colors">
                 Chat on WhatsApp
               </span>
             </button>
@@ -300,12 +308,12 @@ export default function QuickChatWidget({ activePhone = null, onOpenInquiry, onN
             <button
               type="button"
               onClick={handleContactFormClick}
-              className="w-full group flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0D1627] hover:bg-[#121A2C] border border-[#161F30] hover:border-blue-500/40 transition-all duration-150 text-left cursor-pointer"
+              className="w-full group flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0D1627] hover:bg-[#121A2C] border border-[#161F30] hover:border-white/30 transition-all duration-150 text-left cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 text-blue-400 group-hover:scale-105 transition-transform">
-                <MessageSquareText className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center shrink-0 text-white group-hover:bg-white/20 group-hover:scale-105 transition-all shadow-sm">
+                <MessageSquareText className="w-4 h-4 text-white" />
               </div>
-              <span className="text-xs sm:text-sm font-medium text-white group-hover:text-blue-300 transition-colors">
+              <span className="text-xs sm:text-sm font-medium text-white group-hover:text-slate-200 transition-colors">
                 Contact Us Form
               </span>
             </button>
@@ -314,12 +322,12 @@ export default function QuickChatWidget({ activePhone = null, onOpenInquiry, onN
             <button
               type="button"
               onClick={handleCallClick}
-              className="w-full group flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0D1627] hover:bg-[#121A2C] border border-[#161F30] hover:border-amber-500/40 transition-all duration-150 text-left cursor-pointer"
+              className="w-full group flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0D1627] hover:bg-[#121A2C] border border-[#161F30] hover:border-white/30 transition-all duration-150 text-left cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 text-amber-400 group-hover:scale-105 transition-transform">
-                <PhoneCall className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center shrink-0 text-white group-hover:bg-white/20 group-hover:scale-105 transition-all shadow-sm">
+                <PhoneCall className="w-4 h-4 text-white" />
               </div>
-              <span className="text-xs sm:text-sm font-medium text-white group-hover:text-amber-300 transition-colors">
+              <span className="text-xs sm:text-sm font-medium text-white group-hover:text-slate-200 transition-colors">
                 Direct Phone Call
               </span>
             </button>

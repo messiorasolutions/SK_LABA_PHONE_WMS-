@@ -167,6 +167,33 @@ export default function usePhones() {
     return res;
   };
 
+  const [togglingStockId, setTogglingStockId] = useState(null);
+
+  const handleToggleStock = async (phone) => {
+    const id = phone?.phone_id;
+    if (!id || togglingStockId === id) return;
+
+    const currentlyInStock = phone.availability === 'IN_STOCK' || Number(phone.current_stock ?? phone.stock ?? 0) > 0;
+    const nextInStock = !currentlyInStock;
+
+    setTogglingStockId(id);
+    const res = await dispatch(updatePhone(id, {
+      in_stock: nextInStock,
+      availability: nextInStock ? 'IN_STOCK' : 'SOLD_OUT',
+      current_stock: nextInStock ? 10 : 0,
+      stock_quantity: nextInStock ? 10 : 0,
+    }));
+    setTogglingStockId(null);
+
+    if (res?.success) {
+      showToast(`Phone "${phone.name}" marked as ${nextInStock ? 'In Stock' : 'Out of Stock'}`);
+      loadPhones();
+    } else {
+      showToast(res?.error || 'Failed to update stock status', 'error');
+    }
+    return res;
+  };
+
   const publishedCount = phones.filter((p) => p.status === 'PUBLISHED').length;
   const inStockCount = phones.filter((p) => p.availability === 'IN_STOCK').length;
   const archivedCount = phones.filter((p) => p.status === 'ARCHIVED' || p.is_archived === 1).length;
@@ -217,5 +244,7 @@ export default function usePhones() {
     handleDeletePhone,
     handleArchivePhone,
     handleRestorePhone,
+    togglingStockId,
+    handleToggleStock,
   };
 }

@@ -11,6 +11,7 @@ import ConfirmDeleteModal from '../components/Modals/ConfirmDeleteModal';
 import DetailModal from '../components/Modals/DetailModal';
 import PhoneCustomerViewModal from '../components/Modals/PhoneCustomerViewModal';
 import PhoneCompareModal from '../components/Modals/PhoneCompareModal';
+import { useCurrencyConverter } from '../hooks/useCurrencyConverter';
 
 import {
   Smartphone,
@@ -25,6 +26,7 @@ import {
   Scale,
   Archive,
   RotateCcw,
+  Check,
   CheckCircle2,
   AlertCircle,
   ChevronDown,
@@ -122,8 +124,9 @@ export default function PhoneManagementPage() {
   const openDetail = (title, data) => setDetailModal({ isOpen: true, title, data });
   const closeDetail = () => setDetailModal({ isOpen: false, title: '', data: null });
 
-  const formatPrice = (p) =>
-    p ? `$${Number(p).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—';
+  const { convertKrwToLkr, formatKrw, formatLkr } = useCurrencyConverter();
+
+  const formatPrice = (p) => formatKrw(p);
   const formatDate = (d) =>
     d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
 
@@ -365,8 +368,8 @@ export default function PhoneManagementPage() {
                       <th className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[11px]">Brand</th>
                       <th className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[11px]">Condition</th>
                       <th className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[11px]">Price</th>
-                      <th className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[11px]">Low Stock Level</th>
                       <th className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[11px]">Status</th>
+                      <th className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[11px] text-center">Stock</th>
                       <th className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[11px] text-right">Actions</th>
                     </tr>
                   </thead>
@@ -404,11 +407,12 @@ export default function PhoneManagementPage() {
                         </td>
 
                         <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100 text-xs">
-                          {formatPrice(phone.price)}
-                        </td>
-
-                        <td className="px-4 py-3 text-xs font-normal text-slate-600 dark:text-slate-300">
-                          {phone.low_stock_level ?? phone.stock_quantity ?? 25}
+                          <div>{formatPrice(phone.price)}</div>
+                          {phone.price && Number(phone.price) > 0 && (
+                            <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">
+                              ≈ {formatLkr(convertKrwToLkr(phone.price))}
+                            </div>
+                          )}
                         </td>
 
                         <td className="px-4 py-3 text-xs font-normal text-slate-700 dark:text-slate-300">
@@ -417,6 +421,37 @@ export default function PhoneManagementPage() {
                             : phone.status === 'PUBLISHED'
                             ? 'Published'
                             : (phone.status ? (phone.status.charAt(0) + phone.status.slice(1).toLowerCase()) : 'Draft')}
+                        </td>
+
+                        <td className="px-4 py-3 text-center">
+                          {(() => {
+                            const hasStock = phone.availability === 'IN_STOCK' || Number(phone.current_stock ?? phone.stock ?? 0) > 0;
+                            const isToggling = phonesHook.togglingStockId === phone.phone_id;
+                            return (
+                              <button
+                                type="button"
+                                disabled={isToggling}
+                                onClick={() => phonesHook.handleToggleStock(phone)}
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer border ${
+                                  hasStock
+                                    ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                } ${isToggling ? 'opacity-50 pointer-events-none' : ''}`}
+                                title={hasStock ? 'In Stock — Click to mark Out of Stock' : 'Out of Stock — Click to mark In Stock'}
+                              >
+                                <span className={`w-3.5 h-3.5 rounded flex items-center justify-center border transition-colors ${
+                                  hasStock
+                                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                                    : 'border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-900'
+                                }`}>
+                                  {hasStock && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                                </span>
+                                <span className="select-none text-[11px] font-semibold">
+                                  {hasStock ? 'In Stock' : 'Out of Stock'}
+                                </span>
+                              </button>
+                            );
+                          })()}
                         </td>
 
                         <td className="px-4 py-3 text-right">

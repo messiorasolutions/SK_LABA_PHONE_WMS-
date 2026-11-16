@@ -91,15 +91,58 @@ class PhoneService {
      * @returns {Promise<Array>}
      */
     /**
-     * Enrich phone with resolved storage options
-     * @param {Object} phone
-     * @returns {Promise<Object>}
+     * Get a Map of storage_id -> storageOption with in-memory caching (5-minute TTL)
+     * Eliminates N+1 queries when loading multiple phones
      */
-    async enrichPhone(phone) {
-        if (!phone) return null;
+    async _getStorageOptionsMap() {
+        const now = Date.now();
+        if (this._storageMapCache && (now - (this._storageMapCacheTime || 0) < 5 * 60 * 1000)) {
+            return this._storageMapCache;
+        }
+
         const storageRepo = this.storageOptionRepository || storageOptionRepository;
+        let allStorages = [];
+        try {
+            if (typeof storageRepo.findAll === 'function') {
+                allStorages = await storageRepo.findAll();
+            }
+        } catch (e) {
+            allStorages = [];
+        }
+
+        const map = new Map();
+        if (Array.isArray(allStorages)) {
+            for (const s of allStorages) {
+                map.set(Number(s.storage_id), {
+                    storage_id: s.storage_id,
+                    storage_name: s.storage_name,
+                    capacity_gb: s.capacity_gb,
+                });
+            }
+        }
+
+        this._storageMapCache = map;
+        this._storageMapCacheTime = now;
+        return map;
+    }
+
+    /**
+     * Synchronously enrich a phone object using a pre-fetched storage options Map
+     */
+    _enrichPhoneSync(phone, storageMap) {
+        if (!phone) return null;
         const storageIds = Array.isArray(phone.storage_ids) ? phone.storage_ids : [];
-        const storages = await storageRepo.findByIds(storageIds);
+        const storages = [];
+
+        for (const sid of storageIds) {
+            const found = storageMap.get(Number(sid));
+            if (found) {
+                storages.push(found);
+            }
+        }
+
+        storages.sort((a, b) => (Number(a.capacity_gb) || 0) - (Number(b.capacity_gb) || 0));
+
         return {
             ...phone,
             storage_options: storages.map(s => ({
@@ -111,19 +154,52 @@ class PhoneService {
         };
     }
 
-    async getAllPhones(filters = {}) {
-        const rawPhones = await (this.phoneRepository || phoneRepository).findAll(filters);
-        return await Promise.all(rawPhones.map(p => this.enrichPhone(p)));
+    /**
+     * Enrich phone with resolved storage options
+     * @param {Object} phone
+     * @returns {Promise<Object>}
+     */
+    async enrichPhone(phone) {
+        if (!phone) return null;
+        const storageMap = await this._getStorageOptionsMap();
+        return this._enrichPhoneSync(phone, storageMap);
     }
 
     /**
-     * Retrieve all phones for stock management screen
+     * Retrieve all phones (uses single-query batch enrichment, eliminating N+1 queries)
+     * @param {Object} filters
+     * @returns {Promise<Array>}
+     */
+    async getAllPhones(filters = {}) {
+        const t0 = Date.now();
+        const rawPhones = await (this.phoneRepository || phoneRepository).findAll(filters);
+        const tDb = Date.now() - t0;
+
+        if (!rawPhones || rawPhones.length === 0) return [];
+
+        const tMapStart = Date.now();
+        const storageMap = await this._getStorageOptionsMap();
+        const enriched = rawPhones.map(p => this._enrichPhoneSync(p, storageMap));
+        const tEnrich = Date.now() - tMapStart;
+
+        if (process.env.NODE_ENV !== 'production' || process.env.DEBUG_PERF === 'true') {
+            console.log(`[PhoneService.getAllPhones] DB: ${tDb}ms, Enrich: ${tEnrich}ms, Count: ${enriched.length}`);
+        }
+
+        return enriched;
+    }
+
+    /**
+     * Retrieve all phones for stock management screen (batch enriched)
      * @param {Object} filters
      * @returns {Promise<Array>}
      */
     async getStockList(filters = {}) {
         const rawStock = await (this.phoneRepository || phoneRepository).findAllStock(filters);
-        return await Promise.all(rawStock.map(p => this.enrichPhone(p)));
+        if (!rawStock || rawStock.length === 0) return [];
+
+        const storageMap = await this._getStorageOptionsMap();
+        return rawStock.map(p => this._enrichPhoneSync(p, storageMap));
     }
 
     /**
@@ -417,6 +493,22 @@ class PhoneService {
     }
 
     /**
+     * Toggle phone stock status (In Stock vs Out of Stock)
+     * @param {number|string} id
+     * @param {boolean} inStock
+     * @returns {Promise<Object>}
+     */
+    async toggleStock(id, inStock) {
+        const phoneRepo = this.phoneRepository || phoneRepository;
+        const phone = await phoneRepo.findById(id);
+        if (!phone) {
+            throw new AppError(`Phone with ID ${id} not found.`, 404);
+        }
+        const updated = await phoneRepo.toggleStock(id, Boolean(inStock));
+        return await this.enrichPhone(updated);
+    }
+
+    /**
      * Retrieve all archived phones
      * @param {Object} filters
      * @returns {Promise<Array>}
@@ -500,12 +592,18 @@ class PhoneService {
         const nextLowStockLevel = data.low_stock_level !== undefined
             ? Number(data.low_stock_level)
             : (data.stock_quantity !== undefined ? Number(data.stock_quantity) : (existing.low_stock_level ?? existing.stock_quantity ?? 5));
-        const nextCurrentStock = data.current_stock !== undefined
+        let nextCurrentStock = data.current_stock !== undefined
             ? Number(data.current_stock)
             : Number(existing.current_stock ?? 0);
-        const explicitAvailability = data.availability !== undefined
+        let explicitAvailability = data.availability !== undefined
             ? data.availability.trim().toUpperCase()
             : existing.availability;
+
+        if (data.in_stock !== undefined || data.has_stock !== undefined) {
+            const hasStock = Boolean(data.in_stock ?? data.has_stock);
+            nextCurrentStock = hasStock ? (nextCurrentStock > 0 ? nextCurrentStock : 10) : 0;
+            explicitAvailability = hasStock ? 'IN_STOCK' : 'SOLD_OUT';
+        }
 
         const nextAvailability = calculatePhoneAvailability(
             nextCurrentStock,

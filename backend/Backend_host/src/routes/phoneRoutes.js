@@ -21,6 +21,9 @@ router.patch('/:id/stock/sold-out', (req, res, next) => phoneController.markSold
 router.post('/:id/stock/sold-out', (req, res, next) => phoneController.markSoldOut(req, res, next));
 router.put('/:id/stock/sold-out', (req, res, next) => phoneController.markSoldOut(req, res, next));
 
+router.patch('/:id/stock-toggle', (req, res, next) => phoneController.toggleStock(req, res, next));
+router.post('/:id/stock-toggle', (req, res, next) => phoneController.toggleStock(req, res, next));
+
 // Archive routes (MUST be defined before /:id)
 router.get('/archived', (req, res, next) => phoneController.getArchivedPhones(req, res, next));
 

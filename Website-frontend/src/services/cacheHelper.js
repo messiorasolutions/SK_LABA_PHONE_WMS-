@@ -44,15 +44,17 @@ export const defaultKeyGenerator = (params) => {
 };
 
 export function createServiceCache({
-  ttlMs = 3 * 60 * 1000, // 3 minutes default
+  ttlMs = 2 * 60 * 1000, // 2 minutes fresh TTL
+  staleMs = 10 * 60 * 1000, // 10 minutes stale-while-revalidate window
   keyGenerator = defaultKeyGenerator,
 } = {}) {
-  const cache = new Map(); // key -> { data, expiresAt }
+  const cache = new Map(); // key -> { data, expiresAt, staleUntil }
   const inFlight = new Map(); // key -> Promise
 
   return {
     /**
      * Executes the fetcher, deduplicating in-flight requests and returning cached data within TTL.
+     * Supports Stale-While-Revalidate for instant render with background fresh data synchronization.
      * @param {any} params - Arguments or filter object identifying the request
      * @param {Function} fetcher - Async function returning response or data
      * @param {boolean} [forceRefresh=false] - When true, bypasses and overwrites cache
@@ -61,12 +63,36 @@ export function createServiceCache({
       const key = keyGenerator(params);
       const now = Date.now();
 
-      // 1. Valid cache hit
+      // 1. Valid cache hit (fresh or stale-while-revalidate)
       if (!forceRefresh && cache.has(key)) {
         const entry = cache.get(key);
         if (now < entry.expiresAt) {
           return cloneResponse(entry.data);
         }
+
+        // Stale-While-Revalidate: Return cached data immediately, revalidate in background
+        if (now < entry.staleUntil) {
+          if (!inFlight.has(key)) {
+            const bgPromise = (async () => {
+              try {
+                const freshResult = await fetcher();
+                cache.set(key, {
+                  data: cloneResponse(freshResult),
+                  expiresAt: Date.now() + ttlMs,
+                  staleUntil: Date.now() + staleMs,
+                });
+                return freshResult;
+              } catch {
+                return entry.data;
+              } finally {
+                inFlight.delete(key);
+              }
+            })();
+            inFlight.set(key, bgPromise);
+          }
+          return cloneResponse(entry.data);
+        }
+
         cache.delete(key);
       }
 
@@ -85,6 +111,7 @@ export function createServiceCache({
           cache.set(key, {
             data: cloneResponse(result),
             expiresAt: Date.now() + ttlMs,
+            staleUntil: Date.now() + staleMs,
           });
           return result;
         } finally {

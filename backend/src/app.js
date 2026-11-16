@@ -176,7 +176,12 @@ const PUBLIC_STOREFRONT_PREFIXES = [
 
 app.use((req, res, next) => {
     const p = req.path || '';
-    if (req.method === 'GET') {
+    const cookieName = process.env.SESSION_COOKIE_NAME || 'sk_laba_sid';
+    const hasSessionCookie = Boolean(req.headers.cookie && req.headers.cookie.includes(cookieName));
+
+    // If an authenticated user/admin sends a session cookie, ALWAYS run sessionMiddleware
+    // Only skip session lookup for anonymous GET requests to public storefront endpoints
+    if (req.method === 'GET' && !hasSessionCookie) {
         const isPublicStorefront = PUBLIC_STOREFRONT_PREFIXES.some(prefix => p === prefix || p.startsWith(prefix + '/'));
         // Never skip sessions for /api/admin or any moderation/dashboard subpaths
         if (isPublicStorefront && !p.startsWith('/api/admin')) {

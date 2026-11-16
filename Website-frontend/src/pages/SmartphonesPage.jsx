@@ -122,27 +122,27 @@ export default function SmartphonesPage({ onNavigateToHome }) {
   const activeOffersRef = useRef([]);
 
   // Critical path loading: Phone inventory loads & renders cards immediately
-  useEffect(() => {
-    let isMounted = true;
+  const loadPhones = (forceRefresh = false) => {
     setLoading(true);
     setError(null);
-
-    // 1. Critical path: GET phones -> Render phone cards immediately
     phoneService
-      .getPhones()
+      .getPhones({}, { forceRefresh })
       .then((phoneRes) => {
-        if (!isMounted) return;
         const rawPhones = phoneRes.data?.data || phoneRes.data || [];
         const phoneList = Array.isArray(rawPhones) ? rawPhones : [];
         setPhones(applyOffersToPhones(phoneList, activeOffersRef.current));
       })
       .catch((err) => {
-        if (!isMounted) return;
         setError(err.message || 'Failed to fetch smartphone inventory.');
       })
       .finally(() => {
-        if (isMounted) setLoading(false);
+        setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+    loadPhones(false);
 
     // 2. Secondary path: Fetch brands in parallel (non-blocking)
     brandService
@@ -864,7 +864,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
             <p className="text-xs text-theme-textMuted mb-6 font-normal leading-relaxed">{error}</p>
             <button
               type="button"
-              onClick={() => window.location.reload()}
+              onClick={() => loadPhones(true)}
               className="relative inline-flex items-center justify-center p-[0.5px] rounded-full bg-gradient-to-r from-red-600/80 via-blue-700/80 to-blue-900/80 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] shadow-lg shadow-black/80 group cursor-pointer"
             >
               <span className="inline-flex items-center gap-2 py-2 px-6 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
@@ -895,10 +895,11 @@ export default function SmartphonesPage({ onNavigateToHome }) {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2.5 sm:gap-3.5 md:gap-4">
-            {filteredPhones.map((phone) => (
+            {filteredPhones.map((phone, idx) => (
               <PhoneCard
                 key={phone.phone_id || phone.id}
                 phone={phone}
+                priority={idx < 4}
                 onViewDetails={(p) => { setSelectedPhoneForDetail(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                 onReserve={(p) => setSelectedPhoneForReserve(p)}
                 onNotifyBackInStock={(p) => setSelectedPhoneForBackInStock(p)}

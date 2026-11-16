@@ -42,11 +42,15 @@ function createSessionMiddleware() {
     }
 
     const cookieName = process.env.SESSION_COOKIE_NAME || 'sk_laba_sid';
+    const sameSite = process.env.COOKIE_SAMESITE || (isProduction ? 'none' : 'lax');
+    const isSecure = isProduction
+        ? (process.env.COOKIE_SECURE !== 'false' || sameSite === 'none')
+        : (process.env.COOKIE_SECURE === 'true');
 
     const cookieOptions = {
         httpOnly: true,
-        secure: isProduction && process.env.COOKIE_SECURE === 'true',
-        sameSite: process.env.COOKIE_SAMESITE || (isProduction ? 'none' : 'lax'),
+        secure: isSecure,
+        sameSite: sameSite,
         maxAge: Number(process.env.SESSION_MAX_AGE_MS) || (24 * 60 * 60 * 1000), // 24 hours
         path: '/'
     };

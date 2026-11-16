@@ -4,8 +4,9 @@ const { calculatePhoneAvailability } = require('../utils/phoneAvailability');
 class PhoneRepository {
     /**
      * Safely parse JSON fields on a phone row
+     * When isCardView=true, produces lightweight payload (primary photos only, no giant arrays)
      */
-    _formatPhone(row) {
+    _formatPhone(row, isCardView = false) {
         if (!row) return null;
         const jsonFields = [
             'storage_ids',
@@ -25,6 +26,42 @@ class PhoneRepository {
                     // keep raw if not valid json
                 }
             }
+        }
+
+        // Optimize card-view payload size (shrinks JSON from megabytes to kilobytes)
+        if (isCardView) {
+            let primaryPhoto = '';
+            if (Array.isArray(formatted.photos) && formatted.photos.length > 0) {
+                primaryPhoto = formatted.photos[0];
+            }
+
+            if (Array.isArray(formatted.colour_options) && formatted.colour_options.length > 0) {
+                // Keep only primary photo per color option to enable color switching without full galleries
+                formatted.colour_options = formatted.colour_options.map((col, idx) => {
+                    const colPhotos = Array.isArray(col.photos) ? col.photos : [];
+                    const firstPhoto = colPhotos[0] || (idx === 0 ? primaryPhoto : '');
+                    if (!primaryPhoto && firstPhoto) {
+                        primaryPhoto = firstPhoto;
+                    }
+                    return {
+                        id: col.id || `color_${idx}`,
+                        name: col.name || col.color_name || `Color #${idx + 1}`,
+                        color_name: col.color_name || col.name || `Color #${idx + 1}`,
+                        color_code: col.color_code || col.color || '#374151',
+                        quantity: col.quantity !== undefined ? Number(col.quantity) : 0,
+                        storage_quantities: col.storage_quantities || {},
+                        photos: firstPhoto ? [firstPhoto] : []
+                    };
+                });
+            }
+
+            formatted.main_photo = primaryPhoto || (Array.isArray(formatted.photos) && formatted.photos[0]) || '';
+            formatted.photos = primaryPhoto ? [primaryPhoto] : [];
+            // Remove unnecessary large off-page fields from listing card
+            delete formatted.description;
+            delete formatted.specification_ids;
+            delete formatted.accessory_ids;
+            delete formatted.installment_plan_ids;
         }
 
         formatted.current_stock = Number(formatted.current_stock ?? 0);
@@ -113,10 +150,45 @@ class PhoneRepository {
      * @returns {Promise<Array>}
      */
     async findAll(filters = {}) {
-        let query = `
-            SELECT 
+        const isCardView = Boolean(
+            filters.view === 'card' ||
+            filters.card_view === true ||
+            filters.card_view === 'true'
+        );
+
+        // In card view, project only lightweight columns to avoid retrieving off-page BLOBs/TEXT (descriptions)
+        const selectColumns = isCardView
+            ? `
+                p.phone_id,
+                p.name,
+                p.brand_id,
+                b.brand_name,
+                p.phone_condition,
+                p.price,
+                p.storage_ids,
+                p.colour_options,
+                p.low_stock_level,
+                p.current_stock,
+                p.availability,
+                p.installment_enabled,
+                p.status,
+                p.is_archived,
+                p.is_new_arrival,
+                p.photos,
+                p.warranty,
+                p.created_at,
+                p.product_source,
+                p.ownership_type,
+                p.marketplace_listing_id
+              `
+            : `
                 p.*,
                 b.brand_name
+              `;
+
+        let query = `
+            SELECT 
+                ${selectColumns}
             FROM phones p
             LEFT JOIN brands b ON p.brand_id = b.brand_id
             WHERE 1=1
@@ -194,7 +266,7 @@ class PhoneRepository {
         query += ` ORDER BY p.phone_id DESC`;
 
         const [rows] = await pool.execute(query, values);
-        return rows.map(row => this._formatPhone(row));
+        return rows.map(row => this._formatPhone(row, isCardView));
     }
 
     /**
@@ -284,7 +356,7 @@ class PhoneRepository {
         query += ` ORDER BY p.phone_id DESC`;
 
         const [rows] = await pool.execute(query, values);
-        return rows.map(row => this._formatPhone(row));
+        return rows.map(row => this._formatPhone(row, isCardView));
     }
 
     /**
@@ -344,6 +416,20 @@ class PhoneRepository {
     async markSoldOut(phone_id, resetQuantity = true) {
         // Enforce consistent availability & stock: a sold out phone has 0 stock
         const query = `UPDATE phones SET availability = 'SOLD_OUT', current_stock = 0 WHERE phone_id = ?`;
+        await pool.execute(query, [phone_id]);
+        return this.findById(phone_id);
+    }
+
+    /**
+     * Toggle phone in-stock / out-of-stock status directly
+     * @param {number|string} phone_id
+     * @param {boolean} inStock
+     * @returns {Promise<Object>}
+     */
+    async toggleStock(phone_id, inStock) {
+        const query = inStock
+            ? `UPDATE phones SET availability = 'IN_STOCK', current_stock = GREATEST(10, current_stock) WHERE phone_id = ?`
+            : `UPDATE phones SET availability = 'SOLD_OUT', current_stock = 0 WHERE phone_id = ?`;
         await pool.execute(query, [phone_id]);
         return this.findById(phone_id);
     }

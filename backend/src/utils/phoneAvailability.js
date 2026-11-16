@@ -32,6 +32,10 @@ function calculatePhoneAvailability(currentStock, lowStockLevel = 5, explicitAva
         return 'SOLD_OUT';
     }
 
+    if (cleanAvail === 'IN_STOCK') {
+        return 'IN_STOCK';
+    }
+
     if (stock <= threshold) {
         return 'LOW_STOCK';
     }

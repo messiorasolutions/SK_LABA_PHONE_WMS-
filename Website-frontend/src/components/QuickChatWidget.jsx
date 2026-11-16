@@ -14,31 +14,39 @@ function WhatsAppSvg({ className = 'w-5 h-5 fill-current' }) {
   );
 }
 
-const STORAGE_KEY = 'sk_laba_quick_chat_position_v1';
+const STORAGE_KEY = 'sk_laba_quick_chat_position_v2';
 const BUTTON_SIZE = 56;
 const PADDING = 16;
+const MIN_Y = 100; // Stay strictly below the navbar and logo
 
 const getDefaultPosition = () => {
   if (typeof window === 'undefined') return { x: 100, y: 100 };
   const w = window.innerWidth;
   const h = window.innerHeight;
   return {
-    x: Math.max(PADDING, w - BUTTON_SIZE - 24),
-    y: Math.max(PADDING, h - BUTTON_SIZE - 24),
+    x: Math.max(PADDING, w - BUTTON_SIZE - 20),
+    y: Math.max(MIN_Y, h - BUTTON_SIZE - 24),
   };
 };
 
 const getInitialPosition = () => {
   try {
+    // On mobile viewports, keep docked at bottom right to avoid blocking UI/logo
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      return getDefaultPosition();
+    }
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
       if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
         const w = window.innerWidth;
         const h = window.innerHeight;
+        if (parsed.y < MIN_Y || parsed.x < 30) {
+          return getDefaultPosition();
+        }
         return {
           x: Math.min(Math.max(PADDING, parsed.x), Math.max(PADDING, w - BUTTON_SIZE - PADDING)),
-          y: Math.min(Math.max(PADDING, parsed.y), Math.max(PADDING, h - BUTTON_SIZE - PADDING)),
+          y: Math.min(Math.max(MIN_Y, parsed.y), Math.max(MIN_Y, h - BUTTON_SIZE - PADDING)),
         };
       }
     }
@@ -77,7 +85,7 @@ export default function QuickChatWidget({ activePhone = null, onOpenInquiry, onN
         const h = window.innerHeight;
         return {
           x: Math.min(Math.max(PADDING, prev.x), Math.max(PADDING, w - BUTTON_SIZE - PADDING)),
-          y: Math.min(Math.max(PADDING, prev.y), Math.max(PADDING, h - BUTTON_SIZE - PADDING)),
+          y: Math.min(Math.max(MIN_Y, prev.y), Math.max(MIN_Y, h - BUTTON_SIZE - PADDING)),
         };
       });
     }
@@ -134,7 +142,7 @@ export default function QuickChatWidget({ activePhone = null, onOpenInquiry, onN
         const w = window.innerWidth;
         const h = window.innerHeight;
         const newX = Math.min(Math.max(PADDING, dragRef.current.startPosX + dx), w - BUTTON_SIZE - PADDING);
-        const newY = Math.min(Math.max(PADDING, dragRef.current.startPosY + dy), h - BUTTON_SIZE - PADDING);
+        const newY = Math.min(Math.max(MIN_Y, dragRef.current.startPosY + dy), h - BUTTON_SIZE - PADDING);
 
         const newPos = { x: newX, y: newY };
         dragRef.current.currentPos = newPos;

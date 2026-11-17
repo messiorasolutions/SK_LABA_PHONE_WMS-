@@ -55,7 +55,8 @@ const COLOR_PRESETS = [
 ];
 
 /**
- * Compresses an image file client-side into a high quality JPEG DataURL
+ * Compresses an image file client-side into a high quality JPEG DataURL.
+ * Preserves 100% of the original photo with proportional resizing (no cropping, no stretching, no distortion).
  */
 const compressImage = (file) => {
   return new Promise((resolve) => {
@@ -65,24 +66,24 @@ const compressImage = (file) => {
       const img = new Image();
       img.src = event.target.result;
       img.onload = () => {
-        // Standard uniform 1000x1000 square resolution for all smartphones
-        const TARGET_SIZE = 1000;
+        // Proportional scaling within max dimension without cropping
+        const MAX_DIMENSION = 1200;
+        const maxSide = Math.max(img.width, img.height);
+        const scale = maxSide > MAX_DIMENSION ? MAX_DIMENSION / maxSide : 1;
+
+        const targetWidth = Math.max(1, Math.round(img.width * scale));
+        const targetHeight = Math.max(1, Math.round(img.height * scale));
+
         const canvas = document.createElement('canvas');
-        canvas.width = TARGET_SIZE;
-        canvas.height = TARGET_SIZE;
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
         const ctx = canvas.getContext('2d');
 
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
 
-        // Auto-scale and center the photo to fill the square frame evenly without letterboxing
-        const scale = Math.max(TARGET_SIZE / img.width, TARGET_SIZE / img.height);
-        const scaledWidth = img.width * scale;
-        const scaledHeight = img.height * scale;
-        const dx = (TARGET_SIZE - scaledWidth) / 2;
-        const dy = (TARGET_SIZE - scaledHeight) / 2;
-
-        ctx.drawImage(img, dx, dy, scaledWidth, scaledHeight);
+        // Draw the full image starting at (0, 0) - absolutely no cropping or offsets
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
         resolve(canvas.toDataURL('image/jpeg', 0.90));
       };
       img.onerror = () => resolve(event.target.result);

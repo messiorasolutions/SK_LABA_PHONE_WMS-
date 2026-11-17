@@ -405,7 +405,7 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
       <SellYourPhoneSection onNavigateToSellYourPhone={handleGoToSellYourPhone} />
 
       {activeOffers.length > 0 && (
-        <section id="deals" className="pt-12 sm:pt-16 pb-12 sm:pb-16 bg-black scroll-mt-20">
+        <section id="deals" className="pt-6 sm:pt-8 pb-12 sm:pb-16 bg-black scroll-mt-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
               <div>
@@ -445,7 +445,7 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
       )}
 
       {/* About Us Section */}
-      <section id="about" className="pt-10 sm:pt-16 pb-16 sm:pb-24 bg-black scroll-mt-20">
+      <section id="about" className="pt-2 sm:pt-4 pb-16 sm:pb-24 bg-black scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-center">
             {/* Left Side: About Image */}

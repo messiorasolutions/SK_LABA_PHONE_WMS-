@@ -26,6 +26,7 @@ import {
   Palette,
   CreditCard,
   RefreshCw,
+  BatteryCharging,
 } from 'lucide-react';
 import FormattedDescription from '../Common/FormattedDescription';
 import InstallmentPlanService from '../../services/installmentPlanService';
@@ -101,7 +102,7 @@ export default function PhoneModal({
   specifications = [],
 }) {
   const [currentStep, setCurrentStep] = useState(1);
-  const { rate: krwToLkrRate, loading: rateLoading, convertKrwToLkr, formatLkr } = useCurrencyConverter();
+  const { rate: krwToLkrRate, rateInfo, loading: rateLoading, refreshRate, convertKrwToLkr, formatLkr } = useCurrencyConverter();
 
   // Step 1: Basic Information
   const [name, setName] = useState('');
@@ -113,19 +114,18 @@ export default function PhoneModal({
   const [status, setStatus] = useState('PUBLISHED');
   const [isNewArrival, setIsNewArrival] = useState(false);
 
-  // Step 2: Storage & Colors
+  // Step 2: Phone Photos (Min 6, Max 12)
+  const [photos, setPhotos] = useState([]);
   const [selectedStorageIds, setSelectedStorageIds] = useState([]);
-  const [localStorages, setLocalStorages] = useState(storageOptions);
-  const [showAddStorageForm, setShowAddStorageForm] = useState(false);
-  const [newStorageName, setNewStorageName] = useState('');
-  const [newCapacityGb, setNewCapacityGb] = useState('');
-  const [creatingStorage, setCreatingStorage] = useState(false);
-  const [colors, setColors] = useState([]);
 
   // Step 3: Description, Specifications & Additional Options
   const [warranty, setWarranty] = useState('');
   const [description, setDescription] = useState('');
   const [descPreview, setDescPreview] = useState(false);
+  const [batteryHealth, setBatteryHealth] = useState('');
+  const [isGenuineBattery, setIsGenuineBattery] = useState(true);
+  const [isOriginalHousing, setIsOriginalHousing] = useState(true);
+  const [displaySize, setDisplaySize] = useState('');
   const descRef = useRef(null);
   const step3EnteredAtRef = useRef(0);
   const [installmentEnabled, setInstallmentEnabled] = useState(false);
@@ -133,26 +133,6 @@ export default function PhoneModal({
   const [selectedPlanIds, setSelectedPlanIds] = useState([]);
 
   const [submitError, setSubmitError] = useState('');
-
-  useEffect(() => {
-    const merged = [...(storageOptions || [])];
-    STORAGE_PRESETS.forEach((preset) => {
-      const exists = merged.some(
-        (s) => s.storage_name?.toLowerCase() === preset.name.toLowerCase()
-      );
-      if (!exists) {
-        merged.push({
-          storage_id: `preset_${preset.name}`,
-          storage_name: preset.name,
-          capacity_gb: preset.capacity_gb,
-          storage_type: 'Internal UFS',
-          is_active: true,
-        });
-      }
-    });
-    merged.sort((a, b) => Number(a.capacity_gb) - Number(b.capacity_gb));
-    setLocalStorages(merged);
-  }, [storageOptions]);
 
   const [loadingPlans, setLoadingPlans] = useState(false);
 
@@ -194,46 +174,36 @@ export default function PhoneModal({
       setIsNewArrival(Boolean(initial.is_new_arrival));
       setWarranty(initial.warranty || '');
       setDescription(initial.description || '');
+      setBatteryHealth(initial.battery_health !== undefined && initial.battery_health !== null ? String(initial.battery_health) : '');
+      setIsGenuineBattery(initial.is_genuine_battery !== undefined && initial.is_genuine_battery !== null ? Boolean(initial.is_genuine_battery) : true);
+      setIsOriginalHousing(initial.is_original_housing !== undefined && initial.is_original_housing !== null ? Boolean(initial.is_original_housing) : true);
+      setDisplaySize(initial.display_size || '');
 
-      // Parse colors & photos
-      let initialColors = [];
-      let rawColors = initial.colour_options;
-      if (typeof rawColors === 'string') {
+      // Parse phone photos (Min 6, Max 12)
+      let initialPhotos = [];
+      if (Array.isArray(initial.photos)) {
+        initialPhotos = initial.photos;
+      } else if (typeof initial.photos === 'string' && initial.photos.trim().startsWith('[')) {
         try {
-          rawColors = JSON.parse(rawColors);
+          initialPhotos = JSON.parse(initial.photos);
         } catch {
-          rawColors = rawColors.split(',').map((c) => c.trim()).filter(Boolean);
+          initialPhotos = [];
         }
       }
 
-      if (Array.isArray(rawColors) && rawColors.length > 0) {
-        initialColors = rawColors.map((c, i) => {
-          if (typeof c === 'string') {
-            return {
-              id: String(Date.now() + i),
-              name: c,
-              color_code: '#374151',
-              photos: i === 0 && Array.isArray(initial.photos) ? initial.photos.slice(0, 3) : [],
-            };
-          }
-          return {
-            id: String(Date.now() + i),
-            name: c.color_name || c.name || '',
-            color_code: c.color_code || c.color || c.hex || '#374151',
-            photos: Array.isArray(c.photos) ? c.photos.slice(0, 3) : [],
-          };
-        });
-      } else {
-        initialColors = [
-          {
-            id: '1',
-            name: 'Natural Titanium',
-            color_code: '#94A3B8',
-            photos: Array.isArray(initial.photos) ? initial.photos.slice(0, 3) : [],
-          },
-        ];
+      // If initial.photos is empty, fallback to photos stored in colour_options
+      if (initialPhotos.length === 0 && initial.colour_options) {
+        let rawColors = initial.colour_options;
+        if (typeof rawColors === 'string' && rawColors.trim().startsWith('[')) {
+          try {
+            rawColors = JSON.parse(rawColors);
+          } catch {}
+        }
+        if (Array.isArray(rawColors)) {
+          initialPhotos = rawColors.flatMap((c) => c.photos || []).filter(Boolean);
+        }
       }
-      setColors(initialColors);
+      setPhotos(Array.isArray(initialPhotos) ? initialPhotos.slice(0, 12) : []);
 
       setInstallmentEnabled(Boolean(initial.installment_enabled));
 
@@ -273,14 +243,11 @@ export default function PhoneModal({
       setIsNewArrival(false);
       setWarranty('');
       setDescription('');
-      setColors([
-        {
-          id: '1',
-          name: 'Natural Titanium',
-          color_code: '#94A3B8',
-          photos: [],
-        },
-      ]);
+      setBatteryHealth('');
+      setIsGenuineBattery(true);
+      setIsOriginalHousing(true);
+      setDisplaySize('');
+      setPhotos([]);
       setInstallmentEnabled(false);
       setSelectedPlanIds([]);
       setSelectedStorageIds(storageOptions.length > 0 ? [storageOptions[0].storage_id] : []);
@@ -358,114 +325,13 @@ export default function PhoneModal({
     }, 0);
   };
 
-  // Storage Handlers
-  const handleCreateStorage = async (nameVal, capacityVal) => {
-    const sName = (nameVal || newStorageName).trim();
-    const sCap = Number(capacityVal || newCapacityGb);
-    if (!sName || !sCap || sCap <= 0) {
-      alert('Please provide a valid Storage Name (e.g. 512GB) and Capacity in GB (e.g. 512).');
-      return;
-    }
-
-    const existing = localStorages.find((s) => s.storage_name.toLowerCase() === sName.toLowerCase());
-    if (existing) {
-      if (!selectedStorageIds.includes(existing.storage_id)) {
-        setSelectedStorageIds((prev) => [...prev, existing.storage_id]);
-      }
-      setShowAddStorageForm(false);
-      return;
-    }
-
-    setCreatingStorage(true);
-    try {
-      const res = await StorageService.createStorageOption({
-        storage_name: sName,
-        capacity_gb: sCap,
-        storage_type: 'Internal UFS',
-        is_active: true,
-      });
-      const created = res.data?.data || res.data;
-      if (created?.storage_id) {
-        setLocalStorages((prev) => [...prev, created]);
-        setSelectedStorageIds((prev) => [...prev, created.storage_id]);
-        setShowAddStorageForm(false);
-        setNewStorageName('');
-        setNewCapacityGb('');
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || err.message || 'Failed to create storage option');
-    } finally {
-      setCreatingStorage(false);
-    }
-  };
-
-  const handleToggleStorage = async (s) => {
-    const sId = s.storage_id;
-    if (String(sId).startsWith('preset_')) {
-      try {
-        const res = await StorageService.createStorageOption({
-          storage_name: s.storage_name,
-          capacity_gb: s.capacity_gb,
-          storage_type: 'Internal UFS',
-          is_active: true,
-        });
-        const created = res.data?.data || res.data;
-        if (created?.storage_id) {
-          setLocalStorages((prev) =>
-            prev.map((item) => (item.storage_id === sId ? created : item))
-          );
-          setSelectedStorageIds((prev) => [...prev.filter((id) => id !== sId), created.storage_id]);
-          return;
-        }
-      } catch (err) {
-        console.error('Failed to create storage option:', err);
-      }
-    }
-
-    setSelectedStorageIds((prev) =>
-      prev.includes(sId) ? prev.filter((id) => id !== sId) : [...prev, sId]
-    );
-  };
-
-  // Color & Photo Handlers
-  const handleAddColorSlot = (preset) => {
-    const newColor = {
-      id: String(Date.now() + Math.random()),
-      name: preset ? preset.name : '',
-      color_code: preset ? preset.color_code : '#3B82F6',
-      photos: [],
-    };
-    setColors((prev) => [...prev, newColor]);
-  };
-
-  const handleRemoveColorSlot = (id) => {
-    if (colors.length <= 1) {
-      setSubmitError('At least one color option is mandatory.');
-      return;
-    }
-    setColors((prev) => prev.filter((c) => c.id !== id));
-  };
-
-  const handleColorNameChange = (id, newName) => {
-    setColors((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, name: newName } : c))
-    );
-  };
-
-  const handleColorCodeChange = (id, newCode) => {
-    setColors((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, color_code: newCode } : c))
-    );
-  };
-
-  const handleUploadPhotos = async (colorId, files) => {
+  // Phone Photo Handlers (Min 6, Max 12)
+  const handleUploadPhotos = async (files) => {
     if (!files || files.length === 0) return;
-    const color = colors.find((c) => c.id === colorId);
-    if (!color) return;
 
-    const remainingSlots = 3 - (color.photos ? color.photos.length : 0);
+    const remainingSlots = 12 - photos.length;
     if (remainingSlots <= 0) {
-      alert('Maximum of 3 photos allowed for this color.');
+      alert('Maximum of 12 photos allowed for this phone.');
       return;
     }
 
@@ -476,27 +342,12 @@ export default function PhoneModal({
       if (dataUrl) compressedList.push(dataUrl);
     }
 
-    setColors((prev) =>
-      prev.map((c) => {
-        if (c.id === colorId) {
-          const updatedPhotos = [...(c.photos || []), ...compressedList].slice(0, 3);
-          return { ...c, photos: updatedPhotos };
-        }
-        return c;
-      })
-    );
+    setPhotos((prev) => [...prev, ...compressedList].slice(0, 12));
+    setSubmitError('');
   };
 
-  const handleRemovePhoto = (colorId, photoIdx) => {
-    setColors((prev) =>
-      prev.map((c) => {
-        if (c.id === colorId) {
-          const updatedPhotos = c.photos.filter((_, idx) => idx !== photoIdx);
-          return { ...c, photos: updatedPhotos };
-        }
-        return c;
-      })
-    );
+  const handleRemovePhoto = (photoIdx) => {
+    setPhotos((prev) => prev.filter((_, idx) => idx !== photoIdx));
   };
 
   // Step Validation & Navigation
@@ -518,29 +369,15 @@ export default function PhoneModal({
   };
 
   const validateStep2 = () => {
-    if (!selectedStorageIds || selectedStorageIds.length === 0) {
-      setSubmitError('At least one storage option is mandatory.');
+    if (!photos || photos.length < 6) {
+      setSubmitError(
+        `At least 6 photos are required (currently uploaded: ${photos?.length || 0}/12 — need ${6 - (photos?.length || 0)} more).`
+      );
       return false;
     }
-    if (!colors || colors.length === 0) {
-      setSubmitError('At least one color option is mandatory.');
+    if (photos.length > 12) {
+      setSubmitError('Maximum of 12 photos allowed.');
       return false;
-    }
-    for (const c of colors) {
-      if (!c.name.trim()) {
-        setSubmitError('Please enter a color name for all added colors.');
-        return false;
-      }
-      if (!c.photos || c.photos.length === 0) {
-        setSubmitError(
-          `At least 1 photo is mandatory for color "${c.name.trim()}". (You can upload up to 3 photos).`
-        );
-        return false;
-      }
-      if (c.photos.length > 3) {
-        setSubmitError(`Maximum of 3 photos allowed for color "${c.name.trim()}".`);
-        return false;
-      }
     }
     setSubmitError('');
     return true;
@@ -611,16 +448,6 @@ export default function PhoneModal({
       return;
     }
 
-    // Format colour_options and photos
-    const formattedColourOptions = colors.map((c) => ({
-      name: c.name.trim(),
-      color_name: c.name.trim(),
-      color_code: c.color_code || '#374151',
-      photos: c.photos.slice(0, 3),
-    }));
-
-    const allPhotos = colors.flatMap((c) => c.photos || []).filter(Boolean);
-
     const isPhoneInStock = availability === 'IN_STOCK' || Number(lowStockLevel) > 0;
     const finalAvailability = isPhoneInStock ? 'IN_STOCK' : (availability === 'COMING_SOON' ? 'COMING_SOON' : 'SOLD_OUT');
 
@@ -638,11 +465,15 @@ export default function PhoneModal({
       is_new_arrival: isNewArrival,
       warranty: warranty.trim(),
       description: description.trim(),
+      battery_health: batteryHealth.trim() || null,
+      is_genuine_battery: isGenuineBattery,
+      is_original_housing: isOriginalHousing,
+      display_size: displaySize.trim() || null,
       installment_enabled: installmentEnabled,
       installment_plan_ids: installmentEnabled ? selectedPlanIds : [],
-      storage_ids: selectedStorageIds,
-      colour_options: formattedColourOptions,
-      photos: allPhotos,
+      storage_ids: selectedStorageIds && selectedStorageIds.length > 0 ? selectedStorageIds : (storageOptions.length > 0 ? [storageOptions[0].storage_id] : []),
+      colour_options: [{ name: 'Standard', color_name: 'Standard', color_code: '#1E293B', photos }],
+      photos: photos,
     };
 
     const res = await onSubmit(payload);
@@ -675,7 +506,7 @@ export default function PhoneModal({
               </span>
               <span className="text-slate-300 dark:text-slate-600">•</span>
               <span className="text-slate-500 dark:text-slate-400">
-                {initial ? `SKLABA_Phone_${initial.phone_id}` : 'Add a new phone with color options & photos'}
+                {initial ? `SKLABA_Phone_${initial.phone_id}` : 'Add a new phone with 6 to 12 photos'}
               </span>
             </div>
           </div>
@@ -686,7 +517,7 @@ export default function PhoneModal({
           <div className="flex items-center justify-between">
             {[
               { step: 1, label: '1. Basic Details', desc: 'Model, Brand & Price' },
-              { step: 2, label: '2. Storage & Colors', desc: 'Capacities & Photos' },
+              { step: 2, label: '2. Phone Photos', desc: 'Upload 6 to 12 Photos' },
               { step: 3, label: '3. Description & Specs', desc: 'Overview & Financing' },
             ].map((s, idx) => {
               const isActive = currentStep === s.step;
@@ -843,15 +674,28 @@ export default function PhoneModal({
                         />
                       </div>
                       {price && Number(price) > 0 ? (
-                        <div className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                           <span>≈ {formatLkr(convertKrwToLkr(price))}</span>
-                          <span className="text-[10px] text-slate-400 font-normal">
-                            (1 KRW ≈ {Number(krwToLkrRate).toFixed(3)} LKR)
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
+                            (API: 1 KRW ≈ {Number(krwToLkrRate).toFixed(4)} LKR)
                           </span>
+                          <button
+                            type="button"
+                            onClick={refreshRate}
+                            disabled={rateLoading}
+                            title="Fetch latest live exchange rate from API"
+                            className="inline-flex items-center gap-0.5 text-[10px] text-sky-600 dark:text-sky-400 hover:underline cursor-pointer ml-1"
+                          >
+                            <RefreshCw className={`w-2.5 h-2.5 ${rateLoading ? 'animate-spin' : ''}`} />
+                            {rateLoading ? 'Updating...' : 'Live API'}
+                          </button>
                         </div>
                       ) : (
-                        <div className="mt-1 text-[10px] text-slate-400">
-                          Enter amount in South Korean Won (₩)
+                        <div className="mt-1 flex items-center justify-between text-[10px] text-slate-400">
+                          <span>Enter amount in South Korean Won (₩)</span>
+                          <span className="text-slate-500">
+                            Daily API Rate: 1 KRW ≈ {Number(krwToLkrRate).toFixed(4)} LKR
+                          </span>
                         </div>
                       )}
                     </div>
@@ -949,308 +793,94 @@ export default function PhoneModal({
               )}
 
               {/* ══════════════════════════════════════════════════════════ */}
-              {/* SECTION 2: STORAGE OPTIONS & COLORS & PHOTOS              */}
+              {/* SECTION 2: PHONE PHOTOS (MIN 6, MAX 12)                  */}
               {/* ══════════════════════════════════════════════════════════ */}
               {currentStep === 2 && (
                 <div className="space-y-4 animate-in fade-in duration-150">
-                  {/* Storage Options (Mandatory) */}
-                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 space-y-3 shadow-2xs">
-                    <div className="flex items-center justify-between">
+                  <div className="p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 space-y-4 shadow-2xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
                       <div>
-                        <h3 className="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
-                          <HardDrive className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
-                          <span>Storage Options</span>
+                        <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <ImageIcon className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                          <span>Phone Photos</span>
                           <span className="text-red-500">*</span>
                         </h3>
                         <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                          Select internal storage capacities for this model. (Mandatory)
+                          Upload 6 to 12 photos for this phone. (Minimum 6 photos, Maximum 12 photos)
                         </p>
                       </div>
+
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-medium text-rose-600 dark:text-rose-400">
-                          {selectedStorageIds.length} selected
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setShowAddStorageForm((prev) => !prev)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg shadow-2xs transition-colors cursor-pointer"
+                        {photos.length < 6 ? (
+                          <span className="text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-3 py-1 rounded-full border border-amber-200/60 dark:border-amber-900/60">
+                            Min 6 photos required ({photos.length}/12 added — need {6 - photos.length} more)
+                          </span>
+                        ) : photos.length >= 12 ? (
+                          <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1 rounded-full border border-emerald-200/60 dark:border-emerald-900/60">
+                            ✓ 12 of 12 photos added (Maximum reached)
+                          </span>
+                        ) : (
+                          <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1 rounded-full border border-emerald-200/60 dark:border-emerald-900/60">
+                            ✓ {photos.length} of 12 photos added (Ready)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Photo Previews + Upload Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 pt-1">
+                      {photos.map((photoUrl, pIdx) => (
+                        <div
+                          key={pIdx}
+                          className="relative aspect-square rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-1 flex items-center justify-center overflow-hidden group/photo shadow-2xs"
                         >
-                          <Plus className="w-3 h-3 text-slate-500" />
-                          <span>Add Storage</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Inline Custom Storage Creator */}
-                    {showAddStorageForm && (
-                      <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2.5 animate-in fade-in duration-150">
-                        <div className="text-xs font-semibold text-slate-900 dark:text-white">
-                          Create Custom Storage Option
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-1">
-                              Storage Name
-                            </label>
-                            <input
-                              type="text"
-                              value={newStorageName}
-                              onChange={(e) => setNewStorageName(e.target.value)}
-                              placeholder="e.g. 512GB"
-                              className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-800 dark:text-slate-100"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-1">
-                              Capacity (GB)
-                            </label>
-                            <input
-                              type="number"
-                              min="1"
-                              value={newCapacityGb}
-                              onChange={(e) => setNewCapacityGb(e.target.value)}
-                              placeholder="e.g. 512"
-                              className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-800 dark:text-slate-100"
-                            />
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-end gap-2 pt-1">
+                          <img
+                            src={photoUrl}
+                            alt={`Photo ${pIdx + 1}`}
+                            className="w-full h-full object-contain rounded-lg"
+                          />
                           <button
                             type="button"
-                            onClick={() => setShowAddStorageForm(false)}
-                            className="px-2.5 py-1 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                            onClick={() => handleRemovePhoto(pIdx)}
+                            className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md transition-all cursor-pointer opacity-90 hover:opacity-100 hover:scale-110"
+                            title="Delete photo"
                           >
-                            Cancel
+                            <X className="w-3.5 h-3.5 stroke-[2.5]" />
                           </button>
-                          <button
-                            type="button"
-                            disabled={creatingStorage}
-                            onClick={() => handleCreateStorage()}
-                            className="px-3.5 py-1.5 bg-gradient-to-r from-black via-neutral-900 to-rose-950 hover:to-rose-900 text-white border border-neutral-800 rounded-lg text-xs font-medium cursor-pointer transition-all disabled:opacity-50"
-                          >
-                            {creatingStorage ? 'Creating...' : 'Save & Select'}
-                          </button>
+                          <span className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 text-[10px] font-bold rounded-md bg-black/75 text-white backdrop-blur-xs">
+                            {pIdx === 0 ? '#1 Main' : `#${pIdx + 1}`}
+                          </span>
                         </div>
-                      </div>
-                    )}
+                      ))}
 
-                    {/* Storage Selection Tiles - Unified single row/grid */}
-                    {localStorages.length > 0 ? (
-                      <div className="flex flex-wrap gap-2 pt-1">
-                        {localStorages.map((s) => {
-                          const isSelected = selectedStorageIds.includes(s.storage_id);
-                          return (
-                            <button
-                              key={s.storage_id}
-                              type="button"
-                              onClick={() => handleToggleStorage(s)}
-                              className={`px-3.5 py-2 rounded-xl border text-xs font-medium flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
-                                isSelected
-                                  ? 'bg-gradient-to-r from-black via-neutral-900 to-rose-950 text-white border-neutral-800 shadow-2xs'
-                                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60'
-                              }`}
-                            >
-                              <span>{s.storage_name}</span>
-                              <span
-                                className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[10px] transition-colors ${
-                                  isSelected
-                                    ? 'bg-rose-500/30 text-rose-300 border border-rose-400/50'
-                                    : 'border border-slate-300 dark:border-slate-600'
-                                }`}
-                              >
-                                {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 p-2.5 rounded-lg border border-amber-200 dark:border-amber-900">
-                        No storage options found. Click "+ Add Storage" above to create one.
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Colors & Photos (Mandatory) */}
-                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 space-y-3 shadow-2xs">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
-                          <Palette className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
-                          <span>Colors & Photos</span>
-                          <span className="text-red-500">*</span>
-                        </h3>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                          Color selection is mandatory. Upload 1 to 3 photos for each color.
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleAddColorSlot(null)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg shadow-2xs transition-colors cursor-pointer"
-                      >
-                        <Plus className="w-3 h-3 text-slate-500" />
-                        <span>Add Color</span>
-                      </button>
-                    </div>
-
-                    {/* Quick color preset chips */}
-                    <div>
-                      <span className="block text-[11px] font-medium text-slate-400 dark:text-slate-500 mb-1.5">
-                        Quick color presets:
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {COLOR_PRESETS.map((preset) => {
-                          const alreadyAdded = colors.some(
-                            (c) => c.name.toLowerCase() === preset.name.toLowerCase()
-                          );
-                          return (
-                            <button
-                              key={preset.name}
-                              type="button"
-                              onClick={() => {
-                                if (!alreadyAdded) {
-                                  handleAddColorSlot(preset);
-                                }
-                              }}
-                              disabled={alreadyAdded}
-                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-all cursor-pointer ${alreadyAdded
-                                  ? 'opacity-40 bg-slate-100 dark:bg-slate-800 border-transparent cursor-not-allowed text-slate-400'
-                                  : 'bg-white dark:bg-slate-800 hover:border-rose-400/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
-                                }`}
-                            >
-                              <span
-                                className="w-2.5 h-2.5 rounded-full border border-black/20 shrink-0"
-                                style={{ backgroundColor: preset.color_code }}
-                              />
-                              <span>{preset.name}</span>
-                              {alreadyAdded && <Check className="w-3 h-3 text-emerald-500" />}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* List of Color Cards */}
-                    <div className="space-y-3 pt-1">
-                      {colors.map((color, colorIdx) => {
-                        const photoCount = color.photos ? color.photos.length : 0;
-                        const canUploadMore = photoCount < 3;
-
-                        return (
-                          <div
-                            key={color.id || colorIdx}
-                            className="p-3 bg-slate-50/70 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/80 shadow-2xs space-y-2.5"
-                          >
-                            {/* Color Header: Swatch + Color Name + Remove */}
-                            <div className="flex items-center gap-2">
-                              <div className="relative shrink-0" title="Click to choose color code">
-                                <input
-                                  type="color"
-                                  value={color.color_code || '#3B82F6'}
-                                  onChange={(e) => handleColorCodeChange(color.id, e.target.value)}
-                                  className="w-7 h-7 rounded-lg cursor-pointer border border-slate-300 dark:border-slate-600 p-0.5 bg-white dark:bg-slate-700"
-                                />
-                              </div>
-
-                              <div className="flex-1">
-                                <input
-                                  type="text"
-                                  value={color.name}
-                                  onChange={(e) => handleColorNameChange(color.id, e.target.value)}
-                                  placeholder="Color name, e.g. Natural Titanium"
-                                  required
-                                  className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-neutral-400 dark:focus:border-rose-900/50"
-                                />
-                              </div>
-
-                              {colors.length > 1 && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveColorSlot(color.id)}
-                                  className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors cursor-pointer shrink-0"
-                                  title="Remove this color"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                            </div>
-
-                            {/* Photo Upload Section for this Color */}
-                            <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                                  <span>Photos ({photoCount}/3)</span>
-                                  <span className="text-red-500">*</span>
-                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">
-                                    (Min 1 photo, Max 3 photos)
-                                  </span>
-                                </span>
-
-                                {photoCount === 0 ? (
-                                  <span className="text-[10px] font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-2.5 py-0.5 rounded-full border border-rose-200/50 dark:border-rose-900/40">
-                                    At least 1 photo required (Maximum 3)
-                                  </span>
-                                ) : (
-                                  <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-900/40">
-                                    ✓ {photoCount} of 3 photos added (Maximum 3)
-                                  </span>
-                                )}
-                              </div>
-
-                              {/* Photo Previews + Upload Slot Grid */}
-                              <div className="grid grid-cols-3 gap-2">
-                                {color.photos &&
-                                  color.photos.map((photoUrl, pIdx) => (
-                                    <div
-                                      key={pIdx}
-                                      className="relative aspect-square rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1 flex items-center justify-center overflow-hidden group/photo shadow-2xs"
-                                    >
-                                      <img
-                                        src={photoUrl}
-                                        alt={`${color.name} ${pIdx + 1}`}
-                                        className="w-full h-full object-contain"
-                                      />
-                                      <button
-                                        type="button"
-                                        onClick={() => handleRemovePhoto(color.id, pIdx)}
-                                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
-                                        title="Delete photo"
-                                      >
-                                        <X className="w-3 h-3" />
-                                      </button>
-                                      <span className="absolute bottom-1 left-1 px-1 py-0.2 text-[9px] font-bold rounded bg-black/60 text-white">
-                                        #{pIdx + 1}
-                                      </span>
-                                    </div>
-                                  ))}
-
-                                {canUploadMore && (
-                                  <label className="relative aspect-square rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-rose-500/50 dark:hover:border-rose-400/60 bg-white/70 dark:bg-slate-900/40 hover:bg-rose-50/20 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all text-slate-500 dark:text-slate-400 hover:text-rose-600">
-                                    <input
-                                      type="file"
-                                      accept="image/png,image/jpeg,image/webp"
-                                      multiple
-                                      onChange={(e) => {
-                                        handleUploadPhotos(color.id, e.target.files);
-                                        e.target.value = '';
-                                      }}
-                                      className="hidden"
-                                    />
-                                    <Upload className="w-4 h-4" />
-                                    <span className="text-[10px] font-medium text-center leading-tight">
-                                      Upload Photo
-                                    </span>
-                                    <span className="text-[9px] text-slate-400 dark:text-slate-500">
-                                      (Min 1, Max 3)
-                                    </span>
-                                  </label>
-                                )}
-                              </div>
-                            </div>
+                      {photos.length < 12 && (
+                        <label className="relative aspect-square rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-rose-500/60 dark:hover:border-rose-400/60 bg-slate-50/60 dark:bg-slate-900/40 hover:bg-rose-50/20 flex flex-col items-center justify-center gap-1.5 p-3 text-center cursor-pointer transition-all text-slate-500 dark:text-slate-400 hover:text-rose-600 shadow-2xs group">
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp"
+                            multiple
+                            onChange={(e) => {
+                              handleUploadPhotos(e.target.files);
+                              e.target.value = '';
+                            }}
+                            className="hidden"
+                          />
+                          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 group-hover:bg-rose-100 dark:group-hover:bg-rose-950/50 flex items-center justify-center transition-colors">
+                            <Upload className="w-4 h-4 text-slate-600 dark:text-slate-300 group-hover:text-rose-600 dark:group-hover:text-rose-400" />
                           </div>
-                        );
-                      })}
+                          <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-rose-600">
+                            Add Photos
+                          </span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                            ({12 - photos.length} slots left)
+                          </span>
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="pt-2 text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-t border-slate-100 dark:border-slate-800/80">
+                      <span>• First photo (#1) will be used as the primary storefront image.</span>
+                      <span>Requires minimum 6 photos • Maximum 12 photos</span>
                     </div>
                   </div>
                 </div>
@@ -1341,7 +971,83 @@ export default function PhoneModal({
                     </p>
                   </div>
 
-                  {/* 2. Warranty (Always visible in Section 3) */}
+                  {/* 2. Device Specifications & Hardware Condition (Battery, Housing, Display) */}
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 space-y-3.5 shadow-2xs">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <BatteryCharging className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                      <label className="text-xs font-semibold text-slate-900 dark:text-white">
+                        Battery, Housing &amp; Display Specifications
+                      </label>
+                    </div>
+
+                    {/* Battery Health Input + Genuine Battery Checkbox */}
+                    <div className="space-y-1.5">
+                      <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        Battery Health
+                      </label>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            value={batteryHealth}
+                            onChange={(e) => setBatteryHealth(e.target.value)}
+                            placeholder="e.g. 85% or 100%"
+                            className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/10 focus:border-neutral-400 dark:focus:border-rose-900/50"
+                          />
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer select-none py-2 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors shrink-0">
+                          <input
+                            type="checkbox"
+                            checked={isGenuineBattery}
+                            onChange={(e) => setIsGenuineBattery(e.target.checked)}
+                            className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 cursor-pointer"
+                          />
+                          <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                            Genuine Battery
+                          </span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">
+                            ({isGenuineBattery ? 'Genuine' : 'Battery Replaced'})
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Original Phone Housing Checkbox */}
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <label className="flex items-center justify-between p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors cursor-pointer select-none">
+                        <div>
+                          <span className="block text-xs font-medium text-slate-800 dark:text-slate-200">
+                            Original Phone Housing
+                          </span>
+                          <span className="block text-[11px] text-slate-400 dark:text-slate-500">
+                            Status: <strong className={isOriginalHousing ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}>{isOriginalHousing ? 'Original Phone Housing' : 'Housing Replaced'}</strong>
+                          </span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={isOriginalHousing}
+                          onChange={(e) => setIsOriginalHousing(e.target.checked)}
+                          className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 cursor-pointer"
+                        />
+                      </label>
+                    </div>
+
+                    {/* Display Size Input */}
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1.5">
+                      <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        Display Size
+                      </label>
+                      <input
+                        type="text"
+                        value={displaySize}
+                        onChange={(e) => setDisplaySize(e.target.value)}
+                        placeholder='e.g. 6.4" or 6.7 inches'
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/10 focus:border-neutral-400 dark:focus:border-rose-900/50"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 3. Warranty (Always visible in Section 3) */}
                   <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 space-y-1.5 shadow-2xs">
                     <div className="flex items-center gap-1.5 mb-1">
                       <Shield className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
@@ -1527,7 +1233,7 @@ export default function PhoneModal({
                   }}
                   className="inline-flex items-center gap-1.5 py-2.5 px-6 text-xs font-medium text-white bg-gradient-to-r from-black via-neutral-900 to-rose-950 hover:from-neutral-900 hover:to-rose-900 border border-neutral-800 hover:border-rose-900/60 rounded-xl shadow-xs transition-all cursor-pointer"
                 >
-                  <span>{currentStep === 1 ? 'Next: Storage & Colors' : 'Next: Specs & Options'}</span>
+                  <span>{currentStep === 1 ? 'Next: Phone Photos' : 'Next: Specs & Options'}</span>
                   <ChevronRight className="w-4 h-4 text-rose-300" />
                 </button>
               ) : (

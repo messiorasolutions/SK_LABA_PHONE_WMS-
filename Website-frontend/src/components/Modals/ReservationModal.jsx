@@ -15,8 +15,10 @@ import {
 } from 'lucide-react';
 import { createReservation } from '../../services/reservationService';
 import { getStorageOptions } from '../../services/storageService';
+import { useCurrencyConverter } from '../../hooks/useCurrencyConverter';
 
 export default function ReservationModal({ phone, onClose }) {
+  const { convertKrwToLkr, formatKrw, formatLkr } = useCurrencyConverter();
   const [formData, setFormData] = useState({
     customer_name: '',
     phone_number: '',
@@ -396,14 +398,14 @@ export default function ReservationModal({ phone, onClose }) {
         ...(Object.keys(selected_options).length > 0 ? { selected_options } : {}),
         ...(hasDeliveryDetails
           ? {
-              delivery_details: {
-                address: deliveryData.address.trim() || null,
-                city: deliveryData.city.trim() || null,
-                postal_code: deliveryData.postal_code.trim() || null,
-                delivery_phone: deliveryData.delivery_phone.trim() || null,
-                delivery_notes: deliveryData.delivery_notes.trim() || null,
-              },
-            }
+            delivery_details: {
+              address: deliveryData.address.trim() || null,
+              city: deliveryData.city.trim() || null,
+              postal_code: deliveryData.postal_code.trim() || null,
+              delivery_phone: deliveryData.delivery_phone.trim() || null,
+              delivery_notes: deliveryData.delivery_notes.trim() || null,
+            },
+          }
           : {}),
         preferred_collection_date: formData.preferred_collection_date,
         customer_note: cleanNote || undefined,
@@ -479,8 +481,13 @@ export default function ReservationModal({ phone, onClose }) {
                 {/* Price & Variant Specs */}
                 <div className="flex flex-wrap items-center gap-2 pt-0.5">
                   <span className="text-xs sm:text-sm font-bold text-white tracking-tight">
-                    ${Number(phone?.effectivePrice || phone?.price || 0).toLocaleString()}
+                    {formatKrw(phone?.effectivePrice || phone?.price || 0)}
                   </span>
+                  {(phone?.effectivePrice || phone?.price) > 0 && (
+                    <span className="text-[11px] text-white font-normal">
+                      ({formatLkr(convertKrwToLkr(phone?.effectivePrice || phone?.price || 0))})
+                    </span>
+                  )}
 
                   {(selectedColour || phone?.selectedStorage || displayedStorages[0]?.storage_name) && (
                     <div className="flex items-center gap-1.5 text-[11px]">

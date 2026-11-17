@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Clock,
   Trophy,
@@ -153,6 +154,7 @@ function formatDateTime(val) {
 }
 
 export default function GiveawaysPage({ onNavigateToHome }) {
+  const { t } = useTranslation();
   const { shopInfo, getWhatsAppUrl } = useShopInfo();
   const [giveaways, setGiveaways] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -488,20 +490,20 @@ export default function GiveawaysPage({ onNavigateToHome }) {
             className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer font-medium"
           >
             <Home className="w-3.5 h-3.5 text-theme-textSecondary" />
-            <span>Home</span>
+            <span>{t('nav.home')}</span>
           </button>
           <ChevronRight className="w-3.5 h-3.5 text-theme-borderLight" />
-          <span className="text-theme-accentLight font-semibold">Official Giveaways</span>
+          <span className="text-theme-accentLight font-semibold">{t('giveaways.title')}</span>
         </div>
 
         {/* ── Section Header (No left icon, clean text) ─────────────── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-6 border-b border-theme-border/60">
           <div>
             <h1 className="text-2xl sm:text-3xl font-normal tracking-normal text-white">
-              Official Giveaways & Prize Draws
+              {t('giveaways.title')}
             </h1>
             <p className="text-xs text-theme-textSecondary mt-1 max-w-2xl">
-              Enter official promotional giveaways hosted by SK Laba Phone for a chance to win authentic flagship smartphones and accessories direct from South Korea.
+              {t('giveaways.subtitle')}
             </p>
           </div>
 

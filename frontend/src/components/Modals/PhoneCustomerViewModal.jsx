@@ -217,7 +217,44 @@ export default function PhoneCustomerViewModal({
 
   const [selectedColorIdx, setSelectedColorIdx] = useState(0);
   const activeColor = parsedColors[selectedColorIdx] || parsedColors[0];
-  const photos = activeColor?.photos || generalPhotos || [];
+
+  // Collect ALL photos belonging to this phone (general photos, photos array, legacy color photos, main photo)
+  const allPhonePhotos = useMemo(() => {
+    const list = [];
+    const addUnique = (url) => {
+      if (url && typeof url === 'string' && !list.includes(url)) {
+        list.push(url);
+      }
+    };
+
+    if (Array.isArray(phone?.photos)) {
+      phone.photos.forEach(addUnique);
+    } else if (typeof phone?.photos === 'string' && phone.photos.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(phone.photos);
+        if (Array.isArray(parsed)) parsed.forEach(addUnique);
+      } catch (e) {}
+    }
+    if (Array.isArray(phone?.colour_options)) {
+      phone.colour_options.forEach((c) => {
+        if (Array.isArray(c?.photos)) c.photos.forEach(addUnique);
+      });
+    } else if (typeof phone?.colour_options === 'string' && phone.colour_options.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(phone.colour_options);
+        if (Array.isArray(parsed)) {
+          parsed.forEach((c) => {
+            if (Array.isArray(c?.photos)) c.photos.forEach(addUnique);
+          });
+        }
+      } catch (e) {}
+    }
+    if (phone?.main_photo) addUnique(phone.main_photo);
+    if (generalPhotos.length > 0) generalPhotos.forEach(addUnique);
+    return list;
+  }, [phone, generalPhotos]);
+
+  const photos = allPhonePhotos.length > 0 ? allPhonePhotos : (activeColor?.photos || generalPhotos || []);
 
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
 
@@ -426,31 +463,64 @@ export default function PhoneCustomerViewModal({
             <div className="flex flex-col gap-3">
               <div className="flex flex-col sm:flex-row gap-3.5 items-stretch">
                 
-                {/* Thumbnails */}
+                {/* Thumbnails (Left side of Main Image: Column 1 fills first with up to 6 images, then Column 2 fills with up to 12) */}
                 {photos.length > 1 && (
-                  <div className="flex sm:flex-col gap-2.5 shrink-0 overflow-x-auto sm:overflow-y-auto max-h-[440px] p-0.5 [scrollbar-width:none]">
-                    {photos.map((photoUrl, idx) => {
-                      const isPhotoSelected = activePhotoIdx === idx;
-                      return (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => setActivePhotoIdx(idx)}
-                          className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl p-1 shrink-0 transition-all cursor-pointer flex items-center justify-center overflow-hidden border ${
-                            isPhotoSelected
-                              ? 'border-rose-600 ring-2 ring-rose-500/20 bg-rose-50/40 dark:bg-rose-950/30 shadow-xs'
-                              : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
-                          }`}
-                          title={`View photo ${idx + 1}`}
-                        >
-                          <img
-                            src={photoUrl}
-                            alt={`${activeColor?.name} photo ${idx + 1}`}
-                            className="w-full h-full object-contain"
-                          />
-                        </button>
-                      );
-                    })}
+                  <div className="flex gap-2 shrink-0 overflow-x-auto sm:overflow-y-auto max-h-[380px] sm:max-h-[440px] p-0.5 [scrollbar-width:none]">
+                    {/* Column 1 (Photos 1 to 6) */}
+                    <div className="flex sm:flex-col gap-2 shrink-0">
+                      {photos.slice(0, 6).map((photoUrl, colIdx) => {
+                        const globalIdx = colIdx;
+                        const isPhotoSelected = activePhotoIdx === globalIdx;
+                        return (
+                          <button
+                            key={globalIdx}
+                            type="button"
+                            onClick={() => setActivePhotoIdx(globalIdx)}
+                            className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl p-1 shrink-0 transition-all cursor-pointer flex items-center justify-center overflow-hidden border ${
+                              isPhotoSelected
+                                ? 'border-rose-600 ring-2 ring-rose-500/20 bg-rose-50/40 dark:bg-rose-950/30 shadow-xs'
+                                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
+                            }`}
+                            title={`View photo ${globalIdx + 1}`}
+                          >
+                            <img
+                              src={photoUrl}
+                              alt={`${phone.name} photo ${globalIdx + 1}`}
+                              className="w-full h-full object-contain"
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Column 2 (Photos 7 to 12: only rendered if more than 6 photos exist) */}
+                    {photos.length > 6 && (
+                      <div className="flex sm:flex-col gap-2 shrink-0">
+                        {photos.slice(6, 12).map((photoUrl, colIdx) => {
+                          const globalIdx = colIdx + 6;
+                          const isPhotoSelected = activePhotoIdx === globalIdx;
+                          return (
+                            <button
+                              key={globalIdx}
+                              type="button"
+                              onClick={() => setActivePhotoIdx(globalIdx)}
+                              className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl p-1 shrink-0 transition-all cursor-pointer flex items-center justify-center overflow-hidden border ${
+                                isPhotoSelected
+                                  ? 'border-rose-600 ring-2 ring-rose-500/20 bg-rose-50/40 dark:bg-rose-950/30 shadow-xs'
+                                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
+                              }`}
+                              title={`View photo ${globalIdx + 1}`}
+                            >
+                              <img
+                                src={photoUrl}
+                                alt={`${phone.name} photo ${globalIdx + 1}`}
+                                className="w-full h-full object-contain"
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -506,26 +576,19 @@ export default function PhoneCustomerViewModal({
                   )}
                 </div>
               </div>
-
-              {/* Description & Overview Section */}
-              {phone.description && (
-                <div className="bg-white dark:bg-slate-850 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-xs mt-3">
-                  <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">
-                    Description &amp; Overview
-                  </h2>
-                  <FormattedDescription content={phone.description} className="text-slate-700 dark:text-slate-200 text-xs sm:text-sm leading-relaxed" />
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Right Column: Title, Pricing, Color, Storage, Stock & Installments */}
+          {/* Right Column: Title, Pricing, Storage, Stock & Installments */}
           <div className="lg:col-span-6 flex flex-col justify-start space-y-5">
             <div>
               {/* Title & Price on the same line */}
               <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 mb-4">
-                <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white leading-snug">
-                  {phone.name}
+                <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white leading-snug flex flex-wrap items-baseline gap-x-2.5">
+                  <span>{phone.name}</span>
+                  {selectedStorage && !phone.name?.toLowerCase().includes(selectedStorage.toLowerCase()) && (
+                    <span className="text-xl sm:text-2xl text-slate-400 dark:text-slate-500 font-normal">{selectedStorage}</span>
+                  )}
                 </h1>
                 <div className="flex items-baseline gap-3 ml-auto text-right">
                   <span className="text-2xl sm:text-3xl font-normal text-slate-900 dark:text-white tracking-tight">
@@ -545,72 +608,8 @@ export default function PhoneCustomerViewModal({
                 </p>
               )}
 
-              {/* Color Options */}
-              {parsedColors.length > 0 && (
-                <div className="mb-6">
-                  <div className="flex items-center gap-2.5 text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
-                    <span>Selected Color:</span>
-                    <span className="text-slate-900 dark:text-white font-semibold tracking-normal capitalize">{activeColor?.name}</span>
-                  </div>
-                  <div className="flex flex-wrap items-start gap-4 sm:gap-6">
-                    {parsedColors.map((c, idx) => {
-                      const isSelected = selectedColorIdx === idx;
-                      const firstPhoto = c.photos?.[0] || generalPhotos[idx] || generalPhotos[0] || '';
-                      const colorQty = typeof c.quantity === 'number' ? c.quantity : Number(phone.current_stock ?? phone.stock_quantity ?? 0);
-                      const isColorInStock = colorQty > 0;
-
-                      return (
-                        <div
-                          key={c.id || idx}
-                          onClick={() => handleSelectColor(idx)}
-                          className="flex flex-col items-center cursor-pointer group/colorOption w-20 sm:w-24 text-center"
-                        >
-                          <div
-                            className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl p-1 transition-all flex items-center justify-center border ${
-                              isSelected
-                                ? 'border-rose-600 ring-2 ring-rose-500/20 bg-rose-50/40 dark:bg-rose-950/30 shadow-xs scale-105'
-                                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
-                            }`}
-                          >
-                            {firstPhoto ? (
-                              <img
-                                src={firstPhoto}
-                                alt={c.name}
-                                className="w-full h-full object-contain rounded-xl"
-                              />
-                            ) : (
-                              <span
-                                className="w-full h-full rounded-xl"
-                                style={{ backgroundColor: c.color_code || '#4B5563' }}
-                              />
-                            )}
-                          </div>
-
-                          <span
-                            className={`text-xs mt-2 text-center font-medium w-full truncate leading-tight transition-colors ${
-                              isSelected
-                                ? 'text-rose-600 dark:text-rose-400 font-semibold'
-                                : 'text-slate-700 dark:text-slate-300 group-hover/colorOption:text-slate-900 dark:group-hover/colorOption:text-white'
-                            }`}
-                            title={c.name}
-                          >
-                            {c.name}
-                          </span>
-
-                          <span className={`text-[11px] font-normal mt-0.5 text-center leading-none w-full truncate ${
-                            isColorInStock ? 'text-slate-500 dark:text-slate-400' : 'text-amber-600 dark:text-amber-400'
-                          }`}>
-                            {isColorInStock ? `${colorQty} in stock` : 'Out of stock'}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Storage Options */}
-              {phoneStorageOptions.length > 0 && (
+              {/* Storage Options (only shown when multiple storage options exist, like website view) */}
+              {phoneStorageOptions.length > 1 && (
                 <div className="mb-6">
                   <div className="flex items-center gap-2.5 text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
                     <span>Selected Storage:</span>
@@ -638,6 +637,47 @@ export default function PhoneCustomerViewModal({
                 </div>
               )}
 
+              {/* Device Condition & Hardware Specs (Battery Health, Housing, Display Size) */}
+              {(phone.battery_health || phone.is_genuine_battery !== undefined || phone.is_original_housing !== undefined || phone.display_size) && (
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs mb-4">
+                  {/* Battery Health & Condition: Genuine Battery | 80% */}
+                  {(phone.battery_health || phone.is_genuine_battery !== undefined) && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 dark:text-slate-400">Battery:</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">
+                        {(() => {
+                          const status = phone.is_genuine_battery !== false ? 'Genuine Battery' : 'Battery Replaced';
+                          if (phone.battery_health) {
+                            const raw = String(phone.battery_health).trim();
+                            const val = raw.endsWith('%') ? raw : `${raw}%`;
+                            return `${status} | ${val}`;
+                          }
+                          return status;
+                        })()}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Original Phone Housing */}
+                  {phone.is_original_housing !== undefined && (
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+                      <span className="text-slate-500 dark:text-slate-400">Housing:</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">
+                        {phone.is_original_housing !== false ? 'Original Phone Housing' : 'Housing Replaced'}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Display Size under Housing */}
+                  {phone.display_size && (
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+                      <span className="text-slate-500 dark:text-slate-400">Display Size:</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">{phone.display_size}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Warranty */}
               {phone.warranty && (
                 <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -646,39 +686,6 @@ export default function PhoneCustomerViewModal({
                   <span className="font-medium text-slate-800 dark:text-slate-100">{phone.warranty}</span>
                 </div>
               )}
-
-              {/* Inventory Status Overview Box */}
-              <div className="bg-white dark:bg-slate-850 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-xs mb-5">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">
-                  Inventory & Catalog Status
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">Current Stock</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">
-                      {phone.current_stock ?? phone.stock_quantity ?? 0} units
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">Low Stock Alert</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">
-                      {phone.low_stock_level || 5} units
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">Availability</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">
-                      {phone.availability ? phone.availability.replace(/_/g, ' ') : 'In Stock'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">Status</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">
-                      {phone.status || 'Published'}
-                    </span>
-                  </div>
-                </div>
-              </div>
 
               {/* Available Instalment Plans */}
               {Boolean(phone.installment_enabled) && (
@@ -755,6 +762,16 @@ export default function PhoneCustomerViewModal({
                   Close
                 </button>
               </div>
+
+              {/* Description & Overview Section (placed directly under Edit This Phone button) */}
+              {phone.description && (
+                <div className="bg-white dark:bg-slate-850 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-xs mt-3">
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">
+                    Description &amp; Overview
+                  </h2>
+                  <FormattedDescription content={phone.description} className="text-slate-700 dark:text-slate-200 text-xs sm:text-sm leading-relaxed" />
+                </div>
+              )}
 
               {copiedLink && (
                 <p className="text-center text-xs text-emerald-600 dark:text-emerald-400 font-medium animate-in fade-in pt-1">

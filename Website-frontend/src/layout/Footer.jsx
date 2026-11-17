@@ -1,5 +1,6 @@
 import React from 'react';
 import { Phone, MapPin, Clock, Mail, ShieldCheck, MessageSquare } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useShopInfo } from '../context/ShopInfoContext';
 import whatsappIcon from '../assets/icons/whatsappicon.png';
 import facebookIcon from '../assets/icons/facebook.png';
@@ -12,6 +13,7 @@ const FOOTER_BTN_CLASS =
 const FOOTER_ICON_CLASS = "w-3.5 h-3.5 text-slate-300 group-hover:text-white transition-colors shrink-0";
 
 export default function Footer({ onOpenSell }) {
+  const { t } = useTranslation();
   const { shopInfo, getWhatsAppUrl } = useShopInfo();
 
   const handleWhatsApp = () => {
@@ -113,7 +115,7 @@ export default function Footer({ onOpenSell }) {
 
           <div>
             <h4 className="text-xs font-normal text-white uppercase tracking-wider mb-3">
-              Shop Categories
+              {t('footer.quickLinks')}
             </h4>
             <ul className="space-y-2 text-xs font-normal">
               <li>
@@ -150,7 +152,7 @@ export default function Footer({ onOpenSell }) {
 
           <div>
             <h4 className="text-xs font-normal text-white uppercase tracking-wider mb-3">
-              Shop Information
+              {t('footer.contact')}
             </h4>
             <div className="space-y-2 text-xs font-normal">
               <div className="flex items-start gap-2 text-theme-textMuted">
@@ -175,7 +177,7 @@ export default function Footer({ onOpenSell }) {
 
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-theme-textMuted font-normal">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-center sm:text-left">
-            <span>&copy; {new Date().getFullYear()} {shopInfo.name}. All rights reserved.</span>
+            <span>&copy; {new Date().getFullYear()} {shopInfo.name}. {t('footer.copyright')}</span>
             <span className="text-white/20 hidden sm:inline">•</span>
             <span className="text-slate-400">Develop by Messiora (PVT) LTD</span>
           </div>

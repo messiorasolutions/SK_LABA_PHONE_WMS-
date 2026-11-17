@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   Heart,
@@ -9,6 +9,8 @@ import {
   MessageCircle,
   PhoneCall,
   ArrowLeft,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import whatsappIcon from '../../assets/icons/whatsappicon.png';
 import { useFavoritesAndCompare } from '../../hooks/useFavoritesAndCompare';
@@ -18,6 +20,7 @@ import storageService from '../../services/storageService';
 import FormattedDescription from '../Common/FormattedDescription';
 import { resolveImageUrl } from '../../utils/imageHelper';
 import { useCurrencyConverter } from '../../hooks/useCurrencyConverter';
+import { useTranslation } from 'react-i18next';
 
 function SimilarPhoneCard({ simPhone, onSelectPhone }) {
   const { formatKrw } = useCurrencyConverter();
@@ -197,6 +200,7 @@ export default function PhoneDetailModal({
     }
   }, [initialPhone?.phone_id, initialPhone?.id]);
   const { shopInfo, getWhatsAppUrl } = useShopInfo();
+  const { t } = useTranslation();
   const { isFavorite, isInCompare, toggleFavorite, toggleCompare } = useFavoritesAndCompare();
   const { convertKrwToLkr, formatKrw, formatLkr } = useCurrencyConverter();
 
@@ -278,18 +282,63 @@ export default function PhoneDetailModal({
     typeof phone.initialColorIdx === 'number' ? phone.initialColorIdx : 0
   );
   const activeColor = parsedColors[selectedColorIdx] || parsedColors[0];
-  const photos = activeColor?.photos || [];
 
-  const [activePhotoIdx, setActivePhotoIdx] = useState(0);
+  // Collect ALL photos belonging to this phone (general photos, photos array, legacy color photos, main photo)
+  const allPhonePhotos = React.useMemo(() => {
+    const list = [];
+    const addUnique = (url) => {
+      if (url && typeof url === 'string' && !list.includes(url)) {
+        list.push(url);
+      }
+    };
+    if (Array.isArray(phone?.photos)) {
+      phone.photos.forEach(addUnique);
+    } else if (typeof phone?.photos === 'string' && phone.photos.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(phone.photos);
+        if (Array.isArray(parsed)) parsed.forEach(addUnique);
+      } catch (e) {}
+    }
+    if (Array.isArray(phone?.colour_options)) {
+      phone.colour_options.forEach((c) => {
+        if (Array.isArray(c?.photos)) c.photos.forEach(addUnique);
+      });
+    } else if (typeof phone?.colour_options === 'string' && phone.colour_options.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(phone.colour_options);
+        if (Array.isArray(parsed)) {
+          parsed.forEach((c) => {
+            if (Array.isArray(c?.photos)) c.photos.forEach(addUnique);
+          });
+        }
+      } catch (e) {}
+    }
+    if (phone?.main_photo) {
+      addUnique(phone.main_photo);
+    }
+    return list;
+  }, [phone]);
+
+  const photos = allPhonePhotos.length > 0 ? allPhonePhotos : generalPhotos;
+
+  const [activePhotoIdx, setActivePhotoIdx] = useState(
+    typeof phone.initialPhotoIdx === 'number'
+      ? phone.initialPhotoIdx
+      : (typeof phone.initialColorIdx === 'number' ? phone.initialColorIdx : 0)
+  );
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
-  // Reset to initial color and first photo when phone changes
+  // Reset to initial photo when phone changes
   useEffect(() => {
     setSelectedColorIdx(
       typeof phone.initialColorIdx === 'number' ? phone.initialColorIdx : 0
     );
-    setActivePhotoIdx(0);
-  }, [phoneId, phone.initialColorIdx]);
+    setActivePhotoIdx(
+      typeof phone.initialPhotoIdx === 'number'
+        ? phone.initialPhotoIdx
+        : (typeof phone.initialColorIdx === 'number' ? phone.initialColorIdx : 0)
+    );
+  }, [phoneId, phone.initialPhotoIdx, phone.initialColorIdx]);
 
   // Handle color change: updates color and loads that color's photos
   const handleSelectColor = (idx) => {
@@ -309,6 +358,195 @@ export default function PhoneDetailModal({
     e?.stopPropagation();
     if (photos.length <= 1) return;
     setActivePhotoIdx((prev) => (prev + 1) % photos.length);
+  };
+
+  // Mobile Touch Swipe Handling
+  const touchStartXRef = useRef(0);
+  const touchEndXRef = useRef(0);
+
+  const handleTouchStart = (e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    touchStartXRef.current = e.touches[0].clientX;
+    touchEndXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    touchEndXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchStartXRef.current - touchEndXRef.current;
+    const threshold = 40; // minimum swipe distance in px
+    if (diff > threshold) {
+      handleNextPhoto();
+    } else if (diff < -threshold) {
+      handlePrevPhoto();
+    }
+  };
+
+  // Lightbox Zoom & Pan State
+  const [zoomScale, setZoomScale] = useState(1);
+  const [panPos, setPanPos] = useState({ x: 0, y: 0 });
+  const isDraggingPanRef = useRef(false);
+  const panStartRef = useRef({ x: 0, y: 0 });
+  const bottomThumbnailsRef = useRef(null);
+
+  // Reset zoom and pan when photo changes or lightbox closes
+  useEffect(() => {
+    setZoomScale(1);
+    setPanPos({ x: 0, y: 0 });
+  }, [activePhotoIdx, isLightboxOpen]);
+
+  // Auto-scroll the active thumbnail to the center of the bottom carousel
+  useEffect(() => {
+    if (isLightboxOpen && bottomThumbnailsRef.current) {
+      const activeEl = bottomThumbnailsRef.current.children[activePhotoIdx];
+      if (activeEl) {
+        activeEl.scrollIntoView({
+          behavior: 'smooth',
+          inline: 'center',
+          block: 'nearest',
+        });
+      }
+    }
+  }, [activePhotoIdx, isLightboxOpen]);
+
+  const toggleZoom = (e) => {
+    e?.stopPropagation();
+    setZoomScale((prev) => {
+      if (prev === 1) return 2.2;
+      if (prev === 2.2) return 3.2;
+      return 1;
+    });
+    setPanPos({ x: 0, y: 0 });
+  };
+
+  const lightboxStageRef = useRef(null);
+
+  // Prevent browser viewport pinch-zooming the page while inside the lightbox
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    const originalTouchAction = document.body.style.touchAction;
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+
+    const stageEl = lightboxStageRef.current;
+    if (!stageEl) return;
+
+    const preventPageZoom = (e) => {
+      if (e.touches && e.touches.length > 1) {
+        // Prevent default browser viewport page-zoom
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    stageEl.addEventListener('touchstart', preventPageZoom, { passive: false });
+    stageEl.addEventListener('touchmove', preventPageZoom, { passive: false });
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.touchAction = originalTouchAction;
+      stageEl.removeEventListener('touchstart', preventPageZoom);
+      stageEl.removeEventListener('touchmove', preventPageZoom);
+    };
+  }, [isLightboxOpen]);
+
+  // Lightbox Touch Swipe & Pinch-to-Zoom Handling
+  const lightboxTouchStartRef = useRef({ x: 0, y: 0 });
+  const lightboxTouchEndRef = useRef({ x: 0, y: 0 });
+  const lastTapTimeRef = useRef(0);
+  const pinchStartDistRef = useRef(0);
+  const pinchStartScaleRef = useRef(1);
+
+  const handleLightboxTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      pinchStartDistRef.current = dist;
+      pinchStartScaleRef.current = zoomScale;
+      return;
+    }
+
+    if (e.touches.length === 1) {
+      const now = Date.now();
+      if (now - lastTapTimeRef.current < 300) {
+        toggleZoom();
+        lastTapTimeRef.current = 0;
+        return;
+      }
+      lastTapTimeRef.current = now;
+
+      lightboxTouchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+      lightboxTouchEndRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+
+      if (zoomScale > 1) {
+        isDraggingPanRef.current = true;
+        panStartRef.current = {
+          x: e.touches[0].clientX - panPos.x,
+          y: e.touches[0].clientY - panPos.y,
+        };
+      }
+    }
+  };
+
+  const handleLightboxTouchMove = (e) => {
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      if (pinchStartDistRef.current > 0) {
+        const factor = dist / pinchStartDistRef.current;
+        const newScale = Math.min(Math.max(pinchStartScaleRef.current * factor, 1), 4);
+        setZoomScale(newScale);
+      }
+      return;
+    }
+
+    if (e.touches.length === 1) {
+      lightboxTouchEndRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+
+      if (zoomScale > 1 && isDraggingPanRef.current) {
+        setPanPos({
+          x: e.touches[0].clientX - panStartRef.current.x,
+          y: e.touches[0].clientY - panStartRef.current.y,
+        });
+      }
+    }
+  };
+
+  const handleLightboxTouchEnd = () => {
+    pinchStartDistRef.current = 0;
+    isDraggingPanRef.current = false;
+
+    if (zoomScale === 1) {
+      const diffX = lightboxTouchStartRef.current.x - lightboxTouchEndRef.current.x;
+      const diffY = Math.abs(lightboxTouchStartRef.current.y - lightboxTouchEndRef.current.y);
+      const threshold = 40;
+      if (Math.abs(diffX) > threshold && diffY < 80) {
+        if (diffX > 0) {
+          handleNextPhoto();
+        } else {
+          handlePrevPhoto();
+        }
+      }
+    }
   };
 
   useEffect(() => {
@@ -373,6 +611,11 @@ export default function PhoneDetailModal({
     }
   }, [phoneStorageOptions]);
 
+  const reserveVariantLabel =
+    phoneStorageOptions.length > 1 && selectedStorage && selectedStorage !== 'Standard'
+      ? selectedStorage
+      : null;
+
   const [installmentsData, setInstallmentsData] = useState(null);
   const [loadingInstallments, setLoadingInstallments] = useState(false);
 
@@ -429,7 +672,7 @@ export default function PhoneDetailModal({
     const pageUrl = window.location.href;
     const colorStr = selectedColor && selectedColor !== 'Default' ? selectedColor : (activeColor?.name || '');
     const storageStr = selectedStorage && selectedStorage !== 'Standard' ? selectedStorage : (phoneStorageOptions[0]?.storage_name || '');
-    const priceStr = `${formatKrw(effectivePrice)} (≈ ${formatLkr(convertKrwToLkr(effectivePrice))})`;
+    const priceStr = `${formatKrw(effectivePrice)} (${formatLkr(convertKrwToLkr(effectivePrice))})`;
 
     const lines = [
       `*Hello! I am interested in this phone from your website:*`,
@@ -488,11 +731,11 @@ export default function PhoneDetailModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-black hover:bg-neutral-900 text-white text-xs font-normal transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm group"
+              className="inline-flex items-center gap-2 p-2 sm:px-4 sm:py-2 rounded-full border border-white/20 bg-black hover:bg-neutral-900 text-white text-xs font-normal transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm group"
               title="Back to Smartphones"
             >
               <ArrowLeft className="w-4 h-4 text-white group-hover:-translate-x-0.5 transition-transform" />
-              <span>{isMarketplace ? 'Back to Marketplace' : 'Back to Smartphones'}</span>
+              <span className="hidden sm:inline">{isMarketplace ? 'Back to Marketplace' : t('details.backToSmartphones')}</span>
             </button>
 
             <span className="text-white/30 hidden sm:inline">/</span>
@@ -530,40 +773,81 @@ export default function PhoneDetailModal({
           {/* Photo Gallery Column (Left: lg:col-span-6) */}
           <div className="lg:col-span-6 lg:col-start-1 lg:row-start-1 space-y-4">
             <div className="flex flex-col sm:flex-row gap-3.5 items-stretch">
-                {/* Thumbnails */}
+                {/* Thumbnails (Left side of Main Image: Column 1 fills first with up to 6 images, then Column 2 fills with up to 12) - Hidden on mobile */}
                 {photos.length > 1 && (
-                  <div className="flex sm:flex-col gap-2.5 shrink-0 overflow-x-auto sm:overflow-y-auto max-h-[480px] p-0.5 [scrollbar-width:none]">
-                    {photos.map((photoUrl, idx) => {
-                      const isPhotoSelected = activePhotoIdx === idx;
-                      return (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => setActivePhotoIdx(idx)}
-                          className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl p-[1px] shrink-0 transition-all duration-300 cursor-pointer flex items-center justify-center overflow-hidden ${isPhotoSelected
-                              ? 'bg-gradient-to-r from-red-600/75 via-blue-600/70 to-blue-700/80 shadow-md scale-105 ring-1 ring-white/10'
-                              : 'bg-white/15 hover:bg-gradient-to-r hover:from-red-600/50 hover:via-blue-600/50 hover:to-blue-700/60 opacity-70 hover:opacity-100 hover:scale-102'
+                  <div className="hidden sm:flex gap-2 shrink-0 overflow-x-auto sm:overflow-y-auto max-h-[380px] sm:max-h-[440px] p-0.5 [scrollbar-width:none]">
+                    {/* Column 1 (Photos 1 to 6) */}
+                    <div className="flex flex-col gap-2 shrink-0">
+                      {photos.slice(0, 6).map((photoUrl, colIdx) => {
+                        const globalIdx = colIdx;
+                        const isPhotoSelected = activePhotoIdx === globalIdx;
+                        return (
+                          <button
+                            key={globalIdx}
+                            type="button"
+                            onClick={() => setActivePhotoIdx(globalIdx)}
+                            className={`relative w-12 h-12 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-xl p-[1px] shrink-0 transition-all duration-300 cursor-pointer flex items-center justify-center overflow-hidden ${
+                              isPhotoSelected
+                                ? 'bg-gradient-to-r from-red-600/75 via-blue-600/70 to-blue-700/80 shadow-md scale-105 ring-1 ring-white/10'
+                                : 'bg-white/15 hover:bg-gradient-to-r hover:from-red-600/50 hover:via-blue-600/50 hover:to-blue-700/60 opacity-70 hover:opacity-100 hover:scale-102'
                             }`}
-                          title={`View photo ${idx + 1}`}
-                        >
-                          <div className="w-full h-full bg-neutral-950 rounded-[11px] p-1 flex items-center justify-center overflow-hidden">
-                            <img
-                              src={photoUrl}
-                              alt={`${activeColor?.name} photo ${idx + 1}`}
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
-                        </button>
-                      );
-                    })}
+                            title={`View photo ${globalIdx + 1}`}
+                          >
+                            <div className="w-full h-full bg-neutral-950 rounded-[10px] p-0.5 flex items-center justify-center overflow-hidden">
+                              <img
+                                src={resolveImageUrl(photoUrl)}
+                                alt={`${phone.name} photo ${globalIdx + 1}`}
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Column 2 (Photos 7 to 12: only rendered if more than 6 photos exist) */}
+                    {photos.length > 6 && (
+                      <div className="flex flex-col gap-2 shrink-0">
+                        {photos.slice(6, 12).map((photoUrl, colIdx) => {
+                          const globalIdx = colIdx + 6;
+                          const isPhotoSelected = activePhotoIdx === globalIdx;
+                          return (
+                            <button
+                              key={globalIdx}
+                              type="button"
+                              onClick={() => setActivePhotoIdx(globalIdx)}
+                              className={`relative w-12 h-12 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-xl p-[1px] shrink-0 transition-all duration-300 cursor-pointer flex items-center justify-center overflow-hidden ${
+                                isPhotoSelected
+                                  ? 'bg-gradient-to-r from-red-600/75 via-blue-600/70 to-blue-700/80 shadow-md scale-105 ring-1 ring-white/10'
+                                  : 'bg-white/15 hover:bg-gradient-to-r hover:from-red-600/50 hover:via-blue-600/50 hover:to-blue-700/60 opacity-70 hover:opacity-100 hover:scale-102'
+                              }`}
+                              title={`View photo ${globalIdx + 1}`}
+                            >
+                              <div className="w-full h-full bg-neutral-950 rounded-[10px] p-0.5 flex items-center justify-center overflow-hidden">
+                                <img
+                                  src={resolveImageUrl(photoUrl)}
+                                  alt={`${phone.name} photo ${globalIdx + 1}`}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {/* Main Image Box */}
-                <div className="relative aspect-[4/3] max-h-[360px] sm:max-h-[400px] flex-1 bg-neutral-950 rounded-2xl p-6 sm:p-8 flex items-center justify-center overflow-hidden group">
-                  {/* Swap Buttons (< 1 / 2 >) */}
+                <div
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  className="relative aspect-[4/3] max-h-[360px] sm:max-h-[400px] flex-1 bg-neutral-950 rounded-2xl p-6 sm:p-8 flex items-center justify-center overflow-hidden group select-none touch-pan-y"
+                >
+                  {/* Swap Buttons (< 1 / 6 >) - Hidden on mobile, visible on desktop */}
                   {photos.length > 1 && (
-                    <div className="absolute top-3.5 right-3.5 z-20 flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 select-none">
+                    <div className="hidden sm:flex absolute top-3.5 right-3.5 z-20 items-center gap-1.5 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 select-none">
                       <button
                         type="button"
                         onClick={handlePrevPhoto}
@@ -590,10 +874,35 @@ export default function PhoneDetailModal({
                     </div>
                   )}
 
+                  {/* Indicator Dots at bottom of image for mobile view */}
+                  {photos.length > 1 && (
+                    <div className="absolute bottom-3 left-0 right-0 z-20 flex sm:hidden items-center justify-center gap-1.5 pointer-events-auto">
+                      {photos.map((_, dotIdx) => {
+                        const isCurrent = activePhotoIdx === dotIdx;
+                        return (
+                          <button
+                            key={dotIdx}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActivePhotoIdx(dotIdx);
+                            }}
+                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                              isCurrent
+                                ? 'w-5 bg-white shadow-sm'
+                                : 'w-1.5 bg-white/30'
+                            }`}
+                            aria-label={`Go to photo ${dotIdx + 1}`}
+                          />
+                        );
+                      })}
+                    </div>
+                  )}
+
                   {photos[activePhotoIdx] ? (
                     <img
                       src={resolveImageUrl(photos[activePhotoIdx])}
-                      alt={`${phone.name} - ${activeColor?.name}`}
+                      alt={`${phone.name} photo ${activePhotoIdx + 1}`}
                       onClick={() => setIsLightboxOpen(true)}
                       className="max-h-[78%] max-w-[78%] object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)] transition-all duration-300 group-hover:scale-105 cursor-pointer"
                       title="Click to enlarge photo"
@@ -615,8 +924,8 @@ export default function PhoneDetailModal({
               </div>
           </div>
 
-          {/* Right Column: Title, Pricing, Color, Storage, Purchase, Installments */}
-          <div className="lg:col-span-6 lg:col-start-7 lg:row-start-1 lg:row-span-2 flex flex-col justify-start space-y-5">
+          {/* Right Column: Title, Pricing, Storage, Purchase, Quick Contact, Warranty & Description, Installments */}
+          <div className="lg:col-span-6 lg:col-start-7 flex flex-col justify-start space-y-5">
             <div>
               {/* Title & Price on the same line with same font size and wider spacing */}
               <div className="flex flex-wrap items-baseline gap-x-8 sm:gap-x-10 gap-y-2 mb-2">
@@ -638,8 +947,8 @@ export default function PhoneDetailModal({
                     )}
                   </div>
                   {effectivePrice > 0 && (
-                    <div className="text-sm sm:text-base text-emerald-400 font-medium tracking-tight mt-0.5">
-                      ≈ {formatLkr(convertKrwToLkr(effectivePrice))}
+                    <div className="text-sm sm:text-base text-white font-normal tracking-tight mt-0.5">
+                      {formatLkr(convertKrwToLkr(effectivePrice))}
                     </div>
                   )}
                 </div>
@@ -648,7 +957,7 @@ export default function PhoneDetailModal({
               {/* Stock Status under title in clean white letters (no highlighted color) */}
               {!isMarketplace && (
                 <div className="text-sm font-normal text-white mb-4 tracking-wide">
-                  {isVariantSoldOut ? 'Out of Stock' : 'In Stock'}
+                  {isVariantSoldOut ? t('details.outOfStock') : t('details.inStock')}
                 </div>
               )}
 
@@ -658,75 +967,12 @@ export default function PhoneDetailModal({
                 </p>
               )}
 
-              {/* Options: Colours */}
-              {parsedColors.length > 0 && (
+
+              {/* Options: Storage (only shown when multiple storage options exist) */}
+              {phoneStorageOptions.length > 1 && (
                 <div className="mb-8 sm:mb-9">
                   <div className="flex items-center gap-2.5 text-xs sm:text-sm font-normal uppercase tracking-wider text-slate-400 mb-4">
-                    <span>Selected Color:</span>
-                    <span className="text-white font-medium capitalize tracking-normal">{activeColor?.name}</span>
-                  </div>
-                  <div className="flex flex-wrap items-start gap-3 sm:gap-6 md:gap-8 pl-1 sm:pl-2">
-                    {parsedColors.map((c, idx) => {
-                      const isSelected = selectedColorIdx === idx;
-                      const firstPhoto = c.photos?.[0] || generalPhotos[idx] || generalPhotos[0] || '';
-                      const colorQty = typeof c.quantity === 'number' ? c.quantity : Number(phone?.current_stock ?? 0);
-                      const isColorInStock = colorQty > 0;
-
-                      return (
-                        <div
-                          key={c.id || idx}
-                          onClick={() => handleSelectColor(idx)}
-                          className="flex flex-col items-center cursor-pointer group/colorOption w-20 sm:w-24 md:w-28 text-center"
-                        >
-                          <div
-                            className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl p-[1px] transition-all duration-300 flex items-center justify-center ${isSelected
-                                ? 'bg-gradient-to-r from-red-600/75 via-blue-600/70 to-blue-700/80 shadow-md shadow-black/80 scale-105 ring-1 ring-white/10'
-                                : 'bg-white/15 hover:bg-gradient-to-r hover:from-red-600/50 hover:via-blue-600/50 hover:to-blue-700/60 opacity-80 hover:opacity-100 hover:scale-105'
-                              }`}
-                          >
-                            <div className="w-full h-full rounded-[15px] bg-black p-1 overflow-hidden flex items-center justify-center">
-                              {firstPhoto ? (
-                                <img
-                                  src={firstPhoto}
-                                  alt={c.name}
-                                  className="w-full h-full object-cover object-center rounded-xl"
-                                />
-                              ) : (
-                                <span
-                                  className="w-full h-full rounded-xl"
-                                  style={{ backgroundColor: c.color_code || '#4B5563' }}
-                                />
-                              )}
-                            </div>
-                          </div>
-
-                          <span
-                            className={`text-xs sm:text-[13px] mt-2.5 text-center font-normal w-full truncate leading-tight transition-colors ${isSelected
-                                ? 'text-white font-medium'
-                                : 'text-slate-300 group-hover/colorOption:text-white'
-                              }`}
-                            title={c.name}
-                          >
-                            {c.name}
-                          </span>
-
-                          {!isMarketplace && (
-                            <span className={`text-[11px] font-normal mt-1 text-center leading-none w-full truncate ${isColorInStock ? 'text-slate-400' : 'text-neutral-500'}`}>
-                              {isColorInStock ? 'In stock' : 'Out of stock'}
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Options: Storage */}
-              {phoneStorageOptions.length > 0 && (
-                <div className="mb-8 sm:mb-9">
-                  <div className="flex items-center gap-2.5 text-xs sm:text-sm font-normal uppercase tracking-wider text-slate-400 mb-4">
-                    <span>Selected Storage:</span>
+                    <span>{t('details.selectedStorage')}:</span>
                     <span className="text-white font-medium tracking-normal">{selectedStorage}</span>
                   </div>
                   <div className="flex flex-wrap items-start gap-3 sm:gap-6 md:gap-8 pl-1 sm:pl-2">
@@ -774,7 +1020,7 @@ export default function PhoneDetailModal({
 
                           {!isMarketplace && (
                             <span className={`text-[11px] font-normal mt-1.5 text-center leading-none w-full truncate ${isStorageInStock ? 'text-slate-400' : 'text-neutral-500'}`}>
-                              {isStorageInStock ? 'In stock' : 'Out of stock'}
+                              {isStorageInStock ? t('details.inStock') : t('details.outOfStock')}
                             </span>
                           )}
                         </div>
@@ -820,20 +1066,61 @@ export default function PhoneDetailModal({
                       })
                     }
                     className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-950/80 via-zinc-600/70 to-blue-950/80 hover:from-red-900/80 hover:via-zinc-500 hover:to-blue-900/80 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-black/50 group cursor-pointer"
-                    title={`Reserve (${selectedColor} · ${selectedStorage})`}
+                    title={reserveVariantLabel ? `${t('details.reserve')} (${reserveVariantLabel})` : t('details.reserve')}
                   >
                     <span className="w-full h-full py-3 px-4 rounded-full bg-black group-hover:bg-neutral-950 text-white font-normal text-xs sm:text-sm transition-colors text-center truncate flex items-center justify-center">
-                      <span className="truncate">Reserve ({selectedColor} · {selectedStorage})</span>
+                      <span className="truncate">{reserveVariantLabel ? `${t('details.reserve')} (${reserveVariantLabel})` : t('details.reserve')}</span>
                     </span>
                   </button>
                 )}
 
               </div>
 
+              {/* Device Condition & Hardware Specs (Battery Health, Housing, Display Size) */}
+              {(phone.battery_health || phone.is_genuine_battery !== undefined || phone.is_original_housing !== undefined || phone.display_size) && (
+                <div className="py-2.5 px-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-2 text-xs">
+                  {/* Battery Health & Condition: Genuine Battery | 80% */}
+                  {(phone.battery_health || phone.is_genuine_battery !== undefined) && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400 font-normal">Battery:</span>
+                      <span className="text-white font-medium">
+                        {(() => {
+                          const status = phone.is_genuine_battery !== false ? 'Genuine Battery' : 'Battery Replaced';
+                          if (phone.battery_health) {
+                            const raw = String(phone.battery_health).trim();
+                            const val = raw.endsWith('%') ? raw : `${raw}%`;
+                            return `${status} | ${val}`;
+                          }
+                          return status;
+                        })()}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Original Phone Housing */}
+                  {phone.is_original_housing !== undefined && (
+                    <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                      <span className="text-slate-400 font-normal">Housing:</span>
+                      <span className="text-white font-medium">
+                        {phone.is_original_housing !== false ? 'Original Phone Housing' : 'Housing Replaced'}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Display Size under Housing */}
+                  {phone.display_size && (
+                    <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                      <span className="text-slate-400 font-normal">Display Size:</span>
+                      <span className="text-white font-medium">{phone.display_size}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Quick Contact: WhatsApp, Call Shop */}
               <div className="flex items-center justify-between pt-1">
                 <span className="text-xs text-slate-300 uppercase tracking-wider font-normal">
-                  Quick Contact:
+                  {t('details.quickContact')}:
                 </span>
                 <div className="flex items-center gap-2.5">
                   <button
@@ -864,12 +1151,39 @@ export default function PhoneDetailModal({
                 </p>
               )}
 
+              {/* Warranty & Description Section (under Quick Contact) */}
+              {((!isMarketplace && phone.warranty) || phone.description || phone.condition_description) && (
+                <div className="bg-neutral-950 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3.5 mt-3">
+                  {!isMarketplace && phone.warranty && (
+                    <div className="flex items-center gap-2.5 text-xs sm:text-sm font-normal tracking-wide pb-3 border-b border-white/10">
+                      <span className="text-slate-400 uppercase tracking-wider text-xs">
+                        {t('details.warranty')}:
+                      </span>
+                      <span className="text-white font-medium">
+                        {phone.warranty}
+                      </span>
+                    </div>
+                  )}
+
+                  {(phone.description || phone.condition_description) && (
+                    <div>
+                      <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                        {isMarketplace ? "Seller's Description & Notes" : t('details.descriptionOverview')}
+                      </h2>
+                      <div className="text-slate-200 font-normal leading-relaxed text-xs sm:text-sm whitespace-pre-line">
+                        {phone.condition_description || phone.description}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Available Instalment Plans */}
               {Boolean(phone.installment_enabled) && (
                 <div className="bg-black rounded-2xl p-4 mt-4">
                   <div className="mb-2.5">
                     <h2 className="text-xs font-normal uppercase tracking-wider text-slate-300">
-                      Available Instalment Plans
+                      {t('details.installmentPlans')}
                     </h2>
                   </div>
 
@@ -912,33 +1226,6 @@ export default function PhoneDetailModal({
               )}
             </div>
           </div>
-
-          {/* Warranty & Description Section (under phone image) */}
-          {((!isMarketplace && phone.warranty) || phone.description || phone.condition_description) && (
-            <div className="lg:col-span-6 lg:col-start-1 lg:row-start-2 bg-neutral-950 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-4">
-              {!isMarketplace && phone.warranty && (
-                <div className="flex items-center gap-2.5 text-xs sm:text-sm font-normal tracking-wide pb-3 border-b border-white/10">
-                  <span className="text-slate-400 uppercase tracking-wider text-xs">
-                    Warranty:
-                  </span>
-                  <span className="text-white font-medium">
-                    {phone.warranty}
-                  </span>
-                </div>
-              )}
-
-              {(phone.description || phone.condition_description) && (
-                <div>
-                  <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
-                    {isMarketplace ? "Seller's Description & Notes" : "Description & Overview"}
-                  </h2>
-                  <div className="text-slate-200 font-normal leading-relaxed text-xs sm:text-sm whitespace-pre-line">
-                    {phone.condition_description || phone.description}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Similar Phones Section at the bottom */}
@@ -946,7 +1233,7 @@ export default function PhoneDetailModal({
           <div className="pt-10 mt-10 pb-12 sm:pb-16 border-t border-white/10">
             <div className="mb-5 sm:mb-6">
               <h2 className="text-sm sm:text-base font-normal uppercase tracking-wider text-white">
-                {isSoldOut ? 'Similar Available Phones' : 'Similar Phones'}
+                {isSoldOut ? 'Similar Available Phones' : t('details.similarSmartphones')}
               </h2>
             </div>
 
@@ -961,7 +1248,7 @@ export default function PhoneDetailModal({
             </div>
           </div>
         )}
-      {/* ENLARGED PHOTO VIEWER */}
+      {/* ENLARGED PHOTO VIEWER (LIGHTBOX) */}
       {isLightboxOpen && photos[activePhotoIdx] && (
         <div
           role="dialog"
@@ -970,89 +1257,112 @@ export default function PhoneDetailModal({
         >
           {/* Top Bar */}
           <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/10 bg-black/60 shrink-0 z-20">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-bold text-white">
-                {phone.name}
-              </span>
-              <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 font-bold">
-                {activePhotoIdx + 1} / {photos.length}
-              </span>
+            <span className="text-sm font-semibold text-white truncate max-w-[65%]">
+              {phone.name}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={toggleZoom}
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer flex items-center gap-1.5 text-xs"
+                title={zoomScale > 1 ? 'Reset Zoom' : 'Zoom In'}
+              >
+                {zoomScale > 1 ? <ZoomOut className="w-4 h-4" /> : <ZoomIn className="w-4 h-4" />}
+                <span className="font-mono text-[11px]">{Math.round(zoomScale * 100)}%</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsLightboxOpen(false)}
+                className="p-2 rounded-xl bg-white/10 hover:bg-rose-600 text-white transition-colors cursor-pointer"
+                title="Close (Esc)"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsLightboxOpen(false)}
-              className="p-2 rounded-xl bg-white/10 hover:bg-rose-600 text-white transition-colors cursor-pointer"
-              title="Close (Esc)"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
 
-          {/* Large Image Stage */}
+          {/* Large Image Stage (Swipable, Zoomable with zoom button or pinch) */}
           <div
-            className="relative flex-1 flex items-center justify-center overflow-auto p-4"
-            onClick={() => setIsLightboxOpen(false)}
+            ref={lightboxStageRef}
+            className="relative flex-1 w-full flex items-center justify-center overflow-hidden p-2 sm:p-4 touch-none select-none overscroll-none"
+            onTouchStart={handleLightboxTouchStart}
+            onTouchMove={handleLightboxTouchMove}
+            onTouchEnd={handleLightboxTouchEnd}
           >
-            <img
-              src={resolveImageUrl(photos[activePhotoIdx])}
-              alt={`${phone.name} enlarged`}
-              onClick={(e) => e.stopPropagation()}
-              className="max-w-[90vw] max-h-[80vh] object-contain drop-shadow-2xl rounded-xl transition-transform duration-200"
-            />
+            <div
+              className="relative flex items-center justify-center transition-transform duration-200 ease-out"
+              style={{
+                transform: `translate(${panPos.x}px, ${panPos.y}px) scale(${zoomScale})`,
+                transformOrigin: 'center center',
+              }}
+            >
+              <img
+                src={resolveImageUrl(photos[activePhotoIdx])}
+                alt={`${phone.name} enlarged`}
+                className="w-auto h-auto max-w-[88vw] max-h-[62vh] sm:max-h-[72vh] object-contain drop-shadow-2xl rounded-2xl select-none"
+                draggable={false}
+              />
+            </div>
 
-            {/* Prev / Next Buttons */}
-            {photos.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePrevPhoto();
-                  }}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/70 hover:bg-black border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-xl hover:scale-105"
-                  title="Previous Photo (Left Arrow)"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNextPhoto();
-                  }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/70 hover:bg-black border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-xl hover:scale-105"
-                  title="Next Photo (Right Arrow)"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </>
+            {/* Floating Zoom Indicator Pill (shown only when zoomed in) */}
+            {zoomScale > 1 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setZoomScale(1);
+                  setPanPos({ x: 0, y: 0 });
+                }}
+                className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1 rounded-full bg-black/85 backdrop-blur-md border border-white/20 text-white text-xs font-mono select-none flex items-center gap-1.5 shadow-lg cursor-pointer hover:bg-black"
+                title="Tap to reset zoom"
+              >
+                <span>{Math.round(zoomScale * 100)}%</span>
+                <span className="text-[10px] text-slate-300">• Tap to reset</span>
+              </button>
             )}
           </div>
 
-          {/* Bottom Thumbnails */}
+          {/* Bottom Thumbnails Carousel (5-image perspective view) */}
           {photos.length > 1 && (
-            <div className="px-6 py-3 border-t border-white/10 bg-black/60 shrink-0 z-20 flex items-center justify-center gap-2 overflow-x-auto">
-              {photos.map((photoUrl, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActivePhotoIdx(idx);
-                  }}
-                  className={`relative w-16 h-16 rounded-xl overflow-hidden border-2 shrink-0 transition-all cursor-pointer ${
-                    activePhotoIdx === idx
-                      ? 'border-sky-500 scale-105 shadow-md ring-2 ring-sky-500/40'
-                      : 'border-transparent opacity-50 hover:opacity-100'
-                  }`}
-                >
-                  <img
-                    src={resolveImageUrl(photoUrl)}
-                    alt={`Thumb ${idx + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
+            <div className="relative py-3 border-t border-white/10 bg-black/80 shrink-0 z-20 overflow-hidden">
+              <div
+                ref={bottomThumbnailsRef}
+                className="flex items-center justify-center gap-2 sm:gap-3 overflow-x-auto px-4 py-2 [scrollbar-width:none] scroll-smooth"
+              >
+                {photos.map((photoUrl, idx) => {
+                  const dist = Math.abs(idx - activePhotoIdx);
+                  // Dynamic perspective sizing and transparency: 5 images clearly visible
+                  let sizeClasses = 'w-8 h-8 sm:w-9 sm:h-9 scale-75 opacity-20 border-transparent';
+                  if (dist === 0) {
+                    // Center image: biggest, full opacity, highlighted
+                    sizeClasses = 'w-14 h-14 sm:w-16 sm:h-16 scale-105 sm:scale-110 opacity-100 border-2 border-white ring-2 ring-white/50 shadow-2xl z-30';
+                  } else if (dist === 1) {
+                    // Immediate 2 images (left and right): slightly smaller, 80% opacity
+                    sizeClasses = 'w-11 h-11 sm:w-13 sm:h-13 scale-95 sm:scale-100 opacity-80 border border-white/40 shadow-lg z-20';
+                  } else if (dist === 2) {
+                    // Outer 2 images (left and right): smaller, 40% opacity (transparency)
+                    sizeClasses = 'w-9 h-9 sm:w-10 sm:h-10 scale-85 opacity-40 border border-white/20 z-10';
+                  }
+
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActivePhotoIdx(idx);
+                      }}
+                      className={`relative rounded-xl overflow-hidden shrink-0 transition-all duration-300 cursor-pointer flex items-center justify-center bg-neutral-900 ${sizeClasses}`}
+                      title={`Photo ${idx + 1}`}
+                    >
+                      <img
+                        src={resolveImageUrl(photoUrl)}
+                        alt={`Photo ${idx + 1}`}
+                        className="w-full h-full object-cover pointer-events-none"
+                      />
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

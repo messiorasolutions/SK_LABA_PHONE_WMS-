@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShieldCheck, Truck, CreditCard, Headphones } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { TRUST_FEATURES } from '../constants/siteConfig';
 
 const ICON_COMPONENTS = {
@@ -10,6 +11,38 @@ const ICON_COMPONENTS = {
 };
 
 export default function TrustBadges() {
+  const { t } = useTranslation();
+
+  const getFeatureTitle = (id, fallback) => {
+    switch (id) {
+      case 'original':
+        return t('hero.originalTitle');
+      case 'delivery':
+        return t('hero.deliveryTitle');
+      case 'payments':
+        return t('hero.paymentsTitle');
+      case 'support':
+        return t('hero.supportTitle');
+      default:
+        return fallback;
+    }
+  };
+
+  const getFeatureSubtitle = (id, fallback) => {
+    switch (id) {
+      case 'original':
+        return t('hero.originalDesc');
+      case 'delivery':
+        return t('hero.deliveryDesc');
+      case 'payments':
+        return t('hero.paymentsDesc');
+      case 'support':
+        return t('hero.supportDesc');
+      default:
+        return fallback;
+    }
+  };
+
   return (
     <section className="relative z-20 w-full bg-theme-bg py-5 sm:py-7 border-y border-white/[0.04]">
       <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
@@ -28,10 +61,10 @@ export default function TrustBadges() {
 
                 <div className="min-w-0 flex-1">
                   <h4 className="text-[11px] sm:text-xs md:text-sm font-semibold text-theme-textPrimary leading-tight truncate">
-                    {feature.title}
+                    {getFeatureTitle(feature.id, feature.title)}
                   </h4>
                   <p className="text-[10px] sm:text-[11px] text-theme-textSecondary mt-0.5 font-normal line-clamp-1 sm:line-clamp-2 leading-tight">
-                    {feature.subtitle}
+                    {getFeatureSubtitle(feature.id, feature.subtitle)}
                   </p>
                 </div>
               </div>

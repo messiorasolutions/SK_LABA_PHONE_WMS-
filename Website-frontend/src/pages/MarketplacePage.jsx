@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import {
   Home,
   ChevronRight,
@@ -101,6 +102,7 @@ function normalizeMarketplacePhone(p) {
 }
 
 export default function MarketplacePage({ onNavigateToHome }) {
+  const { t } = useTranslation();
   // Global search from Navbar
   const globalSearch = useSelector((state) => state.hero?.searchQuery || '');
 
@@ -370,20 +372,20 @@ export default function MarketplacePage({ onNavigateToHome }) {
             className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer font-medium"
           >
             <Home className="w-3.5 h-3.5 text-theme-textSecondary" />
-            <span>Home</span>
+            <span>{t('nav.home')}</span>
           </button>
           <ChevronRight className="w-3.5 h-3.5 text-theme-borderLight" />
-          <span className="text-theme-accentLight font-semibold">Marketplace</span>
+          <span className="text-theme-accentLight font-semibold">{t('nav.marketplace')}</span>
         </div>
 
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-6 border-b border-theme-border/60">
           <div>
             <h1 className="text-2xl sm:text-3xl font-normal tracking-normal text-white flex items-center gap-3">
-              <span>SK LABA PHONE Marketplace</span>
+              <span>{t('marketplace.title')}</span>
             </h1>
             <p className="text-xs text-theme-textSecondary mt-1 max-w-2xl font-normal leading-relaxed">
-              Browse verified pre-owned & customer-listed smartphones, authentic Korean imports, and verified quality devices.
+              {t('marketplace.subtitle')}
             </p>
           </div>
 
@@ -396,7 +398,7 @@ export default function MarketplacePage({ onNavigateToHome }) {
             >
               <span className="inline-flex items-center gap-2 py-2 px-4 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
                 <Tag className="w-3.5 h-3.5 text-sky-400" />
-                <span>Sell Your Phone</span>
+                <span>{t('sellYourPhone.btn')}</span>
               </span>
             </button>
           </div>
@@ -406,8 +408,7 @@ export default function MarketplacePage({ onNavigateToHome }) {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
             <p className="text-xs text-theme-textSecondary font-normal">
-              Showing <strong className="text-white font-medium">{filteredPhones.length}</strong> smartphone
-              {filteredPhones.length === 1 ? '' : 's'}
+              {t('smartphones.showing')} <strong className="text-white font-medium">{filteredPhones.length}</strong> {t('smartphones.smartphonesCount')}
               {selectedBrand !== 'ALL' && (
                 <span> in {selectedBrand}</span>
               )}
@@ -419,7 +420,7 @@ export default function MarketplacePage({ onNavigateToHome }) {
                 onClick={resetFilters}
                 className="text-xs text-sky-400 hover:underline ml-2 cursor-pointer font-normal"
               >
-                Clear all
+                {t('smartphones.clearFilters')}
               </button>
             )}
           </div>
@@ -433,7 +434,7 @@ export default function MarketplacePage({ onNavigateToHome }) {
               className="px-4 py-2 rounded-full border border-theme-border hover:border-white/25 bg-theme-surface/70 hover:bg-white/[0.04] text-white text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-sm"
             >
               <SlidersHorizontal className="w-3.5 h-3.5 text-theme-textSecondary" />
-              <span>Filters</span>
+              <span>{t('smartphones.filters')}</span>
               {activeFilterCount > 0 && (
                 <span className="w-4 h-4 rounded-full bg-white text-[#0A0F1E] text-[10px] font-bold flex items-center justify-center">
                   {activeFilterCount}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
-import sellPhoneVideo from '../assets/images/sell-your-phone.mp4';
+import sellPhoneVideo from '../assets/images/v1.mp4';
 import sellPhonePoster from '../assets/images/sell-your-phone-poster.webp';
 
 /**
@@ -12,6 +12,8 @@ import sellPhonePoster from '../assets/images/sell-your-phone-poster.webp';
  * 3. Video visual container (unobstructed, naturally placed below CTA with 4-way feathering)
  * 4. Intentional bottom separation before Current Special Offers
  */
+const VIDEO_START_TIME = 1; // Start playback at 0:00:01
+
 export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
   const containerRef = useRef(null);
   const videoRef = useRef(null);
@@ -85,6 +87,10 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
     const video = videoRef.current;
     if (!video) return;
 
+    if (video.currentTime < VIDEO_START_TIME) {
+      video.currentTime = VIDEO_START_TIME;
+    }
+
     const playPromise = video.play();
     if (playPromise !== undefined) {
       playPromise.catch(() => {
@@ -97,11 +103,11 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
     <section
       ref={containerRef}
       aria-labelledby="sell-phone-heading"
-      className="relative w-full overflow-hidden select-none bg-gradient-to-b from-[#050914] via-[#050914] to-black pt-12 sm:pt-16 md:pt-20 pb-12 sm:pb-16 md:pb-20"
+      className="relative w-full overflow-hidden select-none bg-gradient-to-b from-[#050914] via-[#050914] to-black pt-12 sm:pt-16 md:pt-20 pb-0"
     >
       {/* Background ambient lighting/glows - matching SK LABA PHONE brand red & blue */}
       <div
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[600px] md:w-[900px] h-[300px] sm:h-[450px] bg-gradient-to-r from-red-600/10 via-blue-600/10 to-transparent rounded-full blur-3xl pointer-events-none"
+        className="absolute top-20 sm:top-28 left-1/2 -translate-x-1/2 w-[320px] sm:w-[600px] md:w-[900px] h-[250px] sm:h-[350px] bg-gradient-to-r from-red-600/10 via-blue-600/10 to-transparent rounded-full blur-3xl pointer-events-none"
         aria-hidden="true"
       />
 
@@ -114,7 +120,7 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
           Sell Your Phone.
         </h2>
 
-        <p className="max-w-xl mx-auto text-xs sm:text-sm text-slate-300 font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] px-2">
+        <p className="max-w-3xl sm:max-w-4xl md:max-w-none mx-auto text-xs sm:text-sm text-slate-300 font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] px-2 md:whitespace-nowrap">
           Turn your old smartphone into cash. List your phone with SK LABA PHONE and connect with genuine buyers.
         </p>
 
@@ -133,24 +139,22 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
         </div>
       </div>
 
-      {/* 2. Video Visual Area in Normal Flow (Completely unobstructed, naturally placed below CTA with 4-way feathering) */}
+      {/* 2. Video Visual Area in Normal Flow (Completely unobstructed, naturally placed below CTA with smooth mask feathering) */}
       <div className="relative w-full max-w-[1920px] mx-auto px-2 sm:px-4 md:px-6">
-        <div className="relative w-full aspect-video max-h-[760px] flex items-center justify-center overflow-hidden pointer-events-none select-none bg-black/40">
+        <div
+          className="relative w-full aspect-video max-h-[760px] flex items-center justify-center overflow-hidden pointer-events-none select-none"
+          style={{
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 140px, black calc(100% - 50px), transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 140px, black calc(100% - 50px), transparent 100%)',
+          }}
+        >
           {/* Seamless 4-Way Edge Feathering - softly dissolves the video into the surrounding dark theme */}
           <div
-            className="absolute inset-x-0 top-0 h-16 sm:h-24 md:h-32 bg-gradient-to-b from-[#050914] via-[#050914]/80 to-transparent pointer-events-none z-10"
+            className="absolute inset-x-0 top-0 h-32 sm:h-44 md:h-56 bg-gradient-to-b from-[#050914] via-[#050914]/50 to-transparent pointer-events-none z-10"
             aria-hidden="true"
           />
           <div
-            className="absolute inset-x-0 bottom-0 h-20 sm:h-32 md:h-44 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-10"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute inset-y-0 left-0 w-8 sm:w-20 md:w-32 bg-gradient-to-r from-[#050914] via-[#050914]/70 to-transparent pointer-events-none z-10"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute inset-y-0 right-0 w-8 sm:w-20 md:w-32 bg-gradient-to-l from-[#050914] via-[#050914]/70 to-transparent pointer-events-none z-10"
+            className="absolute inset-x-0 bottom-0 h-8 sm:h-12 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-10"
             aria-hidden="true"
           />
 
@@ -161,7 +165,7 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
             aria-hidden="true"
             loading="lazy"
             decoding="async"
-            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ease-out z-0 ${
+            className={`absolute inset-0 w-full h-full object-cover object-top origin-top scale-[1.07] transition-opacity duration-700 ease-out z-0 ${
               isVideoLoaded && !prefersReducedMotion ? 'opacity-0' : 'opacity-100'
             }`}
           />
@@ -170,19 +174,44 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
           {shouldLoadVideo && !prefersReducedMotion && !videoError && (
             <video
               ref={videoRef}
-              src={sellPhoneVideo}
+              src={`${sellPhoneVideo}#t=${VIDEO_START_TIME}`}
               poster={sellPhonePoster}
               autoPlay
               muted
-              loop
               playsInline
               preload="metadata"
-              onCanPlay={() => setIsVideoLoaded(true)}
-              onPlaying={() => setIsVideoLoaded(true)}
+              onLoadedMetadata={() => {
+                if (videoRef.current && videoRef.current.currentTime < VIDEO_START_TIME) {
+                  videoRef.current.currentTime = VIDEO_START_TIME;
+                }
+              }}
+              onCanPlay={() => {
+                if (videoRef.current && videoRef.current.currentTime < VIDEO_START_TIME) {
+                  videoRef.current.currentTime = VIDEO_START_TIME;
+                }
+                setIsVideoLoaded(true);
+              }}
+              onPlaying={() => {
+                if (videoRef.current && videoRef.current.currentTime < VIDEO_START_TIME - 0.2) {
+                  videoRef.current.currentTime = VIDEO_START_TIME;
+                }
+                setIsVideoLoaded(true);
+              }}
+              onTimeUpdate={() => {
+                if (videoRef.current && videoRef.current.currentTime < VIDEO_START_TIME - 0.2) {
+                  videoRef.current.currentTime = VIDEO_START_TIME;
+                }
+              }}
+              onEnded={() => {
+                if (videoRef.current) {
+                  videoRef.current.currentTime = VIDEO_START_TIME;
+                  videoRef.current.play().catch(() => {});
+                }
+              }}
               onError={() => setVideoError(true)}
               aria-hidden="true"
               tabIndex={-1}
-              className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ease-out z-0 ${
+              className={`absolute inset-0 w-full h-full object-cover object-top origin-top scale-[1.07] transition-opacity duration-700 ease-out z-0 ${
                 isVideoLoaded ? 'opacity-100' : 'opacity-0'
               }`}
             />

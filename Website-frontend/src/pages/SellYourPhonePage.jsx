@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   ChevronDown,
@@ -9,6 +10,7 @@ import {
 import { getSellerTerms } from '../services/marketplaceService';
 
 export default function SellYourPhonePage({ onNavigateToHome, onStartListing }) {
+  const { t } = useTranslation();
   const [terms, setTerms] = useState(null);
   const [loadingTerms, setLoadingTerms] = useState(true);
   const [termsExpanded, setTermsExpanded] = useState(false);
@@ -52,16 +54,16 @@ export default function SellYourPhonePage({ onNavigateToHome, onStartListing }) 
             className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
           >
             <Home className="w-3.5 h-3.5" />
-            <span>Home</span>
+            <span>{t('nav.home')}</span>
           </button>
           <ChevronRight className="w-3 h-3 text-slate-600" />
-          <span className="text-white font-medium">Sell Your Phone</span>
+          <span className="text-white font-medium">{t('sellYourPhone.btn')}</span>
         </nav>
 
         {/* Page Heading */}
         <div className="pb-6 border-b border-white/10">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white">
-            Sell Your Phone
+            {t('sellYourPhone.btn')}
           </h1>
         </div>
 
@@ -70,10 +72,10 @@ export default function SellYourPhonePage({ onNavigateToHome, onStartListing }) 
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <h2 className="text-lg sm:text-xl font-bold text-white">
-                Seller Terms &amp; Conditions
+                {t('sellYourPhone.termsTitle')}
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Official Version: <strong className="text-sky-400">{terms?.version || '1.0'}</strong>
+                {t('sellYourPhone.officialVersion')}: <strong className="text-sky-400">{terms?.version || '1.0'}</strong>
               </p>
             </div>
 
@@ -82,7 +84,7 @@ export default function SellYourPhonePage({ onNavigateToHome, onStartListing }) 
               onClick={() => setTermsExpanded((prev) => !prev)}
               className="text-xs font-semibold text-sky-400 hover:text-sky-300 flex items-center gap-1 cursor-pointer"
             >
-              <span>{termsExpanded ? 'Collapse Terms' : 'View Full Terms'}</span>
+              <span>{termsExpanded ? t('sellYourPhone.collapseTerms') : t('sellYourPhone.viewFullTerms')}</span>
               {termsExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
           </div>
@@ -95,7 +97,7 @@ export default function SellYourPhonePage({ onNavigateToHome, onStartListing }) 
               }`}
             >
               {loadingTerms ? (
-                <div className="py-8 text-center text-slate-400">Loading current seller terms...</div>
+                <div className="py-8 text-center text-slate-400">{t('sellYourPhone.loadingTerms')}</div>
               ) : terms?.content ? (
                 <div className="whitespace-pre-line space-y-2">{terms.content}</div>
               ) : (
@@ -128,7 +130,7 @@ export default function SellYourPhonePage({ onNavigateToHome, onStartListing }) 
             onClick={handleStartListingClick}
             className="w-full sm:w-auto px-10 py-4 rounded-xl bg-white hover:bg-slate-200 text-[#070B16] font-extrabold text-sm sm:text-base transition-all shadow-2xl active:scale-[0.98] cursor-pointer inline-flex items-center justify-center gap-2.5"
           >
-            <span>Sell Your Phone</span>
+            <span>{t('sellYourPhone.btn')}</span>
             <ArrowRight className="w-4 h-4 text-sky-600" />
           </button>
         </div>

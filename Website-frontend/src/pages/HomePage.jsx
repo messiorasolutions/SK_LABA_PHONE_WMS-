@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, Tag, Star, MessageSquareHeart, ChevronLeft, ChevronRight } from 'lucide-react';
 import HeroSection from '../components/HeroSection';
 import TrustBadges from '../components/TrustBadges';
@@ -47,6 +48,7 @@ function optimizeImageUrl(url, width = 500) {
 }
 
 function OfferCard({ offer, allPhones, onNavigate }) {
+  const { t } = useTranslation();
   const regularPrice = Number(offer.regular_price || 0);
   const offerPrice = Number(offer.offer_price || 0);
   const savings = regularPrice > offerPrice ? regularPrice - offerPrice : 0;
@@ -233,7 +235,7 @@ function OfferCard({ offer, allPhones, onNavigate }) {
           }}
           className="w-full mt-auto py-2.5 px-4 rounded-full bg-black hover:bg-neutral-900 border border-neutral-700 hover:border-neutral-500 text-white text-xs sm:text-sm font-normal flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-md group/btn cursor-pointer"
         >
-          <span>Discover Offer</span>
+          <span>{t('home.discoverOffer')}</span>
           <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover/btn:translate-x-1 transition-transform" />
         </button>
       </div>
@@ -243,6 +245,7 @@ function OfferCard({ offer, allPhones, onNavigate }) {
 
 export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYourPhone, onOpenSell, onOpenReview }) {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const [activeOffers, setActiveOffers] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
@@ -407,10 +410,10 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
               <div>
                 <span className="text-xs font-normal uppercase tracking-wider text-theme-textSecondary mb-1 block">
-                  Limited Time Deals
+                  {t('home.limitedTimeDeals')}
                 </span>
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-white tracking-tight flex items-center gap-2">
-                  <span>Current Special Offers</span>
+                  <span>{t('home.currentSpecialOffers')}</span>
                   <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-theme-textSecondary" />
                 </h2>
               </div>
@@ -421,7 +424,7 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
                 className="inline-flex self-start sm:self-auto items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
               >
                 <span className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
-                  <span>View in Smartphones Page</span>
+                  <span>{t('home.viewInSmartphones')}</span>
                   <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-0.5 transition-transform" />
                 </span>
               </button>
@@ -467,13 +470,13 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
             <div className="lg:col-span-7 space-y-5 sm:space-y-6">
               <div>
                 <span className="text-xs font-normal uppercase tracking-wider text-theme-textSecondary mb-2 block">
-                  Our Story
+                  {t('home.ourStory')}
                 </span>
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-white tracking-tight">
-                  About SK LABA PHONE
+                  {t('home.aboutTitle')}
                 </h2>
                 <p className="text-xs sm:text-sm text-theme-textSecondary mt-3.5 leading-relaxed font-normal">
-                  Founded on trust and authenticity, SK LABA PHONE connects smart shoppers directly with South Korea&rsquo;s premier smartphone tech. Based in Dongdaemun-gu, Seoul, we hand-inspect every device—eliminating middleman markups so you receive verified original flagships at true wholesale value.
+                  {t('home.aboutDesc')}
                 </p>
               </div>
 
@@ -481,15 +484,15 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-3 pt-5 sm:pt-6 border-t border-white/10">
                 <div className="flex sm:block items-baseline sm:items-start justify-between sm:justify-start gap-2">
                   <div className="text-lg sm:text-xl font-normal text-white tracking-tight">100%</div>
-                  <div className="text-[11px] text-theme-textMuted font-normal">Original Devices</div>
+                  <div className="text-[11px] text-theme-textMuted font-normal">{t('home.originalDevices')}</div>
                 </div>
                 <div className="flex sm:block items-baseline sm:items-start justify-between sm:justify-start gap-2">
-                  <div className="text-base sm:text-lg lg:text-xl font-normal text-white tracking-tight">ලාබ ෆෝන් Value</div>
-                  <div className="text-[11px] text-theme-textMuted font-normal">Fair pricing &amp; marketplace deals</div>
+                  <div className="text-base sm:text-lg lg:text-xl font-normal text-white tracking-tight">{t('home.labaPhoneValue')}</div>
+                  <div className="text-[11px] text-theme-textMuted font-normal">{t('home.fairPricing')}</div>
                 </div>
                 <div className="flex sm:block items-baseline sm:items-start justify-between sm:justify-start gap-2">
                   <div className="text-lg sm:text-xl font-normal text-white tracking-tight">Seoul &bull; LK</div>
-                  <div className="text-[11px] text-theme-textMuted font-normal">Direct Logistics</div>
+                  <div className="text-[11px] text-theme-textMuted font-normal">{t('home.directLogistics')}</div>
                 </div>
               </div>
             </div>
@@ -503,10 +506,10 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 sm:gap-6 mb-8 sm:mb-12">
             <div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-white tracking-tight flex items-center gap-2.5">
-                <span>Verified Customer Reviews</span>
+                <span>{t('home.verifiedReviews')}</span>
               </h2>
               <p className="text-xs sm:text-sm text-theme-textSecondary mt-2 sm:mt-2.5 leading-relaxed">
-                Real feedback from clients who purchased certified smartphones and sold devices through our marketplace.
+                {t('home.reviewsSubtitle')}
               </p>
             </div>
 
@@ -549,7 +552,7 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
               >
                 <span className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
                   <MessageSquareHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span>Write a Review</span>
+                  <span>{t('home.writeReview')}</span>
                 </span>
               </button>
             </div>
@@ -676,9 +679,9 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
           ) : (
             <div className="text-center py-12 px-4 rounded-3xl border border-dashed border-theme-border/80 bg-theme-surface/50 max-w-xl mx-auto space-y-4">
               <div className="space-y-1">
-                <h3 className="text-base font-bold text-white">Be the First to Leave a Review!</h3>
+                <h3 className="text-base font-bold text-white">{t('home.beFirstReview')}</h3>
                 <p className="text-xs text-theme-textSecondary max-w-sm mx-auto">
-                  Have you purchased a smartphone or sold a device through our marketplace? Share your feedback with our community.
+                  {t('home.beFirstReviewDesc')}
                 </p>
               </div>
               <button
@@ -687,7 +690,7 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
                 className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
               >
                 <span className="inline-flex items-center px-5 py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
-                  Share Your Experience
+                  {t('home.shareExperience')}
                 </span>
               </button>
             </div>

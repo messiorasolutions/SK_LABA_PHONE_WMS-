@@ -28,6 +28,9 @@ class PhoneRepository {
             }
         }
 
+        formatted.is_genuine_battery = formatted.is_genuine_battery === undefined || formatted.is_genuine_battery === null ? true : Boolean(formatted.is_genuine_battery);
+        formatted.is_original_housing = formatted.is_original_housing === undefined || formatted.is_original_housing === null ? true : Boolean(formatted.is_original_housing);
+
         // Optimize card-view payload size (shrinks JSON from megabytes to kilobytes)
         if (isCardView) {
             let primaryPhoto = '';
@@ -55,8 +58,29 @@ class PhoneRepository {
                 });
             }
 
-            formatted.main_photo = primaryPhoto || (Array.isArray(formatted.photos) && formatted.photos[0]) || '';
-            formatted.photos = primaryPhoto ? [primaryPhoto] : [];
+            // Extract up to 3 preview photos for phone cards
+            const cardPhotos = [];
+            const addCardPhoto = (url) => {
+                if (url && typeof url === 'string' && !cardPhotos.includes(url)) {
+                    cardPhotos.push(url);
+                }
+            };
+            if (Array.isArray(formatted.photos)) {
+                formatted.photos.forEach(addCardPhoto);
+            }
+            if (Array.isArray(formatted.colour_options)) {
+                formatted.colour_options.forEach((col) => {
+                    if (Array.isArray(col.photos)) {
+                        col.photos.forEach(addCardPhoto);
+                    }
+                });
+            }
+            if (primaryPhoto) {
+                addCardPhoto(primaryPhoto);
+            }
+
+            formatted.main_photo = primaryPhoto || cardPhotos[0] || '';
+            formatted.photos = cardPhotos.slice(0, 3);
             // Remove unnecessary large off-page fields from listing card
             delete formatted.description;
             delete formatted.specification_ids;
@@ -73,7 +97,15 @@ class PhoneRepository {
         formatted.product_source = row.product_source || 'INVENTORY';
         formatted.ownership_type = row.ownership_type || 'PLATFORM_OWNED';
         formatted.marketplace_listing_id = row.marketplace_listing_id || null;
-        formatted.battery_health = row.battery_health !== undefined && row.battery_health !== null ? Number(row.battery_health) : null;
+        if (row.battery_health !== undefined && row.battery_health !== null) {
+            const rawBh = String(row.battery_health).trim();
+            formatted.battery_health = rawBh.length > 0 ? (rawBh.endsWith('%') ? rawBh : `${rawBh}%`) : null;
+        } else {
+            formatted.battery_health = null;
+        }
+        formatted.is_genuine_battery = row.is_genuine_battery !== undefined && row.is_genuine_battery !== null ? Boolean(row.is_genuine_battery) : true;
+        formatted.is_original_housing = row.is_original_housing !== undefined && row.is_original_housing !== null ? Boolean(row.is_original_housing) : true;
+        formatted.display_size = row.display_size ? String(row.display_size).trim() : null;
         formatted.used_condition_grade = row.used_condition_grade || null;
         formatted.availability = calculatePhoneAvailability(
             formatted.current_stock,
@@ -95,8 +127,9 @@ class PhoneRepository {
                 storage_ids, colour_options, specification_ids,
                 warranty, accessory_ids, description,
                 low_stock_level, current_stock, availability, installment_enabled,
-                installment_plan_ids, status, is_archived, is_new_arrival, photos
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                installment_plan_ids, status, is_archived, is_new_arrival, photos,
+                battery_health, is_genuine_battery, is_original_housing, display_size
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const values = [
@@ -118,7 +151,11 @@ class PhoneRepository {
             data.status || 'DRAFT',
             data.is_archived ? 1 : 0,
             data.is_new_arrival ? 1 : 0,
-            data.photos ? JSON.stringify(data.photos) : null
+            data.photos ? JSON.stringify(data.photos) : null,
+            data.battery_health !== undefined && data.battery_health !== null && data.battery_health !== '' ? String(data.battery_health).trim() : null,
+            data.is_genuine_battery !== undefined ? (data.is_genuine_battery ? 1 : 0) : 1,
+            data.is_original_housing !== undefined ? (data.is_original_housing ? 1 : 0) : 1,
+            data.display_size !== undefined && data.display_size !== null && data.display_size !== '' ? String(data.display_size).trim() : null
         ];
 
         const [result] = await pool.execute(query, values);
@@ -179,7 +216,11 @@ class PhoneRepository {
                 p.created_at,
                 p.product_source,
                 p.ownership_type,
-                p.marketplace_listing_id
+                p.marketplace_listing_id,
+                p.battery_health,
+                p.is_genuine_battery,
+                p.is_original_housing,
+                p.display_size
               `
             : `
                 p.*,
@@ -487,7 +528,11 @@ class PhoneRepository {
                 status = ?,
                 is_archived = ?,
                 is_new_arrival = ?,
-                photos = ?
+                photos = ?,
+                battery_health = ?,
+                is_genuine_battery = ?,
+                is_original_housing = ?,
+                display_size = ?
             WHERE phone_id = ?
         `;
 
@@ -511,6 +556,10 @@ class PhoneRepository {
             data.is_archived ? 1 : 0,
             data.is_new_arrival ? 1 : 0,
             data.photos ? JSON.stringify(data.photos) : null,
+            data.battery_health !== undefined && data.battery_health !== null && data.battery_health !== '' ? String(data.battery_health).trim() : null,
+            data.is_genuine_battery !== undefined ? (data.is_genuine_battery ? 1 : 0) : 1,
+            data.is_original_housing !== undefined ? (data.is_original_housing ? 1 : 0) : 1,
+            data.display_size !== undefined && data.display_size !== null && data.display_size !== '' ? String(data.display_size).trim() : null,
             phone_id
         ];
 

@@ -1,70 +1,96 @@
-const CACHE_KEY = 'sk_krw_to_lkr_rate';
-const CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours cache
-const DEFAULT_FALLBACK_RATE = 0.22; // 1 KRW ≈ 0.22 LKR (approximate CBSL benchmark)
+const CACHE_KEY = 'sk_krw_to_lkr_rate_info';
+const DEFAULT_FALLBACK_RATE = 0.22; // 1 KRW ≈ 0.22 LKR (indicative rate)
 
 /**
- * Fetches the current KRW -> LKR exchange rate using free, keyless APIs.
- * Automatically caches for 12 hours in localStorage to prevent unnecessary network requests.
- * @returns {Promise<number>} Exchange rate (e.g. 0.2215)
+ * Always fetches the live daily exchange rate for KRW -> LKR from the free Currency API.
+ * Uses open.er-api.com (updated daily at 00:00 UTC) with Frankfurter API as backup.
+ * 
+ * @param {boolean} forceRefresh - If true, skips any temporary cache and calls the live API immediately.
+ * @returns {Promise<{rate: number, date: string, lastUpdatedText: string, isLive: boolean}>}
  */
-export async function fetchKrwToLkrRate() {
-  // 1. Return fresh cached rate if available
-  try {
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      if (parsed?.rate && (Date.now() - parsed.timestamp) < CACHE_TTL_MS) {
-        return parsed.rate;
+export async function fetchLiveExchangeRate(forceRefresh = false) {
+  const todayDateStr = new Date().toISOString().slice(0, 10);
+
+  // 1. If not forced and already fetched today, return today's rate
+  if (!forceRefresh) {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed?.date === todayDateStr && typeof parsed?.rate === 'number' && parsed.rate > 0) {
+          return { ...parsed, isLive: true };
+        }
       }
-    }
-  } catch (e) {
-    // Non-fatal, continue to fetch
+    } catch (_) {}
   }
 
-  // 2. Fetch from free ExchangeRate-API (open tier, no API key, CORS enabled)
+  // 2. Fetch directly from live ExchangeRate-API (Free, no key, daily updates)
   try {
     const res = await fetch('https://open.er-api.com/v6/latest/KRW');
     if (res.ok) {
       const data = await res.json();
       const rate = data?.rates?.LKR;
       if (typeof rate === 'number' && rate > 0) {
+        const info = {
+          rate,
+          date: todayDateStr,
+          lastUpdatedText: data.time_last_update_utc ? new Date(data.time_last_update_utc).toLocaleDateString() : todayDateStr,
+          isLive: true,
+          provider: 'ExchangeRate-API'
+        };
         try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify({ rate, timestamp: Date.now() }));
+          localStorage.setItem(CACHE_KEY, JSON.stringify(info));
         } catch (_) {}
-        return rate;
+        return info;
       }
     }
   } catch (err) {
-    console.warn('ExchangeRate-API failed, trying fallback:', err?.message || err);
+    console.warn('ExchangeRate-API request failed, trying Frankfurter API:', err?.message || err);
   }
 
-  // 3. Fallback to Frankfurter API (free, no API key, CORS enabled)
+  // 3. Backup live API: Frankfurter API (Free, no key, uses CBSL/Central Bank rates)
   try {
     const res = await fetch('https://api.frankfurter.dev/v1/latest?from=KRW&to=LKR');
     if (res.ok) {
       const data = await res.json();
       const rate = data?.rates?.LKR;
       if (typeof rate === 'number' && rate > 0) {
+        const info = {
+          rate,
+          date: todayDateStr,
+          lastUpdatedText: data.date || todayDateStr,
+          isLive: true,
+          provider: 'Frankfurter API'
+        };
         try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify({ rate, timestamp: Date.now() }));
+          localStorage.setItem(CACHE_KEY, JSON.stringify(info));
         } catch (_) {}
-        return rate;
+        return info;
       }
     }
   } catch (err) {
     console.warn('Frankfurter API fallback failed:', err?.message || err);
   }
 
-  // 4. Fallback to stale cached rate if available
+  // 4. If user is offline, use previously saved rate from cache
   try {
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
       const parsed = JSON.parse(cached);
-      if (parsed?.rate) return parsed.rate;
+      if (parsed?.rate) {
+        return { ...parsed, isLive: false };
+      }
     }
   } catch (_) {}
 
-  return DEFAULT_FALLBACK_RATE;
+  // 5. Fallback rate if completely offline and no cache
+  return {
+    rate: DEFAULT_FALLBACK_RATE,
+    date: todayDateStr,
+    lastUpdatedText: 'Indicative Benchmark',
+    isLive: false,
+    provider: 'Offline Benchmark'
+  };
 }
 
 /**

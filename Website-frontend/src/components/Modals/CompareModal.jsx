@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Trash2, AlertCircle } from 'lucide-react';
 import phoneService from '../../services/phoneService';
 import { useFavoritesAndCompare } from '../../hooks/useFavoritesAndCompare';
+import { useCurrencyConverter } from '../../hooks/useCurrencyConverter';
 
 export default function CompareModal({
   compareIds = [],
@@ -10,6 +11,7 @@ export default function CompareModal({
   onInquirePhone,
 }) {
   const { removeCompare, clearCompare } = useFavoritesAndCompare();
+  const { convertKrwToLkr, formatKrw, formatLkr } = useCurrencyConverter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [comparisonData, setComparisonData] = useState(null);
@@ -173,13 +175,20 @@ export default function CompareModal({
                           {p.name}
                         </h3>
 
-                        <div className="flex items-baseline gap-2 mb-2">
-                          <span className="text-xs font-medium text-white">
-                            ${effPrice.toLocaleString()}
-                          </span>
-                          {p.active_offer?.has_active_offer && (
-                            <span className="text-[10px] text-theme-textMuted line-through">
-                              ${regPrice.toLocaleString()}
+                        <div className="flex flex-col mb-2">
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-xs font-medium text-white">
+                              {formatKrw(effPrice)}
+                            </span>
+                            {p.active_offer?.has_active_offer && (
+                              <span className="text-[10px] text-theme-textMuted line-through">
+                                {formatKrw(regPrice)}
+                              </span>
+                            )}
+                          </div>
+                          {effPrice > 0 && (
+                            <span className="text-[10px] text-white font-normal">
+                              {formatLkr(convertKrwToLkr(effPrice))}
                             </span>
                           )}
                         </div>

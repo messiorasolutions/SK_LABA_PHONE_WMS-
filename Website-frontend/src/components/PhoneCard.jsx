@@ -19,75 +19,61 @@ export default function PhoneCard({
   const favorited = isFavorite(phoneId);
   const inComparison = isInCompare(phoneId);
 
-  // Extract general fallback photos
-  const generalPhotos = useMemo(() => {
-    if (Array.isArray(phone.photos) && phone.photos.length > 0) return phone.photos;
-    if (phone.main_photo) return [phone.main_photo];
-    if (typeof phone.photos === 'string' && phone.photos.trim().startsWith('[')) {
+  // Extract all photos belonging to the phone (from photos array, legacy color photos, or main_photo)
+  const allCardPhotos = useMemo(() => {
+    const list = [];
+    const addUnique = (url) => {
+      if (url && typeof url === 'string' && !list.includes(url)) {
+        list.push(url);
+      }
+    };
+    if (Array.isArray(phone.photos)) {
+      phone.photos.forEach(addUnique);
+    } else if (typeof phone.photos === 'string' && phone.photos.trim().startsWith('[')) {
       try {
         const parsed = JSON.parse(phone.photos);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) parsed.forEach(addUnique);
       } catch (e) {}
     }
-    return [];
+    if (Array.isArray(phone.colour_options)) {
+      phone.colour_options.forEach((c) => {
+        if (Array.isArray(c?.photos)) c.photos.forEach(addUnique);
+      });
+    } else if (typeof phone.colour_options === 'string' && phone.colour_options.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(phone.colour_options);
+        if (Array.isArray(parsed)) {
+          parsed.forEach((c) => {
+            if (Array.isArray(c?.photos)) c.photos.forEach(addUnique);
+          });
+        }
+      } catch (e) {}
+    }
+    if (phone.main_photo) {
+      addUnique(phone.main_photo);
+    }
+    return list;
   }, [phone]);
 
-  // Parse color options (objects with name, color_code, photos or legacy strings)
-  const parsedColors = useMemo(() => {
-    let raw = phone.colour_options;
-    if (!raw) return [];
-    if (typeof raw === 'string') {
-      if (raw.trim().startsWith('[')) {
-        try {
-          raw = JSON.parse(raw);
-        } catch (e) {
-          raw = raw.split(',').map((s) => s.trim()).filter(Boolean);
-        }
-      } else {
-        raw = raw.split(',').map((s) => s.trim()).filter(Boolean);
-      }
+  // Preview photos shown under the price: show up to 3 images
+  const previewPhotos = useMemo(() => {
+    if (allCardPhotos.length > 0) {
+      return allCardPhotos.slice(0, 3);
     }
-    if (!Array.isArray(raw)) return [];
+    return [];
+  }, [allCardPhotos]);
 
-    return raw.map((c, i) => {
-      if (typeof c === 'string') {
-        const fallbackPhoto = generalPhotos[i] || generalPhotos[0] || '';
-        return {
-          id: `color_${i}`,
-          name: c,
-          color_name: c,
-          color_code: '#475569',
-          photos: fallbackPhoto ? [fallbackPhoto] : [],
-        };
-      }
-      return {
-        id: `color_${i}`,
-        name: c.color_name || c.name || `Color #${i + 1}`,
-        color_name: c.color_name || c.name || `Color #${i + 1}`,
-        color_code: c.color_code || c.color || c.hex || '#475569',
-        photos:
-          Array.isArray(c.photos) && c.photos.length > 0
-            ? c.photos
-            : (generalPhotos[i] ? [generalPhotos[i]] : generalPhotos),
-      };
-    });
-  }, [phone, generalPhotos]);
+  // Active displayed photo index
+  const [selectedPhotoIdx, setSelectedPhotoIdx] = useState(0);
 
-  // Default / auto-select the first color
-  const [selectedColorIdx, setSelectedColorIdx] = useState(0);
-
-  // Reset to first color when phone changes
+  // Reset to first photo when phone changes
   useEffect(() => {
-    setSelectedColorIdx(0);
+    setSelectedPhotoIdx(0);
   }, [phoneId]);
 
-  const activeColor = parsedColors[selectedColorIdx] || parsedColors[0];
-
-  // Active displayed photo: prioritizes active color's first photo, then general photo at index, then first general photo, then main_photo
   const displayedPhoto = resolveImageUrl(
-    activeColor?.photos?.[0] ||
-    generalPhotos[selectedColorIdx] ||
-    generalPhotos[0] ||
+    allCardPhotos[selectedPhotoIdx] ||
+    allCardPhotos[0] ||
     phone.main_photo ||
     ''
   );
@@ -119,7 +105,7 @@ export default function PhoneCard({
 
   const handleCardClick = () => {
     if (onViewDetails) {
-      onViewDetails({ ...phone, initialColorIdx: selectedColorIdx });
+      onViewDetails({ ...phone, initialPhotoIdx: selectedPhotoIdx });
     }
   };
 
@@ -298,66 +284,46 @@ export default function PhoneCard({
             )}
           </div>
           {effectivePrice > 0 && (
-            <div className="text-[11px] text-emerald-400 font-medium tracking-tight">
-              ≈ {formatLkr(convertKrwToLkr(effectivePrice))}
+            <div className="text-[11px] text-white font-normal tracking-tight">
+              {formatLkr(convertKrwToLkr(effectivePrice))}
             </div>
           )}
         </div>
 
-        {/* Color thumbnails under the phone card */}
-        {parsedColors.length > 0 && (
+        {/* Photo thumbnails under the price (shows up to 3 images) */}
+        {previewPhotos.length > 0 && (
           <div
-            className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2 pt-1 flex-wrap"
+            className="flex items-center justify-center gap-1.5 sm:gap-2 pt-1.5 flex-wrap"
             onClick={(e) => e.stopPropagation()}
           >
-            {parsedColors.slice(0, 4).map((color, idx) => {
-              const isSelected = selectedColorIdx === idx;
-              const colorPhoto =
-                color.photos?.[0] ||
-                generalPhotos[idx] ||
-                generalPhotos[0] ||
-                '';
-
+            {previewPhotos.map((photoUrl, idx) => {
+              const isSelected = selectedPhotoIdx === idx;
               return (
                 <button
-                  key={color.id || idx}
+                  key={idx}
                   type="button"
-                  title={color.name || `Color #${idx + 1}`}
+                  title={`View image ${idx + 1}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedColorIdx(idx);
+                    setSelectedPhotoIdx(idx);
                   }}
-                  onMouseEnter={() => setSelectedColorIdx(idx)}
+                  onMouseEnter={() => setSelectedPhotoIdx(idx)}
                   className={`group/thumb relative w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg p-0.5 border overflow-hidden transition-all duration-200 cursor-pointer flex items-center justify-center bg-black/40 ${
                     isSelected
                       ? 'border-white ring-1 sm:ring-2 ring-white/40 shadow-md scale-105'
                       : 'border-white/15 hover:border-white/50 opacity-70 hover:opacity-100 hover:scale-105'
                   }`}
                 >
-                  {colorPhoto ? (
-                    <img
-                      src={colorPhoto}
-                      alt={color.name || `Color #${idx + 1}`}
-                      className="w-full h-full object-cover object-center rounded-[6px]"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ) : (
-                    <span
-                      className="w-full h-full rounded-[6px]"
-                      style={{
-                        backgroundColor: color.color_code || '#475569',
-                      }}
-                    />
-                  )}
+                  <img
+                    src={resolveImageUrl(photoUrl)}
+                    alt={`${phone.name} preview ${idx + 1}`}
+                    className="w-full h-full object-cover object-center rounded-[6px]"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </button>
               );
             })}
-            {parsedColors.length > 4 && (
-              <span className="text-[10px] text-slate-400 font-normal pl-0.5 select-none">
-                +{parsedColors.length - 4}
-              </span>
-            )}
           </div>
         )}
       </div>

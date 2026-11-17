@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import sellPhoneVideo from '../assets/images/sell-your-phone.mp4';
 import sellPhoneVideo from '../assets/images/v1.mp4';
 import sellPhonePoster from '../assets/images/sell-your-phone-poster.webp';
 
@@ -15,6 +17,7 @@ import sellPhonePoster from '../assets/images/sell-your-phone-poster.webp';
 const VIDEO_START_TIME = 1; // Start playback at 0:00:01
 
 export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
+  const { t } = useTranslation();
   const containerRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -117,9 +120,11 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
           id="sell-phone-heading"
           className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]"
         >
-          Sell Your Phone.
+          {t('sellYourPhone.title')}
         </h2>
 
+        <p className="max-w-xl mx-auto text-xs sm:text-sm text-slate-300 font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] px-2">
+          {t('sellYourPhone.desc')}
         <p className="max-w-3xl sm:max-w-4xl md:max-w-none mx-auto text-xs sm:text-sm text-slate-300 font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] px-2 md:whitespace-nowrap">
           Turn your old smartphone into cash. List your phone with SK LABA PHONE and connect with genuine buyers.
         </p>
@@ -132,7 +137,7 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
             className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-xl shadow-black/80 group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050914]"
           >
             <span className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs sm:text-sm font-medium transition-colors duration-200 min-h-[44px]">
-              <span>Sell Your Phone</span>
+              <span>{t('sellYourPhone.btn')}</span>
               <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-0.5 transition-transform" />
             </span>
           </button>

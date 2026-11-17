@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { GitCompare, X, ArrowRight, Trash2, Plus, Search } from 'lucide-react';
 import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
+import { useCurrencyConverter } from '../hooks/useCurrencyConverter';
 
 export default function CompareBar({ phones = [], isOpen = false, onClose, onOpenCompare }) {
   const { compareIds, toggleCompare, removeCompare, clearCompare } = useFavoritesAndCompare();
+  const { formatKrw } = useCurrencyConverter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [activeSlotIdx, setActiveSlotIdx] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,7 +109,7 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
                       </span>
                       {phone.price && (
                         <span className="text-[9px] sm:text-[10px] text-white/70 font-mono leading-none mt-0.5">
-                          ${Number(phone.price).toFixed(0)}
+                          {formatKrw(phone.price)}
                         </span>
                       )}
                     </div>
@@ -247,7 +249,7 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
                         <p className="text-[10px] text-white/60 flex items-center gap-1.5 mt-0.5">
                           <span className="truncate">{p.brand_name || 'Smartphone'}</span>
                           <span>•</span>
-                          <span className="font-mono text-white/80">${Number(p.price || 0).toFixed(0)}</span>
+                          <span className="font-mono text-white/80">{formatKrw(p.price || 0)}</span>
                         </p>
                       </div>
                       <div className="w-6 h-6 rounded-lg bg-white/5 group-hover:bg-blue-500/20 flex items-center justify-center shrink-0 transition-colors">

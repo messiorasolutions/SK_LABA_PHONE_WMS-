@@ -32,6 +32,7 @@ import brandService from '../services/brandService';
 import { getActiveOffers } from '../services/offerService';
 import { setSearchQuery, setActiveTab } from '../actions/heroActions';
 import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
+import { useTranslation } from 'react-i18next';
 
 // Helper to enrich phone objects with matching active promotional offers
 function applyOffersToPhones(phoneList, offers) {
@@ -85,6 +86,7 @@ function applyOffersToPhones(phoneList, offers) {
 }
 
 export default function SmartphonesPage({ onNavigateToHome }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const globalSearch = useSelector((state) => state.hero?.searchQuery || '');
   const { favoriteIds, compareIds } = useFavoritesAndCompare();
@@ -219,10 +221,10 @@ export default function SmartphonesPage({ onNavigateToHome }) {
   };
 
   const sortLabels = {
-    newest: 'Newest First',
+    newest: t('smartphones.sortNewest'),
     oldest: 'Oldest First',
-    price_asc: 'Price: Low to High',
-    price_desc: 'Price: High to Low',
+    price_asc: t('smartphones.sortPriceAsc'),
+    price_desc: t('smartphones.sortPriceDesc'),
   };
 
   // Filtered brands matching search bar inside the Filter Drawer
@@ -399,17 +401,17 @@ export default function SmartphonesPage({ onNavigateToHome }) {
             className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer font-medium"
           >
             <Home className="w-3.5 h-3.5 text-theme-textSecondary" />
-            <span>Home</span>
+            <span>{t('nav.home')}</span>
           </button>
           <ChevronRight className="w-3.5 h-3.5 text-theme-borderLight" />
-          <span className="text-theme-accentLight font-semibold">Smartphones Catalog</span>
+          <span className="text-theme-accentLight font-semibold">{t('smartphones.catalogTitle')}</span>
         </div>
 
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-6 border-b border-theme-border/60">
           <div>
             <h1 className="text-2xl sm:text-3xl font-normal tracking-normal text-white flex items-center gap-3">
-              <span>Smartphones & Mobile Devices</span>
+              <span>{t('smartphones.catalogTitle')}</span>
             </h1>
           </div>
 
@@ -427,7 +429,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
               title="Compare smartphones (SRS C-05)"
             >
               <GitCompare className="w-3.5 h-3.5" />
-              <span>Compare {compareIds.length > 0 ? `(${compareIds.length}/3)` : ''}</span>
+              <span>{t('nav.compare')} {compareIds.length > 0 ? `(${compareIds.length}/3)` : ''}</span>
             </button>
 
             {/* Favourites Button */}
@@ -437,7 +439,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
               className="px-3.5 py-2 rounded-lg bg-transparent hover:bg-white/[0.04] border border-theme-border text-theme-textSecondary hover:text-white text-xs font-medium flex items-center gap-2 transition-colors cursor-pointer"
             >
               <Heart className={`w-3.5 h-3.5 ${favoriteIds.length > 0 ? 'text-red-500 fill-current' : ''}`} />
-              <span>Favourites ({favoriteIds.length})</span>
+              <span>{t('nav.favourites')} ({favoriteIds.length})</span>
             </button>
           </div>
         </div>
@@ -446,8 +448,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
             <p className="text-xs text-theme-textSecondary font-medium">
-              Showing <strong className="text-white font-semibold">{filteredPhones.length}</strong> smartphone
-              {filteredPhones.length === 1 ? '' : 's'}
+              {t('smartphones.showing')} <strong className="text-white font-semibold">{filteredPhones.length}</strong> {t('smartphones.smartphonesCount')}
               {selectedBrand !== 'ALL' && brands.find((b) => String(b.brand_id) === String(selectedBrand)) && (
                 <span> in {brands.find((b) => String(b.brand_id) === String(selectedBrand)).brand_name}</span>
               )}
@@ -459,7 +460,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
                 onClick={resetFilters}
                 className="text-xs text-theme-accent hover:underline ml-2 cursor-pointer"
               >
-                Clear all
+                {t('smartphones.clearFilters')}
               </button>
             )}
           </div>
@@ -473,7 +474,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
               className="px-4 py-2 rounded-full border border-theme-border hover:border-white/30 bg-theme-surface/70 hover:bg-white/[0.06] text-white text-xs font-medium flex items-center gap-2 transition-all cursor-pointer shadow-sm"
             >
               <SlidersHorizontal className="w-3.5 h-3.5 text-theme-textSecondary" />
-              <span>Filters</span>
+              <span>{t('smartphones.filters')}</span>
               {activeFilterCount > 0 && (
                 <span className="w-4 h-4 rounded-full bg-white text-[#0A0F1E] text-[10px] font-extrabold flex items-center justify-center">
                   {activeFilterCount}
@@ -490,9 +491,9 @@ export default function SmartphonesPage({ onNavigateToHome }) {
               >
                 <ArrowUpDown className="w-3.5 h-3.5 text-theme-textSecondary" />
                 <span>
-                  Sort by:{' '}
+                  {t('smartphones.sortBy')}:{' '}
                   <span className="text-white font-semibold">
-                    {sortLabels[sortType] || 'Newest First'}
+                    {sortLabels[sortType] || sortLabels.newest}
                   </span>
                 </span>
                 <ChevronDown
@@ -860,7 +861,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
           </div>
         ) : error ? (
           <div className="py-20 text-center bg-theme-surface/70 border border-theme-border rounded-2xl p-8 max-w-lg mx-auto shadow-xl">
-            <p className="text-base font-normal text-red-400 mb-2">Error loading phones</p>
+            <p className="text-base font-normal text-red-400 mb-2">{t('smartphones.errorLoading')}</p>
             <p className="text-xs text-theme-textMuted mb-6 font-normal leading-relaxed">{error}</p>
             <button
               type="button"
@@ -869,7 +870,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
             >
               <span className="inline-flex items-center gap-2 py-2 px-6 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
                 <RotateCcw className="w-3.5 h-3.5 text-slate-300 group-hover:text-white" />
-                <span>Retry</span>
+                <span>{t('smartphones.retry')}</span>
               </span>
             </button>
           </div>
@@ -878,7 +879,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
             <div className="w-14 h-14 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto mb-4 text-theme-textSecondary">
               <Search className="w-6 h-6 text-slate-400" />
             </div>
-            <h3 className="text-base sm:text-lg font-normal text-white mb-2">No Smartphones Found</h3>
+            <h3 className="text-base sm:text-lg font-normal text-white mb-2">{t('smartphones.noPhonesFound')}</h3>
             <p className="text-xs text-theme-textSecondary mb-6 font-normal leading-relaxed">
               No phones matched your selected criteria or search term. Try resetting your filters.
             </p>
@@ -889,7 +890,7 @@ export default function SmartphonesPage({ onNavigateToHome }) {
             >
               <span className="inline-flex items-center justify-center gap-2 py-2.5 px-6 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
                 <RotateCcw className="w-3.5 h-3.5 text-slate-300 group-hover:text-white" />
-                <span>Reset All Filters</span>
+                <span>{t('smartphones.clearFilters')}</span>
               </span>
             </button>
           </div>

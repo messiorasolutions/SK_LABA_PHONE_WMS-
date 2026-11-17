@@ -1,12 +1,29 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Search, User, Menu, X, Heart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Search, User, Menu, X, Heart, Globe } from 'lucide-react';
 import logoImg from '../assets/logo-removebg-preview.png';
 import { setActiveTab, setSearchQuery } from '../actions/heroActions';
 import { NAV_LINKS, STORE_INFO } from '../constants/siteConfig';
 import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
 
 export default function Navbar({ onOpenFavorites, onOpenSell }) {
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language || 'en';
+  const changeLanguage = (lng) => i18n.changeLanguage(lng);
+
+  const getNavLabel = (name) => {
+    switch (name) {
+      case 'Home': return t('nav.home');
+      case 'Smartphones': return t('nav.smartphones');
+      case 'Marketplace': return t('nav.marketplace');
+      case 'Giveaways': return t('nav.giveaways');
+      case 'Reviews': return t('nav.reviews');
+      case 'Deals': return t('nav.deals');
+      case 'Contact Us': return t('nav.contact');
+      default: return name;
+    }
+  };
   const dispatch = useDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = React.useState(false);
@@ -177,7 +194,7 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
                         : 'text-theme-textSecondary hover:text-theme-textPrimary'
                     }
                   >
-                    {link.name}
+                    {getNavLabel(link.name)}
                   </span>
 
                   {isActive && (
@@ -202,13 +219,13 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
                       window.location.hash = '#smartphones';
                     }
                   }}
-                  placeholder="Search smartphones..."
+                  placeholder={t('nav.searchPlaceholder')}
                   className="bg-transparent border-none outline-none text-base sm:text-xs md:text-sm text-theme-textPrimary placeholder-theme-textMuted w-full"
                 />
               </div>
             </div>
 
-            {/* Mobile Search Button (Left to the Favorite Icon) */}
+            {/* Mobile Search Button */}
             <button
               type="button"
               onClick={() => {
@@ -227,7 +244,7 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
               <Search className="w-5 h-5" />
             </button>
 
-
+            {/* Favorite Button */}
             <button
               type="button"
               onClick={handleOpenFavorites}
@@ -242,6 +259,34 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
                 </span>
               )}
             </button>
+
+            {/* Language Switcher (Right side of Favorite button, styled to match navbar icons) */}
+            <div className="flex items-center bg-white/5 border border-white/15 rounded-full p-0.5 text-xs">
+              <button
+                type="button"
+                onClick={() => changeLanguage('en')}
+                className={`px-2 sm:px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-medium transition-all cursor-pointer ${
+                  currentLang.startsWith('en')
+                    ? 'bg-white/15 text-white font-semibold shadow-xs'
+                    : 'text-theme-textSecondary hover:text-white'
+                }`}
+                title="English"
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => changeLanguage('si')}
+                className={`px-2 sm:px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-medium transition-all cursor-pointer ${
+                  currentLang.startsWith('si')
+                    ? 'bg-white/15 text-white font-semibold shadow-xs'
+                    : 'text-theme-textSecondary hover:text-white'
+                }`}
+                title="සිංහල"
+              >
+                සිං
+              </button>
+            </div>
 
             <button
               type="button"
@@ -274,7 +319,7 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
                     window.location.hash = '#smartphones';
                   }
                 }}
-                placeholder="Search smartphones, brands..."
+                placeholder={t('nav.searchPlaceholder')}
                 className="bg-transparent border-none outline-none text-base text-theme-textPrimary placeholder-theme-textMuted w-full"
               />
               {searchQuery ? (
@@ -302,6 +347,36 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
 
         {mobileMenuOpen && (
           <div className="md:hidden py-4 bg-theme-surface/95 backdrop-blur-lg border border-theme-border rounded-2xl px-3 my-2 space-y-1 shadow-2xl">
+            <div className="pb-3 border-b border-theme-border/50 flex items-center justify-between px-3 mb-2">
+              <span className="text-xs text-theme-textSecondary">Language / භාෂාව</span>
+              <div className="flex items-center bg-white/10 border border-white/20 rounded-full p-0.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    changeLanguage('en');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    currentLang.startsWith('en') ? 'bg-white text-black' : 'text-white/80'
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    changeLanguage('si');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    currentLang.startsWith('si') ? 'bg-white text-black' : 'text-white/80'
+                  }`}
+                >
+                  සිංහල
+                </button>
+              </div>
+            </div>
+
             {NAV_LINKS.map((link) => (
               <a
                 key={link.name}
@@ -312,7 +387,7 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
                     : 'text-theme-textSecondary hover:bg-white/5 hover:text-theme-textPrimary'
                   }`}
               >
-                {link.name}
+                {getNavLabel(link.name)}
               </a>
             ))}
           </div>

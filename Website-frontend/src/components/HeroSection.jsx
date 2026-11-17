@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShoppingCart, ArrowRight, Store } from 'lucide-react';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import mainBannerWebp from '../assets/images/main.webp';
 import mainBannerImg from '../assets/images/main.png';
 import { HERO_CONTENT } from '../constants/siteConfig';
@@ -8,6 +9,7 @@ import { setActiveTab } from '../actions/heroActions';
 
 export default function HeroSection() {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
 
   const handleShopSmartphones = () => {
     dispatch(setActiveTab('Smartphones'));
@@ -52,14 +54,14 @@ export default function HeroSection() {
           {/* Eyebrow / Tagline */}
           <div className="mb-2.5 sm:mb-3.5">
             <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.18em] sm:tracking-[0.22em] text-theme-textSecondary">
-              {HERO_CONTENT.eyebrow}
+              {t('hero.eyebrow')}
             </span>
           </div>
 
           {/* Main Title: "Find Your Next Smartphone" - Clean white, non-bold, official */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-white tracking-tight leading-[1.15] sm:leading-[1.12] mb-4 sm:mb-8">
-            Find Your Next <br />
-            Smartphone
+            {t('hero.headlineWhite')} <br />
+            {t('hero.headlineAccent')}
           </h1>
 
           {/* Action CTA Buttons (Moved down on mobile to let the phone banner show clearly) */}
@@ -72,7 +74,7 @@ export default function HeroSection() {
             >
               <span className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full bg-black group-hover:bg-neutral-950 text-white font-normal text-xs sm:text-sm md:text-base transition-colors duration-200">
                 <ShoppingCart className="w-4 h-4 shrink-0" />
-                <span>{HERO_CONTENT.primaryBtnText}</span>
+                <span>{t('hero.primaryBtn')}</span>
                 <ArrowRight className="w-4 h-4 shrink-0 ml-0.5 group-hover:translate-x-0.5 transition-transform" />
               </span>
             </button>
@@ -84,7 +86,7 @@ export default function HeroSection() {
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full bg-black/60 hover:bg-black border border-white/15 hover:border-white/30 text-white font-normal text-xs sm:text-sm md:text-base backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer group"
             >
               <Store className="w-4 h-4 text-white shrink-0" />
-              <span>{HERO_CONTENT.secondaryBtnText}</span>
+              <span>{t('hero.secondaryBtn')}</span>
               <ArrowRight className="w-4 h-4 shrink-0 ml-0.5 text-white group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>

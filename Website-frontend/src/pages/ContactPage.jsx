@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Phone,
   MessageCircle,
@@ -13,6 +14,7 @@ import facebookIcon from '../assets/icons/facebook.png';
 import tiktokIcon from '../assets/icons/tiktok.png';
 
 export default function ContactPage() {
+  const { t } = useTranslation();
   const { shopInfo, getWhatsAppUrl } = useShopInfo();
   const [formData, setFormData] = useState({
     name: '',
@@ -107,10 +109,10 @@ export default function ContactPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6 pb-3 border-b border-white/[0.08]">
           <div>
             <h1 className="text-xl sm:text-2xl font-normal text-white tracking-tight flex items-center gap-2">
-              <span>Contact Us</span>
+              <span>{t('contact.title')}</span>
             </h1>
             <p className="text-xs text-theme-textSecondary mt-1 leading-relaxed">
-              Have questions or need assistance? Reach out to our team directly.
+              {t('contact.subtitle')}
             </p>
           </div>
 
@@ -122,7 +124,7 @@ export default function ContactPage() {
               className="px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-white text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:scale-105"
             >
               <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4 object-contain" />
-              <span>WhatsApp</span>
+              <span>{t('contact.whatsapp')}</span>
             </button>
 
             <a
@@ -132,7 +134,7 @@ export default function ContactPage() {
               className="px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-white text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:scale-105 group"
             >
               <img src={facebookIcon} alt="Facebook" className="w-4 h-4 object-contain group-hover:scale-110 transition-transform" />
-              <span>Facebook</span>
+              <span>{t('contact.facebook')}</span>
             </a>
 
             <a
@@ -142,7 +144,7 @@ export default function ContactPage() {
               className="px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-white text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:scale-105 group"
             >
               <img src={tiktokIcon} alt="TikTok" className="w-4 h-4 object-contain group-hover:scale-110 transition-transform" />
-              <span>TikTok</span>
+              <span>{t('contact.tiktok')}</span>
             </a>
 
             <a
@@ -150,7 +152,7 @@ export default function ContactPage() {
               className="px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-white text-xs font-normal flex items-center gap-2 transition-all shadow-sm"
             >
               <Phone className="w-4 h-4 text-sky-400" />
-              <span>Call Us</span>
+              <span>{t('contact.callUs')}</span>
             </a>
           </div>
         </div>
@@ -168,10 +170,10 @@ export default function ContactPage() {
             {/* Form Title & Description */}
             <div className="mb-5 sm:mb-6 pb-4 border-b border-white/[0.08]">
               <h2 className="text-xl sm:text-2xl font-normal text-white tracking-tight">
-                Send Customer Inquiry
+                {t('contact.sendInquiry')}
               </h2>
               <p className="text-xs text-theme-textSecondary mt-1 leading-relaxed">
-                Your inquiry will be logged directly into our system for fast response.
+                {t('contact.inquirySubtitle')}
               </p>
             </div>
 
@@ -182,10 +184,10 @@ export default function ContactPage() {
                   <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                   <div className="space-y-1 flex-1">
                     <p className="text-sm font-normal text-white">
-                      Inquiry Submitted Successfully!
+                      {t('contact.successTitle')}
                     </p>
                     <p className="text-xs text-emerald-200/90 leading-relaxed">
-                      Thank you for reaching out. Our customer service team will contact you shortly.
+                      {t('contact.successDesc')}
                     </p>
                     <div className="pt-1.5 flex flex-wrap items-center gap-3">
                       <button
@@ -193,7 +195,7 @@ export default function ContactPage() {
                         onClick={() => setSuccess(false)}
                         className="text-xs font-normal text-emerald-400 hover:text-white underline cursor-pointer"
                       >
-                        Send another inquiry
+                        {t('contact.sendAnother')}
                       </button>
                       <span className="text-emerald-500/40">·</span>
                       <button
@@ -224,7 +226,7 @@ export default function ContactPage() {
                 {/* Full Name */}
                 <div className="group/field">
                   <label className="block text-xs font-normal text-slate-300 mb-1.5">
-                    Your Full Name <span className="text-rose-400">*</span>
+                    {t('contact.nameLabel')} <span className="text-rose-400">*</span>
                   </label>
                   <div className="relative">
                     <User className="w-4 h-4 text-slate-300 group-focus-within/field:text-sky-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" />
@@ -235,6 +237,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       disabled={loading}
+                      placeholder={t('contact.namePlaceholder')}
                       className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-sky-500/35 hover:border-sky-400/60 focus:border-sky-400 text-white text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 backdrop-blur-md transition-all shadow-inner disabled:opacity-50"
                     />
                   </div>
@@ -243,7 +246,7 @@ export default function ContactPage() {
                 {/* Phone Number */}
                 <div className="group/field">
                   <label className="block text-xs font-normal text-slate-300 mb-1.5">
-                    Contact Number / WhatsApp <span className="text-rose-400">*</span>
+                    {t('contact.phoneLabel')} <span className="text-rose-400">*</span>
                   </label>
                   <div className="relative">
                     <Phone className="w-4 h-4 text-slate-300 group-focus-within/field:text-sky-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" />
@@ -254,6 +257,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       disabled={loading}
+                      placeholder={t('contact.phonePlaceholder')}
                       className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-sky-500/35 hover:border-sky-400/60 focus:border-sky-400 text-white text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 backdrop-blur-md transition-all shadow-inner disabled:opacity-50 font-sans"
                     />
                   </div>
@@ -263,7 +267,7 @@ export default function ContactPage() {
               {/* Message Textarea */}
               <div className="group/field">
                 <label className="block text-xs font-normal text-slate-300 mb-1.5">
-                  Your Message / Question <span className="text-rose-400">*</span>
+                  {t('contact.messageLabel')} <span className="text-rose-400">*</span>
                 </label>
                 <div className="relative">
                   <textarea
@@ -273,6 +277,7 @@ export default function ContactPage() {
                     onChange={handleChange}
                     required
                     disabled={loading}
+                    placeholder={t('contact.messagePlaceholder')}
                     className="w-full min-h-[88px] px-3.5 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.05] focus:bg-[#070b16] border border-sky-500/35 hover:border-sky-400/60 focus:border-sky-400 text-white text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 backdrop-blur-md transition-all shadow-inner disabled:opacity-50 resize-none leading-relaxed"
                   />
                 </div>
@@ -289,10 +294,10 @@ export default function ContactPage() {
                     {loading ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Submitting Inquiry...</span>
+                        <span>{t('contact.submitting')}</span>
                       </>
                     ) : (
-                      <span>Submit Inquiry</span>
+                      <span>{t('contact.submitBtn')}</span>
                     )}
                   </span>
                 </button>

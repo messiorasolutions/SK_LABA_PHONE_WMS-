@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Star, AlertCircle, RefreshCw } from 'lucide-react';
 import { reviewService } from '../../services/reviewService';
 
 export default function ReviewModal({ onClose, onSuccess }) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     customer_name: '',
     rating: 5,
@@ -88,8 +90,8 @@ export default function ReviewModal({ onClose, onSuccess }) {
         {/* Header */}
         <div className="px-5 py-4 border-b border-white/10 bg-[#0A0F1E]/95 backdrop-blur-md sticky top-0 z-20 shrink-0 flex items-center justify-between">
           <div>
-            <h2 className="text-base font-normal text-white">Share Your Experience</h2>
-            <p className="text-xs text-slate-400 font-normal">Tell others about your experience with SK Laaba Phone</p>
+            <h2 className="text-base font-normal text-white">{t('reviewModal.title')}</h2>
+            <p className="text-xs text-slate-400 font-normal">{t('reviewModal.subtitle')}</p>
           </div>
           <button
             type="button"
@@ -107,12 +109,12 @@ export default function ReviewModal({ onClose, onSuccess }) {
               <Star className="w-7 h-7 fill-emerald-400" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-lg font-normal text-white">Review Submitted!</h3>
+              <h3 className="text-lg font-normal text-white">{t('reviewModal.successTitle')}</h3>
               <p className="text-xs text-emerald-300 font-normal px-2 leading-relaxed">
                 &ldquo;{successMessage}&rdquo;
               </p>
               <p className="text-[11px] text-slate-400 pt-2 font-normal">
-                Thank you for your valuable feedback. It helps other customers make better choices!
+                {t('reviewModal.successDesc')}
               </p>
             </div>
           </div>
@@ -128,7 +130,7 @@ export default function ReviewModal({ onClose, onSuccess }) {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Your Overall Rating <span className="text-rose-400">*</span>
+                  {t('reviewModal.overallRating')} <span className="text-rose-400">*</span>
                 </label>
                 <div className="flex items-center gap-1.5">
                   {[1, 2, 3, 4, 5].map((star) => {
@@ -169,13 +171,13 @@ export default function ReviewModal({ onClose, onSuccess }) {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Your Name <span className="text-rose-400">*</span>
+                  {t('reviewModal.nameLabel')} <span className="text-rose-400">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   maxLength={150}
-                  placeholder="e.g. Kasun Perera"
+                  placeholder={t('reviewModal.namePlaceholder')}
                   value={formData.customer_name}
                   onChange={(e) => setFormData((p) => ({ ...p, customer_name: e.target.value }))}
                   className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-base sm:text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/50 transition-all"
@@ -185,7 +187,7 @@ export default function ReviewModal({ onClose, onSuccess }) {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-xs font-semibold text-slate-300">
-                    Your Review / Feedback <span className="text-rose-400">*</span>
+                    {t('reviewModal.feedbackLabel')} <span className="text-rose-400">*</span>
                   </label>
                   <span className="text-[10px] text-slate-500">
                     {formData.comment.length}/2000
@@ -195,7 +197,7 @@ export default function ReviewModal({ onClose, onSuccess }) {
                   required
                   rows={4}
                   maxLength={2000}
-                  placeholder="Tell us what you liked about our service, phone condition, delivery speed..."
+                  placeholder={t('reviewModal.feedbackPlaceholder')}
                   value={formData.comment}
                   onChange={(e) => setFormData((p) => ({ ...p, comment: e.target.value }))}
                   className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-base sm:text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/50 transition-all resize-none leading-relaxed"
@@ -208,7 +210,7 @@ export default function ReviewModal({ onClose, onSuccess }) {
                   onClick={onClose}
                   className="px-4 py-2 rounded-full text-xs font-normal text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -219,10 +221,10 @@ export default function ReviewModal({ onClose, onSuccess }) {
                     {loading ? (
                       <>
                         <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                        <span>Submitting...</span>
+                        <span>{t('reviewModal.submitting')}</span>
                       </>
                     ) : (
-                      <span>Submit Review</span>
+                      <span>{t('reviewModal.submitBtn')}</span>
                     )}
                   </span>
                 </button>

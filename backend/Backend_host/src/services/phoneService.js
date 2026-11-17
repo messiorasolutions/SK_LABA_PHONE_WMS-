@@ -78,7 +78,11 @@ class PhoneService {
             status,
             is_archived: isArchived ? 1 : 0,
             is_new_arrival: Boolean(data.is_new_arrival === true || data.is_new_arrival === 1 || data.is_new_arrival === 'true') ? 1 : 0,
-            photos: Array.isArray(data.photos) ? data.photos : null
+            photos: Array.isArray(data.photos) ? data.photos : null,
+            battery_health: data.battery_health !== undefined && data.battery_health !== null && data.battery_health !== '' ? String(data.battery_health).trim() : null,
+            is_genuine_battery: data.is_genuine_battery !== undefined ? Boolean(data.is_genuine_battery === true || data.is_genuine_battery === 1 || data.is_genuine_battery === 'true') : true,
+            is_original_housing: data.is_original_housing !== undefined ? Boolean(data.is_original_housing === true || data.is_original_housing === 1 || data.is_original_housing === 'true') : true,
+            display_size: data.display_size !== undefined && data.display_size !== null && data.display_size !== '' ? String(data.display_size).trim() : null
         };
 
         const newPhone = await (this.phoneRepository || phoneRepository).create(phoneRecord);
@@ -632,7 +636,11 @@ class PhoneService {
             is_new_arrival: data.is_new_arrival !== undefined
                 ? (Boolean(data.is_new_arrival === true || data.is_new_arrival === 1 || data.is_new_arrival === 'true') ? 1 : 0)
                 : (existing.is_new_arrival ? 1 : 0),
-            photos: data.photos !== undefined ? data.photos : existing.photos
+            photos: data.photos !== undefined ? data.photos : existing.photos,
+            battery_health: data.battery_health !== undefined ? (data.battery_health !== null && data.battery_health !== '' ? String(data.battery_health).trim() : null) : existing.battery_health,
+            is_genuine_battery: data.is_genuine_battery !== undefined ? Boolean(data.is_genuine_battery === true || data.is_genuine_battery === 1 || data.is_genuine_battery === 'true') : (existing.is_genuine_battery !== undefined ? Boolean(existing.is_genuine_battery) : true),
+            is_original_housing: data.is_original_housing !== undefined ? Boolean(data.is_original_housing === true || data.is_original_housing === 1 || data.is_original_housing === 'true') : (existing.is_original_housing !== undefined ? Boolean(existing.is_original_housing) : true),
+            display_size: data.display_size !== undefined ? (data.display_size !== null && data.display_size !== '' ? String(data.display_size).trim() : null) : existing.display_size
         };
 
         const updatedPhone = await (this.phoneRepository || phoneRepository).update(id, merged);

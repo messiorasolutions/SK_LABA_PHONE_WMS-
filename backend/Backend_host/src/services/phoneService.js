@@ -847,7 +847,11 @@ class PhoneService {
                 accessory_names: accessoryNames,
                 active_offer: activeOffer,
                 installment: installment,
-                description: phone.description || null
+                description: phone.description || null,
+                battery_health: phone.battery_health || null,
+                is_genuine_battery: phone.is_genuine_battery,
+                is_original_housing: phone.is_original_housing,
+                display_size: phone.display_size || null
             };
         }));
 
@@ -861,83 +865,49 @@ class PhoneService {
             {
                 key: 'brand_name',
                 label: 'Brand',
-                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.brand_name || 'N/A']))
-            },
-            {
-                key: 'main_photo',
-                label: 'Photo',
-                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.main_photo]))
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.brand_name || '—']))
             },
             {
                 key: 'regular_price',
-                label: 'Regular Price',
+                label: 'Price',
                 values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.regular_price]))
-            },
-            {
-                key: 'offer_price',
-                label: 'Offer Price',
-                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.active_offer.has_active_offer ? p.active_offer.offer_price : null]))
-            },
-            {
-                key: 'savings',
-                label: 'Savings / Discount',
-                values: Object.fromEntries(enrichedPhones.map(p => [
-                    p.phone_id,
-                    p.active_offer.has_active_offer ? `${p.active_offer.discount_percentage}% off (Save $${p.active_offer.discount_amount})` : 'None'
-                ]))
             },
             {
                 key: 'phone_condition',
                 label: 'Condition',
-                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.phone_condition]))
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.phone_condition || '—']))
             },
             {
-                key: 'availability_label',
-                label: 'Availability',
-                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.availability_label]))
+                key: 'battery_health',
+                label: 'Battery Health',
+                values: Object.fromEntries(enrichedPhones.map(p => {
+                    const rawHealth = p.battery_health ? (String(p.battery_health).trim().endsWith('%') ? p.battery_health.trim() : `${p.battery_health.trim()}%`) : '';
+                    let batteryDisplay = '—';
+                    if (rawHealth && p.is_genuine_battery !== undefined && p.is_genuine_battery !== null) {
+                        const status = (p.is_genuine_battery !== false && p.is_genuine_battery !== 0) ? 'Genuine Battery' : 'Battery Replaced';
+                        batteryDisplay = `${status} | ${rawHealth}`;
+                    } else if (rawHealth) {
+                        batteryDisplay = rawHealth;
+                    } else if (p.is_genuine_battery !== undefined && p.is_genuine_battery !== null) {
+                        batteryDisplay = (p.is_genuine_battery !== false && p.is_genuine_battery !== 0) ? 'Genuine Battery' : 'Battery Replaced';
+                    }
+                    return [p.phone_id, batteryDisplay];
+                }))
             },
             {
-                key: 'current_stock',
-                label: 'Current Stock',
-                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.current_stock]))
-            },
-            {
-                key: 'colour_options',
-                label: 'Colours',
-                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.colour_options]))
-            },
-            {
-                key: 'storage_names',
-                label: 'Storage Options',
-                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.storage_names.length > 0 ? p.storage_names : ['Standard']]))
+                key: 'display_size',
+                label: 'Screen Size',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.display_size || '—']))
             },
             {
                 key: 'warranty',
                 label: 'Warranty',
-                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.warranty]))
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.warranty || '—']))
             },
             {
-                key: 'accessory_names',
-                label: 'Included Accessories',
-                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.accessory_names.length > 0 ? p.accessory_names : ['None specified']]))
-            },
-            {
-                key: 'installment',
-                label: 'Monthly Instalment',
-                values: Object.fromEntries(enrichedPhones.map(p => [
-                    p.phone_id,
-                    p.installment.installment_enabled && p.installment.starting_monthly_payment
-                        ? `From $${p.installment.starting_monthly_payment}/mo (${p.installment.plans_count} plans)`
-                        : 'Not available'
-                ]))
-            },
-            {
-                key: 'specifications',
-                label: 'Key Specifications',
-                values: Object.fromEntries(enrichedPhones.map(p => [
-                    p.phone_id,
-                    p.specifications.map(s => `${s.name}: ${s.description || ''}`).join('; ') || 'Standard specifications'
-                ]))
+                key: 'availability_label',
+                label: 'Availability',
+                values: Object.fromEntries(enrichedPhones.map(p => [p.phone_id, p.availability_label || '—']))
             }
         ];
 

@@ -687,61 +687,6 @@ export default function PhoneCustomerViewModal({
                 </div>
               )}
 
-              {/* Available Instalment Plans */}
-              {Boolean(phone.installment_enabled) && (
-                <div className="bg-white dark:bg-slate-850 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-xs mb-5">
-                  <div className="flex items-center gap-1.5 mb-2.5">
-                    <CreditCard className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                      Available Instalment Plans
-                    </h3>
-                  </div>
-
-                  {loadingInstallments ? (
-                    <div className="text-xs text-slate-400 py-1 font-normal">
-                      Loading installment plans...
-                    </div>
-                  ) : availablePlans.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-1">
-                      {availablePlans.map((plan) => {
-                        const months = Number(plan.number_of_months || 3);
-                        const rate = Number(plan.interest_rate || 0);
-                        const total = effectivePrice * (1 + rate / 100);
-                        const monthly = total / months;
-
-                        return (
-                          <div
-                            key={plan.installment_plan_id}
-                            className="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 flex flex-col justify-between"
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="text-xs font-semibold text-slate-900 dark:text-white truncate">
-                                {plan.plan_name || 'Instalment Plan'}
-                              </span>
-                              <span className="text-xs font-bold text-rose-600 dark:text-rose-400 shrink-0">
-                                ${monthly.toFixed(2)}/mo
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                              {months} Months • {rate === 0 ? '0% Interest' : `${rate}% Int`} • Total: ${total.toFixed(2)}
-                            </p>
-                            {plan.description && (
-                              <p className="text-[10px] text-slate-400 mt-1 pt-1 border-t border-slate-200/40 dark:border-slate-700/40 truncate">
-                                {plan.description}
-                              </p>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Installment financing enabled for this smartphone.
-                    </p>
-                  )}
-                </div>
-              )}
-
               {/* Action Buttons: Edit & Close */}
               <div className="flex items-center gap-3 pt-2">
                 {onEdit && (

@@ -40,16 +40,25 @@ export default function App() {
     const syncRoute = () => {
       const hash = window.location.hash.toLowerCase();
       const pathname = window.location.pathname.toLowerCase();
+      const search = window.location.search.toLowerCase();
 
-      if (hash === '#smartphones' || pathname === '/smartphones') {
+      if (
+        hash.startsWith('#smartphones') ||
+        hash.includes('phone=') ||
+        hash.includes('phoneid=') ||
+        search.includes('phone=') ||
+        search.includes('phoneid=') ||
+        pathname === '/smartphones' ||
+        pathname.includes('phone-management')
+      ) {
         dispatch(setActiveTab('Smartphones'));
-      } else if (hash === '#marketplace' || pathname === '/marketplace') {
+      } else if (hash.startsWith('#marketplace') || pathname === '/marketplace') {
         dispatch(setActiveTab('Marketplace'));
-      } else if (hash === '#sell-your-phone' || pathname === '/sell-your-phone') {
+      } else if (hash.startsWith('#sell-your-phone') || pathname === '/sell-your-phone') {
         dispatch(setActiveTab('SellYourPhone'));
-      } else if (hash === '#giveaways' || pathname === '/giveaways') {
+      } else if (hash.startsWith('#giveaways') || pathname === '/giveaways') {
         dispatch(setActiveTab('Giveaways'));
-      } else if (hash === '#contact' || pathname === '/contact') {
+      } else if (hash.startsWith('#contact') || pathname === '/contact') {
         dispatch(setActiveTab('Contact Us'));
       } else if (hash === '' || hash === '#' || hash === '#home' || hash === '#reviews' || hash === '#about' || hash === '#deals' || pathname === '/') {
         dispatch(setActiveTab('Home'));
@@ -108,9 +117,12 @@ export default function App() {
 
   const handleNavigateToSmartphones = (phone) => {
     dispatch(setActiveTab('Smartphones'));
-    window.location.hash = '#smartphones';
     if (phone) {
+      const pId = phone.phone_id || phone.id;
+      window.location.hash = `#smartphones?phone=${pId}`;
       setSelectedPhoneForDetail(phone);
+    } else {
+      window.location.hash = '#smartphones';
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

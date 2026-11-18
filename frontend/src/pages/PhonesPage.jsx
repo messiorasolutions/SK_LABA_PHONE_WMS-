@@ -224,20 +224,6 @@ function PhoneModal({ open, onClose, onSubmit, initial, loading, brands }) {
                 className={`w-full ${SPACING.input} border border-gray-300 rounded-lg ${TYPOGRAPHY.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none`}
               />
             </div>
-
-            {/* Installment */}
-            <div className="sm:col-span-2 flex items-center gap-3 mb-4">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={form.installment_enabled}
-                onClick={() => setForm({ ...form, installment_enabled: !form.installment_enabled })}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.installment_enabled ? 'bg-blue-600' : 'bg-gray-300'}`}
-              >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.installment_enabled ? 'translate-x-6' : 'translate-x-1'}`} />
-              </button>
-              <span className={TYPOGRAPHY.label}>Installment Enabled</span>
-            </div>
           </div>
 
           <div className="flex justify-end gap-3 mt-2">

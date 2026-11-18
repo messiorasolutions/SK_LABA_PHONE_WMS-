@@ -40,7 +40,6 @@ export default function Header({ toggleSidebar }) {
     if (path.startsWith('/phone-management') || path.startsWith('/phones')) return 'Phone Management';
     if (path.startsWith('/stock-management') || path.startsWith('/stock') || path.startsWith('/storage-management')) return 'Stock Management';
     if (path.startsWith('/offers') || path.startsWith('/offer-management')) return 'Offers Management';
-    if (path.startsWith('/installment-plans') || path.startsWith('/installments')) return 'Installment Plans Management';
     if (path.startsWith('/inquiries')) return 'Customer Inquiries';
     if (path.startsWith('/reservations')) return 'Customer Reservations';
     if (path.startsWith('/users')) return 'User & Role Management';

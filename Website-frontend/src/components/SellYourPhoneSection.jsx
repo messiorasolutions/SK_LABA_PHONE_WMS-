@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import sellPhoneVideo from '../assets/images/sell-your-phone.mp4';
 import sellPhoneVideo from '../assets/images/v1.mp4';
 import sellPhonePoster from '../assets/images/sell-your-phone-poster.webp';
 
@@ -123,10 +122,8 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
           {t('sellYourPhone.title')}
         </h2>
 
-        <p className="max-w-xl mx-auto text-xs sm:text-sm text-slate-300 font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] px-2">
-          {t('sellYourPhone.desc')}
         <p className="max-w-3xl sm:max-w-4xl md:max-w-none mx-auto text-xs sm:text-sm text-slate-300 font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] px-2 md:whitespace-nowrap">
-          Turn your old smartphone into cash. List your phone with SK LABA PHONE and connect with genuine buyers.
+          {t('sellYourPhone.desc') || 'Turn your old smartphone into cash. List your phone with SK LABA PHONE and connect with genuine buyers.'}
         </p>
 
         <div className="pt-1 sm:pt-2">
@@ -144,22 +141,30 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
         </div>
       </div>
 
-      {/* 2. Video Visual Area in Normal Flow (Completely unobstructed, naturally placed below CTA with smooth mask feathering) */}
-      <div className="relative w-full max-w-[1920px] mx-auto px-2 sm:px-4 md:px-6">
+      {/* 2. Video Visual Area in Normal Flow (Expansive width and height while strictly maintaining 16:9 ratio to prevent zoom) */}
+      <div className="relative w-full max-w-[1550px] mx-auto px-2 sm:px-4 md:px-6">
         <div
-          className="relative w-full aspect-video max-h-[760px] flex items-center justify-center overflow-hidden pointer-events-none select-none"
+          className="relative w-full aspect-video max-h-[850px] flex items-center justify-center overflow-hidden pointer-events-none select-none"
           style={{
-            maskImage: 'linear-gradient(to bottom, transparent 0%, black 140px, black calc(100% - 50px), transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 140px, black calc(100% - 50px), transparent 100%)',
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%)',
           }}
         >
-          {/* Seamless 4-Way Edge Feathering - softly dissolves the video into the surrounding dark theme */}
+          {/* Subtle Edge Feathering - softly dissolves the video into the surrounding dark theme */}
           <div
-            className="absolute inset-x-0 top-0 h-32 sm:h-44 md:h-56 bg-gradient-to-b from-[#050914] via-[#050914]/50 to-transparent pointer-events-none z-10"
+            className="absolute inset-x-0 top-0 h-12 sm:h-16 bg-gradient-to-b from-[#050914] to-transparent pointer-events-none z-10"
             aria-hidden="true"
           />
           <div
-            className="absolute inset-x-0 bottom-0 h-8 sm:h-12 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-10"
+            className="absolute inset-x-0 bottom-0 h-10 sm:h-14 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-10"
+            aria-hidden="true"
+          />
+          <div
+            className="absolute inset-y-0 left-0 w-8 sm:w-16 bg-gradient-to-r from-[#050914] to-transparent pointer-events-none z-10"
+            aria-hidden="true"
+          />
+          <div
+            className="absolute inset-y-0 right-0 w-8 sm:w-16 bg-gradient-to-l from-[#050914] to-transparent pointer-events-none z-10"
             aria-hidden="true"
           />
 
@@ -170,7 +175,7 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
             aria-hidden="true"
             loading="lazy"
             decoding="async"
-            className={`absolute inset-0 w-full h-full object-cover object-top origin-top scale-[1.07] transition-opacity duration-700 ease-out z-0 ${
+            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ease-out z-0 ${
               isVideoLoaded && !prefersReducedMotion ? 'opacity-0' : 'opacity-100'
             }`}
           />
@@ -216,7 +221,7 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
               onError={() => setVideoError(true)}
               aria-hidden="true"
               tabIndex={-1}
-              className={`absolute inset-0 w-full h-full object-cover object-top origin-top scale-[1.07] transition-opacity duration-700 ease-out z-0 ${
+              className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ease-out z-0 ${
                 isVideoLoaded ? 'opacity-100' : 'opacity-0'
               }`}
             />

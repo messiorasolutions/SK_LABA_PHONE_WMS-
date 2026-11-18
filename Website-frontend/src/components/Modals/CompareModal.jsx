@@ -1,8 +1,103 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, Trash2, AlertCircle } from 'lucide-react';
 import phoneService from '../../services/phoneService';
 import { useFavoritesAndCompare } from '../../hooks/useFavoritesAndCompare';
 import { useCurrencyConverter } from '../../hooks/useCurrencyConverter';
+import { resolveImageUrl } from '../../utils/imageHelper';
+
+function RotatingPhoneImage({ phone }) {
+  const allPhotos = useMemo(() => {
+    const list = [];
+    const add = (url) => {
+      if (url && typeof url === 'string') {
+        const trimmed = url.trim();
+        if (trimmed && !list.includes(trimmed)) {
+          list.push(trimmed);
+        }
+      }
+    };
+
+    // 1. Photos array or JSON string
+    if (Array.isArray(phone?.photos)) {
+      phone.photos.forEach(add);
+    } else if (typeof phone?.photos === 'string' && phone.photos.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(phone.photos);
+        if (Array.isArray(parsed)) parsed.forEach(add);
+      } catch (e) {}
+    } else if (typeof phone?.photos === 'string' && phone.photos.includes(',')) {
+      phone.photos.split(',').forEach(add);
+    } else if (phone?.photos) {
+      add(phone.photos);
+    }
+
+    // 2. Main photo
+    if (phone?.main_photo) add(phone.main_photo);
+
+    // 3. Color options photos
+    if (Array.isArray(phone?.colour_options)) {
+      phone.colour_options.forEach((c) => {
+        if (Array.isArray(c?.photos)) {
+          c.photos.forEach(add);
+        } else if (typeof c?.photos === 'string' && c.photos.trim().startsWith('[')) {
+          try {
+            const parsed = JSON.parse(c.photos);
+            if (Array.isArray(parsed)) parsed.forEach(add);
+          } catch (e) {}
+        }
+      });
+    }
+
+    // 4. photo_urls
+    if (Array.isArray(phone?.photo_urls)) {
+      phone.photo_urls.forEach(add);
+    }
+
+    return list;
+  }, [phone]);
+
+  const [currentIdx, setCurrentIdx] = useState(0);
+
+  // Auto change image in every 4 seconds to show all available images
+  useEffect(() => {
+    if (allPhotos.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % allPhotos.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [allPhotos.length]);
+
+  const currentPhoto = allPhotos[currentIdx] ? resolveImageUrl(allPhotos[currentIdx]) : null;
+
+  return (
+    <div className="relative aspect-[3/3.4] w-full bg-[#080D1A] rounded p-2 mb-2 flex items-center justify-center overflow-hidden group">
+      {currentPhoto ? (
+        <img
+          key={currentPhoto}
+          src={currentPhoto}
+          alt={phone.name}
+          className="max-h-full max-w-full object-contain transition-all duration-500 animate-in fade-in"
+        />
+      ) : (
+        <span className="text-xs text-theme-textMuted">SK LABA</span>
+      )}
+
+      {/* Indicator dots if multiple photos */}
+      {allPhotos.length > 1 && (
+        <div className="absolute bottom-1.5 left-0 right-0 flex justify-center gap-1 pointer-events-none">
+          {allPhotos.map((_, i) => (
+            <span
+              key={i}
+              className={`h-1 rounded-full transition-all duration-300 ${
+                i === currentIdx ? 'w-3 bg-white' : 'w-1 bg-white/30'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function CompareModal({
   compareIds = [],
@@ -42,7 +137,70 @@ export default function CompareModal({
   }, [compareIds]);
 
   const phones = comparisonData?.phones || [];
-  const matrix = comparisonData?.comparison_matrix || [];
+
+  const comparisonRows = useMemo(() => [
+    {
+      key: 'name',
+      label: 'Phone Model',
+      getValue: (p) => p.name || '—'
+    },
+    {
+      key: 'brand_name',
+      label: 'Brand',
+      getValue: (p) => p.brand_name || '—'
+    },
+    {
+      key: 'price',
+      label: 'Price',
+      getValue: (p) => {
+        const reg = Number(p.regular_price || p.price || 0);
+        const eff = Number(p.effective_price || p.price || 0);
+        return (
+          <div className="flex flex-col">
+            <span className="font-medium text-white">{formatKrw(eff || reg)}</span>
+            {(eff || reg) > 0 && (
+              <span className="text-[10px] text-theme-textMuted">
+                {formatLkr(convertKrwToLkr(eff || reg))}
+              </span>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'phone_condition',
+      label: 'Condition',
+      getValue: (p) => p.phone_condition || '—'
+    },
+    {
+      key: 'battery_health',
+      label: 'Battery Health',
+      getValue: (p) => {
+        const raw = p.battery_health ? String(p.battery_health).trim() : '';
+        const formattedPct = raw ? (raw.endsWith('%') ? raw : `${raw}%`) : '';
+        if (p.is_genuine_battery !== undefined && p.is_genuine_battery !== null) {
+          const status = (p.is_genuine_battery !== false && p.is_genuine_battery !== 0) ? 'Genuine Battery' : 'Battery Replaced';
+          return formattedPct ? `${status} | ${formattedPct}` : status;
+        }
+        return formattedPct || '—';
+      }
+    },
+    {
+      key: 'display_size',
+      label: 'Screen Size',
+      getValue: (p) => p.display_size || '—'
+    },
+    {
+      key: 'warranty',
+      label: 'Warranty',
+      getValue: (p) => p.warranty || '—'
+    },
+    {
+      key: 'availability',
+      label: 'Availability',
+      getValue: (p) => p.availability_label || p.availability || 'In Stock'
+    }
+  ], [convertKrwToLkr, formatKrw, formatLkr]);
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/70 backdrop-blur-sm transition-opacity duration-300">
@@ -133,10 +291,6 @@ export default function CompareModal({
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {phones.map((p) => {
                   const id = p.phone_id || p.id;
-                  let photo = '';
-                  if (Array.isArray(p.photos) && p.photos.length > 0) photo = p.photos[0];
-                  else if (p.main_photo) photo = p.main_photo;
-
                   const regPrice = Number(p.regular_price || p.price || 0);
                   const effPrice = Number(p.effective_price || p.price || 0);
                   const isSoldOut = p.availability === 'SOLD_OUT';
@@ -149,24 +303,15 @@ export default function CompareModal({
                       <button
                         type="button"
                         onClick={() => removeCompare(id)}
-                        className="absolute top-2 right-2 p-1 rounded-md bg-black/50 text-theme-textMuted hover:text-red-400 hover:bg-black transition-colors cursor-pointer"
+                        className="absolute top-2 right-2 p-1 rounded-md bg-black/50 text-theme-textMuted hover:text-red-400 hover:bg-black transition-colors cursor-pointer z-10"
                         title="Remove from comparison"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
 
                       <div>
-                        <div className="aspect-[3/3.4] w-full bg-[#080D1A] rounded p-2 mb-2 flex items-center justify-center">
-                          {photo ? (
-                            <img
-                              src={photo}
-                              alt={p.name}
-                              className="max-h-full max-w-full object-contain"
-                            />
-                          ) : (
-                            <span className="text-xs text-theme-textMuted">SK LABA</span>
-                          )}
-                        </div>
+                        {/* Auto-rotating Phone Images (changes every 4s through all photos) */}
+                        <RotatingPhoneImage phone={p} />
 
                         <span className="text-[10px] font-normal uppercase tracking-wider text-theme-textMuted">
                           {p.brand_name}
@@ -221,47 +366,35 @@ export default function CompareModal({
                 })}
               </div>
 
-              {/* Technical Comparison Matrix Table */}
+              {/* Technical Comparison Table */}
               <div className="bg-transparent border border-theme-border rounded-lg overflow-x-auto mt-6">
                 <div className="px-3.5 py-2.5 bg-white/[0.02] border-b border-theme-border text-[11px] font-medium uppercase tracking-wider text-theme-textMuted">
-                  Detailed Attribute Breakdown
+                  Comparison
                 </div>
                 <div className="divide-y divide-theme-border/60 min-w-[480px]">
-                  {matrix
-                    .filter((row) => row.key !== 'photos' && row.key !== 'main_photo')
-                    .map((row, idx) => (
-                      <div
-                        key={idx}
-                        className="grid grid-cols-2 md:grid-cols-4 p-3 text-xs hover:bg-white/[0.02] transition-colors items-center"
-                      >
-                        <div className="text-theme-textMuted col-span-2 md:col-span-1 mb-1 md:mb-0 font-normal">
-                          {row.label}
-                        </div>
-
-                        {phones.map((p) => {
-                          const id = p.phone_id || p.id;
-                          const rawVal = row.values ? row.values[id] : undefined;
-                          let displayVal = rawVal;
-
-                          if (Array.isArray(rawVal)) {
-                            displayVal = rawVal.join(', ');
-                          } else if (typeof rawVal === 'boolean') {
-                            displayVal = rawVal ? 'Yes' : 'No';
-                          } else if (rawVal === null || rawVal === undefined) {
-                            displayVal = '—';
-                          }
-
-                          return (
-                            <div
-                              key={id}
-                              className="text-white pr-2 font-normal break-words"
-                            >
-                              {String(displayVal)}
-                            </div>
-                          );
-                        })}
+                  {comparisonRows.map((row, idx) => (
+                    <div
+                      key={idx}
+                      className="grid grid-cols-2 md:grid-cols-4 p-3 text-xs hover:bg-white/[0.02] transition-colors items-center"
+                    >
+                      <div className="text-theme-textMuted col-span-2 md:col-span-1 mb-1 md:mb-0 font-normal">
+                        {row.label}
                       </div>
-                    ))}
+
+                      {phones.map((p) => {
+                        const id = p.phone_id || p.id;
+                        const val = row.getValue(p);
+                        return (
+                          <div
+                            key={id}
+                            className="text-white pr-2 font-normal break-words"
+                          >
+                            {val}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

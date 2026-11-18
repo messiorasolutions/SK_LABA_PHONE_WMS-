@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Heart, GitCompare, Tag, Sparkles } from 'lucide-react';
+import { Heart, GitCompare, Tag, Sparkles, ShoppingCart } from 'lucide-react';
 import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
 import { resolveImageUrl } from '../utils/imageHelper';
 import { useCurrencyConverter } from '../hooks/useCurrencyConverter';
+import { useShopInfo } from '../context/ShopInfoContext';
 
 export default function PhoneCard({
   phone,
@@ -13,6 +14,7 @@ export default function PhoneCard({
 }) {
   const { isFavorite, isInCompare, toggleFavorite, toggleCompare } = useFavoritesAndCompare();
   const { convertKrwToLkr, formatKrw, formatLkr } = useCurrencyConverter();
+  const { getWhatsAppUrl } = useShopInfo();
   const [imageFailed, setImageFailed] = useState(false);
 
   const phoneId = phone.phone_id || phone.id;
@@ -107,6 +109,31 @@ export default function PhoneCard({
     if (onViewDetails) {
       onViewDetails({ ...phone, initialPhotoIdx: selectedPhotoIdx });
     }
+  };
+
+  const handleBuyClick = (e) => {
+    e.stopPropagation();
+    const phoneId = phone.phone_id || phone.id;
+    const directPhoneUrl = phone.is_marketplace
+      ? `${window.location.origin}/#marketplace?phone=${phoneId}`
+      : `${window.location.origin}/#smartphones?phone=${phoneId}`;
+    const storageStr = phone.storage_name || phone.storage || (Array.isArray(phone.phone_storage_options) && phone.phone_storage_options[0]?.storage_name) || '';
+    const priceStr = `${formatKrw(effectivePrice)} (${formatLkr(convertKrwToLkr(effectivePrice))})`;
+
+    const lines = [
+      `*Hello! I would like to reserve this phone:*`,
+      ``,
+      `*Model:* ${phone.name || 'Smartphone'}`,
+      storageStr ? `*Storage:* ${storageStr}` : null,
+      `*Price:* ${priceStr}`,
+      (!phone.is_marketplace && phone.warranty) ? `*Warranty:* ${phone.warranty}` : null,
+      phone.phone_condition ? `*Condition:* ${phone.phone_condition}` : null,
+      `🔗 Link: ${directPhoneUrl}`,
+      ``,
+      `I would like to reserve this phone. Could you please guide me on how to proceed? Thank you!`
+    ].filter(Boolean).join('\n');
+
+    window.open(getWhatsAppUrl(lines), '_blank');
   };
 
   return (
@@ -271,23 +298,39 @@ export default function PhoneCard({
           </h3>
         </div>
 
-        {/* Pricing */}
-        <div className="pt-1.5 sm:pt-2 border-t border-theme-border/40">
-          <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
-            <span className="text-sm sm:text-base md:text-lg font-normal text-white tracking-tight">
-              {formatKrw(effectivePrice)}
-            </span>
-            {hasOffer && (
-              <span className="text-[10px] sm:text-xs text-theme-textMuted line-through font-normal">
-                {formatKrw(regularPrice)}
+        {/* Pricing & Buy Button */}
+        <div className="pt-1.5 sm:pt-2 border-t border-theme-border/40 flex items-center justify-between gap-2">
+          {/* Price information */}
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+              <span className="text-sm sm:text-base md:text-lg font-normal text-white tracking-tight">
+                {formatKrw(effectivePrice)}
               </span>
+              {hasOffer && (
+                <span className="text-[10px] sm:text-xs text-theme-textMuted line-through font-normal">
+                  {formatKrw(regularPrice)}
+                </span>
+              )}
+            </div>
+            {effectivePrice > 0 && (
+              <div className="text-[11px] text-white font-normal tracking-tight">
+                {formatLkr(convertKrwToLkr(effectivePrice))}
+              </div>
             )}
           </div>
-          {effectivePrice > 0 && (
-            <div className="text-[11px] text-white font-normal tracking-tight">
-              {formatLkr(convertKrwToLkr(effectivePrice))}
-            </div>
-          )}
+
+          {/* Buy Button (Cart icon in white/dim + small 'Buy' text below without border) */}
+          <button
+            type="button"
+            onClick={handleBuyClick}
+            title="Buy / Reserve via WhatsApp"
+            className="flex flex-col items-center justify-center shrink-0 p-1 sm:p-1.5 text-white transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95 group/buy"
+          >
+            <ShoppingCart className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-white/70 group-hover/buy:text-white transition-colors" />
+            <span className="text-[9px] sm:text-[10px] text-white/80 group-hover/buy:text-white font-medium leading-tight mt-0.5 tracking-wide">
+              Buy
+            </span>
+          </button>
         </div>
 
         {/* Photo thumbnails under the price (shows up to 3 images) */}

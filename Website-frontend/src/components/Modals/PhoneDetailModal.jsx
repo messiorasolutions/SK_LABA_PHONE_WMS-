@@ -668,8 +668,13 @@ export default function PhoneDetailModal({
   const savings = hasOffer ? regularPrice - effectivePrice : 0;
   const discountPercent = hasOffer ? Math.round((savings / regularPrice) * 100) : 0;
 
+  const directPhoneUrl = React.useMemo(() => {
+    const pId = phone?.phone_id || phone?.id;
+    if (!pId) return window.location.href;
+    return `${window.location.origin}/#smartphones?phone=${pId}`;
+  }, [phone]);
+
   const handleWhatsApp = () => {
-    const pageUrl = window.location.href;
     const colorStr = selectedColor && selectedColor !== 'Default' ? selectedColor : (activeColor?.name || '');
     const storageStr = selectedStorage && selectedStorage !== 'Standard' ? selectedStorage : (phoneStorageOptions[0]?.storage_name || '');
     const priceStr = `${formatKrw(effectivePrice)} (${formatLkr(convertKrwToLkr(effectivePrice))})`;
@@ -677,15 +682,37 @@ export default function PhoneDetailModal({
     const lines = [
       `*Hello! I am interested in this phone from your website:*`,
       ``,
-      `*Model:* ${phone.name}`,
+      `*Model:* ${phone.name || 'Smartphone'}`,
       storageStr ? `*Storage:* ${storageStr}` : null,
       colorStr ? `*Color:* ${colorStr}` : null,
       `*Price:* ${priceStr}`,
       (!isMarketplace && phone.warranty) ? `*Warranty:* ${phone.warranty}` : null,
       phone.phone_condition ? `*Condition:* ${phone.phone_condition}` : null,
-      `🔗 Link: ${pageUrl}`,
+      `🔗 Link: ${directPhoneUrl}`,
       ``,
       `Could you please provide me with more details and availability about this phone? Thank you!`
+    ].filter(Boolean).join('\n');
+
+    window.open(getWhatsAppUrl(lines), '_blank');
+  };
+
+  const handleReserveViaWhatsApp = () => {
+    const colorStr = selectedColor && selectedColor !== 'Default' ? selectedColor : (activeColor?.name || '');
+    const storageStr = selectedStorage && selectedStorage !== 'Standard' ? selectedStorage : (phoneStorageOptions[0]?.storage_name || '');
+    const priceStr = `${formatKrw(effectivePrice)} (${formatLkr(convertKrwToLkr(effectivePrice))})`;
+
+    const lines = [
+      `*Hello! I would like to reserve this phone:*`,
+      ``,
+      `*Model:* ${phone.name || 'Smartphone'}`,
+      storageStr ? `*Storage:* ${storageStr}` : null,
+      colorStr ? `*Color:* ${colorStr}` : null,
+      `*Price:* ${priceStr}`,
+      (!isMarketplace && phone.warranty) ? `*Warranty:* ${phone.warranty}` : null,
+      phone.phone_condition ? `*Condition:* ${phone.phone_condition}` : null,
+      `🔗 Link: ${directPhoneUrl}`,
+      ``,
+      `I would like to reserve this phone. Could you please guide me on how to proceed with the reservation? Thank you!`
     ].filter(Boolean).join('\n');
 
     window.open(getWhatsAppUrl(lines), '_blank');
@@ -697,7 +724,7 @@ export default function PhoneDetailModal({
 
   const handleShare = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(directPhoneUrl);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2500);
     }
@@ -1033,9 +1060,9 @@ export default function PhoneDetailModal({
 
             </div>
 
-            {/* Action Buttons: Reserve or Notify + Sell Phone on the same line */}
-            <div className="space-y-4 pt-1">
-              <div className="w-full">
+            {/* Action Buttons: Reserve / Notify and Reserve via WhatsApp */}
+            <div className="space-y-2.5 pt-1">
+              <div className="flex flex-col gap-2.5 items-start">
                 {isVariantSoldOut ? (
                   <button
                     type="button"
@@ -1049,7 +1076,7 @@ export default function PhoneDetailModal({
                     }
                     className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-950/80 via-zinc-600/70 to-blue-950/80 hover:from-red-900/80 hover:via-zinc-500 hover:to-blue-900/80 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-black/50 group cursor-pointer"
                   >
-                    <span className="w-full h-full py-3 px-4 rounded-full bg-black group-hover:bg-neutral-950 text-slate-300 group-hover:text-white font-normal text-xs sm:text-sm transition-colors text-center truncate flex items-center justify-center">
+                    <span className="w-full h-full py-2.5 px-5 rounded-full bg-black group-hover:bg-neutral-950 text-slate-300 group-hover:text-white font-normal text-xs sm:text-sm transition-colors text-center truncate flex items-center justify-center">
                       Notify When Available
                     </span>
                   </button>
@@ -1068,12 +1095,24 @@ export default function PhoneDetailModal({
                     className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-950/80 via-zinc-600/70 to-blue-950/80 hover:from-red-900/80 hover:via-zinc-500 hover:to-blue-900/80 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-black/50 group cursor-pointer"
                     title={reserveVariantLabel ? `${t('details.reserve')} (${reserveVariantLabel})` : t('details.reserve')}
                   >
-                    <span className="w-full h-full py-3 px-4 rounded-full bg-black group-hover:bg-neutral-950 text-white font-normal text-xs sm:text-sm transition-colors text-center truncate flex items-center justify-center">
+                    <span className="w-full h-full py-2.5 px-5 rounded-full bg-black group-hover:bg-neutral-950 text-white font-normal text-xs sm:text-sm transition-colors text-center truncate flex items-center justify-center">
                       <span className="truncate">{reserveVariantLabel ? `${t('details.reserve')} (${reserveVariantLabel})` : t('details.reserve')}</span>
                     </span>
                   </button>
                 )}
 
+                {/* Reserve via WhatsApp Button */}
+                <button
+                  type="button"
+                  onClick={handleReserveViaWhatsApp}
+                  className="relative inline-flex items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-950/80 via-zinc-600/70 to-blue-950/80 hover:from-red-900/80 hover:via-zinc-500 hover:to-blue-900/80 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-black/50 group cursor-pointer"
+                  title="Reserve via WhatsApp"
+                >
+                  <span className="w-full h-full py-2.5 px-5 rounded-full bg-black group-hover:bg-neutral-950 text-white font-normal text-xs sm:text-sm transition-colors flex items-center justify-center gap-2">
+                    <img src={whatsappIcon} alt="" className="w-4 h-4 object-contain" />
+                    <span>{t('details.reserveViaWhatsApp', 'Reserve via WhatsApp')}</span>
+                  </span>
+                </button>
               </div>
 
               {/* Device Condition & Hardware Specs (Battery Health, Housing, Display Size) */}

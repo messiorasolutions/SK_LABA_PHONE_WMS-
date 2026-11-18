@@ -177,6 +177,51 @@ export default function SmartphonesPage({ onNavigateToHome }) {
     };
   }, []);
 
+  // Auto-open phone detail modal when URL contains phone parameter (e.g. #smartphones?phone=9 or ?phone=9)
+  useEffect(() => {
+    let isCancelled = false;
+
+    const checkAndOpenPhoneFromUrl = async () => {
+      const fullUrl = window.location.href;
+      const match = fullUrl.match(/[?&#]phone(?:Id)?=([a-zA-Z0-9_-]+)/i);
+
+      if (!match || !match[1]) return;
+      const targetId = match[1];
+
+      // 1. Check if phone is already in loaded phones list
+      if (phones && phones.length > 0) {
+        const found = phones.find((p) => String(p.phone_id || p.id) === String(targetId));
+        if (found) {
+          if (!isCancelled) setSelectedPhoneForDetail(found);
+          return;
+        }
+      }
+
+      // 2. Fetch directly from API if not found or while loading
+      try {
+        const res = await phoneService.getPhoneById(targetId);
+        const fetched = res?.data?.data || res?.data;
+        if (fetched && !isCancelled) {
+          const enriched = applyOffersToPhones([fetched], activeOffersRef.current)[0] || fetched;
+          setSelectedPhoneForDetail(enriched);
+        }
+      } catch (err) {
+        console.warn('Could not auto-open phone from URL parameter:', err?.message || err);
+      }
+    };
+
+    checkAndOpenPhoneFromUrl();
+
+    window.addEventListener('hashchange', checkAndOpenPhoneFromUrl);
+    window.addEventListener('popstate', checkAndOpenPhoneFromUrl);
+
+    return () => {
+      isCancelled = true;
+      window.removeEventListener('hashchange', checkAndOpenPhoneFromUrl);
+      window.removeEventListener('popstate', checkAndOpenPhoneFromUrl);
+    };
+  }, [phones]);
+
   const maxCatalogPrice = useMemo(() => {
     if (!phones || phones.length === 0) return 1650000;
     const max = Math.max(...phones.map((p) => Number(p.offer_price || p.price || 0)));
@@ -357,12 +402,17 @@ export default function SmartphonesPage({ onNavigateToHome }) {
           allPhones={phones}
           onClose={() => {
             setSelectedPhoneForDetail(null);
+            if (window.location.hash.includes('phone')) {
+              window.history.replaceState(null, '', window.location.pathname + '#smartphones');
+            }
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onOpenReserve={(p) => setSelectedPhoneForReserve(p)}
           onOpenInquiry={(p) => setSelectedPhoneForInquiry(p)}
           onOpenNotifyBackInStock={(p) => setSelectedPhoneForBackInStock(p)}
           onSelectPhone={(simPhone) => {
+            const pId = simPhone.phone_id || simPhone.id;
+            window.history.replaceState(null, '', `${window.location.pathname}#smartphones?phone=${pId}`);
             setSelectedPhoneForDetail(simPhone);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
@@ -901,7 +951,12 @@ export default function SmartphonesPage({ onNavigateToHome }) {
                 key={phone.phone_id || phone.id}
                 phone={phone}
                 priority={idx < 4}
-                onViewDetails={(p) => { setSelectedPhoneForDetail(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                onViewDetails={(p) => {
+                  const pId = p.phone_id || p.id;
+                  window.history.replaceState(null, '', `${window.location.pathname}#smartphones?phone=${pId}`);
+                  setSelectedPhoneForDetail(p);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 onReserve={(p) => setSelectedPhoneForReserve(p)}
                 onNotifyBackInStock={(p) => setSelectedPhoneForBackInStock(p)}
               />

@@ -40,9 +40,6 @@ export default function Sidebar({ isOpen, onClose }) {
   const isOffersActive =
     location.pathname.startsWith('/offers') ||
     location.pathname.startsWith('/offer-management');
-  const isInstallmentsActive =
-    location.pathname.startsWith('/installment-plans') ||
-    location.pathname.startsWith('/installments');
   const isReservationsActive = location.pathname.startsWith('/reservations');
   const isInquiriesActive = location.pathname.startsWith('/inquiries');
   const isSellRequestsActive = location.pathname.startsWith('/sell-requests') || location.pathname.startsWith('/marketplace');
@@ -200,32 +197,7 @@ export default function Sidebar({ isOpen, onClose }) {
               <span className="truncate">Offers Management</span>
             </NavLink>
 
-            {/* 5. Installment Plans Management (SRS MG-11) */}
-            <NavLink
-              to="/installment-plans"
-              onClick={onClose}
-              className={({ isActive }) =>
-                `group relative flex items-center gap-3.5 pl-4 pr-3 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
-                  isInstallmentsActive
-                    ? 'bg-slate-100/90 dark:bg-slate-800/70 text-slate-900 dark:text-white shadow-2xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/50'
-                }`
-              }
-            >
-              {isInstallmentsActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-rose-600 to-neutral-900 rounded-r-full" />
-              )}
-              <CreditCard
-                className={`w-4 h-4 shrink-0 transition-colors ${
-                  isInstallmentsActive
-                    ? 'text-rose-600 dark:text-rose-400'
-                    : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
-                }`}
-              />
-              <span className="truncate">Installment Plans</span>
-            </NavLink>
-
-            {/* 6. Customer Reservations (SRS ST-07) */}
+            {/* 5. Customer Reservations (SRS ST-07) */}
             <NavLink
               to="/reservations"
               onClick={onClose}

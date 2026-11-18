@@ -152,27 +152,9 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Installment Plans Management (SRS MG-11) */}
-      <Route
-        path="/installment-plans"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <InstallmentPlansPage />
-            </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/installments"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <InstallmentPlansPage />
-            </MainLayout>
-          </ProtectedRoute>
-        }
-      />
+      {/* Installment Plans Management - Redirected to Phone Management */}
+      <Route path="/installment-plans" element={<Navigate to="/phone-management" replace />} />
+      <Route path="/installments" element={<Navigate to="/phone-management" replace />} />
 
       {/* Reservation Management (SRS ST-07) */}
       <Route

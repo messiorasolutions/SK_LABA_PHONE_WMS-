@@ -11,6 +11,8 @@ import {
   ArrowLeft,
   ZoomIn,
   ZoomOut,
+  Gift,
+  Check,
 } from 'lucide-react';
 import whatsappIcon from '../../assets/icons/whatsappicon.png';
 import { useFavoritesAndCompare } from '../../hooks/useFavoritesAndCompare';
@@ -187,7 +189,7 @@ export default function PhoneDetailModal({
   useEffect(() => {
     setPhone(initialPhone);
     const pid = initialPhone?.phone_id || initialPhone?.id;
-    if (pid && !initialPhone?.description) {
+    if (pid && (!initialPhone?.description || !initialPhone?.free_accessories)) {
       phoneService
         .getPhoneById(pid)
         .then((res) => {
@@ -207,6 +209,33 @@ export default function PhoneDetailModal({
   const phoneId = phone?.phone_id || phone?.id;
   const favorited = isFavorite(phoneId);
   const inComparison = isInCompare(phoneId);
+
+  // Parse Free Accessories
+  const freeAccessories = React.useMemo(() => {
+    let raw = phone?.free_accessories || phone?.accessory_ids || phone?.accessory_names;
+    if (!raw) return [];
+    if (typeof raw === 'string') {
+      if (raw.trim().startsWith('[')) {
+        try {
+          raw = JSON.parse(raw);
+        } catch {
+          raw = raw.split(',').map((s) => s.trim()).filter(Boolean);
+        }
+      } else {
+        raw = raw.split(',').map((s) => s.trim()).filter(Boolean);
+      }
+    }
+    if (Array.isArray(raw)) {
+      return raw
+        .map((item) => {
+          if (typeof item === 'string') return item.trim();
+          if (item && typeof item === 'object') return item.name || item.specification_name || String(item);
+          return String(item);
+        })
+        .filter(Boolean);
+    }
+    return [];
+  }, [phone?.free_accessories, phone?.accessory_ids, phone?.accessory_names]);
 
   // Fallback general photos from phone record
   const generalPhotos = React.useMemo(() => {
@@ -949,6 +978,50 @@ export default function PhoneDetailModal({
                   )}
                 </div>
               </div>
+
+              {/* Free Accessories Included (shown before description) */}
+              {freeAccessories.length > 0 && (
+                <div className="bg-neutral-950 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center text-white">
+                        <Gift className="w-3.5 h-3.5 text-white" />
+                      </div>
+                      <h2 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-white">
+                        Free Accessories Included
+                      </h2>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/10 text-white border border-white/15">
+                      {freeAccessories.length} Free {freeAccessories.length === 1 ? 'Item' : 'Items'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    {freeAccessories.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white text-xs sm:text-sm"
+                      >
+                        <div className="w-4 h-4 rounded-full bg-white/15 flex items-center justify-center shrink-0">
+                          <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
+                        </div>
+                        <span className="truncate font-normal text-white">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Description & Overview Section (placed under main image) */}
+              {(phone.description || phone.condition_description) && (
+                <div className="bg-neutral-950 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3 shadow-sm">
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    {isMarketplace ? "Seller's Description & Notes" : t('details.descriptionOverview')}
+                  </h2>
+                  <div className="text-slate-200 font-normal leading-relaxed text-xs sm:text-sm">
+                    <FormattedDescription content={phone.condition_description || phone.description} />
+                  </div>
+                </div>
+              )}
           </div>
 
           {/* Right Column: Title, Pricing, Storage, Purchase, Quick Contact, Warranty & Description, Installments */}
@@ -1190,30 +1263,15 @@ export default function PhoneDetailModal({
                 </p>
               )}
 
-              {/* Warranty & Description Section (under Quick Contact) */}
-              {((!isMarketplace && phone.warranty) || phone.description || phone.condition_description) && (
-                <div className="bg-neutral-950 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3.5 mt-3">
-                  {!isMarketplace && phone.warranty && (
-                    <div className="flex items-center gap-2.5 text-xs sm:text-sm font-normal tracking-wide pb-3 border-b border-white/10">
-                      <span className="text-slate-400 uppercase tracking-wider text-xs">
-                        {t('details.warranty')}:
-                      </span>
-                      <span className="text-white font-medium">
-                        {phone.warranty}
-                      </span>
-                    </div>
-                  )}
-
-                  {(phone.description || phone.condition_description) && (
-                    <div>
-                      <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
-                        {isMarketplace ? "Seller's Description & Notes" : t('details.descriptionOverview')}
-                      </h2>
-                      <div className="text-slate-200 font-normal leading-relaxed text-xs sm:text-sm whitespace-pre-line">
-                        {phone.condition_description || phone.description}
-                      </div>
-                    </div>
-                  )}
+              {/* Warranty Section (under Quick Contact) */}
+              {!isMarketplace && phone.warranty && (
+                <div className="bg-neutral-950 border border-white/10 rounded-2xl p-3.5 px-4 flex items-center justify-between text-xs sm:text-sm mt-3">
+                  <span className="text-slate-400 uppercase tracking-wider text-xs">
+                    {t('details.warranty')}:
+                  </span>
+                  <span className="text-white font-medium">
+                    {phone.warranty}
+                  </span>
                 </div>
               )}
 

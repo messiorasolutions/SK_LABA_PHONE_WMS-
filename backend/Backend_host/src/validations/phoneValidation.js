@@ -22,6 +22,7 @@ function validateCreatePhone(req, res, next) {
         specification_ids,
         warranty,
         accessory_ids,
+        free_accessories,
         description,
         low_stock_level,
         current_stock,
@@ -77,6 +78,10 @@ function validateCreatePhone(req, res, next) {
 
     if (accessory_ids !== undefined && accessory_ids !== null && !Array.isArray(accessory_ids)) {
         return next(new AppError('accessory_ids must be an array of accessory IDs.', 400));
+    }
+
+    if (free_accessories !== undefined && free_accessories !== null && !Array.isArray(free_accessories)) {
+        return next(new AppError('free_accessories must be an array of accessories.', 400));
     }
 
     if (installment_plan_ids !== undefined && installment_plan_ids !== null && !Array.isArray(installment_plan_ids)) {
@@ -188,6 +193,7 @@ function validateUpdatePhone(req, res, next) {
         specification_ids,
         warranty,
         accessory_ids,
+        free_accessories,
         description,
         low_stock_level,
         current_stock,
@@ -243,6 +249,10 @@ function validateUpdatePhone(req, res, next) {
 
     if (accessory_ids !== undefined && accessory_ids !== null && !Array.isArray(accessory_ids)) {
         return next(new AppError('accessory_ids must be an array of accessory IDs.', 400));
+    }
+
+    if (free_accessories !== undefined && free_accessories !== null && !Array.isArray(free_accessories)) {
+        return next(new AppError('free_accessories must be an array of accessories.', 400));
     }
 
     if (installment_plan_ids !== undefined && installment_plan_ids !== null && !Array.isArray(installment_plan_ids)) {

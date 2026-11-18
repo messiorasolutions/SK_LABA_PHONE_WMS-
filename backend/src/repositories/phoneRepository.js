@@ -13,6 +13,7 @@ class PhoneRepository {
             'colour_options',
             'specification_ids',
             'accessory_ids',
+            'free_accessories',
             'installment_plan_ids',
             'photos'
         ];
@@ -25,6 +26,14 @@ class PhoneRepository {
                 } catch (e) { // eslint-disable-line no-unused-vars
                     // keep raw if not valid json
                 }
+            }
+        }
+
+        if (!Array.isArray(formatted.free_accessories)) {
+            if (Array.isArray(formatted.accessory_ids) && formatted.accessory_ids.length > 0 && typeof formatted.accessory_ids[0] === 'string') {
+                formatted.free_accessories = formatted.accessory_ids;
+            } else {
+                formatted.free_accessories = [];
             }
         }
 
@@ -85,6 +94,7 @@ class PhoneRepository {
             delete formatted.description;
             delete formatted.specification_ids;
             delete formatted.accessory_ids;
+            delete formatted.free_accessories;
             delete formatted.installment_plan_ids;
         }
 
@@ -125,11 +135,11 @@ class PhoneRepository {
             INSERT INTO phones (
                 name, brand_id, phone_condition, price,
                 storage_ids, colour_options, specification_ids,
-                warranty, accessory_ids, description,
+                warranty, accessory_ids, free_accessories, description,
                 low_stock_level, current_stock, availability, installment_enabled,
                 installment_plan_ids, status, is_archived, is_new_arrival, photos,
                 battery_health, is_genuine_battery, is_original_housing, display_size
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const values = [
@@ -142,6 +152,7 @@ class PhoneRepository {
             data.specification_ids ? JSON.stringify(data.specification_ids) : null,
             data.warranty || null,
             data.accessory_ids ? JSON.stringify(data.accessory_ids) : null,
+            data.free_accessories ? JSON.stringify(data.free_accessories) : (data.accessory_ids ? JSON.stringify(data.accessory_ids) : null),
             data.description || null,
             data.low_stock_level !== undefined ? data.low_stock_level : 5,
             data.current_stock !== undefined ? data.current_stock : 0,
@@ -519,6 +530,7 @@ class PhoneRepository {
                 specification_ids = ?,
                 warranty = ?,
                 accessory_ids = ?,
+                free_accessories = ?,
                 description = ?,
                 low_stock_level = ?,
                 current_stock = ?,
@@ -546,6 +558,7 @@ class PhoneRepository {
             data.specification_ids ? JSON.stringify(data.specification_ids) : null,
             data.warranty || null,
             data.accessory_ids ? JSON.stringify(data.accessory_ids) : null,
+            data.free_accessories ? JSON.stringify(data.free_accessories) : (data.accessory_ids ? JSON.stringify(data.accessory_ids) : null),
             data.description || null,
             data.low_stock_level !== undefined ? data.low_stock_level : 5,
             data.current_stock !== undefined ? data.current_stock : 0,

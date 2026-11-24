@@ -60,7 +60,7 @@ export default function App() {
         dispatch(setActiveTab('Giveaways'));
       } else if (hash.startsWith('#contact') || pathname === '/contact') {
         dispatch(setActiveTab('Contact Us'));
-      } else if (hash === '' || hash === '#' || hash === '#home' || hash === '#reviews' || hash === '#about' || hash === '#deals' || pathname === '/') {
+      } else if (hash === '' || hash === '#' || hash === '#home' || hash === '#reviews' || hash === '#about' || hash === '#deals' || hash === '#offers' || pathname === '/') {
         dispatch(setActiveTab('Home'));
       }
     };

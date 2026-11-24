@@ -13,8 +13,6 @@ import sellPhonePoster from '../assets/images/sell-your-phone-poster.webp';
  * 3. Video visual container (unobstructed, naturally placed below CTA with 4-way feathering)
  * 4. Intentional bottom separation before Current Special Offers
  */
-const VIDEO_START_TIME = 1; // Start playback at 0:00:01
-
 export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
   const { t } = useTranslation();
   const containerRef = useRef(null);
@@ -42,37 +40,23 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
     }
   }, []);
 
-  // Performance: Defer video loading until near viewport via IntersectionObserver
-  // Ensures critical storefront API requests complete unhindered before video stream is requested
+  // Performance: Load video smoothly when near or in viewport
   useEffect(() => {
     let isMounted = true;
     const el = containerRef.current;
     if (!el || typeof IntersectionObserver === 'undefined') {
-      const timer = setTimeout(() => {
-        if (isMounted) setShouldLoadVideo(true);
-      }, 1500);
-      return () => {
-        isMounted = false;
-        clearTimeout(timer);
-      };
+      setShouldLoadVideo(true);
+      return;
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-            window.requestIdleCallback(() => {
-              if (isMounted) setShouldLoadVideo(true);
-            }, { timeout: 2000 });
-          } else {
-            setTimeout(() => {
-              if (isMounted) setShouldLoadVideo(true);
-            }, 300);
-          }
+          if (isMounted) setShouldLoadVideo(true);
           observer.disconnect();
         }
       },
-      { rootMargin: '200px' }
+      { rootMargin: '300px' }
     );
 
     observer.observe(el);
@@ -83,20 +67,16 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
     };
   }, []);
 
-  // Respect autoplay restrictions: ensure muted play once loaded
+  // Ensure autoplay playback starts smoothly once loaded
   useEffect(() => {
     if (!shouldLoadVideo || prefersReducedMotion || videoError) return;
     const video = videoRef.current;
     if (!video) return;
 
-    if (video.currentTime < VIDEO_START_TIME) {
-      video.currentTime = VIDEO_START_TIME;
-    }
-
     const playPromise = video.play();
     if (playPromise !== undefined) {
       playPromise.catch(() => {
-        // Autoplay may be restricted by browser; poster remains visible
+        // Autoplay may be restricted by browser; poster remains seamlessly visible
       });
     }
   }, [shouldLoadVideo, prefersReducedMotion, videoError]);
@@ -141,13 +121,13 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
         </div>
       </div>
 
-      {/* 2. Video Visual Area in Normal Flow (Expansive width and height while strictly maintaining 16:9 ratio to prevent zoom) */}
+      {/* 2. Video Visual Area in Normal Flow (Decreased height to remove KlingAI watermark while keeping phones & hands perfectly framed) */}
       <div className="relative w-full max-w-[1550px] mx-auto px-2 sm:px-4 md:px-6">
         <div
-          className="relative w-full aspect-video max-h-[850px] flex items-center justify-center overflow-hidden pointer-events-none select-none"
+          className="relative w-full aspect-[16/7.5] sm:aspect-[16/7.2] max-h-[650px] flex items-center justify-center overflow-hidden pointer-events-none select-none"
           style={{
-            maskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%)',
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 25px), transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 25px), transparent 100%)',
           }}
         >
           {/* Subtle Edge Feathering - softly dissolves the video into the surrounding dark theme */}
@@ -156,7 +136,7 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
             aria-hidden="true"
           />
           <div
-            className="absolute inset-x-0 bottom-0 h-10 sm:h-14 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-10"
+            className="absolute inset-x-0 bottom-0 h-16 sm:h-24 bg-gradient-to-t from-black via-black/95 to-transparent pointer-events-none z-10"
             aria-hidden="true"
           />
           <div
@@ -168,14 +148,14 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
             aria-hidden="true"
           />
 
-          {/* Stable Poster / Fallback Image */}
+          {/* Stable Poster / Fallback Image (Frame 0 of v1.mp4) */}
           <img
             src={sellPhonePoster}
             alt=""
             aria-hidden="true"
-            loading="lazy"
+            loading="eager"
             decoding="async"
-            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ease-out z-0 ${
+            className={`absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-500 ease-out z-0 ${
               isVideoLoaded && !prefersReducedMotion ? 'opacity-0' : 'opacity-100'
             }`}
           />
@@ -184,44 +164,19 @@ export default function SellYourPhoneSection({ onNavigateToSellYourPhone }) {
           {shouldLoadVideo && !prefersReducedMotion && !videoError && (
             <video
               ref={videoRef}
-              src={`${sellPhoneVideo}#t=${VIDEO_START_TIME}`}
+              src={sellPhoneVideo}
               poster={sellPhonePoster}
               autoPlay
               muted
+              loop
               playsInline
-              preload="metadata"
-              onLoadedMetadata={() => {
-                if (videoRef.current && videoRef.current.currentTime < VIDEO_START_TIME) {
-                  videoRef.current.currentTime = VIDEO_START_TIME;
-                }
-              }}
-              onCanPlay={() => {
-                if (videoRef.current && videoRef.current.currentTime < VIDEO_START_TIME) {
-                  videoRef.current.currentTime = VIDEO_START_TIME;
-                }
-                setIsVideoLoaded(true);
-              }}
-              onPlaying={() => {
-                if (videoRef.current && videoRef.current.currentTime < VIDEO_START_TIME - 0.2) {
-                  videoRef.current.currentTime = VIDEO_START_TIME;
-                }
-                setIsVideoLoaded(true);
-              }}
-              onTimeUpdate={() => {
-                if (videoRef.current && videoRef.current.currentTime < VIDEO_START_TIME - 0.2) {
-                  videoRef.current.currentTime = VIDEO_START_TIME;
-                }
-              }}
-              onEnded={() => {
-                if (videoRef.current) {
-                  videoRef.current.currentTime = VIDEO_START_TIME;
-                  videoRef.current.play().catch(() => {});
-                }
-              }}
+              preload="auto"
+              onLoadedData={() => setIsVideoLoaded(true)}
+              onPlaying={() => setIsVideoLoaded(true)}
               onError={() => setVideoError(true)}
               aria-hidden="true"
               tabIndex={-1}
-              className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ease-out z-0 ${
+              className={`absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-500 ease-out z-0 ${
                 isVideoLoaded ? 'opacity-100' : 'opacity-0'
               }`}
             />

@@ -34,6 +34,31 @@ function errorHandler(err, req, res, next) { // eslint-disable-line no-unused-va
         });
     }
 
+    // Handle MySQL Unknown Column / Field Error
+    if (err.code === 'ER_BAD_FIELD_ERROR' || err.errno === 1054) {
+        console.error('Database Bad Field Error:', err.sqlMessage || err.message);
+        return res.status(400).json({
+            success: false,
+            message: `Database field mismatch: ${err.sqlMessage || 'A database column is missing or unrecognized.'}`
+        });
+    }
+
+    // Handle MySQL Data Too Long Error
+    if (err.code === 'ER_DATA_TOO_LONG' || err.errno === 1406) {
+        return res.status(400).json({
+            success: false,
+            message: 'Uploaded data or images are too large for the database column.'
+        });
+    }
+
+    // Handle MySQL Net Packet Too Large Error
+    if (err.code === 'ER_NET_PACKET_TOO_LARGE' || err.errno === 1153) {
+        return res.status(413).json({
+            success: false,
+            message: 'Uploaded payload or images exceed the maximum allowed packet size.'
+        });
+    }
+
     // Handle AppError (custom operational errors)
     if (err.isOperational) {
         return res.status(err.statusCode || 400).json({

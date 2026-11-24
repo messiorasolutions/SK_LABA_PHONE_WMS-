@@ -8,6 +8,7 @@ import { getActiveOffers } from '../services/offerService';
 import phoneService from '../services/phoneService';
 import { reviewService } from '../services/reviewService';
 import { setActiveTab } from '../actions/heroActions';
+import { formatKrw, formatKrwParts } from '../services/currencyService';
 import SellYourPhoneSection from '../components/SellYourPhoneSection';
 import aboutWebp from '../assets/images/about.webp';
 import aboutImg from '../assets/images/about.jpg';
@@ -40,6 +41,7 @@ function ReviewComment({ comment }) {
 // Helper to append optimal web sizing & format to external imagery
 function optimizeImageUrl(url, width = 500) {
   if (!url || typeof url !== 'string') return '';
+  if (url.startsWith('data:')) return url;
   if (url.includes('images.unsplash.com') && !url.includes('w=')) {
     const separator = url.includes('?') ? '&' : '?';
     return `${url}${separator}w=${width}&auto=format&q=80`;
@@ -123,9 +125,39 @@ function OfferCard({ offer, allPhones, onNavigate }) {
     ? offer.title
     : (offer.description || 'Avurudu Mega Savings (Limited Stock)');
 
+  const phoneWithOffer = React.useMemo(() => {
+    const regPrice = Number(matchedPhone?.price || offer.regular_price || 0);
+    const offPrice = Number(offer.offer_price || 0);
+    const savings = regPrice > offPrice ? regPrice - offPrice : Number(offer.discount_amount || 0);
+    const discountPct =
+      regPrice > 0 && savings > 0
+        ? Math.round((savings / regPrice) * 100)
+        : Number(offer.discount_percentage || 0);
+
+    const basePhone = matchedPhone || (Array.isArray(offer.phones) && offer.phones[0]) || {
+      phone_id: offer.phone_ids?.[0] || 'offer',
+      name: offer.title,
+    };
+
+    return {
+      ...basePhone,
+      offer_price: offPrice,
+      regular_price: regPrice,
+      active_offer: {
+        has_active_offer: true,
+        offer_id: offer.offer_id,
+        offer_title: offer.title,
+        offer_price: offPrice,
+        regular_price: regPrice,
+        discount_percentage: discountPct,
+        savings: savings,
+      },
+    };
+  }, [matchedPhone, offer]);
+
   return (
     <div
-      onClick={() => onNavigate(matchedPhone)}
+      onClick={() => onNavigate(phoneWithOffer)}
       className="relative w-full bg-black hover:bg-neutral-950 rounded-2xl p-3.5 sm:p-4 flex flex-col justify-between transition-all duration-300 shadow-xl shadow-black/90 group cursor-pointer overflow-hidden hover:scale-[1.01]"
     >
       {/* Top Media Container: Dark Mode, no container stroke */}
@@ -215,12 +247,18 @@ function OfferCard({ offer, allPhones, onNavigate }) {
 
           {/* Row 4: Price Section */}
           <div className="flex items-baseline gap-2.5 mb-3.5">
-            <span className="text-lg sm:text-xl font-normal text-white tracking-tight">
-              ${Number(offer.offer_price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <span className="text-base sm:text-lg font-normal text-white tracking-tight flex items-baseline gap-1">
+              <span>{formatKrwParts(offer.offer_price).number}</span>
+              <span className="text-xs text-slate-300 font-normal">
+                {formatKrwParts(offer.offer_price).unit}
+              </span>
             </span>
             {regularPrice > 0 && (
-              <span className="text-xs sm:text-sm text-slate-500 line-through font-normal">
-                ${regularPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <span className="text-xs sm:text-sm text-slate-500 line-through font-normal flex items-baseline gap-0.5">
+                <span>{formatKrwParts(regularPrice).number}</span>
+                <span className="text-[10px]">
+                  {formatKrwParts(regularPrice).unit}
+                </span>
               </span>
             )}
           </div>
@@ -231,7 +269,7 @@ function OfferCard({ offer, allPhones, onNavigate }) {
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            onNavigate(matchedPhone);
+            onNavigate(phoneWithOffer);
           }}
           className="w-full mt-auto py-2.5 px-4 rounded-full bg-black hover:bg-neutral-900 border border-neutral-700 hover:border-neutral-500 text-white text-xs sm:text-sm font-normal flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-md group/btn cursor-pointer"
         >
@@ -404,32 +442,33 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
       {/* Sell Your Phone Video Section */}
       <SellYourPhoneSection onNavigateToSellYourPhone={handleGoToSellYourPhone} />
 
-      {activeOffers.length > 0 && (
-        <section id="deals" className="pt-6 sm:pt-8 pb-12 sm:pb-16 bg-black scroll-mt-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
-              <div>
-                <span className="text-xs font-normal uppercase tracking-wider text-theme-textSecondary mb-1 block">
-                  {t('home.limitedTimeDeals')}
-                </span>
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-white tracking-tight flex items-center gap-2">
-                  <span>{t('home.currentSpecialOffers')}</span>
-                  <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-theme-textSecondary" />
-                </h2>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleGoToSmartphones}
-                className="inline-flex self-start sm:self-auto items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
-              >
-                <span className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
-                  <span>{t('home.viewInSmartphones')}</span>
-                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-0.5 transition-transform" />
-                </span>
-              </button>
+      <section id="deals" className="pt-6 sm:pt-8 pb-12 sm:pb-16 bg-black scroll-mt-20">
+        <div id="offers"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+            <div>
+              <span className="text-xs font-normal uppercase tracking-wider text-theme-textSecondary mb-1 block">
+                {t('home.limitedTimeDeals')}
+              </span>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-white tracking-tight flex items-center gap-2">
+                <span>{t('home.currentSpecialOffers')}</span>
+                <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-theme-textSecondary" />
+              </h2>
             </div>
 
+            <button
+              type="button"
+              onClick={handleGoToSmartphones}
+              className="inline-flex self-start sm:self-auto items-center justify-center p-[1px] rounded-full bg-gradient-to-r from-red-600 via-blue-700 to-blue-900 hover:from-red-500 hover:via-blue-600 hover:to-blue-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-black/60 group cursor-pointer"
+            >
+              <span className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-black group-hover:bg-neutral-950 text-white text-xs font-normal transition-colors duration-200">
+                <span>{t('home.viewInSmartphones')}</span>
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-0.5 transition-transform" />
+              </span>
+            </button>
+          </div>
+
+          {activeOffers.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
               {activeOffers.map((offer) => (
                 <OfferCard
@@ -440,9 +479,28 @@ export default function HomePage({ onNavigateToSmartphones, onNavigateToSellYour
                 />
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          ) : (
+            <div className="w-full rounded-2xl bg-neutral-950 border border-white/10 p-10 sm:p-14 text-center flex flex-col items-center justify-center">
+              <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 mb-4">
+                <Tag className="w-6 h-6 text-slate-400" />
+              </div>
+              <h3 className="text-base sm:text-lg font-medium text-white mb-2">
+                Haven't Any Offers Yet
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto mb-6">
+                There are no active special offers right now. Check back soon for exclusive deals and discounts, or browse our smartphone collection!
+              </p>
+              <button
+                type="button"
+                onClick={handleGoToSmartphones}
+                className="px-6 py-2.5 rounded-full bg-white hover:bg-slate-200 text-black text-xs font-medium transition-all shadow-md hover:scale-[1.02] cursor-pointer"
+              >
+                Browse Smartphones
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* About Us Section */}
       <section id="about" className="pt-2 sm:pt-4 pb-16 sm:pb-24 bg-black scroll-mt-20">

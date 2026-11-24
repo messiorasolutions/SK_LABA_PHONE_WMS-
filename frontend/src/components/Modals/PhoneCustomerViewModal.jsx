@@ -17,8 +17,10 @@ import {
 } from 'lucide-react';
 import FormattedDescription from '../Common/FormattedDescription';
 import InstallmentPlanService from '../../services/installmentPlanService';
+import { useCurrencyConverter } from '../../hooks/useCurrencyConverter';
 
 function SimilarPhoneCard({ simPhone, onSelectPhone }) {
+  const { formatKrw } = useCurrencyConverter();
   const generalPhotos = useMemo(() => {
     if (Array.isArray(simPhone?.photos) && simPhone.photos.length > 0) return simPhone.photos;
     if (Array.isArray(simPhone?.photo_urls) && simPhone.photo_urls.length > 0) return simPhone.photo_urls;
@@ -110,7 +112,7 @@ function SimilarPhoneCard({ simPhone, onSelectPhone }) {
             {simPhone.name}
           </h3>
           <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 block mt-1">
-            ${Number(simPhone.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {formatKrw(simPhone.price)}
           </span>
         </div>
 
@@ -146,6 +148,7 @@ export default function PhoneCustomerViewModal({
   if (!isOpen || !phone) return null;
 
   const phoneId = phone?.phone_id || phone?.id;
+  const { convertKrwToLkr, formatKrw, formatKrwParts, formatLkr } = useCurrencyConverter();
 
   // Fallback general photos from phone record
   const generalPhotos = useMemo(() => {
@@ -611,20 +614,30 @@ export default function PhoneCustomerViewModal({
             <div>
               {/* Title & Price on the same line */}
               <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 mb-4">
-                <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white leading-snug flex flex-wrap items-baseline gap-x-2.5">
-                  <span>{phone.name}</span>
-                  {selectedStorage && !phone.name?.toLowerCase().includes(selectedStorage.toLowerCase()) && (
-                    <span className="text-xl sm:text-2xl text-slate-400 dark:text-slate-500 font-normal">{selectedStorage}</span>
-                  )}
+                <h1 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white leading-snug">
+                  {phone.name}
                 </h1>
-                <div className="flex items-baseline gap-3 ml-auto text-right">
-                  <span className="text-2xl sm:text-3xl font-normal text-slate-900 dark:text-white tracking-tight">
-                    ${effectivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                  {hasOffer && (
-                    <span className="text-sm sm:text-base text-slate-400 line-through font-normal">
-                      ${regularPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <div className="flex flex-col items-end gap-0.5 ml-auto text-right">
+                  <div className="flex items-baseline gap-2.5">
+                    <span className="text-xl sm:text-2xl font-normal text-slate-900 dark:text-white tracking-tight flex items-baseline gap-1">
+                      <span>{formatKrwParts(effectivePrice).number}</span>
+                      <span className="text-xs sm:text-sm font-normal text-slate-500 dark:text-slate-400">
+                        {formatKrwParts(effectivePrice).unit}
+                      </span>
                     </span>
+                    {hasOffer && (
+                      <span className="text-xs sm:text-sm text-slate-400 line-through font-normal flex items-baseline gap-0.5">
+                        <span>{formatKrwParts(regularPrice).number}</span>
+                        <span className="text-[10px] sm:text-xs text-slate-400">
+                          {formatKrwParts(regularPrice).unit}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                  {effectivePrice > 0 && (
+                    <div className="text-xs sm:text-sm font-normal text-slate-600 dark:text-slate-400">
+                      {formatLkr(convertKrwToLkr(effectivePrice))}
+                    </div>
                   )}
                 </div>
               </div>
@@ -738,18 +751,10 @@ export default function PhoneCustomerViewModal({
               {/* Free Accessories Included */}
               {freeAccessories.length > 0 && (
                 <div className="bg-white dark:bg-slate-850 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-xs mt-3">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/15 flex items-center justify-center text-slate-800 dark:text-white">
-                        <Gift className="w-3.5 h-3.5 text-slate-800 dark:text-white" />
-                      </div>
-                      <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-white">
-                        Free Accessories Included
-                      </h2>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-white border border-slate-200 dark:border-white/15">
-                      {freeAccessories.length} Free {freeAccessories.length === 1 ? 'Item' : 'Items'}
-                    </span>
+                  <div className="mb-3">
+                    <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-white">
+                      Free Accessories Included
+                    </h2>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {freeAccessories.map((item, idx) => (

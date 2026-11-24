@@ -15,6 +15,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import marketplaceAdminService from '../../services/marketplaceAdminService';
+import { useCurrencyConverter } from '../../hooks/useCurrencyConverter';
 
 function formatCurrency(amount) {
   const num = Number(amount || 0);
@@ -22,6 +23,7 @@ function formatCurrency(amount) {
 }
 
 export default function MarketplaceSettingsView() {
+  const { convertKrwToLkr, formatKrw, formatLkr } = useCurrencyConverter();
   // Sub-tabs: 'commission' | 'seller_terms' | 'buyer_terms'
   const [activeSection, setActiveSection] = useState('commission');
 
@@ -367,33 +369,58 @@ export default function MarketplaceSettingsView() {
             <div className="space-y-3 pt-1">
               <div>
                 <label className="text-xs font-normal text-slate-700 dark:text-slate-300 block mb-1">
-                  Simulated Listed Price (Rs.):
+                  Simulated Listed Price (만원 / Man-won):
                 </label>
                 <input
                   type="number"
+                  step="any"
+                  min="0"
+                  placeholder="e.g. 50"
                   value={simPrice}
                   onChange={(e) => setSimPrice(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-normal text-slate-900 dark:text-white focus:outline-none"
                 />
+                {numericSimPrice > 0 && (
+                  <div className="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                    ≈ {formatLkr(convertKrwToLkr(numericSimPrice))} (1 만원 = 10,000 KRW)
+                  </div>
+                )}
               </div>
 
               {/* Simulation Breakdown */}
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700 space-y-2 text-xs">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700 space-y-2.5 text-xs">
                 <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 font-normal">
                   <span>Customer Listed Price:</span>
-                  <span className="font-normal text-slate-900 dark:text-white">
-                    {formatCurrency(numericSimPrice)}
-                  </span>
+                  <div className="text-right">
+                    <span className="font-semibold text-slate-900 dark:text-white block">
+                      {formatKrw(numericSimPrice)}
+                    </span>
+                    <span className="text-[11px] text-slate-400 block font-normal">
+                      {formatLkr(convertKrwToLkr(numericSimPrice))}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 font-normal">
                   <span>Platform Fee ({commissionRate}%):</span>
-                  <span className="font-normal text-rose-600 dark:text-rose-400">- {formatCurrency(simCommissionAmount)}</span>
+                  <div className="text-right">
+                    <span className="font-semibold text-rose-600 dark:text-rose-400 block">
+                      - {formatKrw(simCommissionAmount)}
+                    </span>
+                    <span className="text-[11px] text-rose-500/80 dark:text-rose-400/80 block font-normal">
+                      - {formatLkr(convertKrwToLkr(simCommissionAmount))}
+                    </span>
+                  </div>
                 </div>
                 <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between font-normal">
-                  <span className="text-slate-900 dark:text-white">Expected Seller Payout:</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-normal text-sm">
-                    {formatCurrency(simSellerPayout)}
-                  </span>
+                  <span className="text-slate-900 dark:text-white font-medium">Expected Seller Payout:</span>
+                  <div className="text-right">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold text-sm block">
+                      {formatKrw(simSellerPayout)}
+                    </span>
+                    <span className="text-[11px] text-emerald-600/90 dark:text-emerald-400/90 block font-medium">
+                      {formatLkr(convertKrwToLkr(simSellerPayout))}
+                    </span>
+                  </div>
                 </div>
               </div>
 

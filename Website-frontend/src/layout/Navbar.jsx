@@ -19,6 +19,7 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
       case 'Marketplace': return t('nav.marketplace');
       case 'Giveaways': return t('nav.giveaways');
       case 'Reviews': return t('nav.reviews');
+      case 'Offers':
       case 'Deals': return t('nav.deals');
       case 'Contact Us': return t('nav.contact');
       default: return name;
@@ -57,10 +58,10 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
           const el = document.getElementById('reviews');
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         }, 100);
-      } else if (hash === '#deals') {
+      } else if (hash === '#deals' || hash === '#offers') {
         dispatch(setActiveTab('Home'));
         setTimeout(() => {
-          const el = document.getElementById('deals');
+          const el = document.getElementById('deals') || document.getElementById('offers');
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         }, 100);
       } else if (hash === '#about') {
@@ -109,11 +110,11 @@ export default function Navbar({ onOpenFavorites, onOpenSell }) {
           el.scrollIntoView({ behavior: 'smooth' });
         }
       }, 50);
-    } else if (tabName === 'Deals') {
+    } else if (tabName === 'Offers' || tabName === 'Deals') {
       dispatch(setActiveTab('Home'));
       window.location.hash = '#deals';
       setTimeout(() => {
-        const el = document.getElementById('deals');
+        const el = document.getElementById('deals') || document.getElementById('offers');
         if (el) {
           el.scrollIntoView({ behavior: 'smooth' });
         }

@@ -32,6 +32,7 @@ import MarketplaceOrdersView from '../components/Marketplace/MarketplaceOrdersVi
 import MarketplaceSettingsView from '../components/Marketplace/MarketplaceSettingsView';
 import ErrorBoundary from '../components/Common/ErrorBoundary';
 import { Sliders, Percent } from 'lucide-react';
+import { useCurrencyConverter } from '../hooks/useCurrencyConverter';
 
 function formatCurrency(amount) {
   const num = Number(amount || 0);
@@ -79,6 +80,7 @@ const LEGACY_STATUS_CONFIG = {
 };
 
 export default function SellRequestsPage() {
+  const { convertKrwToLkr, formatKrw, formatLkr } = useCurrencyConverter();
   // Active Management Tab: 'marketplace' | 'orders' | 'legacy'
   const [activeTab, setActiveTab] = useState('marketplace');
 
@@ -604,13 +606,23 @@ export default function SellRequestsPage() {
                           </td>
 
                           {/* Asking Price */}
-                          <td className="px-4 py-3 text-right font-normal text-slate-900 dark:text-white">
-                            {formatCurrency(asking)}
+                          <td className="px-4 py-3 text-right">
+                            <span className="font-medium text-slate-900 dark:text-white block">
+                              {formatKrw(asking)}
+                            </span>
+                            <span className="text-[11px] text-slate-400 block font-normal">
+                              {formatLkr(convertKrwToLkr(asking))}
+                            </span>
                           </td>
 
                           {/* Seller Payout */}
-                          <td className="px-4 py-3 text-right font-normal text-emerald-600 dark:text-emerald-400">
-                            {formatCurrency(payout)}
+                          <td className="px-4 py-3 text-right">
+                            <span className="font-semibold text-emerald-600 dark:text-emerald-400 block">
+                              {formatKrw(payout)}
+                            </span>
+                            <span className="text-[11px] text-emerald-500/80 dark:text-emerald-400/80 block font-normal">
+                              {formatLkr(convertKrwToLkr(payout))}
+                            </span>
                           </td>
 
                           {/* Status */}

@@ -27,6 +27,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
+import { useCurrencyConverter } from '../../hooks/useCurrencyConverter';
 
 function resolvePhotoUrl(url) {
   if (!url || typeof url !== 'string') return '';
@@ -127,11 +128,13 @@ export default function MarketplaceListingDetailModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isLightboxOpen, photos.length]);
 
+  const { convertKrwToLkr, formatKrw, formatLkr } = useCurrencyConverter();
+
   if (!listing) return null;
 
   const askingPrice = Number(listing.price || 0);
-  const commission = Math.round((askingPrice * 5) / 100);
-  const sellerPayout = Math.max(0, askingPrice - commission);
+  const commission = Math.round((askingPrice * 0.05) * 100) / 100;
+  const sellerPayout = Math.max(0, Math.round((askingPrice - commission) * 100) / 100);
 
   const handleExecutePrompt = async () => {
     setActionError('');
@@ -229,39 +232,47 @@ export default function MarketplaceListingDetailModal({
     : '';
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5"
-    >
-      <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[1px] transition-opacity"
+        onClick={onClose}
+      />
+
+      {/* Slide-over Right Panel */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="fixed top-0 right-0 bottom-0 z-50 w-full sm:w-[600px] md:w-[720px] lg:w-[840px] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col transform transition-transform duration-200 ease-out animate-in slide-in-from-right"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/75 dark:bg-slate-900/90 shrink-0">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
           <div>
-            <div className="flex items-center gap-2.5">
-              <span className="text-[11px] font-normal uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 {listing.listing_ref || `ID #${listing.listing_id}`}
               </span>
-              <span className="text-xs font-normal text-slate-700 dark:text-slate-300">
+              <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
                 • {listing.status?.replace(/_/g, ' ')}
               </span>
             </div>
-            <h2 className="text-lg font-normal text-slate-900 dark:text-white mt-0.5">
+            <h3 className="font-bold text-base text-slate-900 dark:text-white mt-0.5">
               {listing.brand} {listing.model}
-            </h2>
+            </h3>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center transition-colors cursor-pointer"
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Close"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {actionError && (
             <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
@@ -319,24 +330,39 @@ export default function MarketplaceListingDetailModal({
               )}
 
               {/* Financial Box */}
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 space-y-2">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 space-y-2.5">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-500 dark:text-slate-400 font-normal">Asking Listed Price:</span>
-                  <span className="font-normal text-slate-900 dark:text-white text-sm">
-                    {formatCurrency(askingPrice)}
-                  </span>
+                  <div className="text-right">
+                    <span className="font-semibold text-slate-900 dark:text-white text-sm block">
+                      {formatKrw(askingPrice)}
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 block font-normal">
+                      {formatLkr(convertKrwToLkr(askingPrice))}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-500 dark:text-slate-400 font-normal">Marketplace Fee (5%):</span>
-                  <span className="font-normal text-rose-600 dark:text-rose-400">
-                    - {formatCurrency(commission)}
-                  </span>
+                  <div className="text-right">
+                    <span className="font-semibold text-rose-600 dark:text-rose-400 text-xs block">
+                      - {formatKrw(commission)}
+                    </span>
+                    <span className="text-[11px] text-rose-500/80 dark:text-rose-400/80 block font-normal">
+                      - {formatLkr(convertKrwToLkr(commission))}
+                    </span>
+                  </div>
                 </div>
                 <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
-                  <span className="font-normal text-slate-900 dark:text-white">Seller Payout:</span>
-                  <span className="font-normal text-emerald-600 dark:text-emerald-400 text-sm">
-                    {formatCurrency(sellerPayout)}
-                  </span>
+                  <span className="font-semibold text-slate-900 dark:text-white">Seller Payout:</span>
+                  <div className="text-right">
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm block">
+                      {formatKrw(sellerPayout)}
+                    </span>
+                    <span className="text-[11px] text-emerald-600/90 dark:text-emerald-400/90 block font-medium">
+                      {formatLkr(convertKrwToLkr(sellerPayout))}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -498,14 +524,22 @@ export default function MarketplaceListingDetailModal({
               {promptAction === 'sold' && (
                 <div className="space-y-2">
                   <label className="text-xs text-slate-600 dark:text-slate-300 block">
-                    Final Selling Price (Rs.):
+                    Final Selling Price (만원 / Man-won):
                   </label>
                   <input
                     type="number"
+                    step="any"
+                    min="0"
+                    placeholder="e.g. 155"
                     value={soldPriceInput}
                     onChange={(e) => setSoldPriceInput(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white"
                   />
+                  {soldPriceInput && Number(soldPriceInput) > 0 && (
+                    <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                      ≈ {formatLkr(convertKrwToLkr(soldPriceInput))} (1 만원 = 10,000 KRW)
+                    </div>
+                  )}
                   <p className="text-[11px] text-slate-500">
                     Marking this listing as SOLD will automatically archive the phone from the customer-facing
                     Marketplace and Smartphones catalogue so buyers can no longer purchase or reserve it.
@@ -801,6 +835,6 @@ export default function MarketplaceListingDetailModal({
           )}
         </div>
       )}
-    </div>
+    </>
   );
 }

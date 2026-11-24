@@ -20,7 +20,7 @@ export const NAV_LINKS = [
   { name: 'Marketplace', path: '#marketplace' },
   { name: 'Giveaways', path: '#giveaways' },
   { name: 'Reviews', path: '#reviews' },
-  { name: 'Deals', path: '#deals' },
+  { name: 'Offers', path: '#deals' },
   { name: 'Contact Us', path: '#contact' },
 ];
 

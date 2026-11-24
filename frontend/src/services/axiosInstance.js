@@ -26,11 +26,20 @@ const axiosInstance = axios.create({
   timeout: 25000, // 25 seconds timeout for admin dashboard operations
 });
 
-// Request interceptor: Attach X-CSRF-Token on state-mutating requests (PDF Section 1.3 & 8.8)
+// Request interceptor: Attach Session/Bearer Token and X-CSRF-Token (PDF Section 1.3 & 8.8)
 axiosInstance.interceptors.request.use(
   (config) => {
     const csrfToken = sessionStorage.getItem('csrfToken');
+    const sessionToken = sessionStorage.getItem('sessionToken') || localStorage.getItem('sessionToken');
     const method = (config.method || 'get').toLowerCase();
+
+    config.headers = config.headers || {};
+
+    // Attach Session Token as both Authorization Bearer and X-Session-Token header for bulletproof cross-domain auth
+    if (sessionToken) {
+      config.headers['Authorization'] = `Bearer ${sessionToken}`;
+      config.headers['X-Session-Token'] = sessionToken;
+    }
 
     // Check if endpoint is a public auth endpoint (exempt from CSRF requirement per Section 1.3)
     const isPublicAuth =
@@ -41,7 +50,6 @@ axiosInstance.interceptors.request.use(
 
     // CSRF header required for authenticated POST, PUT, PATCH, DELETE requests
     if (!isPublicAuth && csrfToken && ['post', 'put', 'patch', 'delete'].includes(method)) {
-      config.headers = config.headers || {};
       config.headers['X-CSRF-Token'] = csrfToken;
     }
     return config;
@@ -100,10 +108,17 @@ axiosInstance.interceptors.response.use(
         (originalRequest.url.includes('/auth/me') || originalRequest.url.includes('/auth/login'));
 
       if (!isAuthCheck) {
+        const sessionToken = sessionStorage.getItem('sessionToken') || localStorage.getItem('sessionToken');
         try {
           // Double check if the user session is still alive before tearing down state
           const meRes = await axios.get(`${API_BASE_URL}/api/auth/me`, {
             withCredentials: true,
+            headers: sessionToken
+              ? {
+                  Authorization: `Bearer ${sessionToken}`,
+                  'X-Session-Token': sessionToken,
+                }
+              : {},
           });
           if (meRes.data?.success && meRes.data?.data?.user) {
             // Session is still valid; retry the original request
@@ -113,6 +128,8 @@ axiosInstance.interceptors.response.use(
           // Only redirect if /api/auth/me confirms session is dead
           if (authErr.response?.status === 401) {
             sessionStorage.removeItem('csrfToken');
+            sessionStorage.removeItem('sessionToken');
+            localStorage.removeItem('sessionToken');
             if (window.location.pathname !== '/login') {
               window.location.href = '/login';
             }

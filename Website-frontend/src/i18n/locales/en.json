@@ -5,7 +5,7 @@
     "marketplace": "Marketplace",
     "giveaways": "Giveaways",
     "reviews": "Reviews",
-    "deals": "Deals",
+    "deals": "Offers",
     "contact": "Contact Us",
     "searchPlaceholder": "Search smartphones...",
     "favourites": "Favourites",
@@ -189,7 +189,7 @@
     "copyright": "All Rights Reserved."
   },
   "common": {
-    "currencyWon": "₩",
+    "currencyWon": "만원",
     "currencyRupees": "Rs.",
     "loading": "Loading...",
     "close": "Close",

@@ -13,7 +13,7 @@ export default function PhoneCard({
   onNotifyBackInStock,
 }) {
   const { isFavorite, isInCompare, toggleFavorite, toggleCompare } = useFavoritesAndCompare();
-  const { convertKrwToLkr, formatKrw, formatLkr } = useCurrencyConverter();
+  const { convertKrwToLkr, formatKrw, formatKrwParts, formatLkr } = useCurrencyConverter();
   const { getWhatsAppUrl } = useShopInfo();
   const [imageFailed, setImageFailed] = useState(false);
 
@@ -303,12 +303,18 @@ export default function PhoneCard({
           {/* Price information */}
           <div className="min-w-0">
             <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
-              <span className="text-sm sm:text-base md:text-lg font-normal text-white tracking-tight">
-                {formatKrw(effectivePrice)}
+              <span className="text-sm sm:text-base md:text-lg font-normal text-white tracking-tight flex items-baseline gap-0.5">
+                <span>{formatKrwParts(effectivePrice).number}</span>
+                <span className="text-[10px] sm:text-xs text-slate-300 font-normal">
+                  {formatKrwParts(effectivePrice).unit}
+                </span>
               </span>
               {hasOffer && (
-                <span className="text-[10px] sm:text-xs text-theme-textMuted line-through font-normal">
-                  {formatKrw(regularPrice)}
+                <span className="text-[10px] sm:text-xs text-theme-textMuted line-through font-normal flex items-baseline gap-0.5">
+                  <span>{formatKrwParts(regularPrice).number}</span>
+                  <span className="text-[9px] sm:text-[10px]">
+                    {formatKrwParts(regularPrice).unit}
+                  </span>
                 </span>
               )}
             </div>

@@ -13,6 +13,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import marketplaceAdminService from '../../services/marketplaceAdminService';
+import { useCurrencyConverter } from '../../hooks/useCurrencyConverter';
 
 function formatCurrency(amount) {
   const num = Number(amount || 0);
@@ -32,6 +33,7 @@ const ORDER_STATUS_CONFIG = {
 };
 
 export default function MarketplaceOrdersView() {
+  const { convertKrwToLkr, formatKrw, formatLkr } = useCurrencyConverter();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -173,14 +175,29 @@ export default function MarketplaceOrdersView() {
                         </span>
                         <span className="text-[10px] text-slate-400 font-normal">{o.seller_phone}</span>
                       </td>
-                      <td className="px-4 py-3 text-right font-normal text-slate-900 dark:text-white">
-                        {formatCurrency(o.total_price)}
+                      <td className="px-4 py-3 text-right">
+                        <span className="font-medium text-slate-900 dark:text-white block">
+                          {formatKrw(o.total_price)}
+                        </span>
+                        <span className="text-[11px] text-slate-400 block font-normal">
+                          {formatLkr(convertKrwToLkr(o.total_price))}
+                        </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-normal text-slate-600 dark:text-slate-400">
-                        {formatCurrency(o.commission_amount)}
+                      <td className="px-4 py-3 text-right">
+                        <span className="font-medium text-slate-600 dark:text-slate-400 block">
+                          {formatKrw(o.commission_amount)}
+                        </span>
+                        <span className="text-[11px] text-slate-400 block font-normal">
+                          {formatLkr(convertKrwToLkr(o.commission_amount))}
+                        </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-normal text-emerald-600 dark:text-emerald-400">
-                        {formatCurrency(o.net_seller_payout)}
+                      <td className="px-4 py-3 text-right">
+                        <span className="font-semibold text-emerald-600 dark:text-emerald-400 block">
+                          {formatKrw(o.net_seller_payout)}
+                        </span>
+                        <span className="text-[11px] text-emerald-500/80 dark:text-emerald-400/80 block font-normal">
+                          {formatLkr(convertKrwToLkr(o.net_seller_payout))}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className="inline-flex items-center gap-1.5 text-xs font-normal text-slate-900 dark:text-slate-100">

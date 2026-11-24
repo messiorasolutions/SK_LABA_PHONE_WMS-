@@ -14,10 +14,12 @@ import {
   Edit2,
   ChevronDown,
   ChevronUp,
+  RefreshCw,
 } from 'lucide-react';
 import { getSellerTerms, submitMarketplaceListing } from '../../services/marketplaceService';
 import { useShopInfo } from '../../context/ShopInfoContext';
 import { formatCurrency } from '../../utils/imageHelper';
+import { useCurrencyConverter } from '../../hooks/useCurrencyConverter';
 
 const STORAGE_OPTIONS = ['64GB', '128GB', '256GB', '512GB', '1TB'];
 
@@ -61,6 +63,14 @@ const STEPS = [
 
 export default function SellPhoneModal({ desiredPhone = null, onClose }) {
   const { getWhatsAppUrl } = useShopInfo();
+  const {
+    rate,
+    loading: rateLoading,
+    refreshRate,
+    convertKrwToLkr,
+    formatKrw,
+    formatLkr,
+  } = useCurrencyConverter();
 
   // Current Step Index (1 = Phone, 2 = Condition, 3 = Photos, 4 = Seller, 5 = Review, 6 = Success)
   const [currentStep, setCurrentStep] = useState(1);
@@ -563,39 +573,77 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
               {/* Price with Live Payout Breakdown */}
               <div>
                 <label className="text-xs font-semibold text-slate-200 block mb-1">
-                  Your Asking Selling Price (Rs.) <span className="text-red-400">*</span>
+                  Your Asking Selling Price (만원 / Man-won) <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">
-                    Rs.
+                    만원
                   </span>
                   <input
                     type="number"
                     inputMode="numeric"
-                    placeholder="245000"
+                    step="any"
+                    min="0"
+                    placeholder="e.g. 50 (50 만원 = 500,000 KRW)"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
-                    className="w-full pl-12 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/15 text-white text-base sm:text-base font-bold focus:ring-2 focus:ring-sky-400 outline-none placeholder:text-slate-600"
+                    className="w-full pl-14 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/15 text-white text-base sm:text-base font-bold focus:ring-2 focus:ring-sky-400 outline-none placeholder:text-slate-600"
                   />
                 </div>
                 {fieldErrors.price && (
                   <p className="text-[11px] text-red-400 mt-1">{fieldErrors.price}</p>
                 )}
 
+                {/* Real-time converted price in Rs. */}
+                {numericPrice > 0 ? (
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                    <span>≈ {formatLkr(convertKrwToLkr(numericPrice))}</span>
+                    <span className="text-[10px] text-slate-400 font-normal">
+                      (1 만원 = 10,000 KRW | Live API: 1 KRW ≈ {Number(rate).toFixed(4)} LKR)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={refreshRate}
+                      disabled={rateLoading}
+                      title="Fetch latest live exchange rate from API"
+                      className="inline-flex items-center gap-0.5 text-[10px] text-sky-400 hover:underline cursor-pointer ml-1"
+                    >
+                      <RefreshCw className={`w-2.5 h-2.5 ${rateLoading ? 'animate-spin' : ''}`} />
+                      {rateLoading ? 'Updating...' : 'Live API'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-1 flex items-center justify-between text-[10px] text-slate-400">
+                    <span>Enter price in Man-won (10,000 Won = 1 Man-won)</span>
+                    <span className="text-slate-500">
+                      Live API Rate: 1 KRW ≈ {Number(rate).toFixed(4)} LKR
+                    </span>
+                  </div>
+                )}
+
                 {/* Live Payout Breakdown */}
                 {numericPrice > 0 && (
-                  <div className="mt-3 p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-500/30 text-xs space-y-1.5 animate-in fade-in">
+                  <div className="mt-3 p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-500/30 text-xs space-y-2 animate-in fade-in">
                     <div className="flex items-center justify-between text-slate-300">
                       <span>Listing Price:</span>
-                      <span className="font-semibold text-white">{formatCurrency(numericPrice)}</span>
+                      <div className="text-right">
+                        <span className="font-semibold text-white block">{formatKrw(numericPrice)}</span>
+                        <span className="text-[11px] text-slate-400 block font-normal">{formatLkr(convertKrwToLkr(numericPrice))}</span>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between text-slate-400">
                       <span>Platform Service Fee ({commissionPercentage}%):</span>
-                      <span>- {formatCurrency(commissionAmount)}</span>
+                      <div className="text-right">
+                        <span className="font-medium text-slate-300 block">- {formatKrw(commissionAmount)}</span>
+                        <span className="text-[11px] text-slate-400 block font-normal">- {formatLkr(convertKrwToLkr(commissionAmount))}</span>
+                      </div>
                     </div>
-                    <div className="pt-1.5 border-t border-emerald-500/20 flex items-center justify-between text-emerald-300 font-bold text-xs sm:text-sm">
+                    <div className="pt-2 border-t border-emerald-500/20 flex items-center justify-between text-emerald-300 font-bold text-xs sm:text-sm">
                       <span>Expected Amount You Will Receive:</span>
-                      <span className="text-sm sm:text-base">{formatCurrency(expectedPayout)}</span>
+                      <div className="text-right">
+                        <span className="text-sm sm:text-base text-emerald-300 block">{formatKrw(expectedPayout)}</span>
+                        <span className="text-xs text-emerald-400/90 font-medium block">{formatLkr(convertKrwToLkr(expectedPayout))}</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1041,17 +1089,26 @@ export default function SellPhoneModal({ desiredPhone = null, onClose }) {
                   </button>
                 </div>
 
-                <div className="flex justify-between text-slate-300 pt-1">
+                <div className="flex justify-between items-center text-slate-300 pt-1">
                   <span>Listed Price:</span>
-                  <span className="font-bold text-white">{formatCurrency(numericPrice)}</span>
+                  <div className="text-right">
+                    <span className="font-bold text-white block">{formatKrw(numericPrice)}</span>
+                    <span className="text-[11px] text-slate-400 block font-normal">{formatLkr(convertKrwToLkr(numericPrice))}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between items-center text-slate-400">
                   <span>Platform Commission ({commissionPercentage}%):</span>
-                  <span>- {formatCurrency(commissionAmount)}</span>
+                  <div className="text-right">
+                    <span className="font-medium text-slate-300 block">- {formatKrw(commissionAmount)}</span>
+                    <span className="text-[11px] text-slate-400 block font-normal">- {formatLkr(convertKrwToLkr(commissionAmount))}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-emerald-300 font-bold text-sm sm:text-base pt-2 border-t border-emerald-500/30">
+                <div className="flex justify-between items-center text-emerald-300 font-bold text-sm sm:text-base pt-2 border-t border-emerald-500/30">
                   <span>Expected Amount You Will Receive:</span>
-                  <span>{formatCurrency(expectedPayout)}</span>
+                  <div className="text-right">
+                    <span className="text-emerald-300 block">{formatKrw(expectedPayout)}</span>
+                    <span className="text-xs text-emerald-400/90 font-medium block">{formatLkr(convertKrwToLkr(expectedPayout))}</span>
+                  </div>
                 </div>
                 <p className="text-[10px] text-slate-400 pt-1">
                   * Note: Payout is released to you upon confirmed buyer delivery &amp; hardware verification.

@@ -1,3 +1,52 @@
+<IfModule mod_deflate.c>
+  # GZIP Compression for text-based resources
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript
+  AddOutputFilterByType DEFLATE application/javascript application/x-javascript application/json application/xml
+  AddOutputFilterByType DEFLATE image/svg+xml font/woff font/woff2 font/ttf font/otf
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 day"
+
+  # HTML: Never cache (ensures immediate entry point refresh on deployment)
+  ExpiresByType text/html "access plus 0 seconds"
+
+  # Static Assets: 1 day fallback (unhashed assets never receive 1 year if mod_headers is absent)
+  ExpiresByType text/css "access plus 1 day"
+  ExpiresByType text/javascript "access plus 1 day"
+  ExpiresByType application/javascript "access plus 1 day"
+  ExpiresByType image/webp "access plus 1 day"
+  ExpiresByType image/jpeg "access plus 1 day"
+  ExpiresByType image/png "access plus 1 day"
+  ExpiresByType image/svg+xml "access plus 1 day"
+  ExpiresByType font/woff2 "access plus 1 day"
+</IfModule>
+
+<IfModule mod_setenvif.c>
+  # Scope Vite content-hashed assets specifically to /assets/ using verified 8-char base64url hash pattern
+  SetEnvIf Request_URI "^/assets/.*-[a-zA-Z0-9_-]{8,}\.(css|js|mjs|webp|png|jpe?g|gif|svg|woff2?)$" IS_HASHED_ASSET
+</IfModule>
+
+<IfModule mod_headers.c>
+  # 1. Generic unhashed static assets: 1 day + must-revalidate so updates take effect
+  <FilesMatch "\.(css|js|mjs|ico|jpe?g|png|gif|webp|svg|woff2?|ttf|otf|eot|mp4|webm)$">
+    Header set Cache-Control "public, max-age=86400, must-revalidate"
+  </FilesMatch>
+
+  # 2. Content-hashed assets: Overrides rule 1 with 1-year immutable caching ONLY when under /assets/
+  <FilesMatch "-[a-zA-Z0-9_-]{8,}\.(css|js|mjs|webp|png|jpe?g|gif|svg|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable" env=IS_HASHED_ASSET
+  </FilesMatch>
+
+  # 3. HTML documents: Never cache so users always receive latest SPA entry point
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires 0
+  </FilesMatch>
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
@@ -19,4 +68,3 @@
   RewriteCond %{REQUEST_FILENAME} !-l
   RewriteRule . /index.html [L]
 </IfModule>
-

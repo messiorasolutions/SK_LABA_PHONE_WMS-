@@ -1,9 +1,12 @@
 import axiosInstance from './axiosInstance.js';
 import { API_ENDPOINTS } from '../constants/apiEndpoints.js';
-import { createServiceCache } from './cacheHelper.js';
+import { createServiceCache, generateRequestKey } from './cacheHelper.js';
 
-// In-memory cache for approved reviews (3-minute TTL)
-const reviewsCache = createServiceCache({ ttlMs: 3 * 60 * 1000 });
+// In-memory cache for approved reviews (60-second TTL & in-flight deduplication)
+const reviewsCache = createServiceCache({
+  ttlMs: 60 * 1000,
+  keyGenerator: (params) => generateRequestKey('GET', API_ENDPOINTS.reviews.base, params),
+});
 
 export const reviewService = {
   getApprovedReviews: async (params = {}, options = {}) => {

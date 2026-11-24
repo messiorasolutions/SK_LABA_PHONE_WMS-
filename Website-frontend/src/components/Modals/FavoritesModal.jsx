@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Trash2, AlertCircle, Heart } from 'lucide-react';
 import { useFavoritesAndCompare } from '../../hooks/useFavoritesAndCompare';
+import { resolveImageUrl } from '../../utils/imageHelper';
 import phoneService from '../../services/phoneService';
 
 export default function FavoritesModal({
@@ -180,7 +181,7 @@ export default function FavoritesModal({
                       <div className="w-14 h-14 bg-[#080D1A] rounded p-1 flex items-center justify-center shrink-0 border border-theme-border">
                         {photo ? (
                           <img
-                            src={photo}
+                            src={resolveImageUrl(photo)}
                             alt={item.name}
                             className="max-h-full max-w-full object-contain"
                           />

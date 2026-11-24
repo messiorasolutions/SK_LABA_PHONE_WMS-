@@ -40,24 +40,51 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Track in-flight retry requests to prevent duplicate retries of identical in-flight requests
+const inFlightRetries = new Set();
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const config = error.config;
+    if (!config) {
+      return Promise.reject(error);
+    }
 
-    // Automatic 1-time retry for cold-start timeouts or transient network drops
-    const isTimeoutOrNetwork =
+    const isGet = !config.method || config.method.toUpperCase() === 'GET';
+    const isTimeout =
       error.code === 'ECONNABORTED' ||
-      error.message?.includes('timeout') ||
-      !error.response;
+      Boolean(error.message && error.message.toLowerCase().includes('timeout'));
 
-    const isGetOrSafe = !config?.method || config.method.toLowerCase() === 'get';
+    // Rule: NEVER retry on timeout/ECONNABORTED
+    if (isTimeout) {
+      if (error.response?.data?.message) {
+        error.message = error.response.data.message;
+      }
+      return Promise.reject(error);
+    }
 
-    if (config && isTimeoutOrNetwork && isGetOrSafe && !config.__isRetry) {
-      config.__isRetry = true;
-      // Wait 1.5s for the server process to finish waking up, then retry seamlessly
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      return axiosInstance(config);
+    // Rule: At most ONE retry, only for network errors / 5xx on idempotent GETs
+    // Never while the same request is in flight
+    if (!config.__isRetry && isGet) {
+      const is5xx = Boolean(error.response && error.response.status >= 500 && error.response.status < 600);
+      const isNetworkError = !error.response && !isTimeout;
+
+      if (isNetworkError || is5xx) {
+        const reqKey = `${config.method?.toUpperCase() || 'GET'}:${config.url || ''}:${JSON.stringify(config.params || {})}`;
+
+        if (!inFlightRetries.has(reqKey)) {
+          inFlightRetries.add(reqKey);
+          config.__isRetry = true;
+          try {
+            // 1 s backoff
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            return await axiosInstance(config);
+          } finally {
+            inFlightRetries.delete(reqKey);
+          }
+        }
+      }
     }
 
     if (error.response?.data?.message) {

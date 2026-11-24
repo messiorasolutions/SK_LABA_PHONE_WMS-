@@ -527,9 +527,9 @@ class PhoneService {
      * @param {number|string} id
      * @returns {Promise<Object>}
      */
-    async getPhoneById(id) {
+    async getPhoneById(id, photosAsUrl = false) {
         const phoneRepo = this.phoneRepository || phoneRepository;
-        const phone = await phoneRepo.findById(id);
+        const phone = await phoneRepo.findById(id, photosAsUrl);
         if (!phone) {
             throw new AppError(`Phone with ID ${id} not found.`, 404);
         }

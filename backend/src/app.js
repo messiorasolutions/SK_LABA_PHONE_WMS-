@@ -39,6 +39,9 @@ const AppError = require('./utils/customError');
 
 const app = express();
 
+// Trust reverse proxy (cPanel / Nginx / Cloudflare / Passenger) so that req.secure, req.protocol, and secure cookies work over HTTPS
+app.set('trust proxy', 1);
+
 // 1. CORS Configuration with explicit allowed origins & credentials
 const defaultOrigins = [
     'https://admin.sklabaphone.com',
@@ -77,7 +80,7 @@ const corsOptions = {
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'X-Session-Token'],
     optionsSuccessStatus: 200
 };
 
@@ -148,7 +151,8 @@ app.get('/api/test-db', async (req, res) => {
 });
 
 // 4. Session & CSRF Security Middlewares
-const { sessionMiddleware } = createSessionMiddleware();
+const signature = require('cookie-signature');
+const { sessionMiddleware, cookieName: defaultCookieName, secret: sessionSecret } = createSessionMiddleware();
 
 // Optimize: Skip session store lookups ONLY for purely public storefront GET requests to ensure instant page load
 // All authenticated endpoints (/api/auth, /api/users, /api/admin, /api/inquiries, /api/reservations, /api/sell-requests, /api/back-in-stock-requests) MUST run sessionMiddleware
@@ -166,7 +170,6 @@ const PUBLIC_STOREFRONT_PREFIXES = [
     '/api/marketplace/listings',
     '/api/marketplace/terms',
     '/api/marketplace/commission',
-    '/api/marketplace/commission',
     '/health',
     '/api/test-db',
     '/api/my-ip',
@@ -176,10 +179,29 @@ const PUBLIC_STOREFRONT_PREFIXES = [
 
 app.use((req, res, next) => {
     const p = req.path || '';
-    const cookieName = process.env.SESSION_COOKIE_NAME || 'sk_laba_sid';
-    const hasSessionCookie = Boolean(req.headers.cookie && req.headers.cookie.includes(cookieName));
+    const cookieName = process.env.SESSION_COOKIE_NAME || defaultCookieName || 'sk_laba_sid';
+    let hasSessionCookie = Boolean(req.headers.cookie && req.headers.cookie.includes(cookieName));
 
-    // If an authenticated user/admin sends a session cookie, ALWAYS run sessionMiddleware
+    // Dual-layer session authentication fallback:
+    // If the browser/proxy dropped or blocked cookies (e.g. third-party cookie restrictions or cross-subdomain quirks),
+    // check for X-Session-Token or Authorization: Bearer <sessionId> header
+    if (!hasSessionCookie) {
+        const authHeader = req.headers.authorization;
+        const headerToken = req.headers['x-session-token'] || (
+            authHeader && authHeader.startsWith('Bearer ')
+                ? authHeader.slice(7).trim()
+                : null
+        );
+
+        if (headerToken && sessionSecret) {
+            const signedVal = 's:' + signature.sign(headerToken, sessionSecret);
+            const synthesizedCookie = `${cookieName}=${encodeURIComponent(signedVal)}`;
+            req.headers.cookie = req.headers.cookie ? `${req.headers.cookie}; ${synthesizedCookie}` : synthesizedCookie;
+            hasSessionCookie = true;
+        }
+    }
+
+    // If an authenticated user/admin sends a session cookie or token, ALWAYS run sessionMiddleware
     // Only skip session lookup for anonymous GET requests to public storefront endpoints
     if (req.method === 'GET' && !hasSessionCookie) {
         const isPublicStorefront = PUBLIC_STOREFRONT_PREFIXES.some(prefix => p === prefix || p.startsWith(prefix + '/'));

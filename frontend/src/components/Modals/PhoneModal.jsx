@@ -297,7 +297,7 @@ export default function PhoneModal({
       setFreeAccessories([]);
       setAccessoryInput('');
       setPhotos([]);
-      setSelectedStorageIds(storageOptions.length > 0 ? [storageOptions[0].storage_id] : []);
+      setSelectedStorageIds([]);
     }
   }, [initial, isOpen, brands, storageOptions]);
 
@@ -434,7 +434,7 @@ export default function PhoneModal({
       return false;
     }
     if (!price || Number(price) <= 0) {
-      setSubmitError('A valid price greater than ₩0 is required.');
+      setSubmitError('A valid price greater than 0 만원 is required.');
       return false;
     }
     setSubmitError('');
@@ -546,7 +546,7 @@ export default function PhoneModal({
       display_size: displaySize.trim() || null,
       installment_enabled: false,
       installment_plan_ids: [],
-      storage_ids: selectedStorageIds && selectedStorageIds.length > 0 ? selectedStorageIds : (storageOptions.length > 0 ? [storageOptions[0].storage_id] : []),
+      storage_ids: selectedStorageIds && selectedStorageIds.length > 0 ? selectedStorageIds : [],
       colour_options: [{ name: 'Standard', color_name: 'Standard', color_code: '#1E293B', photos }],
       photos: photos,
     };
@@ -733,26 +733,26 @@ export default function PhoneModal({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                        Price (₩ KRW) <span className="text-red-500">*</span>
+                        Price (만원 / Man-won) <span className="text-red-500">*</span>
                       </label>
                       <div className="relative flex items-center">
-                        <span className="absolute left-3 text-slate-400 text-xs pointer-events-none">₩</span>
+                        <span className="absolute left-3 text-slate-500 dark:text-slate-400 text-xs pointer-events-none font-medium">만원</span>
                         <input
                           type="number"
-                          step="1"
+                          step="any"
                           min="0"
                           value={price}
                           onChange={(e) => setPrice(e.target.value)}
-                          placeholder="50000"
+                          placeholder="e.g. 50 (50 만원 = 500,000 KRW)"
                           required
-                          className="w-full pl-7 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/10 focus:border-neutral-400 dark:focus:border-rose-900/50"
+                          className="w-full pl-11 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/10 focus:border-neutral-400 dark:focus:border-rose-900/50"
                         />
                       </div>
                       {price && Number(price) > 0 ? (
                         <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                           <span>≈ {formatLkr(convertKrwToLkr(price))}</span>
                           <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
-                            (API: 1 KRW ≈ {Number(krwToLkrRate).toFixed(4)} LKR)
+                            (1 만원 = 10,000 KRW | API: 1 KRW ≈ {Number(krwToLkrRate).toFixed(4)} LKR)
                           </span>
                           <button
                             type="button"
@@ -767,9 +767,9 @@ export default function PhoneModal({
                         </div>
                       ) : (
                         <div className="mt-1 flex items-center justify-between text-[10px] text-slate-400">
-                          <span>Enter amount in South Korean Won (₩)</span>
+                          <span>Enter price in Man-won (10,000 Won = 1 Man-won)</span>
                           <span className="text-slate-500">
-                            Daily API Rate: 1 KRW ≈ {Number(krwToLkrRate).toFixed(4)} LKR
+                            Live API Rate: 1 KRW ≈ {Number(krwToLkrRate).toFixed(4)} LKR
                           </span>
                         </div>
                       )}

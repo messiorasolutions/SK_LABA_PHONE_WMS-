@@ -15,6 +15,10 @@ export function AuthProvider({ children }) {
         const meRes = await authService.getMe();
         if (meRes?.success && meRes?.data?.user) {
           setUser(meRes.data.user);
+          if (meRes.data.sessionToken) {
+            sessionStorage.setItem('sessionToken', meRes.data.sessionToken);
+            localStorage.setItem('sessionToken', meRes.data.sessionToken);
+          }
 
           // Restore CSRF token for the active session
           try {
@@ -29,11 +33,15 @@ export function AuthProvider({ children }) {
         } else {
           setUser(null);
           sessionStorage.removeItem('csrfToken');
+          sessionStorage.removeItem('sessionToken');
+          localStorage.removeItem('sessionToken');
         }
       } catch (err) {
         // 401 Unauthorized or expired session
         setUser(null);
         sessionStorage.removeItem('csrfToken');
+        sessionStorage.removeItem('sessionToken');
+        localStorage.removeItem('sessionToken');
       } finally {
         setLoading(false);
       }
@@ -50,6 +58,10 @@ export function AuthProvider({ children }) {
         setCsrfToken(res.data.csrfToken);
         sessionStorage.setItem('csrfToken', res.data.csrfToken);
       }
+      if (res.data.sessionToken) {
+        sessionStorage.setItem('sessionToken', res.data.sessionToken);
+        localStorage.setItem('sessionToken', res.data.sessionToken);
+      }
     }
     return res;
   };
@@ -63,6 +75,8 @@ export function AuthProvider({ children }) {
       setUser(null);
       setCsrfToken(null);
       sessionStorage.removeItem('csrfToken');
+      sessionStorage.removeItem('sessionToken');
+      localStorage.removeItem('sessionToken');
     }
   };
 

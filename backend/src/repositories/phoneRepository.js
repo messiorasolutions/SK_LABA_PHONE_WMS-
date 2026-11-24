@@ -156,49 +156,107 @@ class PhoneRepository {
     }
 
     /**
+     * Cache and retrieve available columns in the `phones` table.
+     * Attempts automatic non-destructive schema migration if columns are missing.
+     */
+    async _getAvailableColumns() {
+        if (this._availableColumnsCache && (Date.now() - (this._availableColumnsCacheTime || 0) < 10 * 60 * 1000)) {
+            return this._availableColumnsCache;
+        }
+
+        try {
+            const [rows] = await pool.query('SHOW COLUMNS FROM phones');
+            const columns = new Set(rows.map(r => r.Field.toLowerCase()));
+
+            // Desired modern columns for phones table
+            const missingMigrations = [];
+            if (!columns.has('free_accessories')) {
+                missingMigrations.push('ADD COLUMN free_accessories LONGTEXT NULL DEFAULT NULL');
+            }
+            if (!columns.has('battery_health')) {
+                missingMigrations.push('ADD COLUMN battery_health VARCHAR(50) NULL DEFAULT NULL');
+            }
+            if (!columns.has('is_genuine_battery')) {
+                missingMigrations.push('ADD COLUMN is_genuine_battery BOOLEAN NOT NULL DEFAULT TRUE');
+            }
+            if (!columns.has('is_original_housing')) {
+                missingMigrations.push('ADD COLUMN is_original_housing BOOLEAN NOT NULL DEFAULT TRUE');
+            }
+            if (!columns.has('display_size')) {
+                missingMigrations.push('ADD COLUMN display_size VARCHAR(50) NULL DEFAULT NULL');
+            }
+            if (!columns.has('is_new_arrival')) {
+                missingMigrations.push('ADD COLUMN is_new_arrival TINYINT(1) NOT NULL DEFAULT 0');
+            }
+
+            // Attempt auto-migration if columns are missing
+            if (missingMigrations.length > 0) {
+                try {
+                    console.log(`[Auto-Migration] Adding ${missingMigrations.length} missing columns to 'phones' table...`);
+                    await pool.query(`ALTER TABLE phones ${missingMigrations.join(', ')}`);
+                    console.log('[Auto-Migration] Successfully migrated phones table schema!');
+
+                    // Refresh column cache after migration
+                    const [refreshed] = await pool.query('SHOW COLUMNS FROM phones');
+                    this._availableColumnsCache = new Set(refreshed.map(r => r.Field.toLowerCase()));
+                    this._availableColumnsCacheTime = Date.now();
+                    return this._availableColumnsCache;
+                } catch (alterErr) {
+                    console.warn('[Auto-Migration] Could not execute ALTER TABLE (will fallback to active columns):', alterErr.message);
+                }
+            }
+
+            this._availableColumnsCache = columns;
+            this._availableColumnsCacheTime = Date.now();
+            return this._availableColumnsCache;
+        } catch (err) {
+            console.error('[phoneRepository] Failed to inspect phones table columns:', err.message);
+            // Return fallback containing standard baseline columns
+            return new Set(['name', 'brand_id', 'phone_condition', 'price', 'storage_ids', 'colour_options', 'specification_ids', 'warranty', 'accessory_ids', 'description', 'low_stock_level', 'current_stock', 'availability', 'installment_enabled', 'installment_plan_ids', 'status', 'is_archived', 'photos']);
+        }
+    }
+
+    /**
      * Insert a new phone record
      * @param {Object} data
      * @returns {Promise<Object>}
      */
     async create(data) {
-        const query = `
-            INSERT INTO phones (
-                name, brand_id, phone_condition, price,
-                storage_ids, colour_options, specification_ids,
-                warranty, accessory_ids, free_accessories, description,
-                low_stock_level, current_stock, availability, installment_enabled,
-                installment_plan_ids, status, is_archived, is_new_arrival, photos,
-                battery_health, is_genuine_battery, is_original_housing, display_size
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
+        const availableCols = await this._getAvailableColumns();
 
-        const values = [
-            data.name,
-            data.brand_id,
-            data.phone_condition,
-            data.price,
-            data.storage_ids ? JSON.stringify(data.storage_ids) : null,
-            data.colour_options ? JSON.stringify(data.colour_options) : null,
-            data.specification_ids ? JSON.stringify(data.specification_ids) : null,
-            data.warranty || null,
-            data.accessory_ids ? JSON.stringify(data.accessory_ids) : null,
-            data.free_accessories ? JSON.stringify(data.free_accessories) : (data.accessory_ids ? JSON.stringify(data.accessory_ids) : null),
-            data.description || null,
-            data.low_stock_level !== undefined ? data.low_stock_level : 5,
-            data.current_stock !== undefined ? data.current_stock : 0,
-            data.availability || 'SOLD_OUT',
-            data.installment_enabled ? 1 : 0,
-            data.installment_plan_ids ? JSON.stringify(data.installment_plan_ids) : null,
-            data.status || 'DRAFT',
-            data.is_archived ? 1 : 0,
-            data.is_new_arrival ? 1 : 0,
-            data.photos ? JSON.stringify(data.photos) : null,
-            data.battery_health !== undefined && data.battery_health !== null && data.battery_health !== '' ? String(data.battery_health).trim() : null,
-            data.is_genuine_battery !== undefined ? (data.is_genuine_battery ? 1 : 0) : 1,
-            data.is_original_housing !== undefined ? (data.is_original_housing ? 1 : 0) : 1,
-            data.display_size !== undefined && data.display_size !== null && data.display_size !== '' ? String(data.display_size).trim() : null
+        const candidateFields = [
+            { col: 'name', val: data.name },
+            { col: 'brand_id', val: data.brand_id },
+            { col: 'phone_condition', val: data.phone_condition },
+            { col: 'price', val: data.price },
+            { col: 'storage_ids', val: data.storage_ids ? JSON.stringify(data.storage_ids) : null },
+            { col: 'colour_options', val: data.colour_options ? JSON.stringify(data.colour_options) : null },
+            { col: 'specification_ids', val: data.specification_ids ? JSON.stringify(data.specification_ids) : null },
+            { col: 'warranty', val: data.warranty || null },
+            { col: 'accessory_ids', val: data.accessory_ids ? JSON.stringify(data.accessory_ids) : null },
+            { col: 'free_accessories', val: data.free_accessories ? JSON.stringify(data.free_accessories) : (data.accessory_ids ? JSON.stringify(data.accessory_ids) : null) },
+            { col: 'description', val: data.description || null },
+            { col: 'low_stock_level', val: data.low_stock_level !== undefined ? data.low_stock_level : 5 },
+            { col: 'current_stock', val: data.current_stock !== undefined ? data.current_stock : 0 },
+            { col: 'availability', val: data.availability || 'SOLD_OUT' },
+            { col: 'installment_enabled', val: data.installment_enabled ? 1 : 0 },
+            { col: 'installment_plan_ids', val: data.installment_plan_ids ? JSON.stringify(data.installment_plan_ids) : null },
+            { col: 'status', val: data.status || 'DRAFT' },
+            { col: 'is_archived', val: data.is_archived ? 1 : 0 },
+            { col: 'is_new_arrival', val: data.is_new_arrival ? 1 : 0 },
+            { col: 'photos', val: data.photos ? JSON.stringify(data.photos) : null },
+            { col: 'battery_health', val: data.battery_health !== undefined && data.battery_health !== null && data.battery_health !== '' ? String(data.battery_health).trim() : null },
+            { col: 'is_genuine_battery', val: data.is_genuine_battery !== undefined ? (data.is_genuine_battery ? 1 : 0) : 1 },
+            { col: 'is_original_housing', val: data.is_original_housing !== undefined ? (data.is_original_housing ? 1 : 0) : 1 },
+            { col: 'display_size', val: data.display_size !== undefined && data.display_size !== null && data.display_size !== '' ? String(data.display_size).trim() : null }
         ];
 
+        const activeFields = candidateFields.filter(f => availableCols.has(f.col.toLowerCase()));
+        const colNames = activeFields.map(f => f.col).join(', ');
+        const placeholders = activeFields.map(() => '?').join(', ');
+        const values = activeFields.map(f => f.val);
+
+        const query = `INSERT INTO phones (${colNames}) VALUES (${placeholders})`;
         const [result] = await pool.execute(query, values);
         return this.findById(result.insertId);
     }
@@ -549,63 +607,40 @@ class PhoneRepository {
      * @returns {Promise<Object>}
      */
     async update(phone_id, data) {
-        const query = `
-            UPDATE phones SET
-                name = ?,
-                brand_id = ?,
-                phone_condition = ?,
-                price = ?,
-                storage_ids = ?,
-                colour_options = ?,
-                specification_ids = ?,
-                warranty = ?,
-                accessory_ids = ?,
-                free_accessories = ?,
-                description = ?,
-                low_stock_level = ?,
-                current_stock = ?,
-                availability = ?,
-                installment_enabled = ?,
-                installment_plan_ids = ?,
-                status = ?,
-                is_archived = ?,
-                is_new_arrival = ?,
-                photos = ?,
-                battery_health = ?,
-                is_genuine_battery = ?,
-                is_original_housing = ?,
-                display_size = ?
-            WHERE phone_id = ?
-        `;
+        const availableCols = await this._getAvailableColumns();
 
-        const values = [
-            data.name,
-            data.brand_id,
-            data.phone_condition,
-            data.price,
-            data.storage_ids ? JSON.stringify(data.storage_ids) : null,
-            data.colour_options ? JSON.stringify(data.colour_options) : null,
-            data.specification_ids ? JSON.stringify(data.specification_ids) : null,
-            data.warranty || null,
-            data.accessory_ids ? JSON.stringify(data.accessory_ids) : null,
-            data.free_accessories ? JSON.stringify(data.free_accessories) : (data.accessory_ids ? JSON.stringify(data.accessory_ids) : null),
-            data.description || null,
-            data.low_stock_level !== undefined ? data.low_stock_level : 5,
-            data.current_stock !== undefined ? data.current_stock : 0,
-            data.availability,
-            data.installment_enabled ? 1 : 0,
-            data.installment_plan_ids ? JSON.stringify(data.installment_plan_ids) : null,
-            data.status,
-            data.is_archived ? 1 : 0,
-            data.is_new_arrival ? 1 : 0,
-            data.photos ? JSON.stringify(data.photos) : null,
-            data.battery_health !== undefined && data.battery_health !== null && data.battery_health !== '' ? String(data.battery_health).trim() : null,
-            data.is_genuine_battery !== undefined ? (data.is_genuine_battery ? 1 : 0) : 1,
-            data.is_original_housing !== undefined ? (data.is_original_housing ? 1 : 0) : 1,
-            data.display_size !== undefined && data.display_size !== null && data.display_size !== '' ? String(data.display_size).trim() : null,
-            phone_id
+        const candidateFields = [
+            { col: 'name', val: data.name },
+            { col: 'brand_id', val: data.brand_id },
+            { col: 'phone_condition', val: data.phone_condition },
+            { col: 'price', val: data.price },
+            { col: 'storage_ids', val: data.storage_ids ? JSON.stringify(data.storage_ids) : null },
+            { col: 'colour_options', val: data.colour_options ? JSON.stringify(data.colour_options) : null },
+            { col: 'specification_ids', val: data.specification_ids ? JSON.stringify(data.specification_ids) : null },
+            { col: 'warranty', val: data.warranty || null },
+            { col: 'accessory_ids', val: data.accessory_ids ? JSON.stringify(data.accessory_ids) : null },
+            { col: 'free_accessories', val: data.free_accessories ? JSON.stringify(data.free_accessories) : (data.accessory_ids ? JSON.stringify(data.accessory_ids) : null) },
+            { col: 'description', val: data.description || null },
+            { col: 'low_stock_level', val: data.low_stock_level !== undefined ? data.low_stock_level : 5 },
+            { col: 'current_stock', val: data.current_stock !== undefined ? data.current_stock : 0 },
+            { col: 'availability', val: data.availability },
+            { col: 'installment_enabled', val: data.installment_enabled ? 1 : 0 },
+            { col: 'installment_plan_ids', val: data.installment_plan_ids ? JSON.stringify(data.installment_plan_ids) : null },
+            { col: 'status', val: data.status },
+            { col: 'is_archived', val: data.is_archived ? 1 : 0 },
+            { col: 'is_new_arrival', val: data.is_new_arrival ? 1 : 0 },
+            { col: 'photos', val: data.photos ? JSON.stringify(data.photos) : null },
+            { col: 'battery_health', val: data.battery_health !== undefined && data.battery_health !== null && data.battery_health !== '' ? String(data.battery_health).trim() : null },
+            { col: 'is_genuine_battery', val: data.is_genuine_battery !== undefined ? (data.is_genuine_battery ? 1 : 0) : 1 },
+            { col: 'is_original_housing', val: data.is_original_housing !== undefined ? (data.is_original_housing ? 1 : 0) : 1 },
+            { col: 'display_size', val: data.display_size !== undefined && data.display_size !== null && data.display_size !== '' ? String(data.display_size).trim() : null }
         ];
 
+        const activeFields = candidateFields.filter(f => availableCols.has(f.col.toLowerCase()));
+        const setClause = activeFields.map(f => `${f.col} = ?`).join(', ');
+        const values = [...activeFields.map(f => f.val), phone_id];
+
+        const query = `UPDATE phones SET ${setClause} WHERE phone_id = ?`;
         await pool.execute(query, values);
         return this.findById(phone_id);
     }

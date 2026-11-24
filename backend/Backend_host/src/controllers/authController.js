@@ -51,7 +51,8 @@ class AuthController {
                                     status: user.status,
                                     last_login_at: user.last_login_at
                                 },
-                                csrfToken
+                                csrfToken,
+                                sessionToken: req.sessionID
                             }
                         });
                     });
@@ -81,7 +82,8 @@ class AuthController {
             return res.status(200).json({
                 success: true,
                 data: {
-                    user: req.user
+                    user: req.user,
+                    sessionToken: req.sessionID || null
                 }
             });
         } catch (error) {

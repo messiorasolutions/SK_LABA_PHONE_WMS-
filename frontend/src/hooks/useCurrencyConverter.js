@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchLiveExchangeRate, formatKrw, formatLkr } from '../services/currencyService';
+import { fetchLiveExchangeRate, formatKrw, formatKrwParts, formatLkr } from '../services/currencyService';
 
 export function useCurrencyConverter() {
   const [rateInfo, setRateInfo] = useState(() => {
@@ -33,9 +33,10 @@ export function useCurrencyConverter() {
     loadRate(false);
   }, [loadRate]);
 
-  const convertKrwToLkr = (krw) => {
-    if (!krw || isNaN(krw)) return 0;
-    return Number(krw) * (rateInfo?.rate || 0.22);
+  const convertKrwToLkr = (manwon) => {
+    if (!manwon || isNaN(manwon)) return 0;
+    // 1 Man-won (만원) = 10,000 KRW
+    return Number(manwon) * 10000 * (rateInfo?.rate || 0.22);
   };
 
   return {
@@ -44,7 +45,9 @@ export function useCurrencyConverter() {
     loading,
     refreshRate: () => loadRate(true),
     convertKrwToLkr,
+    convertManwonToLkr: convertKrwToLkr,
     formatKrw,
+    formatKrwParts,
     formatLkr,
   };
 }

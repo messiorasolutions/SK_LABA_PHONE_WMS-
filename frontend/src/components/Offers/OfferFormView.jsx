@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowLeft,
   Tag,
@@ -10,7 +10,43 @@ import {
   Check,
   Smartphone,
   CheckCircle2,
+  Upload,
+  Image as ImageIcon,
+  X,
 } from 'lucide-react';
+
+const compressImage = (file) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const TARGET_WIDTH = 1200;
+        const TARGET_HEIGHT = 800;
+        const canvas = document.createElement('canvas');
+        canvas.width = TARGET_WIDTH;
+        canvas.height = TARGET_HEIGHT;
+        const ctx = canvas.getContext('2d');
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        const scale = Math.max(TARGET_WIDTH / img.width, TARGET_HEIGHT / img.height);
+        const scaledWidth = img.width * scale;
+        const scaledHeight = img.height * scale;
+        const dx = (TARGET_WIDTH - scaledWidth) / 2;
+        const dy = (TARGET_HEIGHT - scaledHeight) / 2;
+
+        ctx.drawImage(img, dx, dy, scaledWidth, scaledHeight);
+        resolve(canvas.toDataURL('image/jpeg', 0.88));
+      };
+      img.onerror = () => resolve(event.target.result);
+    };
+    reader.onerror = () => resolve('');
+  });
+};
 
 export default function OfferFormView({
   initial = null,
@@ -30,6 +66,32 @@ export default function OfferFormView({
   const [status, setStatus] = useState('DRAFT');
   const [phoneSearch, setPhoneSearch] = useState('');
   const [error, setError] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file (JPG, PNG, or WEBP).');
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const compressed = await compressImage(file);
+      if (compressed) {
+        setBannerImage(compressed);
+        setError(null);
+      }
+    } catch (err) {
+      setError('Failed to process uploaded image.');
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const toDatetimeLocal = (val) => {
     if (!val) return '';
@@ -237,27 +299,78 @@ export default function OfferFormView({
 
               <div>
                 <label className="block text-xs font-normal text-slate-700 dark:text-slate-300 mb-1.5">
-                  Banner Image URL (Optional)
+                  Offer Banner Image (Upload or URL)
                 </label>
-                <input
-                  type="url"
-                  value={bannerImage}
-                  onChange={(e) => setBannerImage(e.target.value)}
-                  placeholder="https://example.com/images/summer-sale-banner.jpg"
-                  className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-normal text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-neutral-500"
-                />
-                {bannerImage && (
-                  <div className="mt-3 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 max-h-40 bg-slate-50 dark:bg-slate-800">
+
+                {bannerImage ? (
+                  <div className="relative mb-3 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 aspect-[16/9] sm:aspect-[21/9] bg-slate-900 group">
                     <img
                       src={bannerImage}
-                      alt="Banner Preview"
-                      className="w-full h-40 object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
+                      alt="Offer Banner Preview"
+                      className="w-full h-full object-cover"
                     />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-3 py-1.5 rounded-lg bg-white/90 hover:bg-white text-slate-900 text-xs font-medium flex items-center gap-1.5 shadow-md cursor-pointer"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Change Image</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBannerImage('')}
+                        className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium flex items-center gap-1.5 shadow-md cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        <span>Remove</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mb-3 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 rounded-xl p-6 text-center cursor-pointer bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors flex flex-col items-center justify-center"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center mb-2 text-slate-500 dark:text-slate-400">
+                      <Upload className="w-5 h-5" />
+                    </div>
+                    <span className="text-xs font-medium text-slate-700 dark:text-slate-200">
+                      {uploadingImage ? 'Processing Image...' : 'Click to Upload Offer Banner Image'}
+                    </span>
+                    <span className="text-[11px] text-slate-400 mt-0.5">
+                      JPG, PNG, or WEBP (Recommended: 1200x800 or similar landscape)
+                    </span>
                   </div>
                 )}
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="url"
+                    value={bannerImage.startsWith('data:') ? '' : bannerImage}
+                    onChange={(e) => setBannerImage(e.target.value)}
+                    placeholder={bannerImage.startsWith('data:') ? 'Image uploaded from computer' : 'Or paste direct image URL (https://...)'}
+                    className="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-normal text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-neutral-500"
+                  />
+                  {bannerImage && !bannerImage.startsWith('data:') && (
+                    <button
+                      type="button"
+                      onClick={() => setBannerImage('')}
+                      className="px-2.5 py-2 text-xs text-slate-400 hover:text-rose-500 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 

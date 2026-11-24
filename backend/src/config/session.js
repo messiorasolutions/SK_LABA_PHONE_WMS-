@@ -43,9 +43,8 @@ function createSessionMiddleware() {
 
     const cookieName = process.env.SESSION_COOKIE_NAME || 'sk_laba_sid';
     const sameSite = process.env.COOKIE_SAMESITE || (isProduction ? 'none' : 'lax');
-    const isSecure = isProduction
-        ? (process.env.COOKIE_SECURE !== 'false' || sameSite === 'none')
-        : (process.env.COOKIE_SECURE === 'true');
+    // If sameSite is 'none', secure MUST be true, otherwise modern browsers reject the Set-Cookie header entirely!
+    const isSecure = isProduction || sameSite === 'none' || (process.env.COOKIE_SECURE === 'true');
 
     const cookieOptions = {
         httpOnly: true,
@@ -55,9 +54,12 @@ function createSessionMiddleware() {
         path: '/'
     };
 
-    // In local development, never set domain so the browser cleanly binds the cookie to localhost
-    if (isProduction && process.env.COOKIE_DOMAIN && !process.env.COOKIE_DOMAIN.includes('localhost')) {
-        cookieOptions.domain = process.env.COOKIE_DOMAIN;
+    // In production or hosted domain, ensure domain is set to share cookies across subdomains (admin.sklabaphone.com & api.sklabaphone.com)
+    const configuredDomain = process.env.COOKIE_DOMAIN;
+    if (configuredDomain && !configuredDomain.includes('localhost')) {
+        cookieOptions.domain = configuredDomain;
+    } else if (isProduction) {
+        cookieOptions.domain = '.sklabaphone.com';
     }
 
     const sessionMiddleware = session({
@@ -74,7 +76,8 @@ function createSessionMiddleware() {
         sessionMiddleware,
         cookieName,
         cookieOptions,
-        store
+        store,
+        secret: secret || 'temporary-fallback-secret-for-testing'
     };
 }
 

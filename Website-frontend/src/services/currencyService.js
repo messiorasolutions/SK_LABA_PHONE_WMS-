@@ -94,11 +94,25 @@ export async function fetchLiveExchangeRate(forceRefresh = false) {
 }
 
 /**
- * Format a number into South Korean Won string (e.g. ₩50,000)
+ * Format a number into South Korean Man-won string (e.g. 5,000 만원)
  */
 export function formatKrw(amount) {
-  if (amount === undefined || amount === null || isNaN(amount)) return '₩0';
-  return `₩${Math.round(Number(amount)).toLocaleString('ko-KR')}`;
+  if (amount === undefined || amount === null || isNaN(amount)) return '0 만원';
+  return `${Math.round(Number(amount)).toLocaleString('ko-KR')} 만원`;
+}
+
+/**
+ * Format a number into separate parts for Korean Man-won: number and unit (만원)
+ * Useful for styling the unit smaller than the price digits.
+ */
+export function formatKrwParts(amount) {
+  if (amount === undefined || amount === null || isNaN(amount)) {
+    return { number: '0', unit: '만원' };
+  }
+  return {
+    number: Math.round(Number(amount)).toLocaleString('ko-KR'),
+    unit: '만원',
+  };
 }
 
 /**

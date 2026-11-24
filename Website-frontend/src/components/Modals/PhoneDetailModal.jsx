@@ -19,6 +19,7 @@ import { useFavoritesAndCompare } from '../../hooks/useFavoritesAndCompare';
 import { useShopInfo } from '../../context/ShopInfoContext';
 import phoneService from '../../services/phoneService';
 import storageService from '../../services/storageService';
+import { getActiveOffers } from '../../services/offerService';
 import FormattedDescription from '../Common/FormattedDescription';
 import { resolveImageUrl } from '../../utils/imageHelper';
 import { useCurrencyConverter } from '../../hooks/useCurrencyConverter';
@@ -192,6 +193,65 @@ export default function PhoneDetailModal({
     setActivePhotoIdx(0);
 
     const pid = initialPhone?.phone_id || initialPhone?.id;
+    if (pid && (!initialPhone?.description || !initialPhone?.free_accessories)) {
+      phoneService
+        .getPhoneById(pid)
+        .then((res) => {
+          const full = res.data?.data || res.data;
+          if (full) {
+            setPhone((prev) => ({
+              ...full,
+              ...prev,
+              description: full.description || prev?.description,
+              free_accessories: full.free_accessories || prev?.free_accessories,
+              specifications: full.specifications || prev?.specifications,
+              colour_options: full.colour_options || prev?.colour_options,
+              storage_options: full.storage_options || prev?.storage_options,
+            }));
+          }
+        })
+        .catch(() => {});
+    }
+
+    if (pid) {
+      getActiveOffers()
+        .then((res) => {
+          const offers = res.data?.data || res.data || [];
+          if (!Array.isArray(offers) || offers.length === 0) return;
+          const pidStr = String(pid);
+          const pNameLower = (initialPhone?.name || '').toLowerCase();
+          const match = offers.find((o) => {
+            if (Array.isArray(o.phone_ids) && o.phone_ids.some((id) => String(id) === pidStr)) return true;
+            if (Array.isArray(o.phones) && o.phones.some((ph) => String(ph.phone_id || ph.id) === pidStr)) return true;
+            const combined = ((o.title || '') + ' ' + (o.description || '')).toLowerCase();
+            return pNameLower && combined.includes(pNameLower);
+          });
+          if (match) {
+            const regPrice = Number(initialPhone?.price || initialPhone?.regular_price || match.regular_price || 0);
+            const offPrice = Number(match.offer_price || 0);
+            const savings = regPrice > offPrice ? regPrice - offPrice : Number(match.discount_amount || 0);
+            const discountPct =
+              regPrice > 0 && savings > 0
+                ? Math.round((savings / regPrice) * 100)
+                : Number(match.discount_percentage || 0);
+            setPhone((prev) => ({
+              ...prev,
+              offer_price: offPrice,
+              regular_price: regPrice,
+              active_offer: {
+                has_active_offer: true,
+                offer_id: match.offer_id,
+                offer_title: match.title,
+                offer_price: offPrice,
+                regular_price: regPrice,
+                discount_percentage: discountPct,
+                savings: savings,
+              },
+            }));
+          }
+        })
+        .catch(() => {});
+    }
     if (!pid) return;
 
     let isCurrent = true;
@@ -217,7 +277,7 @@ export default function PhoneDetailModal({
   const { shopInfo, getWhatsAppUrl } = useShopInfo();
   const { t } = useTranslation();
   const { isFavorite, isInCompare, toggleFavorite, toggleCompare } = useFavoritesAndCompare();
-  const { convertKrwToLkr, formatKrw, formatLkr } = useCurrencyConverter();
+  const { convertKrwToLkr, formatKrw, formatKrwParts, formatLkr } = useCurrencyConverter();
 
   const phoneId = phone?.phone_id || phone?.id;
   const favorited = isFavorite(phoneId);
@@ -991,76 +1051,35 @@ export default function PhoneDetailModal({
                   )}
                 </div>
               </div>
-
-              {/* Free Accessories Included (shown before description) */}
-              {freeAccessories.length > 0 && (
-                <div className="bg-neutral-950 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center text-white">
-                        <Gift className="w-3.5 h-3.5 text-white" />
-                      </div>
-                      <h2 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-white">
-                        Free Accessories Included
-                      </h2>
-                    </div>
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/10 text-white border border-white/15">
-                      {freeAccessories.length} Free {freeAccessories.length === 1 ? 'Item' : 'Items'}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                    {freeAccessories.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white text-xs sm:text-sm"
-                      >
-                        <div className="w-4 h-4 rounded-full bg-white/15 flex items-center justify-center shrink-0">
-                          <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
-                        </div>
-                        <span className="truncate font-normal text-white">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Description & Overview Section (placed under main image) */}
-              {(phone.description || phone.condition_description) && (
-                <div className="bg-neutral-950 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3 shadow-sm">
-                  <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                    {isMarketplace ? "Seller's Description & Notes" : t('details.descriptionOverview')}
-                  </h2>
-                  <div className="text-slate-200 font-normal leading-relaxed text-xs sm:text-sm">
-                    <FormattedDescription content={phone.condition_description || phone.description} />
-                  </div>
-                </div>
-              )}
           </div>
 
           {/* Right Column: Title, Pricing, Storage, Purchase, Quick Contact, Warranty & Description, Installments */}
           <div className="lg:col-span-6 lg:col-start-7 flex flex-col justify-start space-y-5">
             <div>
-              {/* Title & Price on the same line with same font size and wider spacing */}
+              {/* Title & Price */}
               <div className="flex flex-wrap items-baseline gap-x-8 sm:gap-x-10 gap-y-2 mb-2">
-                <h1 className="text-2xl sm:text-3xl font-normal text-white leading-snug flex flex-wrap items-baseline gap-x-2.5">
-                  <span>{phone.name}</span>
-                  {selectedStorage && !phone.name?.toLowerCase().includes(selectedStorage.toLowerCase()) && (
-                    <span className="text-xl sm:text-2xl text-slate-300 font-normal">{selectedStorage}</span>
-                  )}
+                <h1 className="text-xl sm:text-2xl font-normal text-white leading-snug">
+                  {phone.name}
                 </h1>
                 <div className="flex flex-col">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-2xl sm:text-3xl font-normal text-white tracking-tight">
-                      {formatKrw(effectivePrice)}
+                  <div className="flex items-baseline gap-2.5">
+                    <span className="text-xl sm:text-2xl font-normal text-white tracking-tight flex items-baseline gap-1">
+                      <span>{formatKrwParts(effectivePrice).number}</span>
+                      <span className="text-xs sm:text-sm font-normal text-slate-300">
+                        {formatKrwParts(effectivePrice).unit}
+                      </span>
                     </span>
                     {hasOffer && (
-                      <span className="text-sm sm:text-base text-slate-400 line-through font-normal">
-                        {formatKrw(regularPrice)}
+                      <span className="text-xs sm:text-sm text-slate-400 line-through font-normal flex items-baseline gap-0.5">
+                        <span>{formatKrwParts(regularPrice).number}</span>
+                        <span className="text-[10px] sm:text-xs text-slate-400">
+                          {formatKrwParts(regularPrice).unit}
+                        </span>
                       </span>
                     )}
                   </div>
                   {effectivePrice > 0 && (
-                    <div className="text-sm sm:text-base text-white font-normal tracking-tight mt-0.5">
+                    <div className="text-xs sm:text-sm text-white font-normal tracking-tight mt-0.5">
                       {formatLkr(convertKrwToLkr(effectivePrice))}
                     </div>
                   )}
@@ -1242,6 +1261,42 @@ export default function PhoneDetailModal({
                 </div>
               )}
 
+              {/* Free Accessories Included (placed after specs, before Quick Contact) */}
+              {freeAccessories.length > 0 && (
+                <div className="bg-neutral-950 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3 shadow-sm">
+                  <div>
+                    <h2 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-white">
+                      Free Accessories Included
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    {freeAccessories.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white text-xs sm:text-sm"
+                      >
+                        <div className="w-4 h-4 rounded-full bg-white/15 flex items-center justify-center shrink-0">
+                          <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
+                        </div>
+                        <span className="truncate font-normal text-white">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Description & Overview Section (placed after free accessories, before Quick Contact) */}
+              {(phone.description || phone.condition_description) && (
+                <div className="bg-neutral-950 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3 shadow-sm">
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    {isMarketplace ? "Seller's Description & Notes" : t('details.descriptionOverview')}
+                  </h2>
+                  <div className="text-slate-200 font-normal leading-relaxed text-xs sm:text-sm">
+                    <FormattedDescription content={phone.condition_description || phone.description} />
+                  </div>
+                </div>
+              )}
+
               {/* Quick Contact: WhatsApp, Call Shop */}
               <div className="flex items-center justify-between pt-1">
                 <span className="text-xs text-slate-300 uppercase tracking-wider font-normal">
@@ -1313,11 +1368,11 @@ export default function PhoneDetailModal({
                               {plan.provider_name || 'Instalment Plan'}
                             </span>
                             <span className="text-xs font-normal text-white shrink-0">
-                              ₩{Number(plan.monthly_payment || 0).toLocaleString()}/mo
+                              {formatKrw(plan.monthly_payment)}/mo
                             </span>
                           </div>
                           <p className="text-[11px] text-slate-300 font-normal mt-0.5">
-                            {plan.number_of_months} Months • Total: ₩{Number(plan.total_payable || 0).toLocaleString()}
+                            {plan.number_of_months} Months • Total: {formatKrw(plan.total_payable)}
                           </p>
                           {plan.terms && (
                             <p className="text-[11px] text-slate-400 mt-1.5 pt-1.5 border-t border-white/5 font-normal leading-relaxed break-words whitespace-normal">

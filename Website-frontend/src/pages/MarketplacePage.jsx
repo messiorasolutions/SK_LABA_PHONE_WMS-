@@ -560,18 +560,18 @@ export default function MarketplacePage({ onNavigateToHome }) {
                           type="range"
                           min={0}
                           max={maxCatalogPrice}
-                          step={100}
+                          step={1}
                           value={sliderMin}
                           onChange={(e) => handleMinSliderChange(e.target.value)}
                           className={`absolute w-full appearance-none bg-transparent pointer-events-none focus:outline-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-black [&::-moz-range-thumb]:cursor-pointer ${
-                            sliderMin > maxCatalogPrice - 1000 ? 'z-30' : 'z-20'
+                            sliderMin > maxCatalogPrice - 10 ? 'z-30' : 'z-20'
                           }`}
                         />
                         <input
                           type="range"
                           min={0}
                           max={maxCatalogPrice}
-                          step={100}
+                          step={1}
                           value={sliderMax}
                           onChange={(e) => handleMaxSliderChange(e.target.value)}
                           className="absolute w-full appearance-none bg-transparent pointer-events-none z-20 focus:outline-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-black [&::-moz-range-thumb]:cursor-pointer"
@@ -580,7 +580,7 @@ export default function MarketplacePage({ onNavigateToHome }) {
 
                       <div className="flex items-center justify-between gap-3 pt-1">
                         <div className="flex items-center gap-2 flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs">
-                          <span className="text-theme-textMuted font-medium select-none">$</span>
+                          <span className="text-theme-textMuted font-medium select-none text-[11px]">만원</span>
                           <input
                             type="number"
                             value={sliderMin}
@@ -591,7 +591,7 @@ export default function MarketplacePage({ onNavigateToHome }) {
                         </div>
                         <span className="text-xs text-theme-textMuted font-medium select-none">to</span>
                         <div className="flex items-center gap-2 flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs">
-                          <span className="text-theme-textMuted font-medium select-none">$</span>
+                          <span className="text-theme-textMuted font-medium select-none text-[11px]">만원</span>
                           <input
                             type="number"
                             value={sliderMax}

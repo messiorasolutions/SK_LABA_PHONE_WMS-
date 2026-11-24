@@ -43,9 +43,19 @@ export const defaultKeyGenerator = (params) => {
   return JSON.stringify(Object.fromEntries(cleanEntries));
 };
 
+export const generateRequestKey = (method = 'GET', url = '', params = {}) => {
+  if (typeof params !== 'object' || params === null) {
+    return `${method.toUpperCase()}:${url}:${String(params ?? '')}`;
+  }
+  const cleanEntries = Object.entries(params)
+    .filter(([k, v]) => k !== 'forceRefresh' && v !== '' && v !== null && v !== undefined)
+    .sort(([a], [b]) => a.localeCompare(b));
+  return `${method.toUpperCase()}:${url}:${JSON.stringify(Object.fromEntries(cleanEntries))}`;
+};
+
 export function createServiceCache({
-  ttlMs = 2 * 60 * 1000, // 2 minutes fresh TTL
-  staleMs = 10 * 60 * 1000, // 10 minutes stale-while-revalidate window
+  ttlMs = 60 * 1000, // 60 seconds fresh TTL cache
+  staleMs = 0, // In-memory cache window
   keyGenerator = defaultKeyGenerator,
 } = {}) {
   const cache = new Map(); // key -> { data, expiresAt, staleUntil }

@@ -1,6 +1,126 @@
+const crypto = require('crypto');
 const phoneService = require('../services/phoneService');
+const pool = require('../config/db');
+const listCache = require('../utils/listCache');
+const photoLruCache = require('../utils/photoLruCache');
 
 class PhoneController {
+    /**
+     * GET /api/phones/:id/photo?c=<int>&i=<int>&v=<int>
+     * Public phone photo endpoint (serves decoded binary images with long-term caching & ETag)
+     */
+    async getPhonePhoto(req, res, next) {
+        try {
+            const { id } = req.params;
+            const phoneId = parseInt(id, 10);
+            if (isNaN(phoneId) || phoneId <= 0) {
+                return res.status(404).json({ success: false, message: 'Invalid phone ID' });
+            }
+
+            const c = parseInt(req.query.c, 10);
+            const i = parseInt(req.query.i, 10);
+            if (isNaN(c) || isNaN(i) || i < 0) {
+                return res.status(400).json({ success: false, message: 'Invalid photo indices' });
+            }
+
+            const v = req.query.v ? String(req.query.v) : '';
+            const cacheKey = `${phoneId}:${c}:${i}:${v}`;
+
+            // 1. Check decoded buffer LRU cache
+            const cachedPhoto = photoLruCache.getPhoto(cacheKey);
+            if (cachedPhoto) {
+                const clientEtag = req.headers['if-none-match'];
+                if (clientEtag && (clientEtag === cachedPhoto.etag || clientEtag === `"${cachedPhoto.etag}"`)) {
+                    return res.status(304).end();
+                }
+
+                res.setHeader('Content-Type', cachedPhoto.contentType);
+                res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+                res.setHeader('ETag', `"${cachedPhoto.etag}"`);
+                res.setHeader('X-Content-Type-Options', 'nosniff');
+                res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+                return res.status(200).send(cachedPhoto.buffer);
+            }
+
+            // 2. Fetch phone from database
+            const query = `
+                SELECT phone_id, status, is_archived, photos, colour_options, updated_at
+                FROM phones
+                WHERE phone_id = ? AND is_archived = 0 AND status = 'PUBLISHED'
+                LIMIT 1
+            `;
+            const [rows] = await pool.execute(query, [phoneId]);
+            if (!rows || rows.length === 0) {
+                return res.status(404).json({ success: false, message: 'Phone not found or unavailable' });
+            }
+
+            const row = rows[0];
+            let photos = [];
+            let colourOptions = [];
+
+            try {
+                photos = typeof row.photos === 'string' ? JSON.parse(row.photos) : (row.photos || []);
+            } catch {
+                photos = [];
+            }
+
+            try {
+                colourOptions = typeof row.colour_options === 'string' ? JSON.parse(row.colour_options) : (row.colour_options || []);
+            } catch {
+                colourOptions = [];
+            }
+
+            let targetValue = null;
+            if (c === -1) {
+                if (Array.isArray(photos) && i < photos.length) {
+                    targetValue = photos[i];
+                }
+            } else if (c >= 0) {
+                if (Array.isArray(colourOptions) && c < colourOptions.length) {
+                    const col = colourOptions[c];
+                    if (col && Array.isArray(col.photos) && i < col.photos.length) {
+                        targetValue = col.photos[i];
+                    }
+                }
+            }
+
+            if (!targetValue || typeof targetValue !== 'string') {
+                return res.status(404).json({ success: false, message: 'Photo not found' });
+            }
+
+            // Strictly validate data URI: only jpeg, png, webp
+            const match = targetValue.match(/^data:(image\/(jpeg|png|webp));base64,(.+)$/i);
+            if (!match) {
+                return res.status(404).json({ success: false, message: 'Not a base64 photo' });
+            }
+
+            const contentType = match[1].toLowerCase();
+            const base64Data = match[3];
+            const buffer = Buffer.from(base64Data, 'base64');
+            const etag = crypto.createHash('sha1').update(buffer).digest('hex');
+
+            // Store in decoded photo LRU cache
+            const rowUpdatedEpoch = row.updated_at ? new Date(row.updated_at).getTime() : 0;
+            const liveKey = `${phoneId}:${c}:${i}:${rowUpdatedEpoch}`;
+            photoLruCache.setPhoto(liveKey, { buffer, contentType, etag });
+
+            const clientEtag = req.headers['if-none-match'];
+            if (clientEtag && (clientEtag === etag || clientEtag === `"${etag}"`)) {
+                return res.status(304).end();
+            }
+
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+            res.setHeader('ETag', `"${etag}"`);
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+            res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+            return res.status(200).send(buffer);
+        } catch (error) {
+            console.error('PhoneController.getPhonePhoto error:', error.message);
+            return res.status(500).json({ success: false, message: 'Failed to serve photo' });
+        }
+    }
+
     /**
      * POST /api/phones
      * Create a new phone record
@@ -8,6 +128,7 @@ class PhoneController {
     async createPhone(req, res, next) {
         try {
             const phone = await phoneService.createPhone(req.body || {});
+            listCache.clear();
             return res.status(201).json({
                 success: true,
                 message: 'Phone created successfully',
@@ -39,7 +160,7 @@ class PhoneController {
                 card_view
             } = req.query;
 
-            const phones = await phoneService.getAllPhones({
+            const filters = {
                 brand_id,
                 status,
                 phone_condition,
@@ -51,12 +172,19 @@ class PhoneController {
                 is_new_arrival,
                 view,
                 card_view
+            };
+
+            const cacheKey = listCache.generateKey(filters);
+            const phones = await listCache.execute(cacheKey, async () => {
+                return await phoneService.getAllPhones(filters);
             });
 
             if (process.env.NODE_ENV !== 'production' || process.env.DEBUG_PERF === 'true') {
                 const totalDuration = Date.now() - reqStart;
                 console.log(`[PERF] GET /api/phones — count: ${phones.length}, duration: ${totalDuration}ms`);
             }
+
+            res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
 
             return res.status(200).json({
                 success: true,
@@ -266,12 +394,13 @@ class PhoneController {
 
     /**
      * GET /api/phones/:id
-     * Retrieve a phone by ID
+     * Retrieve a phone by ID (supports ?photos=url for full gallery URL rewriting)
      */
     async getPhoneById(req, res, next) {
         try {
             const { id } = req.params;
-            const phone = await phoneService.getPhoneById(id);
+            const photosAsUrl = req.query.photos === 'url';
+            const phone = await phoneService.getPhoneById(id, photosAsUrl);
             return res.status(200).json({
                 success: true,
                 data: phone
@@ -289,6 +418,7 @@ class PhoneController {
         try {
             const { id } = req.params;
             const phone = await phoneService.archivePhone(id);
+            listCache.clear();
             return res.status(200).json({
                 success: true,
                 message: `Phone '${phone.name}' has been archived successfully`,
@@ -308,6 +438,7 @@ class PhoneController {
             const { id } = req.params;
             const restoreStatus = req.body?.status || 'DRAFT';
             const phone = await phoneService.restorePhone(id, restoreStatus);
+            listCache.clear();
             return res.status(200).json({
                 success: true,
                 message: `Phone '${phone.name}' has been restored successfully`,
@@ -326,6 +457,7 @@ class PhoneController {
         try {
             const { id } = req.params;
             const updated = await phoneService.updatePhone(id, req.body || {});
+            listCache.clear();
             return res.status(200).json({
                 success: true,
                 message: 'Phone updated successfully',
@@ -344,6 +476,7 @@ class PhoneController {
         try {
             const { id } = req.params;
             const result = await phoneService.deletePhone(id);
+            listCache.clear();
             return res.status(200).json({
                 success: true,
                 message: `Phone '${result.name}' deleted successfully`,

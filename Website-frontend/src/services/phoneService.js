@@ -1,12 +1,15 @@
 import axiosInstance from './axiosInstance.js';
 import { API_ENDPOINTS } from '../constants/apiEndpoints.js';
-import { createServiceCache } from './cacheHelper.js';
+import { createServiceCache, generateRequestKey } from './cacheHelper.js';
 
 // In-memory cache for phone installments: phoneId -> Promise
 const installmentsCache = new Map();
 
-// In-memory cache for phones catalog (2-minute TTL for fast navigation & deduplication)
-const phonesCache = createServiceCache({ ttlMs: 2 * 60 * 1000 });
+// In-memory cache for phones catalog (60-second TTL for fast navigation & in-flight deduplication)
+const phonesCache = createServiceCache({
+  ttlMs: 60 * 1000,
+  keyGenerator: (params) => generateRequestKey('GET', API_ENDPOINTS.phones.base, params),
+});
 
 // Create Phone
 const createPhone = async (phoneData) => {
@@ -14,7 +17,7 @@ const createPhone = async (phoneData) => {
   return axiosInstance.post(API_ENDPOINTS.phones.base, phoneData);
 };
 
-// Fetch All Phones (requests lightweight card projection for fast loading)
+// Fetch All Phones (requests lightweight card projection for fast loading with 30s timeout)
 const getPhones = async (filters = {}, options = {}) => {
   const forceRefresh = typeof options === 'boolean'
     ? options
@@ -26,14 +29,16 @@ const getPhones = async (filters = {}, options = {}) => {
 
   return phonesCache.execute(
     cleanParams,
-    () => axiosInstance.get(API_ENDPOINTS.phones.base, { params: cleanParams }),
+    () => axiosInstance.get(API_ENDPOINTS.phones.base, { params: cleanParams, timeout: 30000 }),
     forceRefresh
   );
 };
 
 // Find Phone by ID
-const getPhoneById = async (phoneId) => {
-  return axiosInstance.get(API_ENDPOINTS.phones.byId(phoneId));
+const getPhoneById = async (phoneId, options = {}) => {
+  const isPlain = typeof options === 'object' && options !== null;
+  const params = isPlain && options.params ? options.params : (isPlain ? options : {});
+  return axiosInstance.get(API_ENDPOINTS.phones.byId(phoneId), { params });
 };
 
 // Update Phone

@@ -28,21 +28,27 @@ export function resolveImageUrl(photoPath, variant = 'card') {
   if (
     trimmed.startsWith('http://') ||
     trimmed.startsWith('https://') ||
-    trimmed.startsWith('data:image/') ||
+    trimmed.startsWith('data:') ||
     trimmed.startsWith('blob:')
   ) {
     return trimmed;
   }
 
   const base = (API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
-  let cleanPath = trimmed.replace(/^\/+/, '');
+  const rootBase = base.replace(/\/api$/, '');
+  const cleanPath = trimmed.replace(/^\/+/, '');
+
+  // Backend API route (e.g. /api/phones/11/photo?c=0&i=0&v=123456)
+  if (cleanPath.startsWith('api/')) {
+    return `${rootBase}/${cleanPath}`;
+  }
 
   // If path already starts with uploads/, do not duplicate
   if (cleanPath.startsWith('uploads/')) {
-    return `${base}/${cleanPath}`;
+    return `${rootBase}/${cleanPath}`;
   }
 
-  return `${base}/uploads/${cleanPath}`;
+  return `${rootBase}/uploads/${cleanPath}`;
 }
 
 /**

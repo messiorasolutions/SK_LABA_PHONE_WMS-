@@ -1,4 +1,5 @@
 const offerService = require('../services/offerService');
+const listCache = require('../utils/listCache');
 
 class OfferController {
     /**
@@ -8,6 +9,7 @@ class OfferController {
     async createOffer(req, res, next) {
         try {
             const offer = await offerService.createOffer(req.body || {});
+            listCache.clear();
             return res.status(201).json({
                 success: true,
                 message: 'Offer created successfully',
@@ -78,6 +80,7 @@ class OfferController {
         try {
             const { id } = req.params;
             const updated = await offerService.updateOffer(id, req.body || {});
+            listCache.clear();
             return res.status(200).json({
                 success: true,
                 message: 'Offer updated successfully',
@@ -96,6 +99,7 @@ class OfferController {
         try {
             const { id } = req.params;
             const result = await offerService.deleteOffer(id);
+            listCache.clear();
             return res.status(200).json({
                 success: true,
                 message: `Offer '${result.title}' deleted successfully`,

@@ -6,15 +6,16 @@ import HomePage from './pages/HomePage';
 import SmartphonesPage from './pages/SmartphonesPage';
 import ContactPage from './pages/ContactPage';
 import GiveawaysPage from './pages/GiveawaysPage';
-import FavoritesModal from './components/Modals/FavoritesModal';
-import PhoneDetailModal from './components/Modals/PhoneDetailModal';
 import MarketplacePhoneDetailModal from './components/Marketplace/MarketplacePhoneDetailModal';
-import ReservationModal from './components/Modals/ReservationModal';
-import InquiryModal from './components/Modals/InquiryModal';
 import CartModal from './components/Modals/CartModal';
 import SellPhoneModal from './components/Modals/SellPhoneModal';
 import ReviewModal from './components/Modals/ReviewModal';
-import BackInStockModal from './components/Modals/BackInStockModal';
+
+const FavoritesModal = React.lazy(() => import('./components/Modals/FavoritesModal'));
+const PhoneDetailModal = React.lazy(() => import('./components/Modals/PhoneDetailModal'));
+const ReservationModal = React.lazy(() => import('./components/Modals/ReservationModal'));
+const InquiryModal = React.lazy(() => import('./components/Modals/InquiryModal'));
+const BackInStockModal = React.lazy(() => import('./components/Modals/BackInStockModal'));
 import QuickChatWidget from './components/QuickChatWidget';
 import ErrorBoundary from './components/Common/ErrorBoundary';
 import { setActiveTab } from './actions/heroActions';
@@ -189,79 +190,82 @@ export default function App() {
       />
 
       {/* Global Favorites Modal triggered from Navbar (C-06) */}
-      {favoritesModalOpen && (
-        <FavoritesModal
-          onClose={() => setFavoritesModalOpen(false)}
-          onViewPhoneDetails={(p) => setSelectedPhoneForDetail(p)}
-          onReservePhone={(p) => setSelectedPhoneForReserve(p)}
-        />
-      )}
+      <React.Suspense fallback={null}>
+        {favoritesModalOpen && (
+          <FavoritesModal
+            onClose={() => setFavoritesModalOpen(false)}
+            onViewPhoneDetails={(p) => setSelectedPhoneForDetail(p)}
+            onReservePhone={(p) => setSelectedPhoneForReserve(p)}
+          />
+        )}
 
-      {selectedPhoneForDetail && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black">
+        {selectedPhoneForDetail && (
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-black">
+            <ErrorBoundary>
+              <PhoneDetailModal
+                phone={selectedPhoneForDetail}
+                onClose={() => setSelectedPhoneForDetail(null)}
+                onSelectPhone={(p) => setSelectedPhoneForDetail(p)}
+                onOpenReserve={(p) => {
+                  setSelectedPhoneForReserve(p);
+                  setSelectedPhoneForDetail(null);
+                }}
+                onOpenInquiry={(p) => {
+                  setInquiryModalData({ phone: p });
+                  setSelectedPhoneForDetail(null);
+                }}
+                onOpenSell={(p) => {
+                  setSellModalData({ desiredPhone: p });
+                  setSelectedPhoneForDetail(null);
+                }}
+                onOpenNotifyBackInStock={(p) => {
+                  setSelectedPhoneForBackInStock(p);
+                  setSelectedPhoneForDetail(null);
+                }}
+              />
+            </ErrorBoundary>
+          </div>
+        )}
+
+        {selectedPhoneForReserve && (
+          <ReservationModal
+            phone={selectedPhoneForReserve}
+            onClose={() => setSelectedPhoneForReserve(null)}
+          />
+        )}
+
+        {inquiryModalData && (
+          <InquiryModal
+            phone={inquiryModalData.phone}
+            onClose={() => setInquiryModalData(null)}
+          />
+        )}
+
+        {sellModalData && (
           <ErrorBoundary>
-            <PhoneDetailModal
-              phone={selectedPhoneForDetail}
-              onClose={() => setSelectedPhoneForDetail(null)}
-              onOpenReserve={(p) => {
-                setSelectedPhoneForReserve(p);
-                setSelectedPhoneForDetail(null);
-              }}
-              onOpenInquiry={(p) => {
-                setInquiryModalData({ phone: p });
-                setSelectedPhoneForDetail(null);
-              }}
-              onOpenSell={(p) => {
-                setSellModalData({ desiredPhone: p });
-                setSelectedPhoneForDetail(null);
-              }}
-              onOpenNotifyBackInStock={(p) => {
-                setSelectedPhoneForBackInStock(p);
-                setSelectedPhoneForDetail(null);
-              }}
+            <SellPhoneModal
+              desiredPhone={sellModalData.desiredPhone}
+              onClose={() => setSellModalData(null)}
             />
           </ErrorBoundary>
-        </div>
-      )}
+        )}
 
-      {selectedPhoneForReserve && (
-        <ReservationModal
-          phone={selectedPhoneForReserve}
-          onClose={() => setSelectedPhoneForReserve(null)}
-        />
-      )}
-
-      {inquiryModalData && (
-        <InquiryModal
-          phone={inquiryModalData.phone}
-          onClose={() => setInquiryModalData(null)}
-        />
-      )}
-
-      {sellModalData && (
-        <ErrorBoundary>
-          <SellPhoneModal
-            desiredPhone={sellModalData.desiredPhone}
-            onClose={() => setSellModalData(null)}
+        {reviewModalOpen && (
+          <ReviewModal
+            onClose={() => setReviewModalOpen(false)}
+            onSuccess={() => {
+              window.dispatchEvent(new CustomEvent('sk_laba_review_submitted'));
+            }}
           />
-        </ErrorBoundary>
-      )}
+        )}
 
-      {reviewModalOpen && (
-        <ReviewModal
-          onClose={() => setReviewModalOpen(false)}
-          onSuccess={() => {
-            window.dispatchEvent(new CustomEvent('sk_laba_review_submitted'));
-          }}
-        />
-      )}
-
-      {selectedPhoneForBackInStock && (
-        <BackInStockModal
-          phone={selectedPhoneForBackInStock}
-          onClose={() => setSelectedPhoneForBackInStock(null)}
-        />
-      )}
+        {selectedPhoneForBackInStock && (
+          <BackInStockModal
+            phone={selectedPhoneForBackInStock}
+            onClose={() => setSelectedPhoneForBackInStock(null)}
+          />
+        )}
+      </React.Suspense>
 
       {/* Floating Quick Chat Widget (Home & Every Page) */}
       <QuickChatWidget

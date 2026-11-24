@@ -20,12 +20,13 @@ import {
 
 import PhoneCard from '../components/PhoneCard';
 import CompareBar from '../components/CompareBar';
-import PhoneDetailModal from '../components/Modals/PhoneDetailModal';
-import CompareModal from '../components/Modals/CompareModal';
-import FavoritesModal from '../components/Modals/FavoritesModal';
-import InquiryModal from '../components/Modals/InquiryModal';
-import ReservationModal from '../components/Modals/ReservationModal';
-import BackInStockModal from '../components/Modals/BackInStockModal';
+
+const PhoneDetailModal = React.lazy(() => import('../components/Modals/PhoneDetailModal'));
+const CompareModal = React.lazy(() => import('../components/Modals/CompareModal'));
+const FavoritesModal = React.lazy(() => import('../components/Modals/FavoritesModal'));
+const InquiryModal = React.lazy(() => import('../components/Modals/InquiryModal'));
+const ReservationModal = React.lazy(() => import('../components/Modals/ReservationModal'));
+const BackInStockModal = React.lazy(() => import('../components/Modals/BackInStockModal'));
 
 import phoneService from '../services/phoneService';
 import brandService from '../services/brandService';
@@ -973,76 +974,79 @@ export default function SmartphonesPage({ onNavigateToHome }) {
         onOpenCompare={() => setCompareModalOpen(true)}
       />
 
-      {/* Phone Detail Modal (C-03) */}
-      {selectedPhoneForDetail && (
-        <PhoneDetailModal
-          phone={selectedPhoneForDetail}
-          allPhones={phones}
-          onClose={() => setSelectedPhoneForDetail(null)}
-          onOpenReserve={(p) => {
-            setSelectedPhoneForReserve(p);
-            setSelectedPhoneForDetail(null);
-          }}
-          onOpenInquiry={(p) => {
-            setSelectedPhoneForInquiry(p);
-            setSelectedPhoneForDetail(null);
-          }}
-          onOpenNotifyBackInStock={(p) => {
-            setSelectedPhoneForBackInStock(p);
-            setSelectedPhoneForDetail(null);
-          }}
-          onSelectPhone={(simPhone) => setSelectedPhoneForDetail(simPhone)}
-        />
-      )}
+      {/* Modals with Suspense */}
+      <React.Suspense fallback={null}>
+        {/* Phone Detail Modal (C-03) */}
+        {selectedPhoneForDetail && (
+          <PhoneDetailModal
+            phone={selectedPhoneForDetail}
+            allPhones={phones}
+            onClose={() => setSelectedPhoneForDetail(null)}
+            onOpenReserve={(p) => {
+              setSelectedPhoneForReserve(p);
+              setSelectedPhoneForDetail(null);
+            }}
+            onOpenInquiry={(p) => {
+              setSelectedPhoneForInquiry(p);
+              setSelectedPhoneForDetail(null);
+            }}
+            onOpenNotifyBackInStock={(p) => {
+              setSelectedPhoneForBackInStock(p);
+              setSelectedPhoneForDetail(null);
+            }}
+            onSelectPhone={(simPhone) => setSelectedPhoneForDetail(simPhone)}
+          />
+        )}
 
-      {/* Side-by-Side Compare Modal (C-05) */}
-      {compareModalOpen && (
-        <CompareModal
-          compareIds={compareIds}
-          onClose={() => setCompareModalOpen(false)}
-          onReservePhone={(p) => {
-            setSelectedPhoneForReserve(p);
-            setCompareModalOpen(false);
-          }}
-          onInquirePhone={(p) => {
-            setSelectedPhoneForInquiry(p);
-            setCompareModalOpen(false);
-          }}
-        />
-      )}
+        {/* Side-by-Side Compare Modal (C-05) */}
+        {compareModalOpen && (
+          <CompareModal
+            compareIds={compareIds}
+            onClose={() => setCompareModalOpen(false)}
+            onReservePhone={(p) => {
+              setSelectedPhoneForReserve(p);
+              setCompareModalOpen(false);
+            }}
+            onInquirePhone={(p) => {
+              setSelectedPhoneForInquiry(p);
+              setCompareModalOpen(false);
+            }}
+          />
+        )}
 
-      {/* Favourites Modal (C-06) */}
-      {favoritesModalOpen && (
-        <FavoritesModal
-          onClose={() => setFavoritesModalOpen(false)}
-          onViewPhoneDetails={(p) => setSelectedPhoneForDetail(p)}
-          onReservePhone={(p) => setSelectedPhoneForReserve(p)}
-        />
-      )}
+        {/* Favourites Modal (C-06) */}
+        {favoritesModalOpen && (
+          <FavoritesModal
+            onClose={() => setFavoritesModalOpen(false)}
+            onViewPhoneDetails={(p) => setSelectedPhoneForDetail(p)}
+            onReservePhone={(p) => setSelectedPhoneForReserve(p)}
+          />
+        )}
 
-      {/* Inquiry Modal (C-08) */}
-      {selectedPhoneForInquiry && (
-        <InquiryModal
-          phone={selectedPhoneForInquiry}
-          onClose={() => setSelectedPhoneForInquiry(null)}
-        />
-      )}
+        {/* Inquiry Modal (C-08) */}
+        {selectedPhoneForInquiry && (
+          <InquiryModal
+            phone={selectedPhoneForInquiry}
+            onClose={() => setSelectedPhoneForInquiry(null)}
+          />
+        )}
 
-      {/* Reservation Modal (C-09) */}
-      {selectedPhoneForReserve && (
-        <ReservationModal
-          phone={selectedPhoneForReserve}
-          onClose={() => setSelectedPhoneForReserve(null)}
-        />
-      )}
+        {/* Reservation Modal (C-09) */}
+        {selectedPhoneForReserve && (
+          <ReservationModal
+            phone={selectedPhoneForReserve}
+            onClose={() => setSelectedPhoneForReserve(null)}
+          />
+        )}
 
-      {/* Back in Stock Modal (C-10) */}
-      {selectedPhoneForBackInStock && (
-        <BackInStockModal
-          phone={selectedPhoneForBackInStock}
-          onClose={() => setSelectedPhoneForBackInStock(null)}
-        />
-      )}
+        {/* Back in Stock Modal (C-10) */}
+        {selectedPhoneForBackInStock && (
+          <BackInStockModal
+            phone={selectedPhoneForBackInStock}
+            onClose={() => setSelectedPhoneForBackInStock(null)}
+          />
+        )}
+      </React.Suspense>
     </div>
   );
 }

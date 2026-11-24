@@ -3,6 +3,7 @@ const router = express.Router();
 const phoneController = require('../controllers/phoneController');
 const installmentPlanController = require('../controllers/installmentPlanController');
 const offerController = require('../controllers/offerController');
+const authMiddleware = require('../middleware/authMiddleware');
 const {
     validateCreatePhone,
     validateUpdatePhone
@@ -27,13 +28,13 @@ router.post('/:id/stock-toggle', (req, res, next) => phoneController.toggleStock
 // Archive routes (MUST be defined before /:id)
 router.get('/archived', (req, res, next) => phoneController.getArchivedPhones(req, res, next));
 
-router.patch('/:id/archive', (req, res, next) => phoneController.archivePhone(req, res, next));
-router.post('/:id/archive', (req, res, next) => phoneController.archivePhone(req, res, next));
-router.put('/:id/archive', (req, res, next) => phoneController.archivePhone(req, res, next));
+router.patch('/:id/archive', authMiddleware.authenticate, authMiddleware.requireStaffOrAdmin, (req, res, next) => phoneController.archivePhone(req, res, next));
+router.post('/:id/archive', authMiddleware.authenticate, authMiddleware.requireStaffOrAdmin, (req, res, next) => phoneController.archivePhone(req, res, next));
+router.put('/:id/archive', authMiddleware.authenticate, authMiddleware.requireStaffOrAdmin, (req, res, next) => phoneController.archivePhone(req, res, next));
 
-router.patch('/:id/restore', (req, res, next) => phoneController.restorePhone(req, res, next));
-router.post('/:id/restore', (req, res, next) => phoneController.restorePhone(req, res, next));
-router.put('/:id/restore', (req, res, next) => phoneController.restorePhone(req, res, next));
+router.patch('/:id/restore', authMiddleware.authenticate, authMiddleware.requireStaffOrAdmin, (req, res, next) => phoneController.restorePhone(req, res, next));
+router.post('/:id/restore', authMiddleware.authenticate, authMiddleware.requireStaffOrAdmin, (req, res, next) => phoneController.restorePhone(req, res, next));
+router.put('/:id/restore', authMiddleware.authenticate, authMiddleware.requireStaffOrAdmin, (req, res, next) => phoneController.restorePhone(req, res, next));
 
 // Phone Comparison Route (SRS C-05 - Customer/Visitor side-by-side comparison)
 router.get('/compare', (req, res, next) => phoneController.comparePhones(req, res, next));
@@ -48,10 +49,11 @@ router.get('/:id/installments', (req, res, next) => installmentPlanController.ge
 router.get('/:id/offer', (req, res, next) => offerController.getPhoneOffer(req, res, next));
 
 // Standard Phone routes
-router.post('/', validateCreatePhone, (req, res, next) => phoneController.createPhone(req, res, next));
+router.post('/', authMiddleware.authenticate, authMiddleware.requireStaffOrAdmin, validateCreatePhone, (req, res, next) => phoneController.createPhone(req, res, next));
 router.get('/', (req, res, next) => phoneController.getAllPhones(req, res, next));
+router.get('/:id/photo', (req, res, next) => phoneController.getPhonePhoto(req, res, next));
 router.get('/:id', (req, res, next) => phoneController.getPhoneById(req, res, next));
-router.put('/:id', validateUpdatePhone, (req, res, next) => phoneController.updatePhone(req, res, next));
-router.delete('/:id', (req, res, next) => phoneController.deletePhone(req, res, next));
+router.put('/:id', authMiddleware.authenticate, authMiddleware.requireStaffOrAdmin, validateUpdatePhone, (req, res, next) => phoneController.updatePhone(req, res, next));
+router.delete('/:id', authMiddleware.authenticate, authMiddleware.requireStaffOrAdmin, (req, res, next) => phoneController.deletePhone(req, res, next));
 
 module.exports = router;

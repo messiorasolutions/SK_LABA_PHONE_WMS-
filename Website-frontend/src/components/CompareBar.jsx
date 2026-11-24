@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { GitCompare, X, ArrowRight, Trash2, Plus, Search } from 'lucide-react';
 import { useFavoritesAndCompare } from '../hooks/useFavoritesAndCompare';
 import { useCurrencyConverter } from '../hooks/useCurrencyConverter';
+import { resolveImageUrl } from '../utils/imageHelper';
 
 export default function CompareBar({ phones = [], isOpen = false, onClose, onOpenCompare }) {
   const { compareIds, toggleCompare, removeCompare, clearCompare } = useFavoritesAndCompare();
@@ -94,7 +95,7 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
                   >
                     {photo ? (
                       <img
-                        src={photo}
+                        src={resolveImageUrl(photo)}
                         alt={phone.name}
                         className="w-6 h-6 sm:w-7 sm:h-7 object-contain rounded bg-black/40 p-0.5"
                       />
@@ -233,7 +234,7 @@ export default function CompareBar({ phones = [], isOpen = false, onClose, onOpe
                     >
                       {pPhoto ? (
                         <img
-                          src={pPhoto}
+                          src={resolveImageUrl(pPhoto)}
                           alt={p.name}
                           className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-lg bg-black/40 p-1 shrink-0 border border-white/10 group-hover:border-blue-400/40 transition-colors"
                         />

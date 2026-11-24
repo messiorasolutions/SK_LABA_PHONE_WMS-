@@ -1,12 +1,17 @@
+const crypto = require('crypto');
 const pool = require('../config/db');
 const { calculatePhoneAvailability } = require('../utils/phoneAvailability');
+
+const isBase64DataImage = (str) => typeof str === 'string' && /^data:image\/(jpeg|png|webp);base64,/i.test(str);
+const getSha1 = (str) => crypto.createHash('sha1').update(str).digest('hex');
 
 class PhoneRepository {
     /**
      * Safely parse JSON fields on a phone row
-     * When isCardView=true, produces lightweight payload (primary photos only, no giant arrays)
+     * When isCardView=true, produces lightweight payload (primary photos only, URLs rewritten, no giant base64)
+     * When photosAsUrl=true, rewrites all base64 photos across all colour options and photos array
      */
-    _formatPhone(row, isCardView = false) {
+    _formatPhone(row, isCardView = false, photosAsUrl = false) {
         if (!row) return null;
         const jsonFields = [
             'storage_ids',
@@ -40,62 +45,87 @@ class PhoneRepository {
         formatted.is_genuine_battery = formatted.is_genuine_battery === undefined || formatted.is_genuine_battery === null ? true : Boolean(formatted.is_genuine_battery);
         formatted.is_original_housing = formatted.is_original_housing === undefined || formatted.is_original_housing === null ? true : Boolean(formatted.is_original_housing);
 
-        // Optimize card-view payload size (shrinks JSON from megabytes to kilobytes)
-        if (isCardView) {
-            let primaryPhoto = '';
-            if (Array.isArray(formatted.photos) && formatted.photos.length > 0) {
-                primaryPhoto = formatted.photos[0];
-            }
+        const updatedAtEpoch = row.updated_at ? new Date(row.updated_at).getTime() : 0;
+        const phoneId = formatted.phone_id;
+        const sha1ToUrl = new Map();
 
+        const resolvePhotoUrl = (photoStr, c, i) => {
+            if (!isBase64DataImage(photoStr)) {
+                return photoStr; // Normal URLs, relative paths, etc. pass through unchanged
+            }
+            const hash = getSha1(photoStr);
+            if (sha1ToUrl.has(hash)) {
+                return sha1ToUrl.get(hash);
+            }
+            const photoUrl = `/api/phones/${phoneId}/photo?c=${c}&i=${i}&v=${updatedAtEpoch}`;
+            sha1ToUrl.set(hash, photoUrl);
+            return photoUrl;
+        };
+
+        // Optimize card-view payload size (shrinks JSON from megabytes to kilobytes via URL rewrites)
+        if (isCardView) {
+            let primaryColourPhoto = '';
             if (Array.isArray(formatted.colour_options) && formatted.colour_options.length > 0) {
-                // Keep only primary photo per color option to enable color switching without full galleries
-                formatted.colour_options = formatted.colour_options.map((col, idx) => {
+                // Keep only primary photo per color option
+                formatted.colour_options = formatted.colour_options.map((col, cIdx) => {
                     const colPhotos = Array.isArray(col.photos) ? col.photos : [];
-                    const firstPhoto = colPhotos[0] || (idx === 0 ? primaryPhoto : '');
-                    if (!primaryPhoto && firstPhoto) {
-                        primaryPhoto = firstPhoto;
+                    const firstPhoto = colPhotos[0] || '';
+                    let rewrittenPhoto = '';
+                    if (firstPhoto) {
+                        rewrittenPhoto = resolvePhotoUrl(firstPhoto, cIdx, 0);
+                        if (!primaryColourPhoto) {
+                            primaryColourPhoto = rewrittenPhoto;
+                        }
                     }
                     return {
-                        id: col.id || `color_${idx}`,
-                        name: col.name || col.color_name || `Color #${idx + 1}`,
-                        color_name: col.color_name || col.name || `Color #${idx + 1}`,
+                        id: col.id || `color_${cIdx}`,
+                        name: col.name || col.color_name || `Color #${cIdx + 1}`,
+                        color_name: col.color_name || col.name || `Color #${cIdx + 1}`,
                         color_code: col.color_code || col.color || '#374151',
                         quantity: col.quantity !== undefined ? Number(col.quantity) : 0,
                         storage_quantities: col.storage_quantities || {},
-                        photos: firstPhoto ? [firstPhoto] : []
+                        photos: rewrittenPhoto ? [rewrittenPhoto] : []
                     };
                 });
             }
 
-            // Extract up to 3 preview photos for phone cards
-            const cardPhotos = [];
-            const addCardPhoto = (url) => {
-                if (url && typeof url === 'string' && !cardPhotos.includes(url)) {
-                    cardPhotos.push(url);
-                }
-            };
-            if (Array.isArray(formatted.photos)) {
-                formatted.photos.forEach(addCardPhoto);
-            }
-            if (Array.isArray(formatted.colour_options)) {
-                formatted.colour_options.forEach((col) => {
-                    if (Array.isArray(col.photos)) {
-                        col.photos.forEach(addCardPhoto);
-                    }
-                });
-            }
-            if (primaryPhoto) {
-                addCardPhoto(primaryPhoto);
+            let primaryPhoto = primaryColourPhoto;
+            if (!primaryPhoto && Array.isArray(formatted.photos) && formatted.photos.length > 0) {
+                primaryPhoto = resolvePhotoUrl(formatted.photos[0], -1, 0);
             }
 
-            formatted.main_photo = primaryPhoto || cardPhotos[0] || '';
-            formatted.photos = cardPhotos.slice(0, 3);
+            formatted.main_photo = primaryPhoto || '';
+            formatted.photos = formatted.main_photo ? [formatted.main_photo] : [];
+
             // Remove unnecessary large off-page fields from listing card
             delete formatted.description;
             delete formatted.specification_ids;
             delete formatted.accessory_ids;
             delete formatted.free_accessories;
             delete formatted.installment_plan_ids;
+        } else if (photosAsUrl) {
+            // Full gallery photo URL rewriting (used by PhoneDetailModal when photos=url)
+            let primaryColourPhoto = '';
+            if (Array.isArray(formatted.colour_options) && formatted.colour_options.length > 0) {
+                formatted.colour_options = formatted.colour_options.map((col, cIdx) => {
+                    const colPhotos = Array.isArray(col.photos) ? col.photos : [];
+                    const rewrittenPhotos = colPhotos.map((p, pIdx) => {
+                        const url = resolvePhotoUrl(p, cIdx, pIdx);
+                        if (!primaryColourPhoto) primaryColourPhoto = url;
+                        return url;
+                    });
+                    return {
+                        ...col,
+                        photos: rewrittenPhotos
+                    };
+                });
+            }
+
+            if (Array.isArray(formatted.photos)) {
+                formatted.photos = formatted.photos.map((p, pIdx) => resolvePhotoUrl(p, -1, pIdx));
+            }
+
+            formatted.main_photo = primaryColourPhoto || (Array.isArray(formatted.photos) && formatted.photos[0]) || '';
         }
 
         formatted.current_stock = Number(formatted.current_stock ?? 0);
@@ -236,7 +266,7 @@ class PhoneRepository {
      * @param {number|string} phone_id
      * @returns {Promise<Object|null>}
      */
-    async findById(phone_id) {
+    async findById(phone_id, photosAsUrl = false) {
         const query = `
             SELECT 
                 p.*,
@@ -246,7 +276,7 @@ class PhoneRepository {
             WHERE p.phone_id = ?
         `;
         const [rows] = await pool.execute(query, [phone_id]);
-        return rows.length > 0 ? this._formatPhone(rows[0]) : null;
+        return rows.length > 0 ? this._formatPhone(rows[0], false, photosAsUrl) : null;
     }
 
     /**

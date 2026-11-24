@@ -56,40 +56,110 @@ const COLOR_PRESETS = [
 ];
 
 /**
- * Compresses an image file client-side into a high quality JPEG DataURL.
- * Preserves 100% of the original photo with proportional resizing (no cropping, no stretching, no distortion).
+ * Automatically optimizes newly uploaded phone photos client-side:
+ * 1. Primary: createImageBitmap({ imageOrientation: 'from-image' }), max 1200px, WebP 0.8 (JPEG 0.8 fallback)
+ * 2. Fallback: Preserved original FileReader + Image + Canvas, max 1200px, JPEG 0.90
+ * 3. Empty MIME: Validates actual image decode before accepting; rejects invalid files without returning raw data
+ * 4. Error isolation: All asynchronous callbacks are safely wrapped so one failed file never hangs the batch
  */
-const compressImage = (file) => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
-      img.onload = () => {
-        // Proportional scaling within max dimension without cropping
-        const MAX_DIMENSION = 1200;
-        const maxSide = Math.max(img.width, img.height);
-        const scale = maxSide > MAX_DIMENSION ? MAX_DIMENSION / maxSide : 1;
+const compressImage = async (file) => {
+  if (!file) return null;
 
-        const targetWidth = Math.max(1, Math.round(img.width * scale));
-        const targetHeight = Math.max(1, Math.round(img.height * scale));
+  const MAX_DIMENSION = 1200;
+
+  // 1. Primary Path: Modern createImageBitmap with EXIF orientation handling
+  if (typeof window !== 'undefined' && typeof window.createImageBitmap === 'function') {
+    let bitmap = null;
+    try {
+      bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+
+      if (bitmap && bitmap.width > 0 && bitmap.height > 0) {
+        const maxSide = Math.max(bitmap.width, bitmap.height);
+        const scale = maxSide > MAX_DIMENSION ? MAX_DIMENSION / maxSide : 1;
+        const targetWidth = Math.max(1, Math.round(bitmap.width * scale));
+        const targetHeight = Math.max(1, Math.round(bitmap.height * scale));
 
         const canvas = document.createElement('canvas');
         canvas.width = targetWidth;
         canvas.height = targetHeight;
         const ctx = canvas.getContext('2d');
 
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
 
-        // Draw the full image starting at (0, 0) - absolutely no cropping or offsets
-        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-        resolve(canvas.toDataURL('image/jpeg', 0.90));
+          // Primary format: WebP at 0.8 quality
+          let dataUrl = canvas.toDataURL('image/webp', 0.8);
+
+          // Fallback to JPEG at 0.8 quality if browser does not support WebP canvas encoding
+          if (!dataUrl || !dataUrl.startsWith('data:image/webp')) {
+            dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          }
+
+          if (dataUrl && dataUrl.startsWith('data:image/')) {
+            return dataUrl;
+          }
+        }
+      }
+    } catch {
+      // If createImageBitmap fails for any reason, immediately fall through to original fallback
+    } finally {
+      if (bitmap && typeof bitmap.close === 'function') {
+        bitmap.close();
+      }
+    }
+  }
+
+  // 2. Exact Old Fallback Path: FileReader + Image + Canvas with JPEG 0.90 output
+  return new Promise((resolve) => {
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        try {
+          const rawDataUrl = event.target?.result || '';
+          const img = new Image();
+          img.src = rawDataUrl;
+          img.onload = () => {
+            try {
+              const maxSide = Math.max(img.width, img.height);
+              const scale = maxSide > MAX_DIMENSION ? MAX_DIMENSION / maxSide : 1;
+              const targetWidth = Math.max(1, Math.round(img.width * scale));
+              const targetHeight = Math.max(1, Math.round(img.height * scale));
+
+              const canvas = document.createElement('canvas');
+              canvas.width = targetWidth;
+              canvas.height = targetHeight;
+              const ctx = canvas.getContext('2d');
+
+              if (!ctx) {
+                return resolve(rawDataUrl);
+              }
+
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = 'high';
+              ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+              resolve(canvas.toDataURL('image/jpeg', 0.90));
+            } catch {
+              resolve(rawDataUrl);
+            }
+          };
+          img.onerror = () => {
+            if (file.type && file.type.startsWith('image/')) {
+              resolve(rawDataUrl);
+            } else {
+              resolve(null);
+            }
+          };
+        } catch {
+          resolve(null);
+        }
       };
-      img.onerror = () => resolve(event.target.result);
-    };
-    reader.onerror = () => resolve('');
+      reader.onerror = () => resolve(null);
+    } catch {
+      resolve(null);
+    }
   });
 };
 
@@ -329,12 +399,24 @@ export default function PhoneModal({
     const filesToUpload = Array.from(files).slice(0, remainingSlots);
     const compressedList = [];
     for (const file of filesToUpload) {
+      // Reject files with explicit non-image MIME types upfront
+      if (file.type && !file.type.startsWith('image/')) {
+        alert(`"${file.name}" is not an image file.`);
+        continue;
+      }
+
       const dataUrl = await compressImage(file);
-      if (dataUrl) compressedList.push(dataUrl);
+      if (dataUrl) {
+        compressedList.push(dataUrl);
+      } else {
+        alert(`"${file.name}" could not be decoded as an image.`);
+      }
     }
 
-    setPhotos((prev) => [...prev, ...compressedList].slice(0, 12));
-    setSubmitError('');
+    if (compressedList.length > 0) {
+      setPhotos((prev) => [...prev, ...compressedList].slice(0, 12));
+      setSubmitError('');
+    }
   };
 
   const handleRemovePhoto = (photoIdx) => {

@@ -17,9 +17,10 @@ import {
 } from 'lucide-react';
 import PhoneCard from '../components/PhoneCard';
 import { resolveImageUrl } from '../utils/imageHelper';
-import PhoneDetailModal from '../components/Modals/PhoneDetailModal';
-import ReservationModal from '../components/Modals/ReservationModal';
-import InquiryModal from '../components/Modals/InquiryModal';
+
+const PhoneDetailModal = React.lazy(() => import('../components/Modals/PhoneDetailModal'));
+const ReservationModal = React.lazy(() => import('../components/Modals/ReservationModal'));
+const InquiryModal = React.lazy(() => import('../components/Modals/InquiryModal'));
 import { getMarketplacePhones } from '../services/marketplaceService';
 
 function normalizeMarketplacePhone(p) {
@@ -330,33 +331,35 @@ export default function MarketplacePage({ onNavigateToHome }) {
   if (selectedPhoneForDetail) {
     return (
       <div className="w-full min-h-screen bg-black">
-        <PhoneDetailModal
-          phone={selectedPhoneForDetail}
-          allPhones={phones}
-          onClose={() => {
-            setSelectedPhoneForDetail(null);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          onOpenReserve={(p) => setSelectedPhoneForReserve(p)}
-          onOpenInquiry={(p) => setSelectedPhoneForInquiry(p)}
-          onSelectPhone={(simPhone) => {
-            setSelectedPhoneForDetail(simPhone);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-        />
+        <React.Suspense fallback={null}>
+          <PhoneDetailModal
+            phone={selectedPhoneForDetail}
+            allPhones={phones}
+            onClose={() => {
+              setSelectedPhoneForDetail(null);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onOpenReserve={(p) => setSelectedPhoneForReserve(p)}
+            onOpenInquiry={(p) => setSelectedPhoneForInquiry(p)}
+            onSelectPhone={(simPhone) => {
+              setSelectedPhoneForDetail(simPhone);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
 
-        {selectedPhoneForReserve && (
-          <ReservationModal
-            phone={selectedPhoneForReserve}
-            onClose={() => setSelectedPhoneForReserve(null)}
-          />
-        )}
-        {selectedPhoneForInquiry && (
-          <InquiryModal
-            phone={selectedPhoneForInquiry}
-            onClose={() => setSelectedPhoneForInquiry(null)}
-          />
-        )}
+          {selectedPhoneForReserve && (
+            <ReservationModal
+              phone={selectedPhoneForReserve}
+              onClose={() => setSelectedPhoneForReserve(null)}
+            />
+          )}
+          {selectedPhoneForInquiry && (
+            <InquiryModal
+              phone={selectedPhoneForInquiry}
+              onClose={() => setSelectedPhoneForInquiry(null)}
+            />
+          )}
+        </React.Suspense>
       </div>
     );
   }
@@ -810,10 +813,11 @@ export default function MarketplacePage({ onNavigateToHome }) {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2.5 sm:gap-3.5 md:gap-4">
-            {filteredPhones.map((phone) => (
+            {filteredPhones.map((phone, idx) => (
               <PhoneCard
                 key={phone.id || phone.listing_id || phone.phone_id}
                 phone={phone}
+                priority={idx < 4}
                 onViewDetails={(p) => {
                   setSelectedPhoneForDetail(p);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -826,19 +830,21 @@ export default function MarketplacePage({ onNavigateToHome }) {
       </div>
 
       {/* Modals & Overlays */}
-      {selectedPhoneForReserve && (
-        <ReservationModal
-          phone={selectedPhoneForReserve}
-          onClose={() => setSelectedPhoneForReserve(null)}
-        />
-      )}
+      <React.Suspense fallback={null}>
+        {selectedPhoneForReserve && (
+          <ReservationModal
+            phone={selectedPhoneForReserve}
+            onClose={() => setSelectedPhoneForReserve(null)}
+          />
+        )}
 
-      {selectedPhoneForInquiry && (
-        <InquiryModal
-          phone={selectedPhoneForInquiry}
-          onClose={() => setSelectedPhoneForInquiry(null)}
-        />
-      )}
+        {selectedPhoneForInquiry && (
+          <InquiryModal
+            phone={selectedPhoneForInquiry}
+            onClose={() => setSelectedPhoneForInquiry(null)}
+          />
+        )}
+      </React.Suspense>
     </div>
   );
 }

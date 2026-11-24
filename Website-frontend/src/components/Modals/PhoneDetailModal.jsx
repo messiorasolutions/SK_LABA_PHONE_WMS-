@@ -100,7 +100,7 @@ function SimilarPhoneCard({ simPhone, onSelectPhone }) {
       <div className="relative aspect-[4/5] w-full bg-transparent rounded-xl mb-3 flex items-center justify-center p-2.5 sm:p-3 overflow-hidden">
         {displayedPhoto ? (
           <img
-            src={displayedPhoto}
+            src={resolveImageUrl(displayedPhoto)}
             alt={simPhone.name}
             className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]"
           />
@@ -149,7 +149,7 @@ function SimilarPhoneCard({ simPhone, onSelectPhone }) {
                 >
                   {colorPhoto ? (
                     <img
-                      src={colorPhoto}
+                      src={resolveImageUrl(colorPhoto)}
                       alt={color.name}
                       className="w-full h-full object-cover object-center rounded-[6px]"
                       loading="lazy"
@@ -188,7 +188,10 @@ export default function PhoneDetailModal({
   const [phone, setPhone] = useState(initialPhone);
 
   useEffect(() => {
+    // Immediately show newly selected phone's card data
     setPhone(initialPhone);
+    setActivePhotoIdx(0);
+
     const pid = initialPhone?.phone_id || initialPhone?.id;
     if (pid && (!initialPhone?.description || !initialPhone?.free_accessories)) {
       phoneService
@@ -249,6 +252,27 @@ export default function PhoneDetailModal({
         })
         .catch(() => {});
     }
+    if (!pid) return;
+
+    let isCurrent = true;
+
+    // Fetch full phone details and gallery URLs
+    phoneService
+      .getPhoneById(pid, { photos: 'url' })
+      .then((res) => {
+        if (!isCurrent) return; // Discard stale responses
+        const full = res.data?.data || res.data;
+        if (full) {
+          setPhone((prev) => ({ ...prev, ...full }));
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to fetch full phone details:', err);
+      });
+
+    return () => {
+      isCurrent = false; // Protect against race conditions
+    };
   }, [initialPhone?.phone_id, initialPhone?.id]);
   const { shopInfo, getWhatsAppUrl } = useShopInfo();
   const { t } = useTranslation();
